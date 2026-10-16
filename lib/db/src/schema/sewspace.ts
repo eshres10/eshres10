@@ -235,6 +235,50 @@ export const postMediaTable = pgTable("sewspace_post_media", {
 export type Media = typeof mediaTable.$inferSelect;
 export type Post = typeof postsTable.$inferSelect;
 
+// Phase 4: likes, comments (one level of replies), saves and reports (migration 0005).
+export const likesTable = pgTable("sewspace_likes", {
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  postId: integer("post_id").notNull().references(() => postsTable.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.userId, t.postId] })]);
+
+export const commentsTable = pgTable("sewspace_comments", {
+  id: serial("id").primaryKey(),
+  postId: integer("post_id").notNull().references(() => postsTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  parentId: integer("parent_id"),
+  body: text("body").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const savesTable = pgTable("sewspace_saves", {
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  postId: integer("post_id").notNull().references(() => postsTable.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.userId, t.postId] })]);
+
+export const REPORT_KINDS = ["post", "comment", "profile"] as const;
+export const REPORT_REASONS = ["spam", "harassment", "nudity", "violence", "intellectual_property", "other"] as const;
+export const REPORT_STATUSES = ["open", "removed", "dismissed"] as const;
+
+export const reportsTable = pgTable("sewspace_reports", {
+  id: serial("id").primaryKey(),
+  reporterId: varchar("reporter_id", { length: 255 }).notNull(),
+  targetKind: text("target_kind").$type<(typeof REPORT_KINDS)[number]>().notNull(),
+  targetId: text("target_id").notNull(),
+  targetUserId: varchar("target_user_id", { length: 255 }).notNull(),
+  reason: text("reason").$type<(typeof REPORT_REASONS)[number]>().notNull(),
+  details: text("details").notNull().default(""),
+  snapshot: jsonb("snapshot").$type<Record<string, unknown>>().notNull().default({}),
+  status: text("status").$type<(typeof REPORT_STATUSES)[number]>().notNull().default("open"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  resolvedAt: timestamp("resolved_at", { withTimezone: true }),
+  resolvedBy: varchar("resolved_by", { length: 255 }),
+});
+
+export type Comment = typeof commentsTable.$inferSelect;
+export type Report = typeof reportsTable.$inferSelect;
+
 // Read-only view of profile fields that anyone may see (migration 0001).
 export const publicProfilesView = pgView("sewspace_public_profiles", {
   userId: varchar("user_id", { length: 255 }).notNull(),

@@ -20,6 +20,10 @@ tags:
     description: Read-only endpoints that work without signing in
   - name: feed
     description: Posts and feeds
+  - name: social
+    description: Likes, comments, saves, follows, blocks and reports
+  - name: admin
+    description: Report review (ADMIN_USER_IDS only)
 paths:
   /public/profiles/{handle}:
     get:
@@ -141,12 +145,240 @@ paths:
           in: query
           required: false
           schema: { type: string, enum: [all, photo, status, make], default: all }
+        - name: sort
+          in: query
+          required: false
+          description: "recent: newest first. popular: most liked in the last 14 days."
+          schema: { type: string, enum: [recent, popular], default: recent }
       responses:
         "200":
-          description: A page of posts, newest first
+          description: A page of posts
           content:
             application/json:
               schema: { $ref: "#/components/schemas/FeedPage" }
+  /public/posts/{id}/comments:
+    get:
+      operationId: getPostComments
+      tags: [public]
+      summary: Comments on a post the viewer may see, oldest first, each with its replies. Hides comments from people on the other side of a block.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Comment" }
+        "404": { description: Post not found or not visible }
+  /posts/{id}/comments:
+    post:
+      operationId: createComment
+      tags: [social]
+      summary: Comment on a post you may see, or reply to a top-level comment on it.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CommentInput" }
+      responses:
+        "201":
+          description: The new comment
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Comment" }
+        "400": { description: "Empty, too long, or not a valid reply" }
+        "404": { description: Post not found or not visible }
+        "429": { description: Too many comments }
+  /comments/{id}:
+    delete:
+      operationId: deleteComment
+      tags: [social]
+      summary: Delete your comment, or any comment on your post.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Deleted }
+        "404": { description: Not found or not yours to delete }
+  /posts/{id}/like:
+    put:
+      operationId: likePost
+      tags: [social]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Liked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LikeState" }
+        "404": { description: Post not found or not visible }
+    delete:
+      operationId: unlikePost
+      tags: [social]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Not liked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LikeState" }
+        "404": { description: Post not found or not visible }
+  /posts/{id}/save:
+    put:
+      operationId: savePost
+      tags: [social]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SaveState" }
+        "404": { description: Post not found or not visible }
+    delete:
+      operationId: unsavePost
+      tags: [social]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Not saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SaveState" }
+  /saved:
+    get:
+      operationId: getSavedPosts
+      tags: [social]
+      summary: Posts you saved that you may still see, most recently saved first.
+      parameters:
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: A page of posts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedPage" }
+  /follows/{handle}:
+    put:
+      operationId: followProfile
+      tags: [social]
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Following
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FollowState" }
+        "400": { description: You can't follow yourself }
+        "404": { description: Profile not found (or blocked either way) }
+    delete:
+      operationId: unfollowProfile
+      tags: [social]
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Not following
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FollowState" }
+        "404": { description: Profile not found }
+  /blocks:
+    get:
+      operationId: listBlocks
+      tags: [social]
+      summary: People you have blocked.
+      responses:
+        "200":
+          description: Blocked people
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/BlockedPerson" }
+  /blocks/{handle}:
+    put:
+      operationId: blockProfile
+      tags: [social]
+      summary: Block someone. Ends follows both ways; you stop seeing each other's profiles, posts, makes and comments.
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Blocked }
+        "400": { description: You can't block yourself }
+        "404": { description: Profile not found }
+    delete:
+      operationId: unblockProfile
+      tags: [social]
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+      responses:
+        "204": { description: Unblocked (or wasn't blocked) }
+  /reports:
+    post:
+      operationId: createReport
+      tags: [social]
+      summary: Report a post, comment or profile you can see to the admins.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReportInput" }
+      responses:
+        "201":
+          description: Report filed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ReportReceipt" }
+        "404": { description: Nothing to report there (not found or not visible) }
+        "429": { description: Too many reports }
+  /admin/reports:
+    get:
+      operationId: listReports
+      tags: [admin]
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { type: string, enum: [open, removed, dismissed], default: open }
+      responses:
+        "200":
+          description: Reports, oldest open first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Report" }
+        "403": { description: Not an admin }
+  /admin/reports/{id}/resolve:
+    post:
+      operationId: resolveReport
+      tags: [admin]
+      summary: "remove: delete the reported post or comment and close every open report on it. dismiss: close this report."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReportResolution" }
+      responses:
+        "200":
+          description: The resolved report
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Report" }
+        "400": { description: Profiles can't be removed; dismiss instead }
+        "403": { description: Not an admin }
+        "404": { description: Not found }
   /feed:
     get:
       operationId: getHomeFeed
@@ -886,7 +1118,8 @@ components:
           items: { type: string }
         units: { type: string, enum: [metric, imperial] }
         needsHandle: { type: boolean, description: True until the user has chosen a handle }
-      required: [id, name, handle, bio, avatarUrl, joinedAt, experience, favoriteGarments, units, needsHandle]
+        isAdmin: { type: boolean, description: True for ADMIN_USER_IDS (shows report review) }
+      required: [id, name, handle, bio, avatarUrl, joinedAt, experience, favoriteGarments, units, needsHandle, isAdmin]
     PublicProfile:
       type: object
       description: Fields of a profile that anyone may see. Never includes units, experience or other private data.
@@ -898,7 +1131,8 @@ components:
         joinedAt: { type: string, format: date-time }
         isMe: { type: boolean, description: True when this is the signed-in viewer's own profile }
         stats: { $ref: "#/components/schemas/ProfileStats" }
-      required: [handle, name, bio, avatarUrl, joinedAt, isMe, stats]
+        followedByMe: { type: boolean, description: True when the signed-in viewer follows this person }
+      required: [handle, name, bio, avatarUrl, joinedAt, isMe, stats, followedByMe]
     ProfileStats:
       type: object
       description: Posts and makes count only what this viewer may see. The followersOnly counts are the followers-only posts and makes the viewer can't see (0 for the owner and followers); private items are never counted.
@@ -1074,7 +1308,11 @@ components:
           type: array
           description: Tagged make, pattern or fabric, only when the viewer may see it.
           items: { $ref: "#/components/schemas/PostTag" }
-      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags]
+        likeCount: { type: integer }
+        commentCount: { type: integer }
+        likedByMe: { type: boolean }
+        savedByMe: { type: boolean }
+      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe]
     FeedPage:
       type: object
       properties:
@@ -1105,6 +1343,108 @@ components:
         projectId: { type: integer, nullable: true }
         patternId: { type: integer, nullable: true }
         fabricId: { type: integer, nullable: true }
+    LikeState:
+      type: object
+      properties:
+        liked: { type: boolean }
+        likeCount: { type: integer }
+      required: [liked, likeCount]
+    SaveState:
+      type: object
+      properties:
+        saved: { type: boolean }
+      required: [saved]
+    FollowState:
+      type: object
+      properties:
+        following: { type: boolean }
+        followers: { type: integer }
+      required: [following, followers]
+    CommentInput:
+      type: object
+      properties:
+        body: { type: string, minLength: 1, maxLength: 1000 }
+        parentId: { type: integer, nullable: true }
+      required: [body]
+    Comment:
+      type: object
+      properties:
+        id: { type: integer }
+        postId: { type: integer }
+        parentId: { type: integer, nullable: true }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+        author: { $ref: "#/components/schemas/PublicPerson" }
+        canDelete: { type: boolean, description: Your comment, or a comment on your post }
+        replies:
+          type: array
+          items: { $ref: "#/components/schemas/CommentReply" }
+      required: [id, postId, parentId, body, createdAt, author, canDelete, replies]
+    CommentReply:
+      type: object
+      properties:
+        id: { type: integer }
+        postId: { type: integer }
+        parentId: { type: integer, nullable: true }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+        author: { $ref: "#/components/schemas/PublicPerson" }
+        canDelete: { type: boolean }
+      required: [id, postId, parentId, body, createdAt, author, canDelete]
+    BlockedPerson:
+      type: object
+      properties:
+        handle: { type: string }
+        name: { type: string }
+        avatarUrl: { type: string, nullable: true }
+        blockedAt: { type: string, format: date-time }
+      required: [handle, name, avatarUrl, blockedAt]
+    ReportReason:
+      type: string
+      enum: [spam, harassment, nudity, violence, intellectual_property, other]
+    ReportInput:
+      type: object
+      properties:
+        targetKind: { type: string, enum: [post, comment, profile] }
+        targetId: { type: string, description: Post or comment id, or a profile handle }
+        reason: { $ref: "#/components/schemas/ReportReason" }
+        details: { type: string, maxLength: 1000 }
+      required: [targetKind, targetId, reason]
+    ReportReceipt:
+      type: object
+      properties:
+        id: { type: integer }
+      required: [id]
+    ReportResolution:
+      type: object
+      properties:
+        action: { type: string, enum: [remove, dismiss] }
+      required: [action]
+    Report:
+      type: object
+      properties:
+        id: { type: integer }
+        targetKind: { type: string, enum: [post, comment, profile] }
+        targetId: { type: string }
+        reason: { $ref: "#/components/schemas/ReportReason" }
+        details: { type: string }
+        status: { type: string, enum: [open, removed, dismissed] }
+        createdAt: { type: string, format: date-time }
+        resolvedAt: { type: string, format: date-time, nullable: true }
+        reporter: { $ref: "#/components/schemas/PublicPerson" }
+        target:
+          type: object
+          description: What was reported, as it was when reported
+          properties:
+            authorHandle: { type: string, nullable: true }
+            authorName: { type: string, nullable: true }
+            text: { type: string, nullable: true }
+            imageUrl: { type: string, nullable: true }
+            link: { type: string, nullable: true, description: Where to see it in the app, if it still exists }
+          required: [authorHandle, authorName, text, imageUrl, link]
+        stillExists: { type: boolean }
+        openReportsOnTarget: { type: integer }
+      required: [id, targetKind, targetId, reason, details, status, createdAt, resolvedAt, reporter, target, stillExists, openReportsOnTarget]
     ErrorResponse:
       type: object
       properties:

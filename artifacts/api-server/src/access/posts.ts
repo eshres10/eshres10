@@ -1,13 +1,15 @@
-import { and, asc, desc, eq, inArray, isNotNull, lt, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNotNull, lt, or, sql, type SQL } from "drizzle-orm";
 import {
   fabricsTable,
   followsTable,
+  likesTable,
   mediaTable,
   patternsTable,
   postMediaTable,
   postsTable,
   projectsTable,
   publicProfilesView,
+  savesTable,
   type Post,
   type Tx,
 } from "@workspace/db";
@@ -41,6 +43,10 @@ export interface FeedPostView {
   isOwner: boolean;
   media: MediaView[];
   tags: Array<{ kind: "make" | "pattern" | "fabric"; id: number; name: string }>;
+  likeCount: number;
+  commentCount: number;
+  likedByMe: boolean;
+  savedByMe: boolean;
 }
 
 // Cursors are opaque to clients: "<created_at ISO>|<id>" in base64url.
@@ -89,6 +95,19 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
     ? await db.select({ id: fabricsTable.id, name: fabricsTable.name, userId: fabricsTable.userId }).from(fabricsTable)
         .where(and(inArray(fabricsTable.id, fabricIds), visibleTo(fabricsTable, viewer)))
     : [];
+  // Like and comment counts (a function, as comments across a block aren't
+  // counted), and the viewer's own likes and saves.
+  const counts = await db.execute<{ post_id: number; likes: string; comments: string }>(
+    sql`SELECT post_id, likes, comments FROM sewspace_post_counts(${`{${ids.join(",")}}`}::integer[])`,
+  );
+  const liked = viewer.userId
+    ? await db.select({ postId: likesTable.postId }).from(likesTable).where(and(eq(likesTable.userId, viewer.userId), inArray(likesTable.postId, ids)))
+    : [];
+  const saved = viewer.userId
+    ? await db.select({ postId: savesTable.postId }).from(savesTable).where(and(eq(savesTable.userId, viewer.userId), inArray(savesTable.postId, ids)))
+    : [];
+  const countMap = new Map(counts.rows.map((r) => [Number(r.post_id), r]));
+  const likedSet = new Set(liked.map((l) => l.postId)), savedSet = new Set(saved.map((x) => x.postId));
   const byId = <T extends { id: number }>(rows: T[]) => new Map(rows.map((r) => [r.id, r]));
   const authorMap = new Map(authors.map((a) => [a.userId, a]));
   const makeMap = byId(makes), patternMap = byId(patterns), fabricMap = byId(fabrics);
@@ -114,6 +133,10 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
       isOwner: post.userId === viewer.userId,
       media: media.filter((m) => m.postId === post.id).map((m) => mediaView(m.media)),
       tags,
+      likeCount: Number(countMap.get(post.id)?.likes ?? 0),
+      commentCount: Number(countMap.get(post.id)?.comments ?? 0),
+      likedByMe: likedSet.has(post.id),
+      savedByMe: savedSet.has(post.id),
     }];
   });
 }
@@ -139,14 +162,35 @@ export function homeFeed(db: Tx, viewer: Viewer, cursor?: string) {
 }
 
 export type ExploreKind = "all" | "photo" | "status" | "make";
+export type ExploreSort = "recent" | "popular";
+export const POPULAR_WINDOW_DAYS = 14;
+const POPULAR_MAX = 500;
 
-/** Explore / Discover: recent public posts from everyone (blocks still apply). */
-export function exploreFeed(db: Tx, viewer: Viewer, kind: ExploreKind = "all", cursor?: string) {
+/** Explore / Discover: public posts from everyone (blocks still apply), newest or most liked. */
+export async function exploreFeed(db: Tx, viewer: Viewer, kind: ExploreKind = "all", cursor?: string, sort: ExploreSort = "recent") {
   const filters: SQL[] = [eq(postsTable.visibility, "public")];
   if (kind === "photo") filters.push(eq(postsTable.kind, "photo"));
   if (kind === "status") filters.push(eq(postsTable.kind, "status"));
   if (kind === "make") filters.push(isNotNull(postsTable.projectId));
-  return pagePosts(db, viewer, and(...filters) as SQL, cursor);
+  if (sort === "recent") return pagePosts(db, viewer, and(...filters) as SQL, cursor);
+
+  // Popular: most liked in the window. Likes change between pages, so the
+  // cursor is a plain offset ("o:<n>"), capped at POPULAR_MAX posts.
+  const offset = Math.min(Number(/^o:(\d+)$/.exec(Buffer.from(cursor ?? "", "base64url").toString("utf8"))?.[1] ?? 0), POPULAR_MAX);
+  const likes = sql<number>`(SELECT count(*) FROM ${likesTable} WHERE ${likesTable.postId} = ${postsTable.id})`;
+  const rows = await db
+    .select()
+    .from(postsTable)
+    .where(and(...filters, visibleTo(postsTable, viewer), gt(postsTable.createdAt, new Date(Date.now() - POPULAR_WINDOW_DAYS * 86400000))))
+    .orderBy(desc(likes), desc(postsTable.createdAt), desc(postsTable.id))
+    .limit(FEED_PAGE_SIZE + 1)
+    .offset(offset);
+  const shown = rows.slice(0, FEED_PAGE_SIZE);
+  const next = offset + FEED_PAGE_SIZE;
+  return {
+    items: await hydratePosts(db, viewer, shown),
+    nextCursor: rows.length > FEED_PAGE_SIZE && next < POPULAR_MAX ? Buffer.from(`o:${next}`).toString("base64url") : null,
+  };
 }
 
 /** One post, if the viewer may see it. */

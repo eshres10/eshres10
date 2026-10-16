@@ -13,6 +13,11 @@ const KINDS = [
   { id: 'status', label: 'Words' },
 ] as const;
 type Kind = (typeof KINDS)[number]['id'];
+const SORTS = [
+  { id: 'recent', label: 'Newest' },
+  { id: 'popular', label: 'Popular' },
+] as const;
+type Sort = (typeof SORTS)[number]['id'];
 
 function Tile({ post }: { post: FeedPost }) {
   const cover = post.media[0];
@@ -39,10 +44,11 @@ function Tile({ post }: { post: FeedPost }) {
 /** Explore: everyone's public posts as a photo grid. Works signed out. */
 export function ExplorePage() {
   const [kind, setKind] = useState<Kind>('all');
+  const [sort, setSort] = useState<Sort>('recent');
   useEffect(() => { document.title = 'Explore · SewSpace'; }, []);
   const feed = useInfiniteQuery({
-    queryKey: FEED_KEYS.explore(kind),
-    queryFn: ({ pageParam }) => getExploreFeed({ kind, ...(pageParam ? { cursor: pageParam } : {}) }),
+    queryKey: FEED_KEYS.explore(kind, sort),
+    queryFn: ({ pageParam }) => getExploreFeed({ kind, sort, ...(pageParam ? { cursor: pageParam } : {}) }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: last => last.nextCursor ?? undefined,
   });
@@ -54,13 +60,22 @@ export function ExplorePage() {
           <p className="eyebrow">Explore</p>
           <h1 className="mt-1 font-display text-[34px] leading-tight tracking-[-.05em]">Fresh from sewing tables</h1>
         </div>
+        <div className="flex flex-wrap gap-1.5">
+        <div className="flex gap-1 rounded-full bg-white p-1" role="group" aria-label="Order">
+          {SORTS.map(o => (
+            <button key={o.id} type="button" aria-pressed={sort === o.id} onClick={() => setSort(o.id)}
+              className={`min-h-[40px] rounded-full px-4 text-sm font-bold ${sort === o.id ? 'bg-yellow text-ink' : 'text-ink'}`}>{o.label}</button>
+          ))}
+        </div>
         <div className="flex flex-wrap gap-1.5" role="group" aria-label="Show">
           {KINDS.map(k => (
             <button key={k.id} type="button" aria-pressed={kind === k.id} onClick={() => setKind(k.id)}
               className={`min-h-[44px] rounded-full px-4 text-sm font-semibold ${kind === k.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>{k.label}</button>
           ))}
         </div>
+        </div>
       </div>
+      {sort === 'popular' && <p className="mt-3 text-sm text-subtle">Most liked in the last two weeks.</p>}
       <div className="mt-5">
         {feed.isLoading ? <div className="grid place-items-center py-16" role="status" aria-label="Loading"><Loader2 className="animate-spin" /></div>
           : feed.isError ? <ErrorState retry={() => feed.refetch()} />

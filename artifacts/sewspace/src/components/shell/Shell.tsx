@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useGetProfile } from '@workspace/api-client-react';
-import { BookOpen, Compass, LayoutGrid, FolderKanban, Home, House, Layers, Menu, MessageCircle, Plus, Ruler, Scissors, Sparkles, Spool, Store, X } from 'lucide-react';
+import { Bookmark, BookOpen, Compass, Flag, LayoutGrid, FolderKanban, Home, House, Layers, Menu, MessageCircle, Plus, Ruler, Scissors, Sparkles, Spool, Store, X } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
 import { useAuth } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
@@ -17,6 +17,7 @@ export const navGroups: Array<{ label: string; items: NavItem[] }> = [
   { label: 'Community', items: [
     { href: '/feed', label: 'Home', icon: House },
     { href: '/explore', label: 'Explore', icon: Compass },
+    { href: '/saved', label: 'Saved', icon: Bookmark },
   ] },
   { label: 'My studio', items: [
     { href: '/studio', label: 'Overview', icon: LayoutGrid },
@@ -33,7 +34,9 @@ export const navGroups: Array<{ label: string; items: NavItem[] }> = [
   ] },
 ];
 
-const allItems = navGroups.flatMap(group => group.items);
+// Only shown to admins (ADMIN_USER_IDS); the API checks again.
+const adminGroup = { label: 'Admin', items: [{ href: '/admin/reports', label: 'Reports', icon: Flag }] };
+const allItems = [...navGroups, adminGroup].flatMap(group => group.items);
 
 function isActive(location: string, href: string) {
   return location === href || (href !== '/studio' && location.startsWith(`${href}/`));
@@ -49,7 +52,7 @@ function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: (
   return (
     <div className="flex h-full flex-col gap-[22px]">
       <Logo mark="black" href="/studio" />
-      {navGroups.map(group => (
+      {[...navGroups, ...(me?.isAdmin ? [adminGroup] : [])].map(group => (
         <nav key={group.label} aria-label={group.label}>
           <div className="px-3 pb-1.5 text-[11px] font-bold uppercase tracking-[.16em]">{group.label}</div>
           {group.items.map(item => {

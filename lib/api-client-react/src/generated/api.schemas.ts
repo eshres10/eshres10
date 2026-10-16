@@ -31,6 +31,8 @@ export interface Profile {
   units: ProfileUnits;
   /** True until the user has chosen a handle */
   needsHandle: boolean;
+  /** True for ADMIN_USER_IDS (shows report review) */
+  isAdmin: boolean;
 }
 
 /**
@@ -58,6 +60,8 @@ export interface PublicProfile {
   /** True when this is the signed-in viewer's own profile */
   isMe: boolean;
   stats: ProfileStats;
+  /** True when the signed-in viewer follows this person */
+  followedByMe: boolean;
 }
 
 /**
@@ -262,6 +266,10 @@ export interface FeedPost {
   media: Media[];
   /** Tagged make, pattern or fabric, only when the viewer may see it. */
   tags: PostTag[];
+  likeCount: number;
+  commentCount: number;
+  likedByMe: boolean;
+  savedByMe: boolean;
 }
 
 export interface FeedPage {
@@ -306,6 +314,162 @@ export interface PostUpdate {
   patternId?: number | null;
   /** @nullable */
   fabricId?: number | null;
+}
+
+export interface LikeState {
+  liked: boolean;
+  likeCount: number;
+}
+
+export interface SaveState {
+  saved: boolean;
+}
+
+export interface FollowState {
+  following: boolean;
+  followers: number;
+}
+
+export interface CommentInput {
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  body: string;
+  /** @nullable */
+  parentId?: number | null;
+}
+
+export interface CommentReply {
+  id: number;
+  postId: number;
+  /** @nullable */
+  parentId: number | null;
+  body: string;
+  createdAt: string;
+  author: PublicPerson;
+  canDelete: boolean;
+}
+
+export interface Comment {
+  id: number;
+  postId: number;
+  /** @nullable */
+  parentId: number | null;
+  body: string;
+  createdAt: string;
+  author: PublicPerson;
+  /** Your comment */
+  canDelete: boolean;
+  replies: CommentReply[];
+}
+
+export interface BlockedPerson {
+  handle: string;
+  name: string;
+  /** @nullable */
+  avatarUrl: string | null;
+  blockedAt: string;
+}
+
+export type ReportReason = typeof ReportReason[keyof typeof ReportReason];
+
+
+export const ReportReason = {
+  spam: 'spam',
+  harassment: 'harassment',
+  nudity: 'nudity',
+  violence: 'violence',
+  intellectual_property: 'intellectual_property',
+  other: 'other',
+} as const;
+
+export type ReportInputTargetKind = typeof ReportInputTargetKind[keyof typeof ReportInputTargetKind];
+
+
+export const ReportInputTargetKind = {
+  post: 'post',
+  comment: 'comment',
+  profile: 'profile',
+} as const;
+
+export interface ReportInput {
+  targetKind: ReportInputTargetKind;
+  /** Post or comment id */
+  targetId: string;
+  reason: ReportReason;
+  /** @maxLength 1000 */
+  details?: string;
+}
+
+export interface ReportReceipt {
+  id: number;
+}
+
+export type ReportResolutionAction = typeof ReportResolutionAction[keyof typeof ReportResolutionAction];
+
+
+export const ReportResolutionAction = {
+  remove: 'remove',
+  dismiss: 'dismiss',
+} as const;
+
+export interface ReportResolution {
+  action: ReportResolutionAction;
+}
+
+export type ReportTargetKind = typeof ReportTargetKind[keyof typeof ReportTargetKind];
+
+
+export const ReportTargetKind = {
+  post: 'post',
+  comment: 'comment',
+  profile: 'profile',
+} as const;
+
+export type ReportStatus = typeof ReportStatus[keyof typeof ReportStatus];
+
+
+export const ReportStatus = {
+  open: 'open',
+  removed: 'removed',
+  dismissed: 'dismissed',
+} as const;
+
+/**
+ * What was reported, as it was when reported
+ */
+export type ReportTarget = {
+  /** @nullable */
+  authorHandle: string | null;
+  /** @nullable */
+  authorName: string | null;
+  /** @nullable */
+  text: string | null;
+  /** @nullable */
+  imageUrl: string | null;
+  /**
+     * Where to see it in the app
+     * @nullable
+     */
+  link: string | null;
+};
+
+export interface Report {
+  id: number;
+  targetKind: ReportTargetKind;
+  targetId: string;
+  reason: ReportReason;
+  details: string;
+  status: ReportStatus;
+  createdAt: string;
+  /** @nullable */
+  resolvedAt: string | null;
+  reporter: PublicPerson;
+  /** What was reported, as it was when reported */
+  target: ReportTarget;
+  stillExists: boolean;
+  openReportsOnTarget: number;
 }
 
 export interface ErrorResponse {
@@ -870,6 +1034,10 @@ cursor?: string;
 export type GetExploreFeedParams = {
 cursor?: string;
 kind?: GetExploreFeedKind;
+/**
+ * recent: newest first. popular: most liked in the last 14 days.
+ */
+sort?: GetExploreFeedSort;
 };
 
 export type GetExploreFeedKind = typeof GetExploreFeedKind[keyof typeof GetExploreFeedKind];
@@ -880,6 +1048,31 @@ export const GetExploreFeedKind = {
   photo: 'photo',
   status: 'status',
   make: 'make',
+} as const;
+
+export type GetExploreFeedSort = typeof GetExploreFeedSort[keyof typeof GetExploreFeedSort];
+
+
+export const GetExploreFeedSort = {
+  recent: 'recent',
+  popular: 'popular',
+} as const;
+
+export type GetSavedPostsParams = {
+cursor?: string;
+};
+
+export type ListReportsParams = {
+status?: ListReportsStatus;
+};
+
+export type ListReportsStatus = typeof ListReportsStatus[keyof typeof ListReportsStatus];
+
+
+export const ListReportsStatus = {
+  open: 'open',
+  removed: 'removed',
+  dismissed: 'dismissed',
 } as const;
 
 export type GetHomeFeedParams = {

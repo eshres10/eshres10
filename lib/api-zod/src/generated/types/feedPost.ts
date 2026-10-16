@@ -23,4 +23,8 @@ export interface FeedPost {
   media: Media[];
   /** Tagged make, pattern or fabric, only when the viewer may see it. */
   tags: PostTag[];
+  likeCount: number;
+  commentCount: number;
+  likedByMe: boolean;
+  savedByMe: boolean;
 }

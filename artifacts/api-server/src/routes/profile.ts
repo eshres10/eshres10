@@ -22,7 +22,7 @@ export async function ensureProfile(db: Tx, uid: string): Promise<typeof profile
   return profile;
 }
 
-function profileResponse(row: typeof profilesTable.$inferSelect) {
+function profileResponse(row: typeof profilesTable.$inferSelect, isAdmin: boolean) {
   return {
     id: row.id,
     name: row.name,
@@ -34,12 +34,13 @@ function profileResponse(row: typeof profilesTable.$inferSelect) {
     favoriteGarments: row.favoriteGarments,
     units: row.units,
     needsHandle: row.handle === null,
+    isAdmin,
   };
 }
 
 router.get("/profile", scoped(async (req, res, db): Promise<void> => {
   const profile = await ensureProfile(db, getUserId(req));
-  res.json(GetProfileResponse.parse(profileResponse(profile)));
+  res.json(GetProfileResponse.parse(profileResponse(profile, viewerOf(req).isAdmin)));
 }));
 
 router.get("/handles/availability", scoped(async (req, res, db): Promise<void> => {
@@ -95,7 +96,7 @@ router.patch("/profile", scoped(async (req, res, db): Promise<void> => {
       const [row] = await sp.update(profilesTable).set(update).where(eq(profilesTable.userId, uid)).returning();
       return row;
     });
-    res.json(UpdateProfileResponse.parse(profileResponse(profile)));
+    res.json(UpdateProfileResponse.parse(profileResponse(profile, viewerOf(req).isAdmin)));
   } catch (error) {
     if ((error as { code?: string }).code === "23505" || (error as { cause?: { code?: string } }).cause?.code === "23505") {
       res.status(409).json({ error: HANDLE_MESSAGES.taken });

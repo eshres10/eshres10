@@ -29,7 +29,8 @@ export const GetPublicProfileResponse = zod.object({
   "following": zod.number().int(),
   "followersOnlyPosts": zod.number().int(),
   "followersOnlyMakes": zod.number().int()
-}).describe('Posts and makes count only what this viewer may see. The followersOnly counts are the followers-only posts and makes the viewer can\'t see (0 for the owner and followers); private items are never counted.')
+}).describe('Posts and makes count only what this viewer may see. The followersOnly counts are the followers-only posts and makes the viewer can\'t see (0 for the owner and followers); private items are never counted.'),
+  "followedByMe": zod.boolean().describe('True when the signed-in viewer follows this person')
 }).describe('Fields of a profile that anyone may see. Never includes units, experience or other private data.')
 
 
@@ -70,7 +71,11 @@ export const GetProfilePostsResponse = zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
   "id": zod.number().int(),
   "name": zod.string()
-})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean()
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -251,7 +256,11 @@ export const GetPublicPostResponse = zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
   "id": zod.number().int(),
   "name": zod.string()
-})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean()
 })
 
 
@@ -259,10 +268,12 @@ export const GetPublicPostResponse = zod.object({
  * @summary Recent public posts from everyone (Discover). Works signed out; hides people you've blocked or who blocked you.
  */
 export const getExploreFeedQueryKindDefault = `all`;
+export const getExploreFeedQuerySortDefault = `recent`;
 
 export const GetExploreFeedQueryParams = zod.object({
   "cursor": zod.coerce.string().optional(),
-  "kind": zod.enum(['all', 'photo', 'status', 'make']).default(getExploreFeedQueryKindDefault)
+  "kind": zod.enum(['all', 'photo', 'status', 'make']).default(getExploreFeedQueryKindDefault),
+  "sort": zod.enum(['recent', 'popular']).default(getExploreFeedQuerySortDefault).describe('recent: newest first. popular: most liked in the last 14 days.')
 })
 
 export const GetExploreFeedResponse = zod.object({
@@ -291,9 +302,322 @@ export const GetExploreFeedResponse = zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
   "id": zod.number().int(),
   "name": zod.string()
-})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean()
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
+})
+
+
+/**
+ * @summary Comments on a post the viewer may see, oldest first, each with its replies. Hides comments from people on the other side of a block.
+ */
+export const GetPostCommentsParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetPostCommentsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "postId": zod.number().int(),
+  "parentId": zod.number().int().nullable(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "canDelete": zod.boolean().describe('Your comment'),
+  "replies": zod.array(zod.object({
+  "id": zod.number().int(),
+  "postId": zod.number().int(),
+  "parentId": zod.number().int().nullable(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "canDelete": zod.boolean()
+}))
+})
+export const GetPostCommentsResponse = zod.array(GetPostCommentsResponseItem)
+
+
+/**
+ * @summary Comment on a post you may see, or reply to a top-level comment on it.
+ */
+export const CreateCommentParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const createCommentBodyBodyMax = 1000;
+
+
+
+export const CreateCommentBody = zod.object({
+  "body": zod.string().min(1).max(createCommentBodyBodyMax),
+  "parentId": zod.number().int().nullish()
+})
+
+export const CreateCommentResponse = zod.object({
+  "id": zod.number().int(),
+  "postId": zod.number().int(),
+  "parentId": zod.number().int().nullable(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "canDelete": zod.boolean().describe('Your comment'),
+  "replies": zod.array(zod.object({
+  "id": zod.number().int(),
+  "postId": zod.number().int(),
+  "parentId": zod.number().int().nullable(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "canDelete": zod.boolean()
+}))
+})
+
+
+/**
+ * @summary Delete your comment, or any comment on your post.
+ */
+export const DeleteCommentParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteCommentResponse = zod.void()
+
+
+export const LikePostParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const LikePostResponse = zod.object({
+  "liked": zod.boolean(),
+  "likeCount": zod.number().int()
+})
+
+
+export const UnlikePostParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UnlikePostResponse = zod.object({
+  "liked": zod.boolean(),
+  "likeCount": zod.number().int()
+})
+
+
+export const SavePostParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const SavePostResponse = zod.object({
+  "saved": zod.boolean()
+})
+
+
+export const UnsavePostParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UnsavePostResponse = zod.object({
+  "saved": zod.boolean()
+})
+
+
+/**
+ * @summary Posts you saved that you may still see, most recently saved first.
+ */
+export const GetSavedPostsQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional()
+})
+
+export const GetSavedPostsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean()
+})),
+  "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
+})
+
+
+export const FollowProfileParams = zod.object({
+  "handle": zod.coerce.string()
+})
+
+export const FollowProfileResponse = zod.object({
+  "following": zod.boolean(),
+  "followers": zod.number().int()
+})
+
+
+export const UnfollowProfileParams = zod.object({
+  "handle": zod.coerce.string()
+})
+
+export const UnfollowProfileResponse = zod.object({
+  "following": zod.boolean(),
+  "followers": zod.number().int()
+})
+
+
+/**
+ * @summary People you have blocked.
+ */
+export const ListBlocksResponseItem = zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable(),
+  "blockedAt": zod.coerce.date()
+})
+export const ListBlocksResponse = zod.array(ListBlocksResponseItem)
+
+
+/**
+ * @summary Block someone. Ends follows both ways; you stop seeing each other's profiles, posts, makes and comments.
+ */
+export const BlockProfileParams = zod.object({
+  "handle": zod.coerce.string()
+})
+
+export const BlockProfileResponse = zod.void()
+
+
+export const UnblockProfileParams = zod.object({
+  "handle": zod.coerce.string()
+})
+
+export const UnblockProfileResponse = zod.void()
+
+
+/**
+ * @summary Report a post, comment or profile you can see to the admins.
+ */
+export const createReportBodyDetailsMax = 1000;
+
+
+
+export const CreateReportBody = zod.object({
+  "targetKind": zod.enum(['post', 'comment', 'profile']),
+  "targetId": zod.string().describe('Post or comment id'),
+  "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
+  "details": zod.string().max(createReportBodyDetailsMax).optional()
+})
+
+export const CreateReportResponse = zod.object({
+  "id": zod.number().int()
+})
+
+
+export const listReportsQueryStatusDefault = `open`;
+
+export const ListReportsQueryParams = zod.object({
+  "status": zod.enum(['open', 'removed', 'dismissed']).default(listReportsQueryStatusDefault)
+})
+
+export const ListReportsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "targetKind": zod.enum(['post', 'comment', 'profile']),
+  "targetId": zod.string(),
+  "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
+  "details": zod.string(),
+  "status": zod.enum(['open', 'removed', 'dismissed']),
+  "createdAt": zod.coerce.date(),
+  "resolvedAt": zod.coerce.date().nullable(),
+  "reporter": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "target": zod.object({
+  "authorHandle": zod.string().nullable(),
+  "authorName": zod.string().nullable(),
+  "text": zod.string().nullable(),
+  "imageUrl": zod.string().nullable(),
+  "link": zod.string().nullable().describe('Where to see it in the app')
+}).describe('What was reported, as it was when reported'),
+  "stillExists": zod.boolean(),
+  "openReportsOnTarget": zod.number().int()
+})
+export const ListReportsResponse = zod.array(ListReportsResponseItem)
+
+
+/**
+ * @summary remove: delete the reported post or comment and close every open report on it. dismiss: close this report.
+ */
+export const ResolveReportParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const ResolveReportBody = zod.object({
+  "action": zod.enum(['remove', 'dismiss'])
+})
+
+export const ResolveReportResponse = zod.object({
+  "id": zod.number().int(),
+  "targetKind": zod.enum(['post', 'comment', 'profile']),
+  "targetId": zod.string(),
+  "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
+  "details": zod.string(),
+  "status": zod.enum(['open', 'removed', 'dismissed']),
+  "createdAt": zod.coerce.date(),
+  "resolvedAt": zod.coerce.date().nullable(),
+  "reporter": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "target": zod.object({
+  "authorHandle": zod.string().nullable(),
+  "authorName": zod.string().nullable(),
+  "text": zod.string().nullable(),
+  "imageUrl": zod.string().nullable(),
+  "link": zod.string().nullable().describe('Where to see it in the app')
+}).describe('What was reported, as it was when reported'),
+  "stillExists": zod.boolean(),
+  "openReportsOnTarget": zod.number().int()
 })
 
 
@@ -330,7 +654,11 @@ export const GetHomeFeedResponse = zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
   "id": zod.number().int(),
   "name": zod.string()
-})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean()
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -397,7 +725,11 @@ export const CreatePostResponse = zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
   "id": zod.number().int(),
   "name": zod.string()
-})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean()
 })
 
 
@@ -445,7 +777,11 @@ export const UpdatePostResponse = zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
   "id": zod.number().int(),
   "name": zod.string()
-})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean()
 })
 
 
@@ -495,7 +831,8 @@ export const GetProfileResponse = zod.object({
   "experience": zod.string(),
   "favoriteGarments": zod.array(zod.string()),
   "units": zod.enum(['metric', 'imperial']),
-  "needsHandle": zod.boolean().describe('True until the user has chosen a handle')
+  "needsHandle": zod.boolean().describe('True until the user has chosen a handle'),
+  "isAdmin": zod.boolean().describe('True for ADMIN_USER_IDS (shows report review)')
 })
 
 
@@ -533,7 +870,8 @@ export const UpdateProfileResponse = zod.object({
   "experience": zod.string(),
   "favoriteGarments": zod.array(zod.string()),
   "units": zod.enum(['metric', 'imperial']),
-  "needsHandle": zod.boolean().describe('True until the user has chosen a handle')
+  "needsHandle": zod.boolean().describe('True until the user has chosen a handle'),
+  "isAdmin": zod.boolean().describe('True for ADMIN_USER_IDS (shows report review)')
 })
 
 

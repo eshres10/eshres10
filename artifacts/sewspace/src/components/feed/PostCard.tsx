@@ -6,6 +6,8 @@ import { Link } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { VisibilityBadge, VisibilityPicker, type Visibility } from '@/components/visibility';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
+import { PostActions } from '@/components/feed/PostActions';
+import { SafetyMenu } from '@/components/social/SafetyMenu';
 import { timeAgo } from '@/lib/time';
 
 const TAG_ICON = { make: Scissors, pattern: BookOpen, fabric: Layers } as const;
@@ -113,7 +115,7 @@ function OwnerMenu({ post, onDeleted }: { post: FeedPost; onDeleted?: () => void
 }
 
 /** A post in a feed or on its own page. */
-export function PostCard({ post, full = false, onDeleted }: { post: FeedPost; full?: boolean; onDeleted?: () => void }) {
+export function PostCard({ post, full = false, onDeleted, onComment }: { post: FeedPost; full?: boolean; onDeleted?: () => void; onComment?: () => void }) {
   return (
     <article className="overflow-hidden rounded-[30px] bg-white" aria-labelledby={`post-${post.id}-author`}>
       <header className="flex items-center gap-3 px-[18px] py-3.5">
@@ -125,10 +127,12 @@ export function PostCard({ post, full = false, onDeleted }: { post: FeedPost; fu
             {post.visibility !== 'public' && <><span aria-hidden="true">·</span><VisibilityBadge value={post.visibility} /></>}
           </div>
         </div>
-        {post.isOwner && <OwnerMenu post={post} onDeleted={onDeleted} />}
+        {post.isOwner
+          ? <OwnerMenu post={post} onDeleted={onDeleted} />
+          : <SafetyMenu kind="post" targetId={String(post.id)} what="post" authorHandle={post.author.handle} label="Post options" />}
       </header>
-      {post.kind === 'photo' && post.media.length > 0 && <Photos post={post} />}
-      <div className={post.kind === 'status' ? 'px-[18px] pb-5' : 'px-[18px] pb-[18px] pt-3'}>
+      {post.kind === 'photo' && post.media.length > 0 && <><Photos post={post} /><PostActions post={post} onComment={onComment} /></>}
+      <div className={post.kind === 'status' ? 'px-[18px] pb-2' : 'px-[18px] pb-[18px] pt-1'}>
         {post.kind === 'status'
           ? <p className={`whitespace-pre-line break-words ${post.caption.length < 140 ? 'font-display text-[22px] leading-snug tracking-[-.03em]' : 'text-[15px] leading-relaxed'}`}>{post.caption}</p>
           : <Caption post={post} full={full} />}
@@ -144,6 +148,7 @@ export function PostCard({ post, full = false, onDeleted }: { post: FeedPost; fu
           </div>
         )}
       </div>
+      {post.kind === 'status' && <div className="pb-2"><PostActions post={post} onComment={onComment} /></div>}
     </article>
   );
 }

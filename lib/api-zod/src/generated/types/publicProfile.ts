@@ -20,4 +20,6 @@ export interface PublicProfile {
   /** True when this is the signed-in viewer's own profile */
   isMe: boolean;
   stats: ProfileStats;
+  /** True when the signed-in viewer follows this person */
+  followedByMe: boolean;
 }

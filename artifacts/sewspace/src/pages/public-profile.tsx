@@ -1,8 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/react';
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import {
+  followProfile,
+  getGetProfileMakesQueryKey,
+  getGetProfileUsedQueryKey,
+  getGetPublicProfileQueryKey,
   getProfilePosts,
+  unfollowProfile,
   useGetProfileMakes,
   useGetProfileUsed,
   useGetPublicProfile,
@@ -11,12 +16,13 @@ import {
   type ProfileStats,
   type UsedProduct,
 } from '@workspace/api-client-react';
-import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Share2, ShoppingBag, Spool } from 'lucide-react';
+import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Share2, ShoppingBag, Spool, UserCheck, UserPlus } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState, Loading } from '@/components/common';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { AdaptiveLayout } from '@/components/shell/Shell';
+import { SafetyMenu } from '@/components/social/SafetyMenu';
 import { VisibilityBadge } from '@/components/visibility';
 import { swatch } from '@/lib/swatch';
 import NotFound from '@/pages/not-found';
@@ -64,6 +70,34 @@ function ShareButton({ name }: { name: string }) {
   );
 }
 
+/** Follow / Following. Signed-out visitors are asked to sign in and come back here. */
+function FollowButton({ handle, name, following }: { handle: string; name: string; following: boolean }) {
+  const ask = useRequireSignIn();
+  const client = useQueryClient();
+  const [busy, setBusy] = useState(false);
+  const toggle = async () => {
+    if (!ask({ title: `Sign in to follow ${name}`, body: "You'll see their posts in your Home feed. You'll come straight back here." })) return;
+    setBusy(true);
+    try {
+      await (following ? unfollowProfile(handle) : followProfile(handle));
+      // Counts, followers-only posts and the Home feed all change.
+      await client.invalidateQueries({ queryKey: getGetPublicProfileQueryKey(handle) });
+      client.invalidateQueries({ queryKey: FEED_KEYS.all });
+      client.invalidateQueries({ queryKey: getGetProfileMakesQueryKey(handle) });
+      client.invalidateQueries({ queryKey: getGetProfileUsedQueryKey(handle) });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button type="button" onClick={toggle} disabled={busy} aria-pressed={following}
+      className={`inline-flex min-h-[48px] items-center gap-2 rounded-full px-[26px] text-[15px] font-bold disabled:opacity-60 ${following ? 'border border-ink bg-white text-ink' : 'bg-yellow text-ink'}`}>
+      {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : following ? <UserCheck size={16} aria-hidden="true" /> : <UserPlus size={16} aria-hidden="true" />}
+      {following ? 'Following' : 'Follow'}
+    </button>
+  );
+}
+
 function Stats({ stats }: { stats: ProfileStats }) {
   const chip = (n: number, label: string) => (
     <span className="rounded-[20px] bg-canvas px-[18px] py-3"><b className="font-display text-xl">{compact(n)}</b> <span className="text-sm text-subtle">{label}</span></span>
@@ -87,11 +121,13 @@ function LockNotice({ count, what, name }: { count: number; what: 'post' | 'make
     <div className="mt-3.5 flex items-center gap-3 rounded-[24px] bg-white px-5 py-4 text-sm">
       <Lock size={20} aria-hidden="true" className="shrink-0" />
       <span className="flex-1">{plural(count, what)} by {name} {count === 1 ? 'is' : 'are'} for followers only.</span>
-      {!isSignedIn && (
-        <button type="button" className="min-h-[44px] font-bold underline" onClick={() => ask({ title: `Sign in to see more from ${name}`, body: "Followers-only posts show once you follow. You'll come straight back here." })}>
-          Sign in
-        </button>
-      )}
+      {!isSignedIn
+        ? (
+          <button type="button" className="min-h-[44px] font-bold underline" onClick={() => ask({ title: `Sign in to follow ${name}`, body: "Followers-only posts show once you follow. You'll come straight back here." })}>
+            Sign in to follow
+          </button>
+        )
+        : <span className="text-subtle">Follow to see them.</span>}
     </div>
   );
 }
@@ -309,8 +345,15 @@ export function PublicProfilePage({ handle }: { handle: string }) {
             <p className="mt-1 text-[15px] text-subtle">@{p.handle} · Joined {monthYear(p.joinedAt)}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            {p.isMe && <Link href="/settings" className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-yellow px-[26px] text-[15px] font-bold text-ink no-underline"><Pencil size={16} aria-hidden="true" />Edit profile</Link>}
+            {p.isMe
+              ? <Link href="/settings" className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-yellow px-[26px] text-[15px] font-bold text-ink no-underline"><Pencil size={16} aria-hidden="true" />Edit profile</Link>
+              : <FollowButton handle={p.handle} name={p.name} following={p.followedByMe} />}
             <ShareButton name={p.name} />
+            {!p.isMe && (
+              <span className="grid h-12 w-12 place-items-center rounded-full border border-ink">
+                <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />
+              </span>
+            )}
           </div>
           {p.bio && <p className="max-w-[680px] flex-[1_1_100%] whitespace-pre-line text-base leading-relaxed">{p.bio}</p>}
           <Stats stats={p.stats} />

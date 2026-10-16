@@ -1,5 +1,5 @@
 import { and, count, desc, eq, inArray, sql } from "drizzle-orm";
-import { fabricsTable, patternsTable, postsTable, projectsTable, publicProfilesView, threadsTable, type Project, type Tx } from "@workspace/db";
+import { fabricsTable, followsTable, patternsTable, postsTable, projectsTable, publicProfilesView, threadsTable, type Project, type Tx } from "@workspace/db";
 import type { PublicMaterial } from "./makes";
 import { pagePosts } from "./posts";
 import { normaliseHandle, handleProblem } from "./handles";
@@ -12,7 +12,7 @@ import { visibleTo } from "./visibility";
 // and a profile on the other side of a block doesn't exist at all.
 
 /** The profile row behind a handle, or null if missing, without a handle, or blocked either way. */
-async function findProfile(db: Tx, viewer: Viewer, rawHandle: string) {
+export async function findProfile(db: Tx, viewer: Viewer, rawHandle: string) {
   const handle = normaliseHandle(rawHandle);
   const problem = handleProblem(handle);
   if (problem && problem !== "reserved") return null;
@@ -37,7 +37,7 @@ export interface ProfileStats {
   followersOnlyMakes: number;
 }
 
-export type ProfilePage = PublicProfile & { isMe: boolean; stats: ProfileStats };
+export type ProfilePage = PublicProfile & { isMe: boolean; stats: ProfileStats; followedByMe: boolean };
 
 /** Header of a profile page, with counts of what this viewer may see. */
 export async function getProfilePage(db: Tx, viewer: Viewer, handle: string): Promise<ProfilePage | null> {
@@ -52,6 +52,9 @@ export async function getProfilePage(db: Tx, viewer: Viewer, handle: string): Pr
   const follows = await db.execute<{ followers: string; following: string }>(sql`SELECT followers, following FROM sewspace_follow_counts(${uid})`);
   const locked = await db.execute<{ posts: string; makes: string }>(sql`SELECT posts, makes FROM sewspace_followers_only_counts(${uid})`);
   const f = follows.rows[0], l = locked.rows[0];
+  const [mine] = viewer.userId && viewer.userId !== uid
+    ? await db.select({ n: count() }).from(followsTable).where(and(eq(followsTable.followerId, viewer.userId), eq(followsTable.followeeId, uid)))
+    : [{ n: 0 }];
   return {
     handle: row.handle,
     name: row.name,
@@ -59,6 +62,7 @@ export async function getProfilePage(db: Tx, viewer: Viewer, handle: string): Pr
     avatarUrl: row.avatarUrl,
     joinedAt: row.createdAt,
     isMe: viewer.userId === uid,
+    followedByMe: (mine?.n ?? 0) > 0,
     stats: {
       posts: posts?.n ?? 0,
       makes: makes?.n ?? 0,

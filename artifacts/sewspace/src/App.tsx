@@ -19,6 +19,8 @@ import { ProjectsList, ProjectDetail } from '@/components/projects';
 import { SignInPromptProvider } from '@/components/auth/SignInPrompt';
 import { PublicMakePage } from '@/pages/public-make';
 import { ComposePage } from '@/pages/compose';
+import { SavedPage } from '@/pages/saved';
+import { AdminReportsPage } from '@/pages/admin-reports';
 import { ExplorePage } from '@/pages/explore';
 import { FeedPage } from '@/pages/feed';
 import { PostPage } from '@/pages/post';
@@ -33,6 +35,8 @@ const studio = (Page: React.ComponentType) => () => <Shell><Page /></Shell>;
 const InShellStudio = studio(Studio);
 const InShellFeedPage = studio(FeedPage);
 const InShellComposePage = studio(ComposePage);
+const InShellSavedPage = studio(SavedPage);
+const InShellAdminReports = studio(AdminReportsPage);
 const InShellFabricPage = studio(FabricPage);
 const InShellThreadPage = studio(ThreadPage);
 const InShellPatternsPage = studio(PatternsPage);
@@ -68,6 +72,8 @@ function Router() {
     <Route path="/settings" component={InShellSettingsPage} />
     <Route path="/feed" component={InShellFeedPage} />
     <Route path="/new" component={InShellComposePage} />
+    <Route path="/saved" component={InShellSavedPage} />
+    <Route path="/admin/reports" component={InShellAdminReports} />
     <Route path="/explore">{() => <AdaptiveLayout><ExplorePage /></AdaptiveLayout>}</Route>
     <Route path="/posts/:id">{(params: { id: string }) => <AdaptiveLayout><PostPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
     <Route path="/welcome" component={WelcomePage} />

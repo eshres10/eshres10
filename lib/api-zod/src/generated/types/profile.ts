@@ -21,4 +21,6 @@ export interface Profile {
   units: ProfileUnits;
   /** True until the user has chosen a handle */
   needsHandle: boolean;
+  /** True for ADMIN_USER_IDS (shows report review) */
+  isAdmin: boolean;
 }

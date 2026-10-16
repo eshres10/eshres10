@@ -6,13 +6,15 @@ import {
   GetPublicMakeResponse,
   GetPublicPostParams,
   GetPublicPostResponse,
+  GetPostCommentsParams,
+  GetPostCommentsResponse,
   GetPublicProfileResponse,
   GetProfileMakesResponse,
   GetProfilePostsQueryParams,
   GetProfilePostsResponse,
   GetProfileUsedResponse,
 } from "@workspace/api-zod";
-import { exploreFeed, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed } from "../access";
+import { exploreFeed, listComments, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { scoped } from "../lib/scoped";
 
@@ -78,10 +80,20 @@ router.get("/public/posts/:id", scoped(async (req, res, db): Promise<void> => {
   res.json(GetPublicPostResponse.parse(post));
 }));
 
+router.get("/public/posts/:id/comments", scoped(async (req, res, db): Promise<void> => {
+  const params = GetPostCommentsParams.safeParse(req.params);
+  const comments = params.success ? await listComments(db, viewerOf(req), params.data.id) : null;
+  if (!comments) {
+    res.status(404).json({ error: "Post not found" });
+    return;
+  }
+  res.json(GetPostCommentsResponse.parse(comments));
+}));
+
 router.get("/public/explore", scoped(async (req, res, db): Promise<void> => {
   const parsed = GetExploreFeedQueryParams.safeParse(req.query);
-  const query = parsed.success ? parsed.data : { kind: "all" as const, cursor: undefined };
-  res.json(GetExploreFeedResponse.parse(await exploreFeed(db, viewerOf(req), query.kind ?? "all", query.cursor)));
+  const query = parsed.success ? parsed.data : { kind: "all" as const, cursor: undefined, sort: "recent" as const };
+  res.json(GetExploreFeedResponse.parse(await exploreFeed(db, viewerOf(req), query.kind ?? "all", query.cursor, query.sort ?? "recent")));
 }));
 
 export default router;

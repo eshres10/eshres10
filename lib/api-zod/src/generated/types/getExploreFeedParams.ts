@@ -6,8 +6,13 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { GetExploreFeedKind } from './getExploreFeedKind';
+import type { GetExploreFeedSort } from './getExploreFeedSort';
 
 export type GetExploreFeedParams = {
 cursor?: string;
 kind?: GetExploreFeedKind;
+/**
+ * recent: newest first. popular: most liked in the last 14 days.
+ */
+sort?: GetExploreFeedSort;
 };

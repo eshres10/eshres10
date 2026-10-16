@@ -6,6 +6,7 @@ import { Link } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { ErrorState, Loading } from '@/components/common';
 import { HandleField } from '@/components/profile/HandleField';
+import { BlockedAccounts } from '@/components/social/BlockedAccounts';
 import { uploadFile } from '@/lib/upload';
 
 const BIO_MAX = 500;
@@ -133,6 +134,8 @@ export function SettingsPage() {
           </label>
         </div>
       </section>
+
+      <BlockedAccounts />
 
       <div className="sticky bottom-28 z-20 flex flex-wrap items-center justify-end gap-3 rounded-[30px] bg-white/95 p-3 shadow-float backdrop-blur md:bottom-4">
         {update.isError && <p role="alert" className="mr-auto pl-2 text-sm font-semibold text-red-ink">{errorMessage(update.error)}</p>}

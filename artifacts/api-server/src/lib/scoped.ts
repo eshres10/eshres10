@@ -32,7 +32,8 @@ export function scoped(handler: ScopedHandler) {
         out.sent = "status";
       },
     };
-    await withUser(viewerOf(req).userId, (db) => handler(req, reply, db));
+    const viewer = viewerOf(req);
+    await withUser(viewer.userId, (db) => handler(req, reply, db), { isAdmin: viewer.isAdmin });
     if (out.sent === "none") throw new Error(`${req.method} ${req.path} finished without a response`);
     if (out.sent === "status") res.sendStatus(out.status);
     else res.status(out.status).json(out.body);

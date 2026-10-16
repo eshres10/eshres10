@@ -5,6 +5,8 @@ import profileRouter from "./profile";
 import studioRouter from "./studio";
 import visibilityRouter from "./visibility";
 import postsRouter from "./posts";
+import socialRouter from "./social";
+import adminRouter from "./admin";
 import storageRouter, { objectReadRouter } from "./storage";
 import { requireAuth } from "../middlewares/auth";
 
@@ -21,6 +23,8 @@ router.use(profileRouter);
 router.use(studioRouter);
 router.use(visibilityRouter);
 router.use(postsRouter);
+router.use(socialRouter);
+router.use(adminRouter);
 router.use(storageRouter);
 
 export default router;
