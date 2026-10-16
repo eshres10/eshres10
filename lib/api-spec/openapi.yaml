@@ -1,0 +1,1034 @@
+openapi: 3.1.0
+info:
+  # Do not change the title, if the title changes, the import paths will be broken
+  title: Api
+  version: 0.1.0
+  description: Sewspace digital sewing studio API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: studio
+    description: Sewing studio data
+  - name: ai
+    description: AI-ready sewing tools
+  - name: storage
+    description: File upload helpers
+paths:
+  /public/profiles/{handle}:
+    get:
+      operationId: getPublicProfile
+      tags: [studio]
+      summary: Public safe profile lookup (optional authentication)
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Public profile fields only
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicProfile" }
+        "404": { description: Profile not found }
+  /handles/availability:
+    get:
+      operationId: checkHandleAvailability
+      tags: [studio]
+      parameters:
+        - { name: handle, in: query, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Handle availability
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  available: { type: boolean }
+                  reason: { type: string }
+                required: [available, reason]
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /profile:
+    get:
+      operationId: getProfile
+      tags: [studio]
+      summary: Get the signed-in maker profile
+      responses:
+        "200":
+          description: Profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+    patch:
+      operationId: updateProfile
+      tags: [studio]
+      summary: Update the maker profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProfileUpdate"
+      responses:
+        "200":
+          description: Updated profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Profile"
+  /dashboard:
+    get:
+      operationId: getDashboard
+      tags: [studio]
+      summary: Get studio dashboard summary
+      responses:
+        "200":
+          description: Dashboard
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Dashboard"
+  /fabrics:
+    get:
+      operationId: listFabrics
+      tags: [studio]
+      summary: List fabrics
+      parameters:
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Fabrics
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Fabric"
+    post:
+      operationId: createFabric
+      tags: [studio]
+      summary: Add a fabric to the stash
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FabricInput"
+      responses:
+        "201":
+          description: Created fabric
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fabric"
+  /fabrics/{id}:
+    patch:
+      operationId: updateFabric
+      tags: [studio]
+      summary: Update a fabric
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FabricUpdate"
+      responses:
+        "200":
+          description: Updated fabric
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Fabric"
+    delete:
+      operationId: deleteFabric
+      tags: [studio]
+      summary: Delete a fabric
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /threads:
+    get:
+      operationId: listThreads
+      tags: [studio]
+      summary: List threads
+      parameters:
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Threads
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Thread"
+    post:
+      operationId: createThread
+      tags: [studio]
+      summary: Add a thread to the stash
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThreadInput"
+      responses:
+        "201":
+          description: Created thread
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Thread"
+  /threads/{id}:
+    patch:
+      operationId: updateThread
+      tags: [studio]
+      summary: Update a thread
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ThreadUpdate"
+      responses:
+        "200":
+          description: Updated thread
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Thread"
+    delete:
+      operationId: deleteThread
+      tags: [studio]
+      summary: Delete a thread
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /patterns:
+    get:
+      operationId: listPatterns
+      tags: [studio]
+      summary: List sewing patterns
+      parameters:
+        - $ref: "#/components/parameters/Search"
+      responses:
+        "200":
+          description: Patterns
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Pattern"
+    post:
+      operationId: createPattern
+      tags: [studio]
+      summary: Add a sewing pattern
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatternInput"
+      responses:
+        "201":
+          description: Created pattern
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pattern"
+  /patterns/{id}:
+    patch:
+      operationId: updatePattern
+      tags: [studio]
+      summary: Update a sewing pattern
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatternUpdate"
+      responses:
+        "200":
+          description: Updated pattern
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Pattern"
+    delete:
+      operationId: deletePattern
+      tags: [studio]
+      summary: Delete a sewing pattern
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /patterns/analyze-pdf:
+    post:
+      operationId: analyzePatternPdf
+      tags: [ai]
+      summary: Extract sewing pattern details from an uploaded PDF
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PatternPdfAnalysisRequest"
+      responses:
+        "200":
+          description: Extracted pattern details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PatternPdfAnalysis"
+  /projects:
+    get:
+      operationId: listProjects
+      tags: [studio]
+      summary: List sewing projects
+      responses:
+        "200":
+          description: Projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Project"
+    post:
+      operationId: createProject
+      tags: [studio]
+      summary: Start a project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectInput"
+      responses:
+        "201":
+          description: Created project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+  /projects/{id}:
+    get:
+      operationId: getProject
+      tags: [studio]
+      summary: Get a sewing project with its steps and photos
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: Project detail
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDetail"
+    patch:
+      operationId: updateProject
+      tags: [studio]
+      summary: Update a sewing project
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectUpdate"
+      responses:
+        "200":
+          description: Updated project
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Project"
+    delete:
+      operationId: deleteProject
+      tags: [studio]
+      summary: Delete a sewing project
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /projects/{projectId}/steps:
+    post:
+      operationId: createProjectStep
+      tags: [studio]
+      summary: Add a step to a project
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectStepInput"
+      responses:
+        "201":
+          description: Created project step
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectStep"
+  /projects/{projectId}/steps/{stepId}:
+    patch:
+      operationId: updateProjectStep
+      tags: [studio]
+      summary: Update a project step
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/StepId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectStepUpdate"
+      responses:
+        "200":
+          description: Updated project step
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectStep"
+    delete:
+      operationId: deleteProjectStep
+      tags: [studio]
+      summary: Delete a project step
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/StepId"
+      responses:
+        "204":
+          description: Deleted
+  /projects/{projectId}/photos:
+    post:
+      operationId: createProjectPhoto
+      tags: [studio]
+      summary: Add a photo to a project
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectPhotoInput"
+      responses:
+        "201":
+          description: Created project photo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectPhoto"
+  /projects/{projectId}/photos/{photoId}:
+    patch:
+      operationId: updateProjectPhoto
+      tags: [studio]
+      summary: Update a project photo
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/PhotoId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectPhotoUpdate"
+      responses:
+        "200":
+          description: Updated project photo
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectPhoto"
+    delete:
+      operationId: deleteProjectPhoto
+      tags: [studio]
+      summary: Delete a project photo
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/PhotoId"
+      responses:
+        "204":
+          description: Deleted
+  /measurement-profiles:
+    get:
+      operationId: listMeasurementProfiles
+      tags: [studio]
+      summary: List measurement profiles
+      responses:
+        "200":
+          description: Measurement profiles
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/MeasurementProfile"
+    post:
+      operationId: createMeasurementProfile
+      tags: [studio]
+      summary: Add a measurement profile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeasurementProfileInput"
+      responses:
+        "201":
+          description: Created measurement profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeasurementProfile"
+  /measurement-profiles/{id}:
+    patch:
+      operationId: updateMeasurementProfile
+      tags: [studio]
+      summary: Update measurement profile
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MeasurementProfileUpdate"
+      responses:
+        "200":
+          description: Updated measurement profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MeasurementProfile"
+    delete:
+      operationId: deleteMeasurementProfile
+      tags: [studio]
+      summary: Delete measurement profile
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
+  /assistant/messages:
+    post:
+      operationId: askAssistant
+      tags: [ai]
+      summary: Ask the sewing assistant
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssistantInput"
+      responses:
+        "200":
+          description: Assistant response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssistantResponse"
+  /visualizations:
+    post:
+      operationId: createVisualization
+      tags: [ai]
+      summary: Generate a pattern and fabric visualization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VisualizationInput"
+      responses:
+        "200":
+          description: Visualization
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Visualization"
+  /recommendations:
+    get:
+      operationId: getRecommendations
+      tags: [ai]
+      summary: Find projects that match the stash
+      responses:
+        "200":
+          description: Recommendations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Recommendation"
+  /storage/uploads/request-url:
+    post:
+      operationId: requestUploadUrl
+      tags: [storage]
+      summary: Request a private object upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UploadRequest"
+      responses:
+        "200":
+          description: Upload URL
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+    Search:
+      name: search
+      in: query
+      required: false
+      schema:
+        type: string
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: integer
+    StepId:
+      name: stepId
+      in: path
+      required: true
+      schema:
+        type: integer
+    PhotoId:
+      name: photoId
+      in: path
+      required: true
+      schema:
+        type: integer
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required: [status]
+    Profile:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        handle: { type: string, nullable: true }
+        bio: { type: string }
+        avatarUrl: { type: string, nullable: true }
+        joinedAt: { type: string, format: date-time }
+        experience: { type: string }
+        favoriteGarments:
+          type: array
+          items: { type: string }
+        units: { type: string, enum: [metric, imperial] }
+      required: [id, name, handle, bio, avatarUrl, joinedAt, experience, favoriteGarments, units]
+    PublicProfile:
+      type: object
+      properties:
+        handle: { type: string }
+        displayName: { type: string }
+        bio: { type: string }
+        avatar: { type: string, nullable: true }
+        joinDate: { type: string, format: date-time }
+      required: [handle, displayName, bio, avatar, joinDate]
+    ProfileUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 100 }
+        handle: { type: string, minLength: 3, maxLength: 30, pattern: "^[a-z0-9_.]+$" }
+        bio: { type: string, maxLength: 500 }
+        avatarUrl: { type: string, nullable: true }
+        experience: { type: string }
+        favoriteGarments:
+          type: array
+          items: { type: string }
+        units: { type: string, enum: [metric, imperial] }
+    Fabric:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        type: { type: string }
+        color: { type: string }
+        width: { type: number, nullable: true }
+        quantity: { type: number, nullable: true }
+        unit: { type: string }
+        composition: { type: string, nullable: true }
+        stretch: { type: string, nullable: true }
+        weight: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        imageUrl: { type: string, nullable: true }
+        isDemo: { type: boolean }
+      required: [id, name, type, color, width, quantity, unit, composition, stretch, weight, notes, imageUrl, isDemo]
+    FabricInput:
+      type: object
+      required: [name, type, color]
+      properties:
+        name: { type: string, minLength: 1 }
+        type: { type: string }
+        color: { type: string }
+        width: { type: number, nullable: true }
+        quantity: { type: number, nullable: true }
+        unit: { type: string }
+        composition: { type: string, nullable: true }
+        stretch: { type: string, nullable: true }
+        weight: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        imageUrl: { type: string, nullable: true }
+    FabricUpdate:
+      allOf:
+        - $ref: "#/components/schemas/FabricInput"
+    Thread:
+      type: object
+      properties:
+        id: { type: integer }
+        brand: { type: string }
+        color: { type: string }
+        colorName: { type: string }
+        type: { type: string }
+        weight: { type: string, nullable: true }
+        quantity: { type: number, nullable: true }
+        notes: { type: string, nullable: true }
+        imageUrl: { type: string, nullable: true }
+        isDemo: { type: boolean }
+      required: [id, brand, color, colorName, type, weight, quantity, notes, imageUrl, isDemo]
+    ThreadInput:
+      type: object
+      required: [brand, color, colorName, type]
+      properties:
+        brand: { type: string }
+        color: { type: string }
+        colorName: { type: string }
+        type: { type: string }
+        weight: { type: string, nullable: true }
+        quantity: { type: number, nullable: true }
+        notes: { type: string, nullable: true }
+        imageUrl: { type: string, nullable: true }
+    ThreadUpdate:
+      allOf:
+        - $ref: "#/components/schemas/ThreadInput"
+    Pattern:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        designer: { type: string, nullable: true }
+        garmentType: { type: string }
+        difficulty: { type: string }
+        sizes: { type: string, nullable: true }
+        requiredFabric: { type: string, nullable: true }
+        yardage: { type: number, nullable: true }
+        recommendedFabrics: { type: string, nullable: true }
+        seamAllowance: { type: string, nullable: true }
+        instructions: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        coverImageUrl: { type: string, nullable: true }
+        pdfUrl: { type: string, nullable: true }
+        pdfFileName: { type: string, nullable: true }
+        status: { type: string, enum: [want_to_make, purchased, made, favorite] }
+        isDemo: { type: boolean }
+      required: [id, name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, coverImageUrl, pdfUrl, pdfFileName, status, isDemo]
+    PatternInput:
+      type: object
+      required: [name, garmentType, difficulty]
+      properties:
+        name: { type: string }
+        designer: { type: string, nullable: true }
+        garmentType: { type: string }
+        difficulty: { type: string }
+        sizes: { type: string, nullable: true }
+        requiredFabric: { type: string, nullable: true }
+        yardage: { type: number, nullable: true }
+        recommendedFabrics: { type: string, nullable: true }
+        seamAllowance: { type: string, nullable: true }
+        instructions: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        coverImageUrl: { type: string, nullable: true }
+        pdfUrl: { type: string, nullable: true }
+        pdfFileName: { type: string, nullable: true }
+        status: { type: string, enum: [want_to_make, purchased, made, favorite] }
+    PatternUpdate:
+      allOf:
+        - $ref: "#/components/schemas/PatternInput"
+    PatternPdfAnalysisRequest:
+      type: object
+      required: [pdfUrl]
+      properties:
+        pdfUrl: { type: string, minLength: 1 }
+    PatternPdfAnalysis:
+      type: object
+      properties:
+        name: { type: string, nullable: true }
+        designer: { type: string, nullable: true }
+        garmentType: { type: string, nullable: true }
+        difficulty: { type: string, enum: [beginner, intermediate, advanced], nullable: true }
+        sizes: { type: string, nullable: true }
+        requiredFabric: { type: string, nullable: true }
+        yardage: { type: number, nullable: true }
+        recommendedFabrics: { type: string, nullable: true }
+        seamAllowance: { type: string, nullable: true }
+        instructions: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+      required: [name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes]
+    Project:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        status: { type: string, enum: [planning, cutting, sewing, fitting, finished] }
+        progress: { type: integer, minimum: 0, maximum: 100 }
+        patternId: { type: integer, nullable: true }
+        fabricId: { type: integer, nullable: true }
+        threadId: { type: integer, nullable: true }
+        measurementProfileId: { type: integer, nullable: true }
+        coverImageUrl: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        alterations: { type: string, nullable: true }
+        problems: { type: string, nullable: true }
+        solutions: { type: string, nullable: true }
+        completedAt: { type: string, format: date, nullable: true }
+        isDemo: { type: boolean }
+      required: [id, name, status, progress, patternId, fabricId, threadId, measurementProfileId, coverImageUrl, notes, alterations, problems, solutions, completedAt, isDemo]
+    ProjectInput:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string }
+        status: { type: string, enum: [planning, cutting, sewing, fitting, finished] }
+        progress: { type: integer, minimum: 0, maximum: 100 }
+        patternId: { type: integer, nullable: true }
+        fabricId: { type: integer, nullable: true }
+        threadId: { type: integer, nullable: true }
+        measurementProfileId: { type: integer, nullable: true }
+        coverImageUrl: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        alterations: { type: string, nullable: true }
+        problems: { type: string, nullable: true }
+        solutions: { type: string, nullable: true }
+        completedAt: { type: string, format: date, nullable: true }
+    ProjectUpdate:
+      allOf:
+        - $ref: "#/components/schemas/ProjectInput"
+    ProjectStep:
+      type: object
+      properties:
+        id: { type: integer }
+        projectId: { type: integer }
+        title: { type: string }
+        description: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        position: { type: integer }
+        completed: { type: boolean }
+        completedAt: { type: string, format: date-time, nullable: true }
+      required: [id, projectId, title, description, notes, position, completed, completedAt]
+    ProjectStepInput:
+      type: object
+      required: [title]
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        position: { type: integer }
+        completed: { type: boolean }
+        completedAt: { type: string, format: date-time, nullable: true }
+    ProjectStepUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1 }
+        description: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        position: { type: integer }
+        completed: { type: boolean }
+        completedAt: { type: string, format: date-time, nullable: true }
+    ProjectPhoto:
+      type: object
+      properties:
+        id: { type: integer }
+        projectId: { type: integer }
+        url: { type: string }
+        caption: { type: string, nullable: true }
+        fileName: { type: string, nullable: true }
+        position: { type: integer }
+        createdAt: { type: string, format: date-time }
+      required: [id, projectId, url, caption, fileName, position, createdAt]
+    ProjectPhotoInput:
+      type: object
+      required: [url]
+      properties:
+        url: { type: string, minLength: 1 }
+        caption: { type: string, nullable: true }
+        fileName: { type: string, nullable: true }
+        position: { type: integer }
+    ProjectPhotoUpdate:
+      type: object
+      properties:
+        url: { type: string, minLength: 1 }
+        caption: { type: string, nullable: true }
+        fileName: { type: string, nullable: true }
+        position: { type: integer }
+    ProjectDetail:
+      allOf:
+        - $ref: "#/components/schemas/Project"
+        - type: object
+          properties:
+            steps:
+              type: array
+              items: { $ref: "#/components/schemas/ProjectStep" }
+            photos:
+              type: array
+              items: { $ref: "#/components/schemas/ProjectPhoto" }
+          required: [steps, photos]
+    MeasurementProfile:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        recordedAt: { type: string, format: date }
+        notes: { type: string, nullable: true }
+        measurements:
+          $ref: "#/components/schemas/MeasurementValues"
+      required: [id, name, recordedAt, notes, measurements]
+    MeasurementProfileInput:
+      type: object
+      required: [name, recordedAt, measurements]
+      properties:
+        name: { type: string }
+        recordedAt: { type: string, format: date }
+        notes: { type: string, nullable: true }
+        measurements:
+          $ref: "#/components/schemas/MeasurementValues"
+    MeasurementProfileUpdate:
+      allOf:
+        - $ref: "#/components/schemas/MeasurementProfileInput"
+    MeasurementValues:
+      type: object
+      properties:
+        bust: { type: number }
+        neck: { type: number }
+        rise: { type: number }
+        waist: { type: number }
+        wrist: { type: number }
+        height: { type: number }
+        inseam: { type: number }
+        fullHip: { type: number }
+        highHip: { type: number }
+        upperArm: { type: number }
+        armLength: { type: number }
+        underbust: { type: number }
+        backLength: { type: number }
+        frontLength: { type: number }
+        shoulderWidth: { type: number }
+      additionalProperties: false
+    Dashboard:
+      type: object
+      properties:
+        userName: { type: string }
+        fabricCount: { type: integer }
+        threadCount: { type: integer }
+        patternCount: { type: integer }
+        projectCount: { type: integer }
+        activeProject:
+          oneOf:
+            - $ref: "#/components/schemas/Project"
+            - type: "null"
+        recentFabrics:
+          type: array
+          items: { $ref: "#/components/schemas/Fabric" }
+        recentPatterns:
+          type: array
+          items: { $ref: "#/components/schemas/Pattern" }
+      required: [userName, fabricCount, threadCount, patternCount, projectCount, activeProject, recentFabrics, recentPatterns]
+    AssistantInput:
+      type: object
+      required: [message]
+      properties:
+        message: { type: string, minLength: 1 }
+        projectId: { type: integer, nullable: true }
+        imageUrl: { type: string, nullable: true }
+    AssistantResponse:
+      type: object
+      properties:
+        answer: { type: string }
+        mode: { type: string, enum: [demo, live] }
+      required: [answer, mode]
+    VisualizationInput:
+      type: object
+      required: [patternId, fabricId]
+      properties:
+        patternId: { type: integer }
+        fabricId: { type: integer }
+        bodyType: { type: string, nullable: true }
+    Visualization:
+      type: object
+      properties:
+        id: { type: integer }
+        imageUrl: { type: string }
+        mode: { type: string, enum: [demo, live] }
+        disclaimer: { type: string }
+      required: [id, imageUrl, mode, disclaimer]
+    Recommendation:
+      type: object
+      properties:
+        pattern:
+          $ref: "#/components/schemas/Pattern"
+        fabric:
+          $ref: "#/components/schemas/Fabric"
+        suitability: { type: integer }
+        reason: { type: string }
+      required: [pattern, fabric, suitability, reason]
+    UploadRequest:
+      type: object
+      required: [name, size, contentType]
+      properties:
+        name: { type: string }
+        size: { type: integer }
+        contentType: { type: string }
+    UploadResponse:
+      type: object
+      properties:
+        uploadURL: { type: string }
+        objectPath: { type: string }
+      required: [uploadURL, objectPath]
+

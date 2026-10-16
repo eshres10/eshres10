@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 72">
+  <rect width="300" height="72" rx="18" fill="#f2eadb"/>
+  <path d="M27 45c8-18 18-22 30-25 2 8 1 16-4 23-6 8-16 10-26 2Zm7-3c10-1 16-7 19-16-8 3-15 8-19 16Z" fill="#a63e57"/>
+  <path d="M30 49c8-8 16-15 27-24" stroke="#244e45" stroke-width="2.2" stroke-linecap="round"/>
+  <text x="75" y="47" fill="#2d2521" font-family="Georgia,serif" font-size="32" font-style="italic">sewspace</text>
+</svg>
