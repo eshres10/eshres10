@@ -9,7 +9,7 @@ import * as zod from 'zod';
 
 
 /**
- * @summary Public safe profile lookup (optional authentication)
+ * @summary Public profile by handle. Works signed out; returns public fields only.
  */
 export const GetPublicProfileParams = zod.object({
   "handle": zod.coerce.string()
@@ -17,20 +17,25 @@ export const GetPublicProfileParams = zod.object({
 
 export const GetPublicProfileResponse = zod.object({
   "handle": zod.string(),
-  "displayName": zod.string(),
+  "name": zod.string(),
   "bio": zod.string(),
-  "avatar": zod.string().nullable(),
-  "joinDate": zod.coerce.date()
-})
+  "avatarUrl": zod.string().nullable(),
+  "joinedAt": zod.coerce.date()
+}).describe('Fields of a profile that anyone may see. Never includes units, experience or other private data.')
 
 
+/**
+ * @summary Check whether a handle can be claimed by the signed-in user
+ */
 export const CheckHandleAvailabilityQueryParams = zod.object({
   "handle": zod.coerce.string()
 })
 
 export const CheckHandleAvailabilityResponse = zod.object({
+  "handle": zod.string().describe('The handle after normalising (trimmed'),
   "available": zod.boolean(),
-  "reason": zod.string()
+  "reason": zod.enum(['ok', 'yours', 'taken', 'reserved', 'too_short', 'too_long', 'invalid_characters']),
+  "suggestion": zod.string().nullable().describe('An available alternative when this one cannot be used')
 })
 
 
@@ -54,7 +59,8 @@ export const GetProfileResponse = zod.object({
   "joinedAt": zod.coerce.date(),
   "experience": zod.string(),
   "favoriteGarments": zod.array(zod.string()),
-  "units": zod.enum(['metric', 'imperial'])
+  "units": zod.enum(['metric', 'imperial']),
+  "needsHandle": zod.boolean().describe('True until the user has chosen a handle')
 })
 
 
@@ -76,7 +82,7 @@ export const UpdateProfileBody = zod.object({
   "name": zod.string().min(1).max(updateProfileBodyNameMax).optional(),
   "handle": zod.string().min(updateProfileBodyHandleMin).max(updateProfileBodyHandleMax).regex(updateProfileBodyHandleRegExp).optional(),
   "bio": zod.string().max(updateProfileBodyBioMax).optional(),
-  "avatarUrl": zod.string().nullish(),
+  "avatarUrl": zod.string().nullish().describe('/api/storage/objects/... path of an avatar the user uploaded, or null to remove'),
   "experience": zod.string().optional(),
   "favoriteGarments": zod.array(zod.string()).optional(),
   "units": zod.enum(['metric', 'imperial']).optional()
@@ -91,7 +97,8 @@ export const UpdateProfileResponse = zod.object({
   "joinedAt": zod.coerce.date(),
   "experience": zod.string(),
   "favoriteGarments": zod.array(zod.string()),
-  "units": zod.enum(['metric', 'imperial'])
+  "units": zod.enum(['metric', 'imperial']),
+  "needsHandle": zod.boolean().describe('True until the user has chosen a handle')
 })
 
 
@@ -1088,7 +1095,8 @@ export const GetRecommendationsResponse = zod.array(GetRecommendationsResponseIt
 export const RequestUploadUrlBody = zod.object({
   "name": zod.string(),
   "size": zod.number().int(),
-  "contentType": zod.string()
+  "contentType": zod.string(),
+  "purpose": zod.enum(['image', 'avatar', 'pattern_pdf']).optional().describe('What the file is for. Avatars become public once set on a profile with a handle; everything else stays private.')
 })
 
 export const RequestUploadUrlResponse = zod.object({

@@ -30,6 +30,7 @@ import type {
   CheckHandleAvailability200,
   CheckHandleAvailabilityParams,
   Dashboard,
+  ErrorResponse,
   Fabric,
   FabricInput,
   FabricUpdate,
@@ -104,7 +105,7 @@ export const getGetPublicProfileUrl = (handle: string,) => {
 }
 
 /**
- * @summary Public safe profile lookup (optional authentication)
+ * @summary Public profile by handle. Works signed out; returns public fields only.
  */
 export const getPublicProfile = async (handle: string, options?: Parameters<typeof customFetch>[1]): Promise<PublicProfile> => {
 
@@ -175,7 +176,7 @@ export function useGetPublicProfile<TData = Awaited<ReturnType<typeof getPublicP
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Public safe profile lookup (optional authentication)
+ * @summary Public profile by handle. Works signed out; returns public fields only.
  */
 
 export function useGetPublicProfile<TData = Awaited<ReturnType<typeof getPublicProfile>>, TError = ErrorType<void>>(
@@ -211,6 +212,9 @@ export const getCheckHandleAvailabilityUrl = (params: CheckHandleAvailabilityPar
   return stringifiedParams.length > 0 ? `/api/handles/availability?${stringifiedParams}` : `/api/handles/availability`
 }
 
+/**
+ * @summary Check whether a handle can be claimed by the signed-in user
+ */
 export const checkHandleAvailability = async (params: CheckHandleAvailabilityParams, options?: Parameters<typeof customFetch>[1]): Promise<CheckHandleAvailability200> => {
 
   return customFetch<CheckHandleAvailability200>(getCheckHandleAvailabilityUrl(params),
@@ -279,6 +283,9 @@ export function useCheckHandleAvailability<TData = Awaited<ReturnType<typeof che
  params: CheckHandleAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkHandleAvailability>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Check whether a handle can be claimed by the signed-in user
+ */
 
 export function useCheckHandleAvailability<TData = Awaited<ReturnType<typeof checkHandleAvailability>>, TError = ErrorType<unknown>>(
  params: CheckHandleAvailabilityParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof checkHandleAvailability>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
@@ -542,7 +549,7 @@ return customFetch<Profile>(getUpdateProfileUrl(),
 
 export const getUpdateProfileMutationKey = () => ['updateProfile'] as const;
 
-export const getUpdateProfileMutationOptions = <TError = ErrorType<unknown>,
+export const getUpdateProfileMutationOptions = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProfile>>, TError,UpdateProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateProfile>>, TError,UpdateProfileMutationVariables, TContext> => {
 
@@ -571,13 +578,13 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UpdateProfileMutationResult = NonNullable<Awaited<ReturnType<typeof updateProfile>>>
     export type UpdateProfileMutationBody = BodyType<ProfileUpdate>
-    export type UpdateProfileMutationError = ErrorType<unknown>
+    export type UpdateProfileMutationError = ErrorType<ErrorResponse>
     export type UpdateProfileMutationVariables = {data: BodyType<ProfileUpdate>}
 
     /**
  * @summary Update the maker profile
  */
-export const useUpdateProfile = <TError = ErrorType<unknown>,
+export const useUpdateProfile = <TError = ErrorType<ErrorResponse>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProfile>>, TError,UpdateProfileMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof updateProfile>>,

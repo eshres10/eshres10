@@ -16,12 +16,14 @@ tags:
     description: AI-ready sewing tools
   - name: storage
     description: File upload helpers
+  - name: public
+    description: Read-only endpoints that work without signing in
 paths:
   /public/profiles/{handle}:
     get:
       operationId: getPublicProfile
-      tags: [studio]
-      summary: Public safe profile lookup (optional authentication)
+      tags: [public]
+      summary: Public profile by handle. Works signed out; returns public fields only.
       parameters:
         - { name: handle, in: path, required: true, schema: { type: string } }
       responses:
@@ -35,6 +37,7 @@ paths:
     get:
       operationId: checkHandleAvailability
       tags: [studio]
+      summary: Check whether a handle can be claimed by the signed-in user
       parameters:
         - { name: handle, in: query, required: true, schema: { type: string } }
       responses:
@@ -45,9 +48,13 @@ paths:
               schema:
                 type: object
                 properties:
+                  handle: { type: string, description: The handle after normalising (trimmed, lowercased, leading @ removed) }
                   available: { type: boolean }
-                  reason: { type: string }
-                required: [available, reason]
+                  reason:
+                    type: string
+                    enum: [ok, yours, taken, reserved, too_short, too_long, invalid_characters]
+                  suggestion: { type: string, nullable: true, description: An available alternative when this one cannot be used }
+                required: [handle, available, reason, suggestion]
   /healthz:
     get:
       operationId: healthCheck
@@ -89,6 +96,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Profile"
+        "400":
+          description: Invalid handle, bio or avatar
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "409":
+          description: Handle already taken
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
   /dashboard:
     get:
       operationId: getDashboard
@@ -661,23 +678,30 @@ components:
           type: array
           items: { type: string }
         units: { type: string, enum: [metric, imperial] }
-      required: [id, name, handle, bio, avatarUrl, joinedAt, experience, favoriteGarments, units]
+        needsHandle: { type: boolean, description: True until the user has chosen a handle }
+      required: [id, name, handle, bio, avatarUrl, joinedAt, experience, favoriteGarments, units, needsHandle]
     PublicProfile:
       type: object
+      description: Fields of a profile that anyone may see. Never includes units, experience or other private data.
       properties:
         handle: { type: string }
-        displayName: { type: string }
+        name: { type: string }
         bio: { type: string }
-        avatar: { type: string, nullable: true }
-        joinDate: { type: string, format: date-time }
-      required: [handle, displayName, bio, avatar, joinDate]
+        avatarUrl: { type: string, nullable: true }
+        joinedAt: { type: string, format: date-time }
+      required: [handle, name, bio, avatarUrl, joinedAt]
+    ErrorResponse:
+      type: object
+      properties:
+        error: { type: string }
+      required: [error]
     ProfileUpdate:
       type: object
       properties:
         name: { type: string, minLength: 1, maxLength: 100 }
         handle: { type: string, minLength: 3, maxLength: 30, pattern: "^[a-z0-9_.]+$" }
         bio: { type: string, maxLength: 500 }
-        avatarUrl: { type: string, nullable: true }
+        avatarUrl: { type: string, nullable: true, description: "/api/storage/objects/... path of an avatar the user uploaded, or null to remove" }
         experience: { type: string }
         favoriteGarments:
           type: array
@@ -1025,6 +1049,10 @@ components:
         name: { type: string }
         size: { type: integer }
         contentType: { type: string }
+        purpose:
+          type: string
+          enum: [image, avatar, pattern_pdf]
+          description: What the file is for. Avatars become public once set on a profile with a handle; everything else stays private.
     UploadResponse:
       type: object
       properties:

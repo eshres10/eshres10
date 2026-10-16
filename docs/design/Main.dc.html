@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SewSpace — landing</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+</style>
+</helmet>
+<div style="min-height: 100vh; background-color: #f2f2f2; background-image: radial-gradient(#d4d4d4 1px, transparent 1px); background-size: 20px 20px; font-family: 'Inter', system-ui, sans-serif; color: #000; padding-bottom: 32px">
+
+  <header style="max-width: 1232px; margin: 0 auto; padding: 20px 16px 0">
+    <nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px 20px; background: #fff; border-radius: 30px; padding: 12px 14px 12px 22px; box-shadow: rgba(0,0,0,.2) 0 10px 10px -5px">
+      <a href="#" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #000">
+        <span style="width: 36px; height: 36px; border-radius: 11px; background: #e6e51e; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.scissors}}"></path></svg></span>
+        <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.04em">sewspace</span>
+      </a>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px 26px; font-size: 15px; font-weight: 500">
+        <a href="Explore.dc.html" style="text-decoration: none">Explore</a>
+        <a href="Challenge.dc.html" style="text-decoration: none">Challenges</a> <a href="ForumThread.dc.html" style="text-decoration: none">Forum</a>
+        <a href="Pattern.dc.html" style="text-decoration: none">Patterns</a>
+        <a href="#how" style="text-decoration: none">How it works</a>
+      </div>
+      <div style="display: flex; gap: 8px">
+        <a href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border: 1px solid #000; border-radius: 3000px; text-decoration: none; font-weight: 500; font-size: 15px">Log in</a>
+        <a href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; background: #000; color: #fff; border-radius: 3000px; text-decoration: none; font-weight: 600; font-size: 15px">Join free</a>
+      </div>
+    </nav>
+  </header>
+
+  <section style="max-width: 1040px; margin: 0 auto; padding: 88px 16px 56px; text-align: center">
+    <span style="display: inline-block; background: #d63333; color: #fff; border-radius: 3000px; padding: 6px 14px; font-size: 13px; font-weight: 600">The sewing community, all in one studio</span>
+    <h1 style="margin: 28px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: clamp(46px, 7.4vw, 92px); line-height: 1.02; letter-spacing: -0.065em">Where sewists <span style="display: inline-grid; place-items: center; width: .82em; height: .82em; border-radius: 50%; background: #e6e51e; vertical-align: -0.06em"><svg width="44%" height="44%" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.scissors}}"></path></svg></span> show every make <span style="display: inline-grid; place-items: center; width: .82em; height: .82em; border-radius: 22%; background: #466cf3; vertical-align: -0.06em; transform: rotate(-8deg)"><svg width="46%" height="46%" viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.heart}}"></path></svg></span></h1>
+    <p style="margin: 26px auto 0; max-width: 620px; font-size: 18px; line-height: 1.55; color: #3a3a3a">Post your makes, log every alteration, join challenges, and find out how a pattern really fits from the people who have sewn it.</p>
+    <div style="margin-top: 34px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px">
+      <a href="#" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 30px; background: #e6e51e; color: #000; border-radius: 3000px; text-decoration: none; font-weight: 600; font-size: 16px">Start sharing — it's free</a>
+      <a href="Explore.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 30px; background: #000; color: #fff; border-radius: 3000px; text-decoration: none; font-weight: 600; font-size: 16px">Browse makes</a>
+    </div>
+    <p style="margin: 16px 0 0; font-size: 14px; color: #555">No account needed to browse. Sign in to like, comment and join challenges.</p>
+  </section>
+
+  <section aria-label="Product preview" style="max-width: 1232px; margin: 0 auto; padding: 0 16px">
+    <div style="background: #ff8562; border-radius: 40px; padding: clamp(14px, 3vw, 36px)">
+      <div style="background: #fff; border-radius: 16px; overflow: hidden">
+        <div style="display: flex; gap: 7px; padding: 14px 16px; border-bottom: 1px solid #e6e6e6">
+          <span style="width: 11px; height: 11px; border-radius: 50%; background: #f34646"></span>
+          <span style="width: 11px; height: 11px; border-radius: 50%; background: #e6e51e"></span>
+          <span style="width: 11px; height: 11px; border-radius: 50%; background: #466cf3"></span>
+        </div>
+        <div style="background-color: #fafafa; background-image: radial-gradient(#e2e2e2 1px, transparent 1px); background-size: 20px 20px; padding: clamp(16px, 3vw, 36px); display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 24px; align-items: start">
+
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <span style="align-self: flex-start; background: #d63333; color: #fff; border-radius: 3000px; padding: 5px 13px; font-size: 13px; font-weight: 600">Tag the pattern &amp; fabric</span>
+            <article style="background: #fff; border: 1px solid #e6e6e6; border-radius: 24px; overflow: hidden">
+              <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px">
+                <span style="width: 34px; height: 34px; border-radius: 50%; background: #466cf3; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px">M</span>
+                <div style="flex: 1"><div style="font-weight: 600; font-size: 14px">mara.makes</div><div style="font-size: 12px; color: #555">2h · Public</div></div>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="{{i.more}}"></path></svg>
+              </div>
+              <div style="position: relative; aspect-ratio: 4/5; background: #e6e6e6"><img src="/_blob/188ffd136f4c0ada8a70caa52d09ec3b" alt="Lavender sprig cotton dress with a drawstring waist" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">
+                <span style="position: absolute; top: 12px; right: 12px; background: rgba(0,0,0,.72); color: #fff; border-radius: 3000px; padding: 4px 10px; font-size: 12px; font-weight: 600">1/4</span>
+              </div>
+              <div style="padding: 12px 14px 16px">
+                <div style="display: flex; align-items: center; gap: 16px; font-size: 14px; font-weight: 600">
+                  <span style="display: inline-flex; align-items: center; gap: 6px"><svg width="22" height="22" viewBox="0 0 24 24" fill="#f34646" stroke="#f34646" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="{{i.heart}}"></path></svg>312</span>
+                  <span style="display: inline-flex; align-items: center; gap: 6px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="{{i.comment}}"></path></svg>28</span>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.send}}"></path></svg>
+                  <svg style="margin-left: auto" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="{{i.bookmark}}"></path></svg>
+                </div>
+                <p style="margin: 10px 0 0; font-size: 14px; line-height: 1.5"><b>mara.makes</b> Finally finished my drawstring dress. Lengthened the bodice 2cm and it sits perfectly now.</p>
+                <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px">
+                  <span style="background: #f2f2f2; border-radius: 3000px; padding: 5px 10px; font-size: 12px; font-weight: 500">Pattern · Willa Dress</span>
+                  <span style="background: #f2f2f2; border-radius: 3000px; padding: 5px 10px; font-size: 12px; font-weight: 500">Fabric · Cotton lawn</span>
+                </div>
+              </div>
+            </article>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <span style="align-self: flex-start; background: #d63333; color: #fff; border-radius: 3000px; padding: 5px 13px; font-size: 13px; font-weight: 600">Profiles with every make</span>
+            <div style="background: #fff; border: 1px solid #e6e6e6; border-radius: 24px; padding: 18px">
+              <div style="display: flex; align-items: center; gap: 12px">
+                <span style="width: 56px; height: 56px; border-radius: 50%; background: #e6e51e; display: grid; place-items: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px">J</span>
+                <div style="flex: 1"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">June Okafor</div><div style="font-size: 13px; color: #555">@junesews · 2.4k followers</div></div>
+                <span style="background: #e6e51e; border-radius: 3000px; padding: 8px 14px; font-size: 13px; font-weight: 600">Follow</span>
+              </div>
+              <div style="margin-top: 16px; display: flex; gap: 4px; background: #f2f2f2; border-radius: 3000px; padding: 4px; font-size: 13px; font-weight: 600">
+                <span style="flex: 1; text-align: center; background: #000; color: #fff; border-radius: 3000px; padding: 7px 0">Posts</span>
+                <span style="flex: 1; text-align: center; padding: 7px 0">Makes</span>
+                <span style="flex: 1; text-align: center; padding: 7px 0">Used</span>
+              </div>
+              <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px">
+                <sc-for list="{{mini}}" as="m" hint-placeholder-count="9">
+                  <img src="{{m.img}}" alt="" style="display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 8px">
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <span style="align-self: flex-start; background: #d63333; color: #fff; border-radius: 3000px; padding: 5px 13px; font-size: 13px; font-weight: 600">Challenges &amp; pattern pages</span>
+            <div style="background: #fff; border: 1px solid #e6e6e6; border-radius: 24px; overflow: hidden">
+              <div style="height: 140px; position: relative; overflow: hidden; background: #e6e6e6"><img src="/_blob/1192463bd0067b49a26194ff1b40ec1c" alt="Denim pinafore over a cutwork blouse" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 35%"><span style="position: absolute; left: 14px; top: 14px; background: #e6e51e; border-radius: 3000px; padding: 4px 11px; font-size: 12px; font-weight: 700">Active</span></div>
+              <div style="padding: 16px">
+                <div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">#OctoberDenimChallenge</div>
+                <div style="margin-top: 6px; display: flex; gap: 14px; font-size: 13px; color: #555"><span>12 days left</span><span>486 joined</span></div>
+                <span style="margin-top: 14px; display: flex; justify-content: center; background: #000; color: #fff; border-radius: 3000px; padding: 10px; font-size: 14px; font-weight: 600">Join challenge</span>
+              </div>
+            </div>
+            <div style="background: #fff; border: 1px solid #e6e6e6; border-radius: 24px; padding: 16px">
+              <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-weight: 700; font-size: 15px">Willa Dress</span><span style="font-size: 12px; color: #555">214 makes</span></div>
+              <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 8px">
+                <sc-for list="{{ratings}}" as="r" hint-placeholder-count="3">
+                  <div style="display: grid; grid-template-columns: 92px 1fr 30px; align-items: center; gap: 8px; font-size: 12px"><span style="color: #555">{{r.label}}</span><span style="height: 8px; border-radius: 3000px; background: #f2f2f2; overflow: hidden"><span style="display: block; height: 100%; background: #466cf3; width: {{r.pct}}"></span></span><b>{{r.score}}</b></div>
+                </sc-for>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width: 1232px; margin: 0 auto; padding: 104px 16px 0">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+      <div>
+        <div style="color: #c42a2a; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">Explore</div>
+        <h2 style="margin: 10px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: clamp(32px, 4vw, 48px); line-height: 1.05; letter-spacing: -0.05em">Fresh from the community</h2>
+      </div>
+      <a href="Explore.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border: 1px solid #000; border-radius: 3000px; text-decoration: none; font-weight: 600; font-size: 15px; background: #fff">See everything on Explore</a>
+    </div>
+    <div style="margin-top: 32px; display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px">
+      <sc-for list="{{posts}}" as="p" hint-placeholder-count="8">
+        <a href="#" style="position: relative; display: block; aspect-ratio: 1/1; border-radius: 24px; overflow: hidden; text-decoration: none; background: #e6e6e6"><img src="{{p.img}}" alt="{{p.alt}}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">
+          <span style="position: absolute; left: 10px; bottom: 10px; right: 10px; display: flex; justify-content: space-between; gap: 8px">
+            <span style="background: #fff; color: #000; border-radius: 3000px; padding: 5px 11px; font-size: 12px; font-weight: 600">@{{p.h}}</span>
+            <span style="display: inline-flex; align-items: center; gap: 4px; background: #fff; color: #000; border-radius: 3000px; padding: 5px 10px; font-size: 12px; font-weight: 600"><svg width="13" height="13" viewBox="0 0 24 24" fill="#f34646" stroke="#f34646" stroke-width="2" aria-hidden="true"><path d="{{i.heart}}"></path></svg>{{p.likes}}</span>
+          </span>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+
+  <section id="how" style="max-width: 1232px; margin: 0 auto; padding: 112px 16px 0">
+    <div style="text-align: center">
+      <div style="color: #c42a2a; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">How it works</div>
+      <h2 style="margin: 10px auto 0; max-width: 760px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: clamp(32px, 4vw, 48px); line-height: 1.05; letter-spacing: -0.05em">Sewing depth, social ease</h2>
+    </div>
+    <div style="margin-top: 40px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px">
+      <div style="background: #fff; border-radius: 34px; padding: 36px">
+        <span style="width: 48px; height: 48px; border-radius: 14px; background: #e6e51e; display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.book}}"></path></svg></span>
+        <h3 style="margin: 22px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.04em">Log every make</h3>
+        <p style="margin: 10px 0 0; font-size: 15px; line-height: 1.55; color: #3a3a3a">Pattern, size, fabric and alterations live with the photos, so your notes help the next person too.</p>
+        <dl style="margin: 22px 0 0; display: grid; grid-template-columns: auto 1fr; gap: 8px 16px; font-size: 13px; background: #f2f2f2; border-radius: 18px; padding: 16px">
+          <dt style="color: #555">Pattern</dt><dd style="margin: 0; font-weight: 600">Willa Dress</dd>
+          <dt style="color: #555">Size</dt><dd style="margin: 0; font-weight: 600">14, graded to 16 at hip</dd>
+          <dt style="color: #555">Fabric</dt><dd style="margin: 0; font-weight: 600">Cotton lawn, 2.8 m</dd>
+          <dt style="color: #555">Alterations</dt><dd style="margin: 0; font-weight: 600">+2 cm bodice, 1 cm swayback</dd>
+        </dl>
+      </div>
+      <div style="background: #fff; border-radius: 34px; padding: 36px">
+        <span style="width: 48px; height: 48px; border-radius: 14px; background: #466cf3; display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.star}}"></path></svg></span>
+        <h3 style="margin: 22px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.04em">Pattern pages that tell the truth</h3>
+        <p style="margin: 10px 0 0; font-size: 15px; line-height: 1.55; color: #3a3a3a">One page per pattern or fabric, gathering every public make and honest ratings for fit, difficulty and instructions.</p>
+        <div style="margin-top: 22px; background: #f2f2f2; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 10px">
+          <sc-for list="{{ratings}}" as="r" hint-placeholder-count="3">
+            <div style="display: grid; grid-template-columns: 92px 1fr 30px; align-items: center; gap: 8px; font-size: 13px"><span style="color: #555">{{r.label}}</span><span style="height: 8px; border-radius: 3000px; background: #fff; overflow: hidden"><span style="display: block; height: 100%; background: #000; width: {{r.pct}}"></span></span><b>{{r.score}}</b></div>
+          </sc-for>
+        </div>
+      </div>
+      <div style="background: #fff; border-radius: 34px; padding: 36px">
+        <span style="width: 48px; height: 48px; border-radius: 14px; background: #ff8562; display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.trophy}}"></path></svg></span>
+        <h3 style="margin: 22px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.04em">Challenges that get you sewing</h3>
+        <p style="margin: 10px 0 0; font-size: 15px; line-height: 1.55; color: #3a3a3a">Anyone can start one. Join, submit a make, and cheer on everyone else's entries.</p>
+        <div style="margin-top: 22px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; text-align: center">
+          <div style="background: #000; color: #fff; border-radius: 16px; padding: 12px 4px"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px">12</div><div style="font-size: 11px">days</div></div>
+          <div style="background: #000; color: #fff; border-radius: 16px; padding: 12px 4px"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px">06</div><div style="font-size: 11px">hours</div></div>
+          <div style="background: #f2f2f2; border-radius: 16px; padding: 12px 4px"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px">486</div><div style="font-size: 11px">joined</div></div>
+          <div style="background: #f2f2f2; border-radius: 16px; padding: 12px 4px"><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px">731</div><div style="font-size: 11px">entries</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width: 1232px; margin: 0 auto; padding: 112px 16px 0">
+    <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 16px">
+      <div>
+        <div style="color: #c42a2a; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">Challenges</div>
+        <h2 style="margin: 10px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: clamp(32px, 4vw, 48px); line-height: 1.05; letter-spacing: -0.05em">Something to sew this month</h2>
+      </div>
+      <a href="Challenge.dc.html" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; border: 1px solid #000; border-radius: 3000px; text-decoration: none; font-weight: 600; font-size: 15px; background: #fff">All challenges</a>
+    </div>
+    <div style="margin-top: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px">
+      <sc-for list="{{challenges}}" as="c" hint-placeholder-count="3">
+        <a href="Challenge.dc.html" style="display: block; background: #fff; border-radius: 34px; overflow: hidden; text-decoration: none; color: #000">
+          <div style="height: 220px; position: relative; overflow: hidden; background: #e6e6e6"><img src="{{c.img}}" alt="{{c.alt}}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 16px; top: 16px; border-radius: 3000px; padding: 5px 12px; font-size: 12px; font-weight: 700; {{c.pill}}">{{c.status}}</span></div>
+          <div style="padding: 22px 24px 26px">
+            <div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.04em">{{c.title}}</div>
+            <p style="margin: 8px 0 0; font-size: 14px; line-height: 1.5; color: #3a3a3a">{{c.desc}}</p>
+            <div style="margin-top: 14px; display: flex; gap: 16px; font-size: 13px; font-weight: 600"><span>{{c.time}}</span><span style="color: #555">{{c.people}}</span></div>
+          </div>
+        </a>
+      </sc-for>
+    </div>
+  </section>
+
+  <section style="max-width: 1232px; margin: 0 auto; padding: 112px 16px 0">
+    <div style="background: #000; color: #fff; border-radius: 40px; padding: clamp(32px, 5vw, 64px); display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 40px; align-items: center">
+      <div>
+        <div style="color: #e6e51e; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">Your studio, your rules</div>
+        <h2 style="margin: 12px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: clamp(32px, 4vw, 50px); line-height: 1.03; letter-spacing: -0.05em">Stash and patterns stay private until you say so.</h2>
+        <p style="margin: 18px 0 0; font-size: 16px; line-height: 1.6; color: #d6d6d6">Every post, make, stash item and pattern has its own setting. Measurements are never shared. The AI assistant is optional and only reads what you can already see.</p>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 12px">
+        <div style="display: flex; align-items: center; gap: 16px; background: #fff; color: #000; border-radius: 24px; padding: 18px 20px">
+          <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: #e6e51e; display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="{{i.globe}}"></path></svg></span>
+          <div><div style="font-weight: 700; font-size: 16px">Public</div><div style="font-size: 14px; color: #555">Anyone, even without an account</div></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px; background: #fff; color: #000; border-radius: 24px; padding: 18px 20px">
+          <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: #466cf3; display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="{{i.users}}"></path></svg></span>
+          <div><div style="font-weight: 700; font-size: 16px">Followers</div><div style="font-size: 14px; color: #555">Only people who follow you</div></div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 16px; background: #fff; color: #000; border-radius: 24px; padding: 18px 20px; outline: 3px solid #e6e51e; outline-offset: -3px">
+          <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; background: #000; display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.lock}}"></path></svg></span>
+          <div><div style="font-weight: 700; font-size: 16px">Private · default for stash &amp; patterns</div><div style="font-size: 14px; color: #555">Just you</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="max-width: 900px; margin: 0 auto; padding: 120px 16px 96px; text-align: center">
+    <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: clamp(38px, 5.4vw, 68px); line-height: 1.02; letter-spacing: -0.06em">Your next make is someone's inspiration.</h2>
+    <div style="margin-top: 32px; display: flex; flex-wrap: wrap; justify-content: center; gap: 12px">
+      <a href="#" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 30px; background: #e6e51e; color: #000; border-radius: 3000px; text-decoration: none; font-weight: 600; font-size: 16px">Open your studio</a>
+      <a href="Explore.dc.html" style="display: inline-flex; align-items: center; min-height: 52px; padding: 0 30px; background: #000; color: #fff; border-radius: 3000px; text-decoration: none; font-weight: 600; font-size: 16px">Look around first</a>
+    </div>
+  </section>
+
+  <footer style="max-width: 1232px; margin: 0 auto; padding: 0 16px">
+    <div style="background: #fff; border-radius: 30px; padding: 22px 26px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; font-size: 14px">
+      <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: -0.04em">sewspace</span>
+      <div style="display: flex; flex-wrap: wrap; gap: 8px 22px"><a href="Explore.dc.html" style="text-decoration: none">Explore</a><a href="Challenge.dc.html" style="text-decoration: none">Challenges</a> <a href="ForumThread.dc.html" style="text-decoration: none">Forum</a><a href="Pattern.dc.html" style="text-decoration: none">Patterns</a><a href="#" style="text-decoration: none">Community guidelines</a><a href="#" style="text-decoration: none">Privacy</a></div>
+      <span style="color: #555">Made for the hands that make.</span>
+    </div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":3600}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var sw = {
+      gingham: "background-color:#ff8562;background-image:linear-gradient(90deg,rgba(255,255,255,.5) 50%,transparent 50%),linear-gradient(rgba(255,255,255,.5) 50%,transparent 50%);background-size:28px 28px",
+      stripe: "background:repeating-linear-gradient(90deg,#e6e51e 0 16px,#000 16px 20px)",
+      dots: "background-color:#466cf3;background-image:radial-gradient(#fff 2.5px,transparent 3px);background-size:18px 18px",
+      denim: "background-color:#2c4672;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.09) 0 2px,transparent 2px 7px)",
+      linen: "background-color:#e9e0cc;background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.05) 0 1px,transparent 1px 4px),repeating-linear-gradient(90deg,rgba(0,0,0,.04) 0 1px,transparent 1px 5px)",
+      floral: "background-color:#f34646;background-image:radial-gradient(circle at 30% 30%,#e6e51e 0 5px,transparent 6px),radial-gradient(circle at 70% 70%,#fff 0 4px,transparent 5px);background-size:34px 34px",
+      check: "background-color:#fff;background-image:linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%),linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%);background-size:20px 20px;background-position:0 0,10px 10px",
+      emerald: "background-color:#1f6b55;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.08) 0 1px,transparent 1px 6px)"
+    };
+    var P = {
+      blue_floral: '/_blob/057c4fedc8c7a51b83d0aa3f797c4b48', dark_floral: '/_blob/769e9f00331c5518d858d9a671756c46', ikat: '/_blob/070d0dbfa6770629d474769422fdcce8',
+      linen_stack: '/_blob/623f53848a0fba7bb103667b6cd6d996', orange_linen: '/_blob/544eca3d47a401399c1e405afd3fada4', polka: '/_blob/f6078638415aa9a1943ae3aab1bedae6',
+      rolls: '/_blob/91375372928539e1e7afc9e791509906', shop: '/_blob/55887fc2105646d7b1f47c4296ac5891', solids: '/_blob/973249613519f24b590d1a29562f5378',
+      velvet: '/_blob/0b6b01103b47174ea4ec4c0f6db6b9f7', blue_gown: '/_blob/701b827f636929720e8290d66c043951', blue_linen: '/_blob/5fb545dfebc25a3ab288dabc4d4f34cc',
+      bow_blouse: '/_blob/378fd54e9a610caf64290fbec065ccf9', butterfly: '/_blob/f91b3526340d65ba4402e367501c7827', denim_pinafore: '/_blob/1192463bd0067b49a26194ff1b40ec1c',
+      dirndl: '/_blob/a61bdc356ada728b0e1c50c4248e64b1', gingham_top: '/_blob/c974cd96842b2dd8418f09777861290e', gold_gown: '/_blob/1f26346581fa5b1d2b3ba2642b997bb1',
+      green_gingham: '/_blob/e551a46b8280f8ecc8ee3ab17952c2bf', knot_bag: '/_blob/5bf905114ac1edcca363e2d2dc675860', lavender: '/_blob/188ffd136f4c0ada8a70caa52d09ec3b',
+      patchwork: '/_blob/cedd8232af110501083827e498f729f6', pink_floral: '/_blob/31f9090e0f46023c17a2689be64e6db3', plaid_skirt: '/_blob/3fb41ae12053aadbcaf96b90bd6f28ea',
+      red_dress: '/_blob/0a8ae6a44e186ecaeb7322a09be76d15', red_skirt: '/_blob/c14805936ea42c8a216102adbfceffbc', sailor: '/_blob/e9b9124af50eb749d99a9f4a4477d928',
+      slip_dress: '/_blob/156a03273ae96fc256def755c3066a37', sweatshirt: '/_blob/b15aceab26480c18148934a44710873a', wrap_vest: '/_blob/a93207f7db6c002a302477269ae8ce59',
+      yellow_halter: '/_blob/b24763864c8c89e98667824487e6a6eb'
+    };
+    return {
+      sw: sw,
+      i: {
+        scissors: "M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M20 4 8.12 15.88 M14.47 14.48 20 20 M8.12 8.12 12 12",
+        heart: "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z",
+        comment: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z",
+        bookmark: "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z",
+        send: "m22 2-7 20-4-9-9-4Z M22 2 11 13",
+        more: "M12 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2z M19 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2z M5 11a1 1 0 1 0 0 2 1 1 0 0 0 0-2z",
+        book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z M4 19.5A2.5 2.5 0 0 0 6.5 22H20v-5",
+        star: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z",
+        trophy: "M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 22h16 M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22 M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22 M18 2H6v7a6 6 0 0 0 12 0V2Z",
+        globe: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+        users: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
+        lock: "M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4"
+      },
+      mini: [P.green_gingham, P.red_dress, P.lavender, P.blue_linen, P.sailor, P.gingham_top, P.pink_floral, P.wrap_vest, P.slip_dress].map(function (u) { return { img: u }; }),
+      ratings: [
+        { label: 'Fit', score: '4.6', pct: '92%' },
+        { label: 'Difficulty', score: '2.8', pct: '56%' },
+        { label: 'Instructions', score: '4.3', pct: '86%' }
+      ],
+      posts: [
+        { h: 'mara.makes', likes: '312', img: P.lavender, alt: 'Lavender sprig drawstring dress' },
+        { h: 'the.denim.drawer', likes: '1.2k', img: P.denim_pinafore, alt: 'Denim pinafore dress' },
+        { h: 'kofi_tailors', likes: '845', img: P.bow_blouse, alt: 'Striped blouse with a big neck bow' },
+        { h: 'junesews', likes: '528', img: P.blue_linen, alt: 'Blue linen slip dress' },
+        { h: 'stitchandbloom', likes: '96', img: P.butterfly, alt: 'Patchwork butterfly wings costume' },
+        { h: 'priya.pins', likes: '407', img: P.red_dress, alt: 'Red linen sundress' },
+        { h: 'slowseams', likes: '233', img: P.green_gingham, alt: 'Green floral gingham dress' },
+        { h: 'hemline.hal', likes: '61', img: P.plaid_skirt, alt: 'Red plaid gathered maxi skirt' }
+      ],
+      challenges: [
+        { title: '#OctoberDenimChallenge', desc: 'Sew anything in denim this month: jeans, jackets, bags or a patched-up favourite.', status: 'Active', pill: 'background:#e6e51e;color:#000', time: '12 days left', people: '486 sewists', img: P.denim_pinafore, alt: 'Denim pinafore dress' },
+        { title: 'Sew From Your Stash', desc: 'No new fabric allowed. Make something from what is already on your shelves.', status: 'Upcoming', pill: 'background:#fff;color:#2f55d4;border:2px solid #2f55d4', time: 'Starts in 9 days', people: '112 interested', img: P.linen_stack, alt: 'Stack of printed linens' },
+        { title: '#SummerLinenWeek', desc: 'A week of breezy linen makes, from first toile to final press.', status: 'Ended', pill: 'background:#3a3a3a;color:#fff', time: 'Ended 3 Sep', people: '1,204 entries', img: P.orange_linen, alt: 'Orange and yellow striped linen' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

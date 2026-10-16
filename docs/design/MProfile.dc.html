@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SewSpace mobile — my profile</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background-color: #f2f2f2; background-image: radial-gradient(#d4d4d4 1px, transparent 1px); background-size: 20px 20px; font-family: 'Inter', system-ui, sans-serif; color: #000">
+
+  <header style="position: absolute; left: 12px; right: 12px; top: 12px; z-index: 2; display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 24px; padding: 6px 6px 6px 16px; box-shadow: rgba(0,0,0,.2) 0 10px 10px -5px">
+    <span style="flex: 1; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.04em">@ena.sews</span>
+    <button aria-label="Saved posts" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; display: grid; place-items: center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="{{i.bookmark}}"></path></svg></button>
+    <button aria-label="Settings and privacy" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.menu}}"></path></svg></button>
+  </header>
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 80px; bottom: 0; overflow: hidden">
+    <section style="background: #fff; border-radius: 28px; padding: 18px">
+      <div style="display: flex; align-items: center; gap: 16px">
+        <span style="width: 78px; height: 78px; flex-shrink: 0; border-radius: 50%; background: #000; color: #e6e51e; display: grid; place-items: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 32px">E</span>
+        <div style="flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); text-align: center">
+          <div><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px">23</div><div style="font-size: 12px; color: #555">posts</div></div>
+          <div><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px">186</div><div style="font-size: 12px; color: #555">followers</div></div>
+          <div><div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px">94</div><div style="font-size: 12px; color: #555">following</div></div>
+        </div>
+      </div>
+      <div style="margin-top: 12px; font-weight: 700; font-size: 15px">Ena</div>
+      <p style="margin: 2px 0 0; font-size: 14px; line-height: 1.5">Sewing my way through the stash, one linen skirt at a time. Melbourne.</p>
+      <div style="margin-top: 12px; display: flex; gap: 8px">
+        <button style="flex: 1; min-height: 44px; border: 0; border-radius: 3000px; background: #e6e51e; font: inherit; font-size: 14px; font-weight: 700">Edit profile</button>
+        <button style="flex: 1; min-height: 44px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 14px; font-weight: 700">Share profile</button>
+      </div>
+    </section>
+
+    <div role="tablist" aria-label="Profile sections" style="margin-top: 10px; display: flex; gap: 4px; background: #fff; border-radius: 3000px; padding: 4px">
+      <button role="tab" aria-selected="true" style="flex: 1; min-height: 40px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-weight: 700; font-size: 13px">Posts</button>
+      <button role="tab" aria-selected="false" style="flex: 1; min-height: 40px; border: 0; border-radius: 3000px; background: transparent; font: inherit; font-weight: 700; font-size: 13px">Makes</button>
+      <button role="tab" aria-selected="false" style="flex: 1; min-height: 40px; border: 0; border-radius: 3000px; background: transparent; font: inherit; font-weight: 700; font-size: 13px">Used</button>
+    </div>
+
+    <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px">
+      <sc-for list="{{tiles}}" as="t" hint-placeholder-count="12">
+        <a href="MPost.dc.html" style="position: relative; display: block; aspect-ratio: 1/1; border-radius: 12px; overflow: hidden; background: #e6e6e6"><img src="{{t.img}}" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover">
+          <sc-if value="{{t.badge}}" hint-placeholder-val="{{false}}"><span style="position: absolute; right: 5px; top: 5px; width: 24px; height: 24px; border-radius: 50%; background: #fff; display: grid; place-items: center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="{{t.badgeLabel}}"><path d="{{t.badge}}"></path></svg></span></sc-if>
+        </a>
+      </sc-for>
+    </div>
+  </div>
+
+  <nav aria-label="App" style="position: absolute; left: 12px; right: 12px; bottom: 16px; z-index: 3; display: flex; align-items: center; justify-content: space-between; background: #fff; border-radius: 30px; padding: 8px 12px; box-shadow: rgba(0,0,0,.2) 0 10px 14px -5px">
+    <a href="MFeed.dc.html" aria-label="Home" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.home}}"></path></svg></a>
+    <a href="#" aria-label="Explore" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.compass}}"></path></svg></a>
+    <a href="MCompose.dc.html" aria-label="New post" style="width: 58px; height: 52px; display: grid; place-items: center; border-radius: 20px; background: #e6e51e"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="{{i.plus}}"></path></svg></a>
+    <a href="#" aria-label="My studio" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.kanban}}"></path></svg></a>
+    <a href="MProfile.dc.html" aria-label="My profile" aria-current="page" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px; background: #000"><span style="width: 28px; height: 28px; border-radius: 50%; background: #e6e51e; color: #000; display: grid; place-items: center; font-size: 12px; font-weight: 700">E</span></a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var sw = {
+      gingham: "background-color:#ff8562;background-image:linear-gradient(90deg,rgba(255,255,255,.5) 50%,transparent 50%),linear-gradient(rgba(255,255,255,.5) 50%,transparent 50%);background-size:20px 20px",
+      stripe: "background:repeating-linear-gradient(90deg,#e6e51e 0 12px,#000 12px 15px)",
+      dots: "background-color:#466cf3;background-image:radial-gradient(#fff 2px,transparent 2.5px);background-size:14px 14px",
+      denim: "background-color:#2c4672;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.09) 0 2px,transparent 2px 7px)",
+      linen: "background-color:#e9e0cc;background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.05) 0 1px,transparent 1px 4px)",
+      floral: "background-color:#f34646;background-image:radial-gradient(circle at 30% 30%,#e6e51e 0 4px,transparent 5px);background-size:26px 26px",
+      emerald: "background-color:#1f6b55;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.08) 0 1px,transparent 1px 6px)"
+    };
+    var P = {
+      blue_floral: '/_blob/057c4fedc8c7a51b83d0aa3f797c4b48', dark_floral: '/_blob/769e9f00331c5518d858d9a671756c46', ikat: '/_blob/070d0dbfa6770629d474769422fdcce8',
+      linen_stack: '/_blob/623f53848a0fba7bb103667b6cd6d996', orange_linen: '/_blob/544eca3d47a401399c1e405afd3fada4', polka: '/_blob/f6078638415aa9a1943ae3aab1bedae6',
+      rolls: '/_blob/91375372928539e1e7afc9e791509906', shop: '/_blob/55887fc2105646d7b1f47c4296ac5891', solids: '/_blob/973249613519f24b590d1a29562f5378',
+      velvet: '/_blob/0b6b01103b47174ea4ec4c0f6db6b9f7', blue_gown: '/_blob/701b827f636929720e8290d66c043951', blue_linen: '/_blob/5fb545dfebc25a3ab288dabc4d4f34cc',
+      bow_blouse: '/_blob/378fd54e9a610caf64290fbec065ccf9', butterfly: '/_blob/f91b3526340d65ba4402e367501c7827', denim_pinafore: '/_blob/1192463bd0067b49a26194ff1b40ec1c',
+      dirndl: '/_blob/a61bdc356ada728b0e1c50c4248e64b1', gingham_top: '/_blob/c974cd96842b2dd8418f09777861290e', gold_gown: '/_blob/1f26346581fa5b1d2b3ba2642b997bb1',
+      green_gingham: '/_blob/e551a46b8280f8ecc8ee3ab17952c2bf', knot_bag: '/_blob/5bf905114ac1edcca363e2d2dc675860', lavender: '/_blob/188ffd136f4c0ada8a70caa52d09ec3b',
+      patchwork: '/_blob/cedd8232af110501083827e498f729f6', pink_floral: '/_blob/31f9090e0f46023c17a2689be64e6db3', plaid_skirt: '/_blob/3fb41ae12053aadbcaf96b90bd6f28ea',
+      red_dress: '/_blob/0a8ae6a44e186ecaeb7322a09be76d15', red_skirt: '/_blob/c14805936ea42c8a216102adbfceffbc', sailor: '/_blob/e9b9124af50eb749d99a9f4a4477d928',
+      slip_dress: '/_blob/156a03273ae96fc256def755c3066a37', sweatshirt: '/_blob/b15aceab26480c18148934a44710873a', wrap_vest: '/_blob/a93207f7db6c002a302477269ae8ce59',
+      yellow_halter: '/_blob/b24763864c8c89e98667824487e6a6eb'
+    };
+    var users = "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75";
+    var lock = "M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4";
+    var list = [
+      [P.sailor, '', ''], [P.knot_bag, users, 'Followers only'], [P.solids, '', ''],
+      [P.polka, lock, 'Only you'], [P.wrap_vest, '', ''], [P.patchwork, '', ''],
+      [P.red_skirt, '', ''], [P.sweatshirt, users, 'Followers only'], [P.velvet, '', ''],
+      [P.bow_blouse, '', ''], [P.ikat, '', ''], [P.gingham_top, '', '']
+    ];
+    return {
+      i: {
+        bookmark: "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z",
+        menu: "M4 6h16 M4 12h16 M4 18h16",
+        home: "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
+        compass: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z m4.24 5.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z",
+        plus: "M12 5v14 M5 12h14",
+        kanban: "M3 3h18v18H3z M8 7v7 M12 7v4 M16 7v9"
+      },
+      tiles: list.map(function (t) { return { img: t[0], badge: t[1], badgeLabel: t[2] }; })
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SewSpace — Forum</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+</style>
+</helmet>
+<div style="min-height: 100vh; background-color: #f2f2f2; background-image: radial-gradient(#d4d4d4 1px, transparent 1px); background-size: 20px 20px; font-family: 'Inter', system-ui, sans-serif; color: #000; padding: 18px; display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+
+  <aside style="flex: 1 1 250px; max-width: 100%; background: #e6e51e; border-radius: 30px; padding: 22px 16px; display: flex; flex-direction: column; gap: 22px">
+    <a href="AppFeed.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 0 8px; text-decoration: none; color: #000">
+      <span style="width: 36px; height: 36px; border-radius: 11px; background: #000; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e6e51e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.scissors}}"></path></svg></span>
+      <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.04em">sewspace</span>
+    </a>
+    <sc-for list="{{nav}}" as="g" hint-placeholder-count="3">
+      <nav aria-label="{{g.label}}">
+        <div style="padding: 0 12px 6px; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">{{g.label}}</div>
+        <sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+          <a href="{{n.href}}" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 18px; text-decoration: none; font-size: 14px; font-weight: 600; {{n.style}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>{{n.label}}</a>
+        </sc-for>
+      </nav>
+    </sc-for>
+  </aside>
+
+  <div style="flex: 999 1 720px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+    <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: #fff; border-radius: 30px; padding: 10px 12px 10px 22px; box-shadow: rgba(0,0,0,.2) 0 10px 10px -5px">
+      <h1 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.04em">Forum</h1>
+      <label style="flex: 1 1 240px; position: relative; display: block; margin-left: 12px">
+        <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search the forum</span>
+        <svg style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%)" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="{{i.search}}"></path></svg>
+        <input type="search" placeholder="Search questions, polls, tips…" style="width: 100%; min-height: 44px; border: 1px solid #e6e6e6; border-radius: 16px; padding: 0 14px 0 40px; font: inherit; font-size: 14px; background: #f2f2f2">
+      </label>
+      <a href="#composer" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 20px; border-radius: 3000px; background: #000; color: #fff; text-decoration: none; font-weight: 700; font-size: 14px"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="{{i.plus}}"></path></svg>Start a discussion</a>
+    </header>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+      <main style="flex: 999 1 540px; min-width: 0; display: flex; flex-direction: column; gap: 14px">
+
+        <section id="composer" aria-label="Start a discussion" style="background: #fff; border-radius: 30px; padding: 18px">
+          <div style="display: flex; align-items: center; gap: 12px">
+            <span style="width: 40px; height: 40px; flex-shrink: 0; border-radius: 50%; background: #000; color: #fff; display: grid; place-items: center; font-weight: 700">E</span>
+            <div style="font-weight: 700; font-size: 15px">What kind of post?</div>
+          </div>
+          <div role="radiogroup" aria-label="Post type" style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px">
+            <sc-for list="{{composeTypes}}" as="c" hint-placeholder-count="5">
+              <button role="radio" aria-checked="{{c.checked}}" onClick="{{c.pick}}" style="display: inline-flex; align-items: center; gap: 7px; min-height: 40px; padding: 0 14px; border-radius: 3000px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; {{c.style}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{c.icon}}"></path></svg>{{c.label}}</button>
+            </sc-for>
+          </div>
+          <label style="margin-top: 12px; display: block">
+            <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Title</span>
+            <input placeholder="{{compose.title}}" style="width: 100%; min-height: 48px; border: 1px solid #000; border-radius: 16px; padding: 0 16px; font: inherit; font-size: 16px; font-weight: 600">
+          </label>
+          <label style="margin-top: 8px; display: block">
+            <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Details</span>
+            <textarea rows="2" placeholder="{{compose.body}}" style="width: 100%; border: 1px solid #e6e6e6; border-radius: 16px; padding: 12px 16px; font: inherit; font-size: 14px; resize: none; background: #fafafa"></textarea>
+          </label>
+          <sc-if value="{{isPollCompose}}" hint-placeholder-val="{{false}}">
+            <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+              <label><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Option 1</span><input placeholder="Option 1" style="width: 100%; min-height: 44px; border: 1px solid #e6e6e6; border-radius: 14px; padding: 0 14px; font: inherit; font-size: 14px"></label>
+              <label><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Option 2</span><input placeholder="Option 2" style="width: 100%; min-height: 44px; border: 1px solid #e6e6e6; border-radius: 14px; padding: 0 14px; font: inherit; font-size: 14px"></label>
+              <button style="min-height: 44px; border: 1px dashed #000; border-radius: 14px; background: #fff; font: inherit; font-size: 14px; font-weight: 600">Add option</button>
+              <label><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Poll length</span><select style="width: 100%; min-height: 44px; border: 1px solid #e6e6e6; border-radius: 14px; padding: 0 12px; font: inherit; font-size: 14px; background: #fff"><option>Runs for 3 days</option><option>1 day</option><option>1 week</option></select></label>
+            </div>
+          </sc-if>
+          <div style="margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px">
+            <label><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Board</span><select style="min-height: 40px; border: 1px solid #e6e6e6; border-radius: 3000px; padding: 0 14px; font: inherit; font-size: 13px; font-weight: 600; background: #fff"><option>Fitting &amp; alterations</option><option>Fabric &amp; cutting</option><option>Machines &amp; tools</option><option>Beginners' corner</option></select></label>
+            <button aria-label="Add photos" style="width: 40px; height: 40px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.image}}"></path></svg></button>
+            <button aria-label="Tag a pattern, fabric or make" style="width: 40px; height: 40px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.tag}}"></path></svg></button>
+            <span style="margin-left: auto; font-size: 12px; color: #555">{{compose.hint}}</span>
+            <button style="min-height: 44px; padding: 0 22px; border: 0; border-radius: 3000px; background: #e6e51e; font: inherit; font-size: 14px; font-weight: 700">{{compose.cta}}</button>
+          </div>
+        </section>
+
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px">
+          <div role="tablist" aria-label="Filter by type" style="display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px">
+            <sc-for list="{{filters}}" as="f" hint-placeholder-count="6">
+              <button role="tab" aria-selected="{{f.selected}}" onClick="{{f.pick}}" style="flex-shrink: 0; min-height: 40px; padding: 0 14px; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; {{f.style}}">{{f.label}} <span style="opacity: .6; font-weight: 600">{{f.count}}</span></button>
+            </sc-for>
+          </div>
+          <div role="tablist" aria-label="Sort" style="display: flex; gap: 2px; background: #fff; border-radius: 3000px; padding: 3px">
+            <button role="tab" aria-selected="true" style="min-height: 36px; padding: 0 14px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 13px; font-weight: 700">Hot</button>
+            <button role="tab" aria-selected="false" style="min-height: 36px; padding: 0 14px; border: 0; border-radius: 3000px; background: transparent; font: inherit; font-size: 13px; font-weight: 700">New</button>
+            <button role="tab" aria-selected="false" style="min-height: 36px; padding: 0 14px; border: 0; border-radius: 3000px; background: transparent; font: inherit; font-size: 13px; font-weight: 700">Unanswered</button>
+          </div>
+        </div>
+
+        <sc-for list="{{topics}}" as="t" hint-placeholder-count="6">
+          <article style="background: #fff; border-radius: 28px; padding: 18px; display: flex; gap: 14px">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 2px; flex-shrink: 0">
+              <button onClick="{{t.vote}}" aria-pressed="{{t.votedAttr}}" aria-label="Upvote" style="width: 44px; height: 40px; border: 0; border-radius: 14px; display: grid; place-items: center; cursor: pointer; {{t.voteStyle}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m18 15-6-6-6 6"></path></svg></button>
+              <span style="font-weight: 700; font-size: 14px">{{t.votes}}</span>
+            </div>
+            <div style="flex: 1; min-width: 0">
+              <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12px; color: #555">
+                <span style="display: inline-flex; align-items: center; gap: 5px; border-radius: 3000px; padding: 4px 10px; font-weight: 700; {{t.badge}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{t.icon}}"></path></svg>{{t.typeLabel}}</span>
+                <sc-if value="{{t.solved}}" hint-placeholder-val="{{false}}"><span style="display: inline-flex; align-items: center; gap: 4px; border-radius: 3000px; padding: 4px 10px; background: #e6e51e; color: #000; font-weight: 700"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Solved</span></sc-if>
+                <sc-if value="{{t.pinned}}" hint-placeholder-val="{{false}}"><span style="border-radius: 3000px; padding: 4px 10px; background: #f2f2f2; color: #000; font-weight: 700">Pinned</span></sc-if>
+                <span>{{t.board}} · <b style="color: #000">@{{t.h}}</b> · {{t.when}}</span>
+              </div>
+              <h2 style="margin: 10px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; line-height: 1.25; letter-spacing: -0.03em"><a href="ForumThread.dc.html" style="text-decoration: none">{{t.title}}</a></h2>
+              <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.55; color: #3a3a3a">{{t.excerpt}}</p>
+
+              <sc-if value="{{t.isPoll}}" hint-placeholder-val="{{false}}">
+                <div role="group" aria-label="Poll options" style="margin-top: 12px; display: flex; flex-direction: column; gap: 6px">
+                  <sc-for list="{{poll}}" as="o" hint-placeholder-count="4">
+                    <button onClick="{{o.pick}}" aria-pressed="{{o.chosen}}" style="position: relative; overflow: hidden; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 46px; padding: 0 14px; border-radius: 14px; font: inherit; font-size: 14px; font-weight: 600; text-align: left; cursor: pointer; {{o.style}}">
+                      <span style="position: absolute; left: 0; top: 0; bottom: 0; background: {{o.barColor}}; width: {{o.bar}}"></span>
+                      <span style="position: relative">{{o.label}}</span>
+                      <span style="position: relative; font-weight: 700">{{o.pctText}}</span>
+                    </button>
+                  </sc-for>
+                  <div style="font-size: 12px; color: #555">{{pollMeta}}</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{t.answer}}" hint-placeholder-val="{{false}}">
+                <div style="margin-top: 12px; border-radius: 18px; background: #f2f2f2; padding: 12px 14px; font-size: 14px; line-height: 1.5">
+                  <div style="font-size: 12px; font-weight: 700; color: #000; display: flex; align-items: center; gap: 6px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg>Accepted answer from @{{t.answerBy}}</div>
+                  <div style="margin-top: 4px">{{t.answer}}</div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{t.recs}}" hint-placeholder-val="{{false}}">
+                <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+                  <span style="font-size: 12px; font-weight: 700; color: #555">Most recommended:</span>
+                  <sc-for list="{{t.recs}}" as="r" hint-placeholder-count="3">
+                    <a href="Pattern.dc.html" style="display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 12px; border-radius: 3000px; background: #ff8562; color: #000; text-decoration: none; font-size: 13px; font-weight: 700">{{r.name}} <span style="font-weight: 600">×{{r.n}}</span></a>
+                  </sc-for>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{t.img}}" hint-placeholder-val="{{false}}">
+                <div style="margin-top: 12px; display: flex; gap: 8px">
+                  <img src="{{t.img}}" alt="{{t.alt}}" style="width: 160px; height: 200px; border-radius: 18px; object-fit: cover">
+                  <sc-if value="{{t.img2}}" hint-placeholder-val="{{false}}"><img src="{{t.img2}}" alt="" style="width: 160px; height: 200px; border-radius: 18px; object-fit: cover"></sc-if>
+                </div>
+              </sc-if>
+
+              <div style="margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; font-size: 13px; font-weight: 600">
+                <a href="ForumThread.dc.html" style="display: inline-flex; align-items: center; gap: 6px; text-decoration: none"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="{{i.comment}}"></path></svg>{{t.replies}}</a>
+                <sc-for list="{{t.tags}}" as="g" hint-placeholder-count="2">
+                  <span style="color: #2f55d4">#{{g}}</span>
+                </sc-for>
+                <sc-if value="{{t.unanswered}}" hint-placeholder-val="{{false}}"><a href="ForumThread.dc.html" style="margin-left: auto; display: inline-flex; align-items: center; min-height: 36px; padding: 0 14px; border-radius: 3000px; border: 1px solid #000; text-decoration: none; font-weight: 700">Be the first to answer</a></sc-if>
+              </div>
+            </div>
+          </article>
+        </sc-for>
+
+        <sc-if value="{{empty}}" hint-placeholder-val="{{false}}">
+          <div style="background: #fff; border-radius: 28px; padding: 40px 20px; text-align: center; font-size: 15px">Nothing here yet. Be the first to start one.</div>
+        </sc-if>
+      </main>
+
+      <aside style="flex: 1 1 290px; display: flex; flex-direction: column; gap: 16px">
+        <section style="background: #fff; border-radius: 30px; padding: 22px">
+          <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Boards</h2>
+          <div style="margin-top: 10px; display: flex; flex-direction: column">
+            <sc-for list="{{boards}}" as="b" hint-placeholder-count="8">
+              <a href="#" style="display: flex; align-items: center; gap: 10px; min-height: 44px; border-top: 1px solid #e6e6e6; text-decoration: none; font-size: 14px; font-weight: 600"><span style="width: 10px; height: 10px; border-radius: 50%; {{b.dot}}"></span><span style="flex: 1">{{b.name}}</span><span style="font-size: 12px; color: #555; font-weight: 500">{{b.n}}</span></a>
+            </sc-for>
+          </div>
+        </section>
+        <section style="background: #000; color: #fff; border-radius: 30px; padding: 22px">
+          <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Asking a good question</h2>
+          <ol style="margin: 12px 0 0; padding-left: 18px; font-size: 14px; line-height: 1.6; color: #d6d6d6">
+            <li>Say the fabric, pattern and size.</li>
+            <li>Add a photo of the problem area.</li>
+            <li>Mark the answer that worked so others find it.</li>
+          </ol>
+        </section>
+        <section style="background: #fff; border-radius: 30px; padding: 22px">
+          <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Top helpers this month</h2>
+          <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px">
+            <div style="display: flex; align-items: center; gap: 10px"><span style="width: 36px; height: 36px; border-radius: 50%; background: #e6e51e; display: grid; place-items: center; font-weight: 700">K</span><span style="flex: 1; font-size: 14px"><b>kofi_tailors</b><br><span style="font-size: 12px; color: #555">48 accepted answers</span></span></div>
+            <div style="display: flex; align-items: center; gap: 10px"><span style="width: 36px; height: 36px; border-radius: 50%; background: #466cf3; color: #fff; display: grid; place-items: center; font-weight: 700">J</span><span style="flex: 1; font-size: 14px"><b>junesews</b><br><span style="font-size: 12px; color: #555">31 accepted answers</span></span></div>
+            <div style="display: flex; align-items: center; gap: 10px"><span style="width: 36px; height: 36px; border-radius: 50%; background: #ff8562; display: grid; place-items: center; font-weight: 700">A</span><span style="flex: 1; font-size: 14px"><b>ada_alters</b><br><span style="font-size: 12px; color: #555">22 accepted answers</span></span></div>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2400}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { filter: 'all', compose: 'question', voted: {}, poll: null }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var P = {
+      wrap_vest: '/_blob/a93207f7db6c002a302477269ae8ce59', polka: '/_blob/f6078638415aa9a1943ae3aab1bedae6',
+      linen_stack: '/_blob/623f53848a0fba7bb103667b6cd6d996', gingham_top: '/_blob/c974cd96842b2dd8418f09777861290e'
+    };
+    var i = {
+      scissors: "M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M20 4 8.12 15.88 M14.47 14.48 20 20 M8.12 8.12 12 12",
+      search: "M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z m10 18-4.3-4.3",
+      plus: "M12 5v14 M5 12h14",
+      image: "M3 3h18v18H3z M9 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4z M21 15l-5-5L5 21",
+      tag: "M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l8.59-8.59a1 1 0 0 0 0-1.41z M7 7h.01",
+      comment: "M7.9 20A9 9 0 1 0 4 16.1L2 22Z",
+      home: "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
+      compass: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z m4.24 5.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z",
+      forum: "M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1",
+      trophy: "M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 22h16 M18 2H6v7a6 6 0 0 0 12 0V2Z",
+      bookmark: "m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z",
+      kanban: "M3 3h18v18H3z M8 7v7 M12 7v4 M16 7v9",
+      layers: "m12 2 10 5-10 5L2 7z M2 17l10 5 10-5 M2 12l10 5 10-5",
+      book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z",
+      ruler: "M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4z M7.5 10.5l2 2 M10.5 7.5l2 2 M13.5 4.5l2 2",
+      sparkles: "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z M19 3v4 M17 5h4",
+      help: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3 M12 17h.01",
+      poll: "M3 3v18h18 M8 17V9 M13 17V5 M18 17v-4",
+      star: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z",
+      info: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 16v-4 M12 8h.01",
+      camera: "M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z M12 10a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"
+    };
+    var T = {
+      post: { label: 'Show & tell', icon: i.camera, badge: 'background:#fff;color:#000;border:1px solid #000' },
+      question: { label: 'Question', icon: i.help, badge: 'background:#466cf3;color:#fff' },
+      rec: { label: 'Recommendation', icon: i.star, badge: 'background:#ff8562;color:#000' },
+      info: { label: 'Info & guides', icon: i.info, badge: 'background:#000;color:#fff' },
+      poll: { label: 'Poll', icon: i.poll, badge: 'background:#e6e51e;color:#000' }
+    };
+    var all = [
+      { id: 1, type: 'question', board: 'Fabric & cutting', h: 'slowseams', when: '3h', votes: 58, replies: '24 answers', title: 'How do I stop linen shifting while I cut?', excerpt: 'Midweight washed linen, Harbour Slip Dress. The back panel keeps creeping off grain no matter how many pins I use.', tags: ['linen', 'cutting'], solved: true, answer: 'Spray-starch and press it first, then use pattern weights and a rotary cutter instead of pins. Cut single layer for the back panel.', answerBy: 'kofi_tailors' },
+      { id: 2, type: 'poll', board: 'Machines & tools', h: 'hemline.hal', when: '6h', votes: 41, replies: '87 comments', title: 'Which trouser closure do you actually trust?', excerpt: 'Settling an argument in my sewing group. Vote, then tell us why in the comments.', tags: ['trousers'], isPoll: true },
+      { id: 3, type: 'rec', board: "Beginners' corner", h: 'tilly.tacks', when: '1d', votes: 33, replies: '19 replies', title: 'Recommend me a first trousers pattern', excerpt: 'Confident with dresses, never sewn a fly. Elastic waist is fine. Woven, not knit.', tags: ['beginner', 'trousers'], recs: [{ name: 'Harbour Wide Leg', n: 9 }, { name: 'Field Chore Pant', n: 5 }, { name: 'Everyday Pull-on', n: 4 }] },
+      { id: 4, type: 'info', board: 'Fabric & cutting', h: 'junesews', when: '2d', votes: 214, replies: '36 comments', pinned: true, title: 'Guide: how to pre-wash every fibre, in one table', excerpt: 'Linen, viscose, wool, silk, denim and knits: water temperature, drying, and how much shrinkage to expect. Save it for later.', tags: ['prewash', 'guide'], img: P.linen_stack, alt: 'Stack of printed linens', img2: P.polka },
+      { id: 5, type: 'post', board: 'Fitting & alterations', h: 'kofi_tailors', when: '2d', votes: 96, replies: '41 replies', title: 'My first wrap vest. What would you change?', excerpt: 'Self-drafted from a block. I think the armholes are a touch low. Honest feedback welcome.', tags: ['tailoring', 'feedback'], img: P.wrap_vest, alt: 'Dark wool wrap vest on a hanger', img2: '' },
+      { id: 6, type: 'question', board: 'Machines & tools', h: 'nell.needles', when: '20m', votes: 2, replies: 'No answers yet', title: 'Why does my twin needle skip stitches on jersey?', excerpt: 'Stretch twin needle 4.0, polyester thread, cotton jersey. Skips every few cm on the hem only.', tags: ['knits', 'machines'], unanswered: true }
+    ];
+    var counts = { all: all.length };
+    all.forEach(function (t) { counts[t.type] = (counts[t.type] || 0) + 1; });
+    var filterDefs = [['all', 'All'], ['question', 'Questions'], ['poll', 'Polls'], ['rec', 'Recommendations'], ['info', 'Info & guides'], ['post', 'Show & tell']];
+    var shown = all.filter(function (t) { return s.filter === 'all' || t.type === s.filter; });
+    var pollOpts = [['Invisible zip', 42], ['Fly front zip', 31], ['Buttons', 18], ['Elastic, always', 9]];
+    var voted = s.poll !== null;
+    var composeDefs = {
+      post: { label: 'Show & tell', title: 'Give your post a title', body: 'Share a make, a win or a work in progress…', cta: 'Post', hint: 'Shows in the forum and your followers’ feeds' },
+      question: { label: 'Question', title: 'What do you need help with?', body: 'Add the fabric, pattern, size and the step you are on. Photos help.', cta: 'Ask', hint: 'You can mark the answer that worked' },
+      rec: { label: 'Recommendation', title: 'What are you looking for?', body: 'e.g. a first trousers pattern, a fabric for a summer shirt…', cta: 'Ask for recommendations', hint: 'Replies can link pattern and fabric pages' },
+      info: { label: 'Info', title: 'Share a guide, tip or event', body: 'Explain it so a beginner could follow along.', cta: 'Share', hint: 'Great guides get pinned' },
+      poll: { label: 'Poll', title: 'Ask the community to vote', body: 'Add a little context (optional).', cta: 'Start poll', hint: 'Results show after people vote' }
+    };
+    return {
+      i: i,
+      nav: [
+        { label: 'Community', items: [
+          { label: 'Home', icon: i.home, style: 'background:transparent;color:#000', href: 'AppFeed.dc.html' },
+          { label: 'Explore', icon: i.compass, style: 'background:transparent;color:#000', href: '#' },
+          { label: 'Forum', icon: i.forum, style: 'background:#000;color:#fff', href: 'Forum.dc.html' },
+          { label: 'Challenges', icon: i.trophy, style: 'background:transparent;color:#000', href: '#' },
+          { label: 'Saved', icon: i.bookmark, style: 'background:transparent;color:#000', href: '#' }
+        ] },
+        { label: 'My studio', items: [
+          { label: 'Projects & makes', icon: i.kanban, style: 'background:transparent;color:#000', href: 'MakeDetail.dc.html' },
+          { label: 'Fabric stash', icon: i.layers, style: 'background:transparent;color:#000', href: '#' },
+          { label: 'Pattern library', icon: i.book, style: 'background:transparent;color:#000', href: '#' },
+          { label: 'Measurements', icon: i.ruler, style: 'background:transparent;color:#000', href: '#' }
+        ] },
+        { label: 'Help', items: [
+          { label: 'Sewing assistant', icon: i.sparkles, style: 'background:transparent;color:#000', href: '#' }
+        ] }
+      ],
+      composeTypes: ['post', 'question', 'rec', 'info', 'poll'].map(function (k) {
+        var on = s.compose === k;
+        return { label: composeDefs[k].label, icon: T[k].icon, checked: on ? 'true' : 'false', style: on ? 'background:#000;color:#fff;border:1px solid #000' : 'background:#fff;color:#000;border:1px solid #e6e6e6', pick: function () { self.setState({ compose: k }); } };
+      }),
+      compose: composeDefs[s.compose],
+      isPollCompose: s.compose === 'poll',
+      filters: filterDefs.map(function (f) {
+        var on = s.filter === f[0];
+        return { label: f[1], count: counts[f[0]] || 0, selected: on ? 'true' : 'false', style: on ? 'background:#000;color:#fff;border:1px solid #000' : 'background:#fff;color:#000;border:1px solid #e6e6e6', pick: function () { self.setState({ filter: f[0] }); } };
+      }),
+      empty: shown.length === 0,
+      topics: shown.map(function (t) {
+        var v = !!s.voted[t.id];
+        var d = T[t.type];
+        return {
+          title: t.title, excerpt: t.excerpt, board: t.board, h: t.h, when: t.when, replies: t.replies, tags: t.tags,
+          typeLabel: d.label, icon: d.icon, badge: d.badge,
+          solved: !!t.solved, pinned: !!t.pinned, isPoll: !!t.isPoll, unanswered: !!t.unanswered,
+          answer: t.answer || '', answerBy: t.answerBy || '', recs: t.recs || '', img: t.img || '', img2: t.img2 || '', alt: t.alt || '',
+          votes: t.votes + (v ? 1 : 0), votedAttr: v ? 'true' : 'false',
+          voteStyle: v ? 'background:#e6e51e;color:#000' : 'background:#f2f2f2;color:#000',
+          vote: function () { var n = Object.assign({}, self.state.voted); n[t.id] = !n[t.id]; self.setState({ voted: n }); }
+        };
+      }),
+      poll: pollOpts.map(function (o, n) {
+        var chosen = s.poll === n;
+        return {
+          label: o[0], chosen: chosen ? 'true' : 'false',
+          pctText: voted ? o[1] + '%' : '',
+          bar: voted ? o[1] + '%' : '0%',
+          barColor: chosen ? '#e6e51e' : '#e6e6e6',
+          style: voted ? (chosen ? 'background:#fff;color:#000;border:2px solid #000' : 'background:#fff;color:#000;border:1px solid #e6e6e6') : 'background:#fff;color:#000;border:1px solid #000',
+          pick: function () { self.setState({ poll: n }); }
+        };
+      }),
+      pollMeta: voted ? '313 votes · 2 days left · tap another option to change your vote' : '312 votes · 2 days left · vote to see results',
+      boards: [
+        { name: 'Fitting & alterations', n: '2.1k', dot: 'background:#466cf3' },
+        { name: 'Fabric & cutting', n: '1.8k', dot: 'background:#ff8562' },
+        { name: 'Machines & tools', n: '1.4k', dot: 'background:#000' },
+        { name: 'Patterns & hacks', n: '1.2k', dot: 'background:#e6e51e;border:1px solid #000' },
+        { name: "Beginners' corner", n: '980', dot: 'background:#f34646' },
+        { name: 'Mending & upcycling', n: '640', dot: 'background:#1f6b55' },
+        { name: 'Meetups & events', n: '210', dot: 'background:#8a8a8a' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

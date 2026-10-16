@@ -4,6 +4,7 @@ import {
   integer,
   jsonb,
   pgTable,
+  pgView,
   real,
   serial,
   text,
@@ -28,6 +29,11 @@ export const profilesTable = pgTable("sewspace_profiles", {
   experience: text("experience").notNull().default("beginner"),
   favoriteGarments: text("favorite_garments").array().notNull().default([]),
   units: text("units").notNull().default("metric"),
+  // Public identity (migration 0001). Readable by others only through the
+  // sewspace_public_profiles view.
+  handle: text("handle"),
+  bio: text("bio").notNull().default(""),
+  avatarUrl: text("avatar_url"),
   ...timestamps,
 });
 
@@ -157,6 +163,26 @@ export const projectPhotosTable = pgTable("sewspace_project_photos", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+// Who uploaded each stored object. Read through RLS by the storage route.
+export const uploadsTable = pgTable("sewspace_uploads", {
+  objectPath: text("object_path").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  contentType: text("content_type").notNull(),
+  sizeBytes: integer("size_bytes").notNull().default(0),
+  purpose: text("purpose").notNull().default("image"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+// Read-only view of profile fields that anyone may see (migration 0001).
+export const publicProfilesView = pgView("sewspace_public_profiles", {
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  handle: text("handle").notNull(),
+  name: text("name").notNull(),
+  bio: text("bio").notNull(),
+  avatarUrl: text("avatar_url"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+}).existing();
+
 export const insertProfileSchema = createInsertSchema(profilesTable).omit({
   id: true,
   createdAt: true,
@@ -203,6 +229,7 @@ export type MeasurementProfile = typeof measurementProfilesTable.$inferSelect;
 export type Project = typeof projectsTable.$inferSelect;
 export type ProjectStep = typeof projectStepsTable.$inferSelect;
 export type ProjectPhoto = typeof projectPhotosTable.$inferSelect;
+export type Upload = typeof uploadsTable.$inferSelect;
 export type InsertProfile = z.infer<typeof insertProfileSchema>;
 export type InsertFabric = z.infer<typeof insertFabricSchema>;
 export type InsertThread = z.infer<typeof insertThreadSchema>;

@@ -1,6 +1,6 @@
 import { and, asc, desc, eq, ilike, ne, or } from "drizzle-orm";
 import { Router, type IRouter, type Request } from "express";
-import { db } from "@workspace/db";
+import { withUser, type Tx } from "@workspace/db";
 import { openai } from "@workspace/integrations-openai-ai-server";
 import { generateImageBuffer } from "@workspace/integrations-openai-ai-server/image";
 import {
@@ -12,6 +12,7 @@ import {
   projectStepsTable,
   projectsTable,
   threadsTable,
+  uploadsTable,
 } from "@workspace/db";
 import {
   AskAssistantBody,
@@ -81,148 +82,14 @@ import {
   UpdateThreadResponse,
 } from "@workspace/api-zod";
 import { getUserId } from "../middlewares/auth";
+import { scoped, type Reply } from "../lib/scoped";
+import { ensureProfile } from "./profile";
+import { findForeignObjectField, IMAGE_FIELD, PDF_FIELD, type UploadPurpose } from "../access";
+import { viewerOf } from "../middlewares/auth";
 import { ObjectNotFoundError, ObjectStorageService } from "../lib/objectStorage";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
-
-const DEMO_FABRICS = [
-  {
-    name: "Blue Floral Cotton",
-    type: "Cotton lawn",
-    color: "Blue / white",
-    width: 145,
-    quantity: 3.2,
-    unit: "m",
-    composition: "100% cotton",
-    stretch: "None",
-    weight: "Lightweight",
-    notes: "Soft hand, beautiful drape for warm-weather pieces.",
-  },
-  {
-    name: "Emerald Linen",
-    type: "Linen",
-    color: "Emerald",
-    width: 140,
-    quantity: 2.4,
-    unit: "m",
-    composition: "100% linen",
-    stretch: "None",
-    weight: "Midweight",
-    notes: "A little rumpled in the best way.",
-  },
-  {
-    name: "Cream Linen Blend",
-    type: "Linen blend",
-    color: "Natural cream",
-    width: 145,
-    quantity: 1.8,
-    unit: "m",
-    composition: "55% linen, 45% viscose",
-    stretch: "None",
-    weight: "Midweight",
-    notes: "Slightly fluid with a soft texture.",
-  },
-  {
-    name: "Black Stretch Denim",
-    type: "Stretch denim",
-    color: "Washed black",
-    width: 150,
-    quantity: 2.1,
-    unit: "m",
-    composition: "98% cotton, 2% elastane",
-    stretch: "Comfort stretch",
-    weight: "Structured",
-    notes: "Great for bottoms and chore jackets.",
-  },
-];
-
-const DEMO_THREADS = [
-  { brand: "Gutermann", color: "#24334a", colorName: "Navy", type: "All-purpose", weight: "Tex 30", quantity: 100 },
-  { brand: "Gutermann", color: "#ede6d8", colorName: "Cream", type: "All-purpose", weight: "Tex 30", quantity: 80 },
-  { brand: "Aurifil", color: "#287b63", colorName: "Emerald", type: "Cotton", weight: "50 wt", quantity: 130 },
-  { brand: "Gutermann", color: "#242424", colorName: "Black", type: "All-purpose", weight: "Tex 30", quantity: 120 },
-];
-
-const DEMO_PATTERNS = [
-  {
-    name: "Summer Wrap Dress",
-    designer: "Sew Liberated",
-    garmentType: "Dresses",
-    difficulty: "Intermediate",
-    sizes: "0–24",
-    requiredFabric: "Lightweight woven",
-    yardage: 3,
-    recommendedFabrics: "Cotton lawn, linen, rayon",
-    seamAllowance: "1.5 cm",
-    instructions: "Wrap bodice, waist ties, and softly gathered skirt.",
-    notes: "An easy favorite with plenty of movement.",
-    status: "want_to_make",
-  },
-  {
-    name: "Classic A-Line Skirt",
-    designer: "Mara Hoffman",
-    garmentType: "Skirts",
-    difficulty: "Beginner",
-    sizes: "2–22",
-    requiredFabric: "Light to midweight woven",
-    yardage: 1.8,
-    recommendedFabrics: "Linen, cotton, denim",
-    seamAllowance: "1.5 cm",
-    instructions: "Simple waistband, invisible zipper, and shaped panels.",
-    notes: "The one you will make again and again.",
-    status: "purchased",
-  },
-  {
-    name: "Everyday Blouse",
-    designer: "Megan Nielsen",
-    garmentType: "Tops",
-    difficulty: "Intermediate",
-    sizes: "0–20",
-    requiredFabric: "Fluid woven",
-    yardage: 2.2,
-    recommendedFabrics: "Linen blend, silk, rayon",
-    seamAllowance: "1 cm",
-    instructions: "Relaxed fit with a soft collar and gathered sleeve.",
-    notes: "Designed for your most interesting fabrics.",
-    status: "favorite",
-  },
-  {
-    name: "Wide Leg Trousers",
-    designer: "Paper Theory",
-    garmentType: "Pants",
-    difficulty: "Advanced",
-    sizes: "6–28",
-    requiredFabric: "Midweight woven",
-    yardage: 2.6,
-    recommendedFabrics: "Linen, denim, wool blend",
-    seamAllowance: "1.5 cm",
-    instructions: "High-rise trousers with a wide leg and deep pockets.",
-    notes: "A rewarding slow sew.",
-    status: "want_to_make",
-  },
-];
-
-const DEMO_PROJECTS = [
-  {
-    name: "Blue Summer Dress",
-    status: "sewing",
-    progress: 64,
-    patternIndex: 0,
-    fabricIndex: 0,
-    threadIndex: 0,
-    notes: "The bodice is together. Next up: finish the waist ties.",
-  },
-  {
-    name: "Emerald Linen Skirt",
-    status: "cutting",
-    progress: 28,
-    patternIndex: 1,
-    fabricIndex: 1,
-    threadIndex: 2,
-    notes: "Cutting layout is ready on the table.",
-  },
-];
 
 function userId(req: Request): string {
   return getUserId(req);
@@ -237,96 +104,22 @@ function dateString(value: Date | string | null | undefined): string | null | un
   return value;
 }
 
-const demoDataInFlight = new Map<string, Promise<void>>();
+const FOREIGN_FILE_ERROR = "That file isn't one of your uploads. Upload it again.";
 
-async function seedDemoData(uid: string): Promise<void> {
-  const [profile] = await db
-    .select({ id: profilesTable.id })
-    .from(profilesTable)
-    .where(eq(profilesTable.userId, uid))
-    .limit(1);
-  if (profile) return;
-
-  const [createdProfile] = await db
-    .insert(profilesTable)
-    .values({
-      userId: uid,
-      name: "Sophie",
-      experience: "intermediate",
-      favoriteGarments: ["Dresses", "Tops", "Skirts"],
-      units: "metric",
-    })
-    .returning({ id: profilesTable.id });
-
-  const fabrics = await db
-    .insert(fabricsTable)
-    .values(DEMO_FABRICS.map((fabric) => ({ ...fabric, userId: uid, isDemo: true })))
-    .returning({ id: fabricsTable.id });
-  const threads = await db
-    .insert(threadsTable)
-    .values(DEMO_THREADS.map((thread) => ({ ...thread, userId: uid, isDemo: true })))
-    .returning({ id: threadsTable.id });
-  const patterns = await db
-    .insert(patternsTable)
-    .values(DEMO_PATTERNS.map((pattern) => ({ ...pattern, userId: uid, isDemo: true })))
-    .returning({ id: patternsTable.id });
-  const [measurements] = await db
-    .insert(measurementProfilesTable)
-    .values({
-      userId: uid,
-      name: "Measurements — September 2026",
-      recordedAt: "2026-09-12",
-      notes: "Measured in a supportive bra, standing naturally.",
-      measurements: {
-        height: 168,
-        bust: 91,
-        underbust: 77,
-        waist: 72,
-        highHip: 86,
-        fullHip: 98,
-        shoulderWidth: 38,
-        backLength: 40,
-        frontLength: 43,
-        armLength: 59,
-        upperArm: 29,
-        wrist: 16,
-        neck: 35,
-        inseam: 78,
-        rise: 27,
-      },
-    })
-    .returning({ id: measurementProfilesTable.id });
-
-  await db.insert(projectsTable).values(
-    DEMO_PROJECTS.map((project) => ({
-      userId: uid,
-      name: project.name,
-      status: project.status,
-      progress: project.progress,
-      patternId: patterns[project.patternIndex]?.id,
-      fabricId: fabrics[project.fabricIndex]?.id,
-      threadId: threads[project.threadIndex]?.id,
-      measurementProfileId: measurements.id,
-      notes: project.notes,
-      isDemo: true,
-    })),
-  );
-  void createdProfile;
-}
-
-async function ensureDemoData(uid: string): Promise<void> {
-  const activeSeed = demoDataInFlight.get(uid);
-  if (activeSeed) {
-    await activeSeed;
-    return;
-  }
-  const seed = seedDemoData(uid);
-  demoDataInFlight.set(uid, seed);
-  try {
-    await seed;
-  } finally {
-    demoDataInFlight.delete(uid);
-  }
+// Rejects a create/update that points a file field at an object the caller
+// didn't upload (or at an external URL). Unchanged stored values are allowed.
+async function rejectsForeignFiles(
+  db: Tx,
+  req: Request,
+  res: Reply,
+  values: Record<string, unknown>,
+  fields: Record<string, readonly UploadPurpose[]>,
+  existing?: Record<string, unknown> | null,
+): Promise<boolean> {
+  const field = await findForeignObjectField(db, viewerOf(req), values, fields, existing);
+  if (!field) return false;
+  res.status(400).json({ error: FOREIGN_FILE_ERROR });
+  return true;
 }
 
 function fabricResponse(row: typeof fabricsTable.$inferSelect) {
@@ -430,7 +223,7 @@ function projectPhotoResponse(row: typeof projectPhotosTable.$inferSelect) {
   };
 }
 
-async function recalculateProjectProgress(projectId: number, uid: string): Promise<void> {
+async function recalculateProjectProgress(db: Tx, projectId: number, uid: string): Promise<void> {
   const steps = await db
     .select({ completed: projectStepsTable.completed })
     .from(projectStepsTable)
@@ -463,42 +256,9 @@ function measurementResponse(row: typeof measurementProfilesTable.$inferSelect) 
   };
 }
 
-function profileResponse(row: typeof profilesTable.$inferSelect) {
-  return {
-    id: row.id,
-    name: row.name,
-    experience: row.experience,
-    favoriteGarments: row.favoriteGarments,
-    units: row.units,
-  };
-}
-
-router.get("/profile", async (req, res): Promise<void> => {
+router.get("/dashboard", scoped(async (req, res, db): Promise<void> => {
   const uid = userId(req);
-  await ensureDemoData(uid);
-  const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, uid));
-  res.json(GetProfileResponse.parse(profileResponse(profile)));
-});
-
-router.patch("/profile", async (req, res): Promise<void> => {
-  const parsed = UpdateProfileBody.safeParse(req.body);
-  if (!parsed.success) {
-    res.status(400).json({ error: parsed.error.message });
-    return;
-  }
-  const uid = userId(req);
-  await ensureDemoData(uid);
-  const [profile] = await db
-    .update(profilesTable)
-    .set(parsed.data)
-    .where(eq(profilesTable.userId, uid))
-    .returning();
-  res.json(UpdateProfileResponse.parse(profileResponse(profile)));
-});
-
-router.get("/dashboard", async (req, res): Promise<void> => {
-  const uid = userId(req);
-  await ensureDemoData(uid);
+  await ensureProfile(db, uid);
   const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, uid));
   const [fabrics, threads, patterns, projects, recentFabrics, recentPatterns] = await Promise.all([
     db.select({ id: fabricsTable.id }).from(fabricsTable).where(eq(fabricsTable.userId, uid)),
@@ -520,13 +280,12 @@ router.get("/dashboard", async (req, res): Promise<void> => {
       recentPatterns: recentPatterns.map(patternResponse),
     }),
   );
-});
+}));
 
-router.get("/fabrics", async (req, res): Promise<void> => {
+router.get("/fabrics", scoped(async (req, res, db): Promise<void> => {
   const parsed = ListFabricsQueryParams.safeParse(req.query);
   const search = cleanSearch(parsed.success ? parsed.data.search : undefined);
   const uid = userId(req);
-  await ensureDemoData(uid);
   const rows = await db
     .select()
     .from(fabricsTable)
@@ -537,34 +296,41 @@ router.get("/fabrics", async (req, res): Promise<void> => {
     )
     .orderBy(desc(fabricsTable.createdAt));
   res.json(ListFabricsResponse.parse(rows.map(fabricResponse)));
-});
+}));
 
-router.post("/fabrics", async (req, res): Promise<void> => {
+router.post("/fabrics", scoped(async (req, res, db): Promise<void> => {
   const parsed = CreateFabricBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+  if (await rejectsForeignFiles(db, req, res, parsed.data, { imageUrl: IMAGE_FIELD })) return;
   const [row] = await db.insert(fabricsTable).values({ ...parsed.data, userId: userId(req), isDemo: false }).returning();
   res.status(201).json(CreateFabricResponse.parse(fabricResponse(row)));
-});
+}));
 
-router.patch("/fabrics/:id", async (req, res): Promise<void> => {
+router.patch("/fabrics/:id", scoped(async (req, res, db): Promise<void> => {
   const params = UpdateFabricParams.safeParse(req.params);
   const body = UpdateFabricBody.safeParse(req.body);
   if (!params.success || !body.success) {
     res.status(400).json({ error: "Invalid fabric data" });
     return;
   }
+  const [existing] = await db.select().from(fabricsTable).where(and(eq(fabricsTable.id, params.data.id), eq(fabricsTable.userId, userId(req))));
+  if (!existing) {
+    res.status(404).json({ error: "Fabric not found" });
+    return;
+  }
+  if (await rejectsForeignFiles(db, req, res, body.data, { imageUrl: IMAGE_FIELD }, existing)) return;
   const [row] = await db.update(fabricsTable).set(body.data).where(and(eq(fabricsTable.id, params.data.id), eq(fabricsTable.userId, userId(req)))).returning();
   if (!row) {
     res.status(404).json({ error: "Fabric not found" });
     return;
   }
   res.json(UpdateFabricResponse.parse(fabricResponse(row)));
-});
+}));
 
-router.delete("/fabrics/:id", async (req, res): Promise<void> => {
+router.delete("/fabrics/:id", scoped(async (req, res, db): Promise<void> => {
   const params = DeleteFabricParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -576,43 +342,49 @@ router.delete("/fabrics/:id", async (req, res): Promise<void> => {
     return;
   }
   res.sendStatus(204);
-});
+}));
 
-router.get("/threads", async (req, res): Promise<void> => {
+router.get("/threads", scoped(async (req, res, db): Promise<void> => {
   const parsed = ListThreadsQueryParams.safeParse(req.query);
   const search = cleanSearch(parsed.success ? parsed.data.search : undefined);
   const uid = userId(req);
-  await ensureDemoData(uid);
   const rows = await db.select().from(threadsTable).where(search ? and(eq(threadsTable.userId, uid), or(ilike(threadsTable.colorName, `%${search}%`), ilike(threadsTable.brand, `%${search}%`))) : eq(threadsTable.userId, uid)).orderBy(desc(threadsTable.createdAt));
   res.json(ListThreadsResponse.parse(rows.map(threadResponse)));
-});
+}));
 
-router.post("/threads", async (req, res): Promise<void> => {
+router.post("/threads", scoped(async (req, res, db): Promise<void> => {
   const parsed = CreateThreadBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+  if (await rejectsForeignFiles(db, req, res, parsed.data, { imageUrl: IMAGE_FIELD })) return;
   const [row] = await db.insert(threadsTable).values({ ...parsed.data, userId: userId(req), isDemo: false }).returning();
   res.status(201).json(CreateThreadResponse.parse(threadResponse(row)));
-});
+}));
 
-router.patch("/threads/:id", async (req, res): Promise<void> => {
+router.patch("/threads/:id", scoped(async (req, res, db): Promise<void> => {
   const params = UpdateThreadParams.safeParse(req.params);
   const body = UpdateThreadBody.safeParse(req.body);
   if (!params.success || !body.success) {
     res.status(400).json({ error: "Invalid thread data" });
     return;
   }
+  const [existing] = await db.select().from(threadsTable).where(and(eq(threadsTable.id, params.data.id), eq(threadsTable.userId, userId(req))));
+  if (!existing) {
+    res.status(404).json({ error: "Thread not found" });
+    return;
+  }
+  if (await rejectsForeignFiles(db, req, res, body.data, { imageUrl: IMAGE_FIELD }, existing)) return;
   const [row] = await db.update(threadsTable).set(body.data).where(and(eq(threadsTable.id, params.data.id), eq(threadsTable.userId, userId(req)))).returning();
   if (!row) {
     res.status(404).json({ error: "Thread not found" });
     return;
   }
   res.json(UpdateThreadResponse.parse(threadResponse(row)));
-});
+}));
 
-router.delete("/threads/:id", async (req, res): Promise<void> => {
+router.delete("/threads/:id", scoped(async (req, res, db): Promise<void> => {
   const params = DeleteThreadParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -624,16 +396,15 @@ router.delete("/threads/:id", async (req, res): Promise<void> => {
     return;
   }
   res.sendStatus(204);
-});
+}));
 
-router.get("/patterns", async (req, res): Promise<void> => {
+router.get("/patterns", scoped(async (req, res, db): Promise<void> => {
   const parsed = ListPatternsQueryParams.safeParse(req.query);
   const search = cleanSearch(parsed.success ? parsed.data.search : undefined);
   const uid = userId(req);
-  await ensureDemoData(uid);
   const rows = await db.select().from(patternsTable).where(search ? and(eq(patternsTable.userId, uid), or(ilike(patternsTable.name, `%${search}%`), ilike(patternsTable.garmentType, `%${search}%`), ilike(patternsTable.designer, `%${search}%`))) : eq(patternsTable.userId, uid)).orderBy(desc(patternsTable.createdAt));
   res.json(ListPatternsResponse.parse(rows.map(patternResponse)));
-});
+}));
 
 router.post("/patterns/analyze-pdf", async (req, res): Promise<void> => {
   const parsed = AnalyzePatternPdfBody.safeParse(req.body);
@@ -645,6 +416,15 @@ router.post("/patterns/analyze-pdf", async (req, res): Promise<void> => {
   const match = parsed.data.pdfUrl.match(/^\/api\/storage(\/objects\/.+)$/);
   if (!match) {
     res.status(400).json({ error: "Invalid pattern PDF location" });
+    return;
+  }
+
+  // Only analyse a PDF the caller uploaded as a pattern PDF.
+  const foreign = await withUser(userId(req), (db) =>
+    findForeignObjectField(db, viewerOf(req), { pdfUrl: parsed.data.pdfUrl }, { pdfUrl: PDF_FIELD }),
+  );
+  if (foreign) {
+    res.status(404).json({ error: "Uploaded PDF not found" });
     return;
   }
 
@@ -736,32 +516,39 @@ Rules:
   }
 });
 
-router.post("/patterns", async (req, res): Promise<void> => {
+router.post("/patterns", scoped(async (req, res, db): Promise<void> => {
   const parsed = CreatePatternBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+  if (await rejectsForeignFiles(db, req, res, parsed.data, { coverImageUrl: IMAGE_FIELD, pdfUrl: PDF_FIELD })) return;
   const [row] = await db.insert(patternsTable).values({ ...parsed.data, userId: userId(req), isDemo: false }).returning();
   res.status(201).json(CreatePatternResponse.parse(patternResponse(row)));
-});
+}));
 
-router.patch("/patterns/:id", async (req, res): Promise<void> => {
+router.patch("/patterns/:id", scoped(async (req, res, db): Promise<void> => {
   const params = UpdatePatternParams.safeParse(req.params);
   const body = UpdatePatternBody.safeParse(req.body);
   if (!params.success || !body.success) {
     res.status(400).json({ error: "Invalid pattern data" });
     return;
   }
+  const [existing] = await db.select().from(patternsTable).where(and(eq(patternsTable.id, params.data.id), eq(patternsTable.userId, userId(req))));
+  if (!existing) {
+    res.status(404).json({ error: "Pattern not found" });
+    return;
+  }
+  if (await rejectsForeignFiles(db, req, res, body.data, { coverImageUrl: IMAGE_FIELD, pdfUrl: PDF_FIELD }, existing)) return;
   const [row] = await db.update(patternsTable).set(body.data).where(and(eq(patternsTable.id, params.data.id), eq(patternsTable.userId, userId(req)))).returning();
   if (!row) {
     res.status(404).json({ error: "Pattern not found" });
     return;
   }
   res.json(UpdatePatternResponse.parse(patternResponse(row)));
-});
+}));
 
-router.delete("/patterns/:id", async (req, res): Promise<void> => {
+router.delete("/patterns/:id", scoped(async (req, res, db): Promise<void> => {
   const params = DeletePatternParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -773,21 +560,21 @@ router.delete("/patterns/:id", async (req, res): Promise<void> => {
     return;
   }
   res.sendStatus(204);
-});
+}));
 
-router.get("/projects", async (req, res): Promise<void> => {
+router.get("/projects", scoped(async (req, res, db): Promise<void> => {
   const uid = userId(req);
-  await ensureDemoData(uid);
   const rows = await db.select().from(projectsTable).where(eq(projectsTable.userId, uid)).orderBy(desc(projectsTable.createdAt));
   res.json(ListProjectsResponse.parse(rows.map(projectResponse)));
-});
+}));
 
-router.post("/projects", async (req, res): Promise<void> => {
+router.post("/projects", scoped(async (req, res, db): Promise<void> => {
   const parsed = CreateProjectBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
     return;
   }
+  if (await rejectsForeignFiles(db, req, res, parsed.data, { coverImageUrl: IMAGE_FIELD })) return;
   const [row] = await db
     .insert(projectsTable)
     .values({
@@ -798,15 +585,21 @@ router.post("/projects", async (req, res): Promise<void> => {
     })
     .returning();
   res.status(201).json(CreateProjectResponse.parse(projectResponse(row)));
-});
+}));
 
-router.patch("/projects/:id", async (req, res): Promise<void> => {
+router.patch("/projects/:id", scoped(async (req, res, db): Promise<void> => {
   const params = UpdateProjectParams.safeParse(req.params);
   const body = UpdateProjectBody.safeParse(req.body);
   if (!params.success || !body.success) {
     res.status(400).json({ error: "Invalid project data" });
     return;
   }
+  const [existing] = await db.select().from(projectsTable).where(and(eq(projectsTable.id, params.data.id), eq(projectsTable.userId, userId(req))));
+  if (!existing) {
+    res.status(404).json({ error: "Project not found" });
+    return;
+  }
+  if (await rejectsForeignFiles(db, req, res, body.data, { coverImageUrl: IMAGE_FIELD }, existing)) return;
   const [row] = await db
     .update(projectsTable)
     .set({ ...body.data, completedAt: dateString(body.data.completedAt) })
@@ -817,9 +610,9 @@ router.patch("/projects/:id", async (req, res): Promise<void> => {
     return;
   }
   res.json(UpdateProjectResponse.parse(projectResponse(row)));
-});
+}));
 
-router.delete("/projects/:id", async (req, res): Promise<void> => {
+router.delete("/projects/:id", scoped(async (req, res, db): Promise<void> => {
   const params = DeleteProjectParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -831,9 +624,9 @@ router.delete("/projects/:id", async (req, res): Promise<void> => {
     return;
   }
   res.sendStatus(204);
-});
+}));
 
-router.get("/projects/:id", async (req, res): Promise<void> => {
+router.get("/projects/:id", scoped(async (req, res, db): Promise<void> => {
   const params = GetProjectParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -867,9 +660,9 @@ router.get("/projects/:id", async (req, res): Promise<void> => {
       photos: photos.map(projectPhotoResponse),
     }),
   );
-});
+}));
 
-router.post("/projects/:projectId/steps", async (req, res): Promise<void> => {
+router.post("/projects/:projectId/steps", scoped(async (req, res, db): Promise<void> => {
   const params = CreateProjectStepParams.safeParse(req.params);
   const body = CreateProjectStepBody.safeParse(req.body);
   if (!params.success) {
@@ -898,11 +691,11 @@ router.post("/projects/:projectId/steps", async (req, res): Promise<void> => {
       completedAt: body.data.completed ? body.data.completedAt ?? new Date() : null,
     })
     .returning();
-  await recalculateProjectProgress(project.id, uid);
+  await recalculateProjectProgress(db, project.id, uid);
   res.status(201).json(CreateProjectStepResponse.parse(projectStepResponse(step)));
-});
+}));
 
-router.patch("/projects/:projectId/steps/:stepId", async (req, res): Promise<void> => {
+router.patch("/projects/:projectId/steps/:stepId", scoped(async (req, res, db): Promise<void> => {
   const params = UpdateProjectStepParams.safeParse(req.params);
   const body = UpdateProjectStepBody.safeParse(req.body);
   if (!params.success) {
@@ -943,11 +736,11 @@ router.patch("/projects/:projectId/steps/:stepId", async (req, res): Promise<voi
     res.status(404).json({ error: "Project step not found" });
     return;
   }
-  await recalculateProjectProgress(project.id, uid);
+  await recalculateProjectProgress(db, project.id, uid);
   res.json(UpdateProjectStepResponse.parse(projectStepResponse(step)));
-});
+}));
 
-router.delete("/projects/:projectId/steps/:stepId", async (req, res): Promise<void> => {
+router.delete("/projects/:projectId/steps/:stepId", scoped(async (req, res, db): Promise<void> => {
   const params = DeleteProjectStepParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -976,11 +769,11 @@ router.delete("/projects/:projectId/steps/:stepId", async (req, res): Promise<vo
     res.status(404).json({ error: "Project step not found" });
     return;
   }
-  await recalculateProjectProgress(project.id, uid);
+  await recalculateProjectProgress(db, project.id, uid);
   res.sendStatus(204);
-});
+}));
 
-router.post("/projects/:projectId/photos", async (req, res): Promise<void> => {
+router.post("/projects/:projectId/photos", scoped(async (req, res, db): Promise<void> => {
   const params = CreateProjectPhotoParams.safeParse(req.params);
   const body = CreateProjectPhotoBody.safeParse(req.body);
   if (!params.success) {
@@ -1000,14 +793,15 @@ router.post("/projects/:projectId/photos", async (req, res): Promise<void> => {
     res.status(404).json({ error: "Project not found" });
     return;
   }
+  if (await rejectsForeignFiles(db, req, res, body.data, { url: IMAGE_FIELD })) return;
   const [photo] = await db
     .insert(projectPhotosTable)
     .values({ ...body.data, projectId: project.id, userId: uid })
     .returning();
   res.status(201).json(CreateProjectPhotoResponse.parse(projectPhotoResponse(photo)));
-});
+}));
 
-router.patch("/projects/:projectId/photos/:photoId", async (req, res): Promise<void> => {
+router.patch("/projects/:projectId/photos/:photoId", scoped(async (req, res, db): Promise<void> => {
   const params = UpdateProjectPhotoParams.safeParse(req.params);
   const body = UpdateProjectPhotoBody.safeParse(req.body);
   if (!params.success) {
@@ -1027,6 +821,15 @@ router.patch("/projects/:projectId/photos/:photoId", async (req, res): Promise<v
     res.status(404).json({ error: "Project not found" });
     return;
   }
+  const [existingPhoto] = await db
+    .select()
+    .from(projectPhotosTable)
+    .where(and(eq(projectPhotosTable.id, params.data.photoId), eq(projectPhotosTable.projectId, project.id), eq(projectPhotosTable.userId, uid)));
+  if (!existingPhoto) {
+    res.status(404).json({ error: "Project photo not found" });
+    return;
+  }
+  if (await rejectsForeignFiles(db, req, res, body.data, { url: IMAGE_FIELD }, existingPhoto)) return;
   const [photo] = await db
     .update(projectPhotosTable)
     .set(body.data)
@@ -1043,9 +846,9 @@ router.patch("/projects/:projectId/photos/:photoId", async (req, res): Promise<v
     return;
   }
   res.json(UpdateProjectPhotoResponse.parse(projectPhotoResponse(photo)));
-});
+}));
 
-router.delete("/projects/:projectId/photos/:photoId", async (req, res): Promise<void> => {
+router.delete("/projects/:projectId/photos/:photoId", scoped(async (req, res, db): Promise<void> => {
   const params = DeleteProjectPhotoParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -1075,16 +878,15 @@ router.delete("/projects/:projectId/photos/:photoId", async (req, res): Promise<
     return;
   }
   res.sendStatus(204);
-});
+}));
 
-router.get("/measurement-profiles", async (req, res): Promise<void> => {
+router.get("/measurement-profiles", scoped(async (req, res, db): Promise<void> => {
   const uid = userId(req);
-  await ensureDemoData(uid);
   const rows = await db.select().from(measurementProfilesTable).where(eq(measurementProfilesTable.userId, uid)).orderBy(desc(measurementProfilesTable.recordedAt));
   res.json(ListMeasurementProfilesResponse.parse(rows.map(measurementResponse)));
-});
+}));
 
-router.post("/measurement-profiles", async (req, res): Promise<void> => {
+router.post("/measurement-profiles", scoped(async (req, res, db): Promise<void> => {
   const parsed = CreateMeasurementProfileBody.safeParse(req.body);
   if (!parsed.success) {
     res.status(400).json({ error: parsed.error.message });
@@ -1099,9 +901,9 @@ router.post("/measurement-profiles", async (req, res): Promise<void> => {
     })
     .returning();
   res.status(201).json(CreateMeasurementProfileResponse.parse(measurementResponse(row)));
-});
+}));
 
-router.patch("/measurement-profiles/:id", async (req, res): Promise<void> => {
+router.patch("/measurement-profiles/:id", scoped(async (req, res, db): Promise<void> => {
   const params = UpdateMeasurementProfileParams.safeParse(req.params);
   const body = UpdateMeasurementProfileBody.safeParse(req.body);
   if (!params.success || !body.success) {
@@ -1121,9 +923,9 @@ router.patch("/measurement-profiles/:id", async (req, res): Promise<void> => {
     return;
   }
   res.json(UpdateMeasurementProfileResponse.parse(measurementResponse(row)));
-});
+}));
 
-router.delete("/measurement-profiles/:id", async (req, res): Promise<void> => {
+router.delete("/measurement-profiles/:id", scoped(async (req, res, db): Promise<void> => {
   const params = DeleteMeasurementProfileParams.safeParse(req.params);
   if (!params.success) {
     res.status(400).json({ error: params.error.message });
@@ -1135,7 +937,7 @@ router.delete("/measurement-profiles/:id", async (req, res): Promise<void> => {
     return;
   }
   res.sendStatus(204);
-});
+}));
 
 router.post("/assistant/messages", async (req, res): Promise<void> => {
   const parsed = AskAssistantBody.safeParse(req.body);
@@ -1146,11 +948,12 @@ router.post("/assistant/messages", async (req, res): Promise<void> => {
   const uid = userId(req);
   let projectContext = "No project is currently selected.";
 
-  if (parsed.data.projectId) {
+  // Read context in a short transaction; the model call below runs outside it.
+  if (parsed.data.projectId) await withUser(uid, async (db) => {
     const [project] = await db
       .select()
       .from(projectsTable)
-      .where(and(eq(projectsTable.id, parsed.data.projectId), eq(projectsTable.userId, uid)));
+      .where(and(eq(projectsTable.id, parsed.data.projectId!), eq(projectsTable.userId, uid)));
 
     if (project) {
       const [pattern, fabric, measurements] = await Promise.all([
@@ -1194,7 +997,7 @@ router.post("/assistant/messages", async (req, res): Promise<void> => {
         measurements: measurements?.measurements,
       });
     }
-  }
+  });
 
   try {
     const completion = await openai.chat.completions.create({
@@ -1234,8 +1037,11 @@ router.post("/visualizations", async (req, res): Promise<void> => {
     return;
   }
   const uid = userId(req);
-  const [pattern] = await db.select().from(patternsTable).where(and(eq(patternsTable.id, parsed.data.patternId), eq(patternsTable.userId, uid)));
-  const [fabric] = await db.select().from(fabricsTable).where(and(eq(fabricsTable.id, parsed.data.fabricId), eq(fabricsTable.userId, uid)));
+  const { pattern, fabric } = await withUser(uid, async (db) => {
+    const [pattern] = await db.select().from(patternsTable).where(and(eq(patternsTable.id, parsed.data.patternId), eq(patternsTable.userId, uid)));
+    const [fabric] = await db.select().from(fabricsTable).where(and(eq(fabricsTable.id, parsed.data.fabricId), eq(fabricsTable.userId, uid)));
+    return { pattern, fabric };
+  });
   if (!pattern || !fabric) {
     res.status(404).json({ error: "Pattern or fabric not found" });
     return;
@@ -1264,6 +1070,9 @@ Show one adult model wearing the completed garment in a warm, minimal sewing-stu
       "image/png",
       `visualizations/${uid}`,
     );
+    await withUser(uid, (db) =>
+      db.insert(uploadsTable).values({ objectPath, userId: uid, contentType: "image/png", sizeBytes: image.length, purpose: "visualization" }),
+    );
     res.json(
       CreateVisualizationResponse.parse({
         id: Date.now(),
@@ -1278,13 +1087,17 @@ Show one adult model wearing the completed garment in a warm, minimal sewing-stu
   }
 });
 
-router.get("/recommendations", async (req, res): Promise<void> => {
+router.get("/recommendations", scoped(async (req, res, db): Promise<void> => {
   const uid = userId(req);
-  await ensureDemoData(uid);
   const [patterns, fabrics] = await Promise.all([
     db.select().from(patternsTable).where(eq(patternsTable.userId, uid)),
     db.select().from(fabricsTable).where(eq(fabricsTable.userId, uid)),
   ]);
+  // A recommendation pairs a pattern with a fabric; with no fabric there is nothing to pair.
+  if (!fabrics.length) {
+    res.json(GetRecommendationsResponse.parse([]));
+    return;
+  }
   const recommendations = patterns.slice(0, 4).map((pattern, index) => {
     const fabric = fabrics[index % Math.max(fabrics.length, 1)];
     const name = `${pattern.recommendedFabrics ?? ""} ${pattern.requiredFabric ?? ""}`.toLowerCase();
@@ -1300,6 +1113,6 @@ router.get("/recommendations", async (req, res): Promise<void> => {
     };
   });
   res.json(GetRecommendationsResponse.parse(recommendations));
-});
+}));
 
 export default router;

@@ -5,9 +5,12 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { UploadRequestPurpose } from './uploadRequestPurpose';
 
 export interface UploadRequest {
   name: string;
   size: number;
   contentType: string;
+  /** What the file is for. Avatars become public once set on a profile with a handle; everything else stays private. */
+  purpose?: UploadRequestPurpose;
 }

@@ -21,7 +21,10 @@ export interface ProfileUpdate {
   handle?: string;
   /** @maxLength 500 */
   bio?: string;
-  /** @nullable */
+  /**
+     * /api/storage/objects/... path of an avatar the user uploaded, or null to remove
+     * @nullable
+     */
   avatarUrl?: string | null;
   experience?: string;
   favoriteGarments?: string[];

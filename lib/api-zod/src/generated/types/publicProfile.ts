@@ -6,11 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 
+/**
+ * Fields of a profile that anyone may see. Never includes units, experience or other private data.
+ */
 export interface PublicProfile {
   handle: string;
-  displayName: string;
+  name: string;
   bio: string;
   /** @nullable */
-  avatar: string | null;
-  joinDate: Date;
+  avatarUrl: string | null;
+  joinedAt: Date;
 }

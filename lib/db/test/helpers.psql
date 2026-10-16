@@ -1,0 +1,41 @@
+-- Shared helpers for RLS tests. Each test switches identity with act_as().
+\set QUIET on
+SET client_min_messages = warning;
+CREATE SCHEMA IF NOT EXISTS t;
+
+-- Become the app role as the given Clerk user (NULL = signed out), for the rest of the session.
+CREATE OR REPLACE FUNCTION t.act_as(uid text) RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  PERFORM set_config('app.user_id', coalesce(uid, ''), false);
+  EXECUTE 'SET ROLE sewspace_app';
+END $$;
+
+CREATE OR REPLACE FUNCTION t.eq(actual bigint, expected bigint, label text) RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  IF actual IS DISTINCT FROM expected THEN
+    RAISE EXCEPTION 'FAIL %: expected %, got %', label, expected, actual;
+  END IF;
+END $$;
+
+-- Asserts that a statement is rejected (by RLS or a privilege check).
+CREATE OR REPLACE FUNCTION t.rejects(stmt text, label text) RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  BEGIN
+    EXECUTE stmt;
+  EXCEPTION WHEN insufficient_privilege OR check_violation THEN
+    RETURN;
+  END;
+  RAISE EXCEPTION 'FAIL %: statement was allowed: %', label, stmt;
+END $$;
+
+-- Number of rows a statement touched (0 when RLS hides the target rows).
+CREATE OR REPLACE FUNCTION t.affected(stmt text) RETURNS bigint LANGUAGE plpgsql AS $$
+DECLARE n bigint;
+BEGIN
+  EXECUTE stmt;
+  GET DIAGNOSTICS n = ROW_COUNT;
+  RETURN n;
+END $$;
+
+GRANT USAGE ON SCHEMA t TO sewspace_app;
+GRANT EXECUTE ON ALL FUNCTIONS IN SCHEMA t TO sewspace_app;

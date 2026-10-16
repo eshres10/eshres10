@@ -99,12 +99,12 @@ export function ProjectSteps({ project }: { project: any }) {
     <div className="studio-card rounded-xl p-6">
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h2 className="font-display text-2xl text-[#302621]">Construction Steps</h2>
-          <p className="mt-1 text-sm text-[#79675c]">Check off your progress as you sew.</p>
+          <h2 className="font-display text-2xl text-ink">Construction Steps</h2>
+          <p className="mt-1 text-sm text-subtle">Check off your progress as you sew.</p>
         </div>
         <div className="text-right" data-testid="progress-summary">
-          <p className="font-mono-custom text-xl text-[#b24761]">{percentage}%</p>
-          <p className="text-xs text-[#887566]">{completedCount} of {totalCount} completed</p>
+          <p className="font-mono-custom text-xl text-red-ink">{percentage}%</p>
+          <p className="text-xs text-subtle">{completedCount} of {totalCount} completed</p>
         </div>
       </div>
 
@@ -113,7 +113,7 @@ export function ProjectSteps({ project }: { project: any }) {
           <div
             key={step.id}
             className={`group flex items-start gap-3 rounded-lg border p-3 transition-colors ${
-              step.completed ? 'border-transparent bg-[#e7d9c5]/50' : 'border-[#d4c5b0] bg-white'
+              step.completed ? 'border-transparent bg-canvas/50' : 'border-line bg-white'
             }`}
           >
             <button
@@ -124,8 +124,8 @@ export function ProjectSteps({ project }: { project: any }) {
             >
               <div className={`grid h-6 w-6 sm:h-5 sm:w-5 place-items-center rounded border transition-colors ${
                 step.completed
-                  ? 'border-[#b24761] bg-[#b24761] text-white'
-                  : 'border-[#d4c5b0] bg-[#fbf6ed] hover:border-[#b24761]'
+                  ? 'border-ink bg-yellow text-white'
+                  : 'border-line bg-white hover:border-ink'
               }`}>
                 {step.completed && <Check size={14} className="sm:w-3 sm:h-3" strokeWidth={3} />}
               </div>
@@ -144,12 +144,12 @@ export function ProjectSteps({ project }: { project: any }) {
                     }}
                     onBlur={handleSaveEdit}
                     data-testid={`input-edit-step-${step.id}`}
-                    className="w-full border-b border-[#b24761] bg-transparent pb-1 text-base sm:text-sm text-[#302621] outline-none"
+                    className="w-full border-b border-ink bg-transparent pb-1 text-base sm:text-sm text-ink outline-none"
                   />
                 </div>
               ) : (
                 <p
-                  className={`text-base sm:text-sm ${step.completed ? 'text-[#887566] line-through' : 'text-[#302621]'}`}
+                  className={`text-base sm:text-sm ${step.completed ? 'text-subtle line-through' : 'text-ink'}`}
                   onDoubleClick={() => {
                     setEditTitle(step.title);
                     setEditingId(step.id);
@@ -164,7 +164,7 @@ export function ProjectSteps({ project }: { project: any }) {
               <button
                 onClick={() => { setEditTitle(step.title); setEditingId(step.id); }}
                 data-testid={`edit-step-${step.id}`}
-                className="grid min-h-[44px] min-w-[44px] sm:min-h-[24px] sm:min-w-[24px] place-items-center rounded-md text-[#887566] hover:bg-[#e7d9c5] hover:text-[#302621]"
+                className="grid min-h-[44px] min-w-[44px] sm:min-h-[24px] sm:min-w-[24px] place-items-center rounded-md text-subtle hover:bg-canvas hover:text-ink"
                 aria-label="Edit step"
               >
                 <Edit2 size={16} className="sm:w-3 sm:h-3" />
@@ -172,7 +172,7 @@ export function ProjectSteps({ project }: { project: any }) {
               <button
                 onClick={() => handleDelete(step.id)}
                 data-testid={`delete-step-${step.id}`}
-                className="grid min-h-[44px] min-w-[44px] sm:min-h-[24px] sm:min-w-[24px] place-items-center rounded-md text-[#887566] hover:bg-[#f3d9d5] hover:text-[#9d443f]"
+                className="grid min-h-[44px] min-w-[44px] sm:min-h-[24px] sm:min-w-[24px] place-items-center rounded-md text-subtle hover:bg-peach-soft hover:text-red-ink"
                 aria-label="Delete step"
               >
                 <Trash2 size={16} className="sm:w-3 sm:h-3" />
@@ -183,7 +183,7 @@ export function ProjectSteps({ project }: { project: any }) {
       </div>
 
       {adding ? (
-        <form onSubmit={handleAdd} className="mt-4 flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 rounded-lg border border-[#b24761] bg-white p-2">
+        <form onSubmit={handleAdd} className="mt-4 flex flex-wrap sm:flex-nowrap items-center gap-2 sm:gap-3 rounded-lg border border-ink bg-white p-2">
           <input
             ref={inputRef}
             autoFocus
@@ -191,21 +191,21 @@ export function ProjectSteps({ project }: { project: any }) {
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="e.g. Sew shoulder seams..."
             data-testid="input-new-step"
-            className="flex-1 w-full sm:w-auto bg-transparent px-2 py-2 text-base sm:text-sm text-[#302621] outline-none"
+            className="flex-1 w-full sm:w-auto bg-transparent px-2 py-2 text-base sm:text-sm text-ink outline-none"
           />
           <div className="flex w-full sm:w-auto gap-2 justify-end">
             <button
               type="submit"
               disabled={create.isPending || !newTitle.trim()}
               data-testid="button-save-step"
-              className="min-h-[44px] sm:min-h-[auto] flex-1 sm:flex-none justify-center rounded-md bg-[#b24761] px-4 py-2 sm:px-3 sm:py-1.5 text-sm sm:text-xs font-semibold text-white hover:bg-[#9d3e56] disabled:opacity-50 inline-flex items-center"
+              className="min-h-[44px] sm:min-h-[auto] flex-1 sm:flex-none justify-center rounded-md bg-yellow px-4 py-2 sm:px-3 sm:py-1.5 text-sm sm:text-xs font-semibold text-white hover:bg-yellow disabled:opacity-50 inline-flex items-center"
             >
               {create.isPending ? <Loader2 size={16} className="animate-spin" /> : 'Add'}
             </button>
             <button
               type="button"
               onClick={() => setAdding(false)}
-              className="grid min-h-[44px] min-w-[44px] sm:min-h-[auto] sm:min-w-[auto] place-items-center rounded-md text-[#887566] hover:bg-[#e7d9c5]"
+              className="grid min-h-[44px] min-w-[44px] sm:min-h-[auto] sm:min-w-[auto] place-items-center rounded-md text-subtle hover:bg-canvas"
               aria-label="Cancel"
             >
               <X size={18} className="sm:w-3.5 sm:h-3.5" />
@@ -216,7 +216,7 @@ export function ProjectSteps({ project }: { project: any }) {
         <button
           onClick={() => setAdding(true)}
           data-testid="button-add-step"
-          className="mt-4 flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg border border-dashed border-[#d4c5b0] py-3 text-sm font-semibold text-[#887566] transition-colors hover:border-[#b24761] hover:bg-[#fbf6ed] hover:text-[#b24761]"
+          className="mt-4 flex w-full min-h-[44px] items-center justify-center gap-2 rounded-lg border border-dashed border-line py-3 text-sm font-semibold text-subtle transition-colors hover:border-ink hover:bg-white hover:text-red-ink"
         >
           <Plus size={16} /> Add a step
         </button>

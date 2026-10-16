@@ -34,8 +34,8 @@ export function ProjectDetail() {
   if (isLoading) {
     return (
       <div className="space-y-4 p-5 md:p-10" data-testid="state-loading">
-        <div className="h-8 w-56 animate-pulse rounded bg-[#e7d9c5]" />
-        <div className="h-64 animate-pulse rounded-xl bg-[#e7d9c5]" />
+        <div className="h-8 w-56 animate-pulse rounded bg-canvas" />
+        <div className="h-64 animate-pulse rounded-xl bg-canvas" />
       </div>
     );
   }
@@ -43,9 +43,9 @@ export function ProjectDetail() {
   if (isError || !project) {
     return (
       <div className="studio-card mx-auto mt-10 max-w-lg rounded-xl px-5 py-20 text-center" data-testid="state-error">
-        <FolderKanban className="mx-auto text-[#9d443f]" size={32} />
+        <FolderKanban className="mx-auto text-red-ink" size={32} />
         <h2 className="mt-4 font-display text-2xl">Project not found</h2>
-        <p className="mt-2 text-sm text-[#79675c]">We could not load this project. It may have been removed.</p>
+        <p className="mt-2 text-sm text-subtle">We could not load this project. It may have been removed.</p>
         <div className="mt-6 flex justify-center gap-3">
           <Link href="/projects" className="btn btn-line">Back to projects</Link>
           <button onClick={() => refetch()} className="btn btn-primary">Try again</button>
@@ -60,11 +60,11 @@ export function ProjectDetail() {
   const measurement = measurements.find((m: any) => m.id === project.measurementProfileId);
 
   const statusColors: Record<string, string> = {
-    planning: 'bg-[#e7d9c5] text-[#655549]',
-    cutting: 'bg-[#d8c1a1] text-[#655549]',
-    sewing: 'bg-[#d7a36b] text-[#5e493a]',
-    fitting: 'bg-[#2e5b51] text-[#f3e8d6]',
-    finished: 'bg-[#b24761] text-[#f9eddd]',
+    planning: 'bg-canvas text-subtle',
+    cutting: 'bg-peach text-subtle',
+    sewing: 'bg-peach text-ink',
+    fitting: 'bg-ink text-white',
+    finished: 'bg-yellow text-ink',
   };
 
   const handleUpdateNotes = (field: string, value: string) => {
@@ -83,7 +83,7 @@ export function ProjectDetail() {
   return (
     <div data-testid="project-detail">
       <div className="mb-6 flex items-center justify-between">
-        <Link href="/projects" className="inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold text-[#887566] hover:text-[#302621]">
+        <Link href="/projects" className="inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold text-subtle hover:text-ink">
           <ChevronLeft size={16} /> <span className="hidden sm:inline">Back to notebook</span><span className="sm:hidden">Back</span>
         </Link>
         <button
@@ -101,36 +101,36 @@ export function ProjectDetail() {
           {/* Header Card */}
           <div className="studio-card overflow-hidden rounded-xl">
             {project.coverImageUrl && (
-              <div className="h-64 w-full bg-[#d6c3a5]">
+              <div className="h-64 w-full bg-peach">
                 <img src={project.coverImageUrl} alt={project.name} className="h-full w-full object-cover" />
               </div>
             )}
             <div className="p-6 md:p-8">
               <div className="mb-4 flex flex-wrap items-center gap-3">
-                <span className={`rounded-full px-2.5 py-1 font-mono-custom text-[.6rem] uppercase tracking-wider ${statusColors[project.status] || 'bg-[#e7d9c5] text-[#655549]'}`}>
+                <span className={`rounded-full px-2.5 py-1 font-mono-custom text-[.6rem] uppercase tracking-wider ${statusColors[project.status] || 'bg-canvas text-subtle'}`}>
                   {project.status.replace('_', ' ')}
                 </span>
                 {project.completedAt && (
-                  <span className="font-mono-custom text-[.6rem] uppercase text-[#887566]">
+                  <span className="font-mono-custom text-[.6rem] uppercase text-subtle">
                     Finished {new Date(project.completedAt).toLocaleDateString()}
                   </span>
                 )}
               </div>
 
-              <h1 className="font-display text-4xl leading-tight text-[#302621] md:text-5xl">{project.name}</h1>
+              <h1 className="font-display text-4xl leading-tight text-ink md:text-5xl">{project.name}</h1>
               {project.description && (
-                <p className="mt-4 max-w-2xl text-lg leading-relaxed text-[#655549]">{project.description}</p>
+                <p className="mt-4 max-w-2xl text-lg leading-relaxed text-subtle">{project.description}</p>
               )}
 
               {/* Progress Bar inside Header */}
-              <div className="mt-8 rounded-lg bg-[#fbf6ed] p-4">
-                <div className="mb-2 flex justify-between font-mono-custom text-xs text-[#79675c]">
+              <div className="mt-8 rounded-lg bg-white p-4">
+                <div className="mb-2 flex justify-between font-mono-custom text-xs text-subtle">
                   <span className="uppercase tracking-widest">Overall Progress</span>
                   <span>{project.progress || 0}%</span>
                 </div>
-                <div className="h-2 overflow-hidden rounded-full bg-[#e4d8c7]">
+                <div className="h-2 overflow-hidden rounded-full bg-canvas">
                   <div
-                    className="h-full rounded-full bg-[#b24761] transition-all duration-500 ease-out"
+                    className="h-full rounded-full bg-yellow transition-all duration-500 ease-out"
                     style={{ width: `${Math.min(100, project.progress || 0)}%` }}
                   />
                 </div>
@@ -148,60 +148,60 @@ export function ProjectDetail() {
         <div className="space-y-6">
           {/* Materials Card */}
           <div className="studio-card rounded-xl p-6">
-            <h3 className="font-display text-2xl text-[#302621]">Materials</h3>
+            <h3 className="font-display text-2xl text-ink">Materials</h3>
             <div className="mt-5 space-y-4">
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-[#e7d9c5] text-[#887566]">
+                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-canvas text-subtle">
                   <BookOpen size={16} />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-[#887566]">Pattern</p>
+                  <p className="text-xs font-semibold text-subtle">Pattern</p>
                   {pattern ? (
-                    <Link href="/patterns" className="text-sm font-medium text-[#b24761] hover:underline">{pattern.name}</Link>
+                    <Link href="/patterns" className="text-sm font-medium text-red-ink hover:underline">{pattern.name}</Link>
                   ) : (
-                    <p className="text-sm text-[#302621]">None selected</p>
+                    <p className="text-sm text-ink">None selected</p>
                   )}
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-[#e7d9c5] text-[#887566]">
+                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-canvas text-subtle">
                   <Palette size={16} />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-[#887566]">Fabric</p>
+                  <p className="text-xs font-semibold text-subtle">Fabric</p>
                   {fabric ? (
-                    <Link href="/stash/fabrics" className="text-sm font-medium text-[#b24761] hover:underline">{fabric.name} ({fabric.color})</Link>
+                    <Link href="/stash/fabrics" className="text-sm font-medium text-red-ink hover:underline">{fabric.name} ({fabric.color})</Link>
                   ) : (
-                    <p className="text-sm text-[#302621]">None selected</p>
+                    <p className="text-sm text-ink">None selected</p>
                   )}
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-[#e7d9c5] text-[#887566]">
+                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-canvas text-subtle">
                   <Package size={16} />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-[#887566]">Thread</p>
+                  <p className="text-xs font-semibold text-subtle">Thread</p>
                   {thread ? (
-                    <Link href="/stash/threads" className="text-sm font-medium text-[#b24761] hover:underline">{thread.colorName} ({thread.brand})</Link>
+                    <Link href="/stash/threads" className="text-sm font-medium text-red-ink hover:underline">{thread.colorName} ({thread.brand})</Link>
                   ) : (
-                    <p className="text-sm text-[#302621]">None selected</p>
+                    <p className="text-sm text-ink">None selected</p>
                   )}
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-[#e7d9c5] text-[#887566]">
+                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-canvas text-subtle">
                   <Ruler size={16} />
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-[#887566]">Measurements</p>
+                  <p className="text-xs font-semibold text-subtle">Measurements</p>
                   {measurement ? (
-                    <Link href="/measurements" className="text-sm font-medium text-[#b24761] hover:underline">{measurement.name}</Link>
+                    <Link href="/measurements" className="text-sm font-medium text-red-ink hover:underline">{measurement.name}</Link>
                   ) : (
-                    <p className="text-sm text-[#302621]">None selected</p>
+                    <p className="text-sm text-ink">None selected</p>
                   )}
                 </div>
               </div>
@@ -217,7 +217,7 @@ export function ProjectDetail() {
               { id: 'solutions', title: 'Solutions', placeholder: 'How you fixed them...' }
             ].map((section) => (
               <div key={section.id} className="studio-card rounded-xl p-5">
-                <h3 className="font-mono-custom text-[.7rem] uppercase tracking-widest text-[#887566]">{section.title}</h3>
+                <h3 className="font-mono-custom text-[.7rem] uppercase tracking-widest text-subtle">{section.title}</h3>
                 <textarea
                   defaultValue={String((project as any)[section.id] || '')}
                   onBlur={(e) => {
@@ -227,7 +227,7 @@ export function ProjectDetail() {
                   }}
                   placeholder={section.placeholder}
                   data-testid={`textarea-${section.id}`}
-                  className="mt-3 w-full resize-none bg-transparent text-sm leading-relaxed text-[#302621] outline-none placeholder:text-[#a89b8f]"
+                  className="mt-3 w-full resize-none bg-transparent text-sm leading-relaxed text-ink outline-none placeholder:text-subtle"
                   rows={Math.max(3, String((project as any)[section.id] || '').split('\n').length)}
                 />
               </div>

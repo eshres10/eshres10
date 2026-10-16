@@ -5,8 +5,16 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { CheckHandleAvailability200Reason } from './checkHandleAvailability200Reason';
 
 export type CheckHandleAvailability200 = {
+  /** The handle after normalising (trimmed */
+  handle: string;
   available: boolean;
-  reason: string;
+  reason: CheckHandleAvailability200Reason;
+  /**
+     * An available alternative when this one cannot be used
+     * @nullable
+     */
+  suggestion: string | null;
 };

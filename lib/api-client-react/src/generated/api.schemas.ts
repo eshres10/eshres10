@@ -29,15 +29,24 @@ export interface Profile {
   experience: string;
   favoriteGarments: string[];
   units: ProfileUnits;
+  /** True until the user has chosen a handle */
+  needsHandle: boolean;
 }
 
+/**
+ * Fields of a profile that anyone may see. Never includes units, experience or other private data.
+ */
 export interface PublicProfile {
   handle: string;
-  displayName: string;
+  name: string;
   bio: string;
   /** @nullable */
-  avatar: string | null;
-  joinDate: string;
+  avatarUrl: string | null;
+  joinedAt: string;
+}
+
+export interface ErrorResponse {
+  error: string;
 }
 
 export type ProfileUpdateUnits = typeof ProfileUpdateUnits[keyof typeof ProfileUpdateUnits];
@@ -62,7 +71,10 @@ export interface ProfileUpdate {
   handle?: string;
   /** @maxLength 500 */
   bio?: string;
-  /** @nullable */
+  /**
+     * /api/storage/objects/... path of an avatar the user uploaded, or null to remove
+     * @nullable
+     */
   avatarUrl?: string | null;
   experience?: string;
   favoriteGarments?: string[];
@@ -540,10 +552,24 @@ export interface Recommendation {
   reason: string;
 }
 
+/**
+ * What the file is for. Avatars become public once set on a profile with a handle; everything else stays private.
+ */
+export type UploadRequestPurpose = typeof UploadRequestPurpose[keyof typeof UploadRequestPurpose];
+
+
+export const UploadRequestPurpose = {
+  image: 'image',
+  avatar: 'avatar',
+  pattern_pdf: 'pattern_pdf',
+} as const;
+
 export interface UploadRequest {
   name: string;
   size: number;
   contentType: string;
+  /** What the file is for. Avatars become public once set on a profile with a handle; everything else stays private. */
+  purpose?: UploadRequestPurpose;
 }
 
 export interface UploadResponse {
@@ -557,9 +583,29 @@ export type CheckHandleAvailabilityParams = {
 handle: string;
 };
 
+export type CheckHandleAvailability200Reason = typeof CheckHandleAvailability200Reason[keyof typeof CheckHandleAvailability200Reason];
+
+
+export const CheckHandleAvailability200Reason = {
+  ok: 'ok',
+  yours: 'yours',
+  taken: 'taken',
+  reserved: 'reserved',
+  too_short: 'too_short',
+  too_long: 'too_long',
+  invalid_characters: 'invalid_characters',
+} as const;
+
 export type CheckHandleAvailability200 = {
+  /** The handle after normalising (trimmed */
+  handle: string;
   available: boolean;
-  reason: string;
+  reason: CheckHandleAvailability200Reason;
+  /**
+     * An available alternative when this one cannot be used
+     * @nullable
+     */
+  suggestion: string | null;
 };
 
 export type ListFabricsParams = {

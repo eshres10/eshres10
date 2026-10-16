@@ -19,4 +19,6 @@ export interface Profile {
   experience: string;
   favoriteGarments: string[];
   units: ProfileUnits;
+  /** True until the user has chosen a handle */
+  needsHandle: boolean;
 }

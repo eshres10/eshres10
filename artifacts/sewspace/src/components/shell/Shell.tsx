@@ -1,0 +1,142 @@
+import { useEffect, useState, type ReactNode } from 'react';
+import { useGetProfile } from '@workspace/api-client-react';
+import { BookOpen, FolderKanban, Home, Layers, Menu, MessageCircle, Ruler, Sparkles, Spool, Store, X } from 'lucide-react';
+import { Link, Redirect, useLocation } from 'wouter';
+import { RequireSignIn } from '@/components/auth/RequireSignIn';
+import { UserAvatar } from '@/components/avatar';
+import { Logo } from '@/components/brand/Logo';
+import { currentAppPath } from '@/lib/navigation';
+
+type NavItem = { href: string; label: string; icon: typeof Home };
+
+// Groups follow the design (Community / My studio / Help). Community items
+// (Home, Explore, Forum, Challenges, Saved) are added as their phases ship.
+export const navGroups: Array<{ label: string; items: NavItem[] }> = [
+  { label: 'My studio', items: [
+    { href: '/studio', label: 'Overview', icon: Home },
+    { href: '/projects', label: 'Projects & makes', icon: FolderKanban },
+    { href: '/stash/fabrics', label: 'Fabric stash', icon: Layers },
+    { href: '/stash/threads', label: 'Thread drawer', icon: Spool },
+    { href: '/patterns', label: 'Pattern library', icon: BookOpen },
+    { href: '/measurements', label: 'Measurements', icon: Ruler },
+  ] },
+  { label: 'Help', items: [
+    { href: '/assistant', label: 'Sewing assistant', icon: MessageCircle },
+    { href: '/ai-studio', label: 'Outfit preview', icon: Sparkles },
+    { href: '/marketplace', label: 'Marketplace', icon: Store },
+  ] },
+];
+
+const allItems = navGroups.flatMap(group => group.items);
+
+function isActive(location: string, href: string) {
+  return location === href || (href !== '/studio' && location.startsWith(`${href}/`));
+}
+
+function useMyProfile() {
+  const profile = useGetProfile();
+  return profile.data;
+}
+
+function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: () => void }) {
+  const me = useMyProfile();
+  return (
+    <div className="flex h-full flex-col gap-[22px]">
+      <Logo mark="black" href="/studio" />
+      {navGroups.map(group => (
+        <nav key={group.label} aria-label={group.label}>
+          <div className="px-3 pb-1.5 text-[11px] font-bold uppercase tracking-[.16em]">{group.label}</div>
+          {group.items.map(item => {
+            const Icon = item.icon;
+            const active = isActive(location, item.href);
+            return (
+              <Link key={item.href} href={item.href} onClick={onNavigate} aria-current={active ? 'page' : undefined}
+                data-testid={`link-nav-${item.label.toLowerCase().replace(/[^a-z]+/g, '-')}`}
+                className={`flex min-h-[44px] items-center gap-3 rounded-[18px] px-3 text-sm font-semibold no-underline ${active ? 'bg-ink text-white' : 'text-ink hover:bg-white/60'}`}>
+                <Icon size={18} aria-hidden="true" /><span className="flex-1">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      ))}
+      <Link href="/settings" onClick={onNavigate} data-testid="link-settings" className="mt-auto flex min-h-[52px] items-center gap-3 border-t border-ink px-3 pt-3.5 text-ink no-underline">
+        <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} />
+        <span className="min-w-0 flex-1">
+          <span className="block truncate text-sm font-bold">{me?.name ?? 'Your profile'}</span>
+          <span className="block truncate text-xs">{me?.handle ? `@${me.handle} · ` : ''}Profile &amp; settings</span>
+        </span>
+      </Link>
+    </div>
+  );
+}
+
+function MobileTabBar({ location }: { location: string }) {
+  const me = useMyProfile();
+  const tabs = [
+    { href: '/studio', label: 'Studio', icon: Home },
+    { href: '/projects', label: 'Projects', icon: FolderKanban },
+    { href: '/stash/fabrics', label: 'Stash', icon: Layers },
+    { href: '/assistant', label: 'Assistant', icon: MessageCircle },
+  ];
+  const meHref = me?.handle ? `/@${me.handle}` : '/settings';
+  return (
+    <nav aria-label="App" className="fixed inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between rounded-[30px] bg-white px-3 py-2 shadow-float md:hidden">
+      {tabs.map(tab => {
+        const Icon = tab.icon;
+        const active = isActive(location, tab.href);
+        return (
+          <Link key={tab.href} href={tab.href} aria-label={tab.label} aria-current={active ? 'page' : undefined}
+            className={`grid h-12 w-[52px] place-items-center rounded-[18px] ${active ? 'bg-ink text-white' : 'text-ink'}`}>
+            <Icon size={22} aria-hidden="true" />
+          </Link>
+        );
+      })}
+      <Link href={meHref} aria-label="My profile" aria-current={location === meHref ? 'page' : undefined} className="grid h-12 w-[52px] place-items-center rounded-[18px]">
+        <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} size={28} />
+      </Link>
+    </nav>
+  );
+}
+
+function ShellFrame({ children }: { children: ReactNode }) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [location] = useLocation();
+  const profile = useGetProfile();
+  useEffect(() => { setMenuOpen(false); }, [location]);
+
+  // First visit: choose a handle before using the app, then come back here.
+  if (profile.data?.needsHandle && location !== '/welcome') {
+    return <Redirect to={`/welcome?next=${encodeURIComponent(currentAppPath())}`} replace />;
+  }
+
+  const title = allItems.find(item => isActive(location, item.href))?.label ?? (location === '/settings' ? 'Profile & settings' : 'SewSpace');
+  return (
+    <div className="min-h-[100dvh] pb-28 md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]">
+      <aside className="sticky top-[18px] hidden h-[calc(100dvh-36px)] w-[260px] shrink-0 overflow-y-auto rounded-[30px] bg-yellow px-4 py-[22px] md:block">
+        <SidebarNav location={location} />
+      </aside>
+      {menuOpen && (
+        <div className="fixed inset-0 z-50 bg-ink/40 md:hidden" onClick={e => { if (e.target === e.currentTarget) setMenuOpen(false); }}>
+          <aside className="h-full w-[300px] max-w-[85vw] overflow-y-auto rounded-r-[30px] bg-yellow px-4 pb-[calc(1.4rem+env(safe-area-inset-bottom))] pt-[calc(1.4rem+env(safe-area-inset-top))]">
+            <button type="button" onClick={() => setMenuOpen(false)} aria-label="Close menu" className="float-right grid h-11 w-11 place-items-center rounded-full bg-white"><X size={20} /></button>
+            <SidebarNav location={location} onNavigate={() => setMenuOpen(false)} />
+          </aside>
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <header className="sticky top-[calc(.75rem+env(safe-area-inset-top))] z-30 mx-3 mt-3 flex items-center gap-3 rounded-[30px] bg-white py-2.5 pl-[22px] pr-3 shadow-float md:static md:mx-0 md:mt-0">
+          <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="-ml-2 grid h-11 w-11 place-items-center rounded-full bg-canvas md:hidden"><Menu size={20} /></button>
+          <h1 className="min-w-0 flex-1 truncate font-display text-[22px] tracking-[-.04em]">{title}</h1>
+          <Link href="/settings" aria-label="Profile & settings" className="hidden md:block"><UserAvatar name={profile.data?.name} avatarUrl={profile.data?.avatarUrl} size={40} /></Link>
+        </header>
+        <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8">{children}</main>
+      </div>
+      <MobileTabBar location={location} />
+    </div>
+  );
+}
+
+/** Layout for signed-in pages: private, with the studio sidebar and tab bar. */
+export function Shell({ children }: { children: ReactNode }) {
+  return <RequireSignIn><ShellFrame>{children}</ShellFrame></RequireSignIn>;
+}
