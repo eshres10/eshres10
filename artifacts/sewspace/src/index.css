@@ -113,6 +113,7 @@
 .studio-card { background: #fff; border: 1px solid var(--style-line); border-radius: 30px !important; box-shadow: none; }
 .field { width: 100%; min-height: 46px; font-size: 16px; font-weight: 400; border: 1px solid #000; background: #fff; border-radius: 16px; padding: .7rem .85rem; color: #000; outline: none; transition: border-color .18s ease, box-shadow .18s ease; }
 .field[data-testid^="input-search-"] { padding-left: 2.5rem; }
+.field.pl-9 { padding-left: 2.25rem; } /* fields with a leading search icon */
 .field[aria-required="true"] { border-color: #000; }
 label:has(.field[required]) > span:first-child::after { content: " *"; color: var(--style-red); }
 .field:focus { border-color: #000; box-shadow: 0 0 0 4px rgba(230,229,30,.55); }

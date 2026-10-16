@@ -9,6 +9,7 @@ import socialRouter from "./social";
 import adminRouter from "./admin";
 import catalogRouter, { catalogPublicRouter } from "./catalog";
 import challengesRouter, { challengesPublicRouter } from "./challenges";
+import forumRouter, { forumPublicRouter } from "./forum";
 import storageRouter, { objectReadRouter } from "./storage";
 import { requireAuth } from "../middlewares/auth";
 
@@ -19,6 +20,7 @@ router.use(healthRouter);
 router.use(publicRouter);
 router.use(catalogPublicRouter);
 router.use(challengesPublicRouter);
+router.use(forumPublicRouter);
 router.use(objectReadRouter);
 
 // Everything below needs a signed-in user.
@@ -31,6 +33,7 @@ router.use(socialRouter);
 router.use(adminRouter);
 router.use(catalogRouter);
 router.use(challengesRouter);
+router.use(forumRouter);
 router.use(storageRouter);
 
 export default router;

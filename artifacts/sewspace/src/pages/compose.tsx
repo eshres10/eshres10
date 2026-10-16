@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { createMedia, enterChallenge, useCreatePost, useListFabrics, useListJoinedChallenges, useListPatterns, useListProjects, type Media } from '@workspace/api-client-react';
+import { enterChallenge, useCreatePost, useListFabrics, useListJoinedChallenges, useListPatterns, useListProjects, type Media } from '@workspace/api-client-react';
 import { ArrowLeft, ArrowRight, BookOpen, ImagePlus, Layers, Loader2, Scissors, Trophy, X } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { VisibilityPicker, type Visibility } from '@/components/visibility';
-import { uploadFile } from '@/lib/upload';
+import { processPhoto } from '@/lib/photos';
 
 const MAX_PHOTOS = 10;
 const MAX_CAPTION = 2200;
@@ -14,12 +14,6 @@ type PhotoItem = { key: string; preview: string; status: 'uploading' | 'ready' |
 
 function errorMessage(error: unknown, fallback: string): string {
   return (error as { data?: { error?: string } })?.data?.error ?? (error as Error)?.message ?? fallback;
-}
-
-/** Upload, then have the server resize it and strip metadata. */
-async function processPhoto(file: File): Promise<Media> {
-  const { url } = await uploadFile(file, 'image');
-  return createMedia({ objectPath: url.replace(/^\/api\/storage/, '') });
 }
 
 /** New post: photos with a caption, or a status. Tags and visibility apply to both. */

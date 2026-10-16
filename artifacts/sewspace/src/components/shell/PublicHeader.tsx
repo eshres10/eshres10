@@ -12,6 +12,7 @@ export function PublicHeader() {
         <Logo />
         <span className="hidden flex-1 items-center gap-1 pl-4 md:flex">
           <Link href="/explore" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Explore</Link>
+          <Link href="/forum" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Forum</Link>
           <Link href="/challenges" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Challenges</Link>
           <Link href="/catalog" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Patterns</Link>
         </span>

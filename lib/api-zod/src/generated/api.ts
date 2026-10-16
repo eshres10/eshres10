@@ -577,8 +577,8 @@ export const createReportBodyDetailsMax = 1000;
 
 
 export const CreateReportBody = zod.object({
-  "targetKind": zod.enum(['post', 'comment', 'profile', 'review', 'challenge']),
-  "targetId": zod.string().describe('Post, comment or review id, a profile handle, or a challenge slug'),
+  "targetKind": zod.enum(['post', 'comment', 'profile', 'review', 'challenge', 'topic', 'forum_reply']),
+  "targetId": zod.string().describe('Post, comment, review, topic or forum reply id, a profile handle, or a challenge slug'),
   "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
   "details": zod.string().max(createReportBodyDetailsMax).optional()
 })
@@ -596,7 +596,7 @@ export const ListReportsQueryParams = zod.object({
 
 export const ListReportsResponseItem = zod.object({
   "id": zod.number().int(),
-  "targetKind": zod.enum(['post', 'comment', 'profile', 'review', 'challenge']),
+  "targetKind": zod.enum(['post', 'comment', 'profile', 'review', 'challenge', 'topic', 'forum_reply']),
   "targetId": zod.string(),
   "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
   "details": zod.string(),
@@ -634,7 +634,7 @@ export const ResolveReportBody = zod.object({
 
 export const ResolveReportResponse = zod.object({
   "id": zod.number().int(),
-  "targetKind": zod.enum(['post', 'comment', 'profile', 'review', 'challenge']),
+  "targetKind": zod.enum(['post', 'comment', 'profile', 'review', 'challenge', 'topic', 'forum_reply']),
   "targetId": zod.string(),
   "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
   "details": zod.string(),
@@ -1409,6 +1409,890 @@ export const DeleteChallengeEntryParams = zod.object({
 })
 
 export const DeleteChallengeEntryResponse = zod.void()
+
+
+/**
+ * @summary Topics, newest activity first (hot), newest (new) or without replies (unanswered). Works signed out.
+ */
+export const listForumTopicsQueryFilterDefault = `all`;
+export const listForumTopicsQuerySortDefault = `hot`;
+export const listForumTopicsQueryQMax = 80;
+
+
+
+export const ListForumTopicsQueryParams = zod.object({
+  "filter": zod.enum(['all', 'show_tell', 'question', 'recommendation', 'info', 'poll', 'solved']).default(listForumTopicsQueryFilterDefault),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']).optional(),
+  "sort": zod.enum(['hot', 'new', 'unanswered']).default(listForumTopicsQuerySortDefault),
+  "q": zod.coerce.string().max(listForumTopicsQueryQMax).optional(),
+  "cursor": zod.coerce.string().optional()
+})
+
+export const ListForumTopicsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "lastActivityAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "replies": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "solved": zod.boolean(),
+  "pinned": zod.boolean(),
+  "locked": zod.boolean(),
+  "poll": zod.union([zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.'),zod.null()]),
+  "acceptedAnswer": zod.object({
+  "author": zod.string(),
+  "excerpt": zod.string()
+}).nullable(),
+  "topRecommendations": zod.array(zod.object({
+  "catalog": zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),
+  "count": zod.number().int()
+})).describe('Pages most recommended in replies (recommendation topics)')
+})),
+  "nextCursor": zod.string().nullable()
+})
+
+
+/**
+ * @summary Counts for the filters and boards.
+ */
+export const GetForumOverviewResponse = zod.object({
+  "total": zod.number().int(),
+  "solved": zod.number().int(),
+  "kinds": zod.array(zod.object({
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "count": zod.number().int()
+})),
+  "boards": zod.array(zod.object({
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "count": zod.number().int()
+}))
+})
+
+
+/**
+ * @summary Most accepted answers in the last 30 days.
+ */
+export const GetForumHelpersResponseItem = zod.object({
+  "person": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "accepted": zod.number().int()
+})
+export const GetForumHelpersResponse = zod.array(GetForumHelpersResponseItem)
+
+
+/**
+ * @summary Topics about a shared pattern/product page or a make.
+ */
+export const GetForumDiscussionsQueryParams = zod.object({
+  "catalogId": zod.coerce.number().int().optional(),
+  "makeId": zod.coerce.number().int().optional()
+})
+
+export const GetForumDiscussionsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "lastActivityAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "replies": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "solved": zod.boolean(),
+  "pinned": zod.boolean(),
+  "locked": zod.boolean(),
+  "poll": zod.union([zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.'),zod.null()]),
+  "acceptedAnswer": zod.object({
+  "author": zod.string(),
+  "excerpt": zod.string()
+}).nullable(),
+  "topRecommendations": zod.array(zod.object({
+  "catalog": zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),
+  "count": zod.number().int()
+})).describe('Pages most recommended in replies (recommendation topics)')
+})
+export const GetForumDiscussionsResponse = zod.array(GetForumDiscussionsResponseItem)
+
+
+export const GetForumTopicParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetForumTopicResponse = zod.object({
+  "id": zod.number().int(),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "lastActivityAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "replies": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "solved": zod.boolean(),
+  "pinned": zod.boolean(),
+  "locked": zod.boolean(),
+  "poll": zod.union([zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.'),zod.null()]),
+  "acceptedAnswer": zod.object({
+  "author": zod.string(),
+  "excerpt": zod.string()
+}).nullable(),
+  "topRecommendations": zod.array(zod.object({
+  "catalog": zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),
+  "count": zod.number().int()
+})).describe('Pages most recommended in replies (recommendation topics)')
+}).and(zod.object({
+  "body": zod.string(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]),
+  "make": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable()
+}).nullable().describe('The author\'s make, only when the viewer may see it'),
+  "post": zod.union([zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
+}),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
+  "acceptedReplyId": zod.number().int().nullable(),
+  "isMine": zod.boolean(),
+  "canModerate": zod.boolean()
+}))
+
+
+/**
+ * @summary Replies: the accepted answer first, then most upvoted, each with its replies.
+ */
+export const GetForumRepliesParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetForumRepliesResponseItem = zod.object({
+  "id": zod.number().int(),
+  "body": zod.string(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "isMine": zod.boolean(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()])
+}).and(zod.object({
+  "accepted": zod.boolean(),
+  "replies": zod.array(zod.object({
+  "id": zod.number().int(),
+  "body": zod.string(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "isMine": zod.boolean(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()])
+}))
+}))
+export const GetForumRepliesResponse = zod.array(GetForumRepliesResponseItem)
+
+
+/**
+ * @summary Start a topic. Show & tell can also go to your feed as a public post.
+ */
+export const createForumTopicBodyTitleMin = 3;
+export const createForumTopicBodyTitleMax = 140;
+
+export const createForumTopicBodyBodyMax = 10000;
+
+export const createForumTopicBodyTagsItemMax = 30;
+
+export const createForumTopicBodyTagsMax = 5;
+
+export const createForumTopicBodyPollOptionsItemMax = 80;
+
+export const createForumTopicBodyPollOptionsMax = 6;
+
+export const createForumTopicBodyMediaIdsMax = 10;
+
+
+
+export const CreateForumTopicBody = zod.object({
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string().min(createForumTopicBodyTitleMin).max(createForumTopicBodyTitleMax),
+  "body": zod.string().max(createForumTopicBodyBodyMax).optional(),
+  "tags": zod.array(zod.string().max(createForumTopicBodyTagsItemMax)).max(createForumTopicBodyTagsMax).optional(),
+  "catalogId": zod.number().int().nullish(),
+  "makeId": zod.number().int().nullish(),
+  "pollOptions": zod.array(zod.string().max(createForumTopicBodyPollOptionsItemMax)).max(createForumTopicBodyPollOptionsMax).optional(),
+  "pollDays": zod.union([zod.literal(1),zod.literal(3),zod.literal(7)]).optional(),
+  "shareToFeed": zod.boolean().optional().describe('Show & tell only - also post it publicly to your feed'),
+  "mediaIds": zod.array(zod.number().int()).max(createForumTopicBodyMediaIdsMax).optional()
+})
+
+export const CreateForumTopicResponse = zod.object({
+  "id": zod.number().int(),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "lastActivityAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "replies": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "solved": zod.boolean(),
+  "pinned": zod.boolean(),
+  "locked": zod.boolean(),
+  "poll": zod.union([zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.'),zod.null()]),
+  "acceptedAnswer": zod.object({
+  "author": zod.string(),
+  "excerpt": zod.string()
+}).nullable(),
+  "topRecommendations": zod.array(zod.object({
+  "catalog": zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),
+  "count": zod.number().int()
+})).describe('Pages most recommended in replies (recommendation topics)')
+}).and(zod.object({
+  "body": zod.string(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]),
+  "make": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable()
+}).nullable().describe('The author\'s make, only when the viewer may see it'),
+  "post": zod.union([zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
+}),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
+  "acceptedReplyId": zod.number().int().nullable(),
+  "isMine": zod.boolean(),
+  "canModerate": zod.boolean()
+}))
+
+
+export const UpdateForumTopicParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateForumTopicBodyTitleMin = 3;
+export const updateForumTopicBodyTitleMax = 140;
+
+export const updateForumTopicBodyBodyMax = 10000;
+
+export const updateForumTopicBodyTagsItemMax = 30;
+
+export const updateForumTopicBodyTagsMax = 5;
+
+
+
+export const UpdateForumTopicBody = zod.object({
+  "title": zod.string().min(updateForumTopicBodyTitleMin).max(updateForumTopicBodyTitleMax).optional(),
+  "body": zod.string().max(updateForumTopicBodyBodyMax).optional(),
+  "tags": zod.array(zod.string().max(updateForumTopicBodyTagsItemMax)).max(updateForumTopicBodyTagsMax).optional()
+})
+
+export const UpdateForumTopicResponse = zod.object({
+  "id": zod.number().int(),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "lastActivityAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "replies": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "solved": zod.boolean(),
+  "pinned": zod.boolean(),
+  "locked": zod.boolean(),
+  "poll": zod.union([zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.'),zod.null()]),
+  "acceptedAnswer": zod.object({
+  "author": zod.string(),
+  "excerpt": zod.string()
+}).nullable(),
+  "topRecommendations": zod.array(zod.object({
+  "catalog": zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),
+  "count": zod.number().int()
+})).describe('Pages most recommended in replies (recommendation topics)')
+}).and(zod.object({
+  "body": zod.string(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]),
+  "make": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable()
+}).nullable().describe('The author\'s make, only when the viewer may see it'),
+  "post": zod.union([zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
+}),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
+  "acceptedReplyId": zod.number().int().nullable(),
+  "isMine": zod.boolean(),
+  "canModerate": zod.boolean()
+}))
+
+
+export const DeleteForumTopicParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteForumTopicResponse = zod.void()
+
+
+/**
+ * @summary The asker marks (or clears) the answer that worked.
+ */
+export const SetAcceptedAnswerParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const SetAcceptedAnswerBody = zod.object({
+  "replyId": zod.number().int().nullable()
+})
+
+export const SetAcceptedAnswerResponse = zod.object({
+  "id": zod.number().int(),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "lastActivityAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "replies": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "solved": zod.boolean(),
+  "pinned": zod.boolean(),
+  "locked": zod.boolean(),
+  "poll": zod.union([zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.'),zod.null()]),
+  "acceptedAnswer": zod.object({
+  "author": zod.string(),
+  "excerpt": zod.string()
+}).nullable(),
+  "topRecommendations": zod.array(zod.object({
+  "catalog": zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),
+  "count": zod.number().int()
+})).describe('Pages most recommended in replies (recommendation topics)')
+}).and(zod.object({
+  "body": zod.string(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]),
+  "make": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable()
+}).nullable().describe('The author\'s make, only when the viewer may see it'),
+  "post": zod.union([zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
+}),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
+  "acceptedReplyId": zod.number().int().nullable(),
+  "isMine": zod.boolean(),
+  "canModerate": zod.boolean()
+}))
+
+
+/**
+ * @summary Admins pin or lock a topic.
+ */
+export const ModerateForumTopicParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const ModerateForumTopicBody = zod.object({
+  "pinned": zod.boolean().optional(),
+  "locked": zod.boolean().optional()
+})
+
+export const ModerateForumTopicResponse = zod.object({
+  "id": zod.number().int(),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "lastActivityAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "replies": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "solved": zod.boolean(),
+  "pinned": zod.boolean(),
+  "locked": zod.boolean(),
+  "poll": zod.union([zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.'),zod.null()]),
+  "acceptedAnswer": zod.object({
+  "author": zod.string(),
+  "excerpt": zod.string()
+}).nullable(),
+  "topRecommendations": zod.array(zod.object({
+  "catalog": zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),
+  "count": zod.number().int()
+})).describe('Pages most recommended in replies (recommendation topics)')
+}).and(zod.object({
+  "body": zod.string(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]),
+  "make": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable()
+}).nullable().describe('The author\'s make, only when the viewer may see it'),
+  "post": zod.union([zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
+}),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
+  "acceptedReplyId": zod.number().int().nullable(),
+  "isMine": zod.boolean(),
+  "canModerate": zod.boolean()
+}))
+
+
+export const CreateForumReplyParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const createForumReplyBodyBodyMax = 5000;
+
+
+
+export const CreateForumReplyBody = zod.object({
+  "body": zod.string().min(1).max(createForumReplyBodyBodyMax),
+  "parentId": zod.number().int().nullish(),
+  "catalogId": zod.number().int().nullish().describe('Recommend a shared pattern or product page')
+})
+
+export const CreateForumReplyResponse = zod.object({
+  "id": zod.number().int(),
+  "body": zod.string(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "isMine": zod.boolean(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()])
+}).and(zod.object({
+  "accepted": zod.boolean(),
+  "replies": zod.array(zod.object({
+  "id": zod.number().int(),
+  "body": zod.string(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "isMine": zod.boolean(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()])
+}))
+}))
+
+
+/**
+ * @summary Vote, or change your vote, while the poll is open.
+ */
+export const VoteForumPollParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const VoteForumPollBody = zod.object({
+  "optionId": zod.number().int()
+})
+
+export const VoteForumPollResponse = zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.')
+
+
+export const DeleteForumReplyParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteForumReplyResponse = zod.void()
+
+
+export const UpvoteForumParams = zod.object({
+  "kind": zod.enum(['topic', 'reply']),
+  "id": zod.coerce.number().int()
+})
+
+export const UpvoteForumResponse = zod.object({
+  "voted": zod.boolean(),
+  "votes": zod.number().int()
+})
+
+
+export const RemoveForumUpvoteParams = zod.object({
+  "kind": zod.enum(['topic', 'reply']),
+  "id": zod.coerce.number().int()
+})
+
+export const RemoveForumUpvoteResponse = zod.object({
+  "voted": zod.boolean(),
+  "votes": zod.number().int()
+})
 
 
 /**

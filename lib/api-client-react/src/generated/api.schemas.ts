@@ -418,11 +418,13 @@ export const ReportInputTargetKind = {
   profile: 'profile',
   review: 'review',
   challenge: 'challenge',
+  topic: 'topic',
+  forum_reply: 'forum_reply',
 } as const;
 
 export interface ReportInput {
   targetKind: ReportInputTargetKind;
-  /** Post, comment or review id, a profile handle, or a challenge slug */
+  /** Post, comment, review, topic or forum reply id, a profile handle, or a challenge slug */
   targetId: string;
   reason: ReportReason;
   /** @maxLength 1000 */
@@ -454,6 +456,8 @@ export const ReportTargetKind = {
   profile: 'profile',
   review: 'review',
   challenge: 'challenge',
+  topic: 'topic',
+  forum_reply: 'forum_reply',
 } as const;
 
 export type ReportStatus = typeof ReportStatus[keyof typeof ReportStatus];
@@ -929,6 +933,246 @@ export interface MembershipState {
 
 export interface EntryInput {
   postId: number;
+}
+
+export type ForumBoard = typeof ForumBoard[keyof typeof ForumBoard];
+
+
+export const ForumBoard = {
+  fitting: 'fitting',
+  fabric: 'fabric',
+  machines: 'machines',
+  patterns: 'patterns',
+  beginners: 'beginners',
+  mending: 'mending',
+  meetups: 'meetups',
+} as const;
+
+export type ForumKind = typeof ForumKind[keyof typeof ForumKind];
+
+
+export const ForumKind = {
+  show_tell: 'show_tell',
+  question: 'question',
+  recommendation: 'recommendation',
+  info: 'info',
+  poll: 'poll',
+} as const;
+
+export type ForumPollOptionsItem = {
+  id: number;
+  label: string;
+  /** @nullable */
+  votes: number | null;
+};
+
+/**
+ * Option votes are null until you vote, unless you wrote the poll or it has closed.
+ */
+export interface ForumPoll {
+  closesAt: string;
+  open: boolean;
+  total: number;
+  revealed: boolean;
+  /** @nullable */
+  myOptionId: number | null;
+  options: ForumPollOptionsItem[];
+}
+
+/**
+ * @nullable
+ */
+export type ForumTopicSummaryAcceptedAnswer = {
+  author: string;
+  excerpt: string;
+} | null;
+
+export type ForumTopicSummaryTopRecommendationsItem = {
+  catalog: CatalogRef;
+  count: number;
+};
+
+export interface ForumTopicSummary {
+  id: number;
+  board: ForumBoard;
+  kind: ForumKind;
+  title: string;
+  excerpt: string;
+  tags: string[];
+  author: PublicPerson;
+  createdAt: string;
+  lastActivityAt: string;
+  votes: number;
+  replies: number;
+  votedByMe: boolean;
+  solved: boolean;
+  pinned: boolean;
+  locked: boolean;
+  poll: ForumPoll | null;
+  /** @nullable */
+  acceptedAnswer: ForumTopicSummaryAcceptedAnswer;
+  /** Pages most recommended in replies (recommendation topics) */
+  topRecommendations: ForumTopicSummaryTopRecommendationsItem[];
+}
+
+/**
+ * The author's make, only when the viewer may see it
+ * @nullable
+ */
+export type ForumTopicMake = {
+  id: number;
+  name: string;
+  /** @nullable */
+  coverImageUrl: string | null;
+} | null;
+
+export type ForumTopic = ForumTopicSummary & ({
+  body: string;
+  catalog: CatalogRef | null;
+  /**
+     * The author's make, only when the viewer may see it
+     * @nullable
+     */
+  make: ForumTopicMake;
+  /** The feed post this was shared as (show & tell), when visible */
+  post: FeedPost | null;
+  /** @nullable */
+  acceptedReplyId: number | null;
+  isMine: boolean;
+  canModerate: boolean;
+});
+
+export interface ForumTopicPage {
+  items: ForumTopicSummary[];
+  /** @nullable */
+  nextCursor: string | null;
+}
+
+export type ForumOverviewKindsItem = {
+  kind: ForumKind;
+  count: number;
+};
+
+export type ForumOverviewBoardsItem = {
+  board: ForumBoard;
+  count: number;
+};
+
+export interface ForumOverview {
+  total: number;
+  solved: number;
+  kinds: ForumOverviewKindsItem[];
+  boards: ForumOverviewBoardsItem[];
+}
+
+export interface ForumHelper {
+  person: PublicPerson;
+  accepted: number;
+}
+
+export interface ForumReplyChild {
+  id: number;
+  body: string;
+  author: PublicPerson;
+  createdAt: string;
+  votes: number;
+  votedByMe: boolean;
+  isMine: boolean;
+  catalog: CatalogRef | null;
+}
+
+export type ForumReply = ForumReplyChild & {
+  accepted: boolean;
+  replies: ForumReplyChild[];
+};
+
+export type ForumTopicInputPollDays = typeof ForumTopicInputPollDays[keyof typeof ForumTopicInputPollDays];
+
+
+export const ForumTopicInputPollDays = {
+  NUMBER_1: 1,
+  NUMBER_3: 3,
+  NUMBER_7: 7,
+} as const;
+
+export interface ForumTopicInput {
+  board: ForumBoard;
+  kind: ForumKind;
+  /**
+     * @minLength 3
+     * @maxLength 140
+     */
+  title: string;
+  /** @maxLength 10000 */
+  body?: string;
+  /**
+     * @maxItems 5
+     * @items.maxLength 30
+     */
+  tags?: string[];
+  /** @nullable */
+  catalogId?: number | null;
+  /** @nullable */
+  makeId?: number | null;
+  /**
+     * @maxItems 6
+     * @items.maxLength 80
+     */
+  pollOptions?: string[];
+  pollDays?: ForumTopicInputPollDays;
+  /** Show & tell only - also post it publicly to your feed */
+  shareToFeed?: boolean;
+  /** @maxItems 10 */
+  mediaIds?: number[];
+}
+
+export interface ForumTopicUpdate {
+  /**
+     * @minLength 3
+     * @maxLength 140
+     */
+  title?: string;
+  /** @maxLength 10000 */
+  body?: string;
+  /**
+     * @maxItems 5
+     * @items.maxLength 30
+     */
+  tags?: string[];
+}
+
+export interface ForumReplyInput {
+  /**
+     * @minLength 1
+     * @maxLength 5000
+     */
+  body: string;
+  /** @nullable */
+  parentId?: number | null;
+  /**
+     * Recommend a shared pattern or product page
+     * @nullable
+     */
+  catalogId?: number | null;
+}
+
+export interface AcceptInput {
+  /** @nullable */
+  replyId: number | null;
+}
+
+export interface ModerateInput {
+  pinned?: boolean;
+  locked?: boolean;
+}
+
+export interface PollVoteInput {
+  optionId: number;
+}
+
+export interface ForumVoteState {
+  voted: boolean;
+  votes: number;
 }
 
 export interface ErrorResponse {
@@ -1591,6 +1835,57 @@ export const GetChallengeEntriesSort = {
   newest: 'newest',
   following: 'following',
 } as const;
+
+export type ListForumTopicsParams = {
+filter?: ListForumTopicsFilter;
+board?: ListForumTopicsBoard;
+sort?: ListForumTopicsSort;
+/**
+ * @maxLength 80
+ */
+q?: string;
+cursor?: string;
+};
+
+export type ListForumTopicsFilter = typeof ListForumTopicsFilter[keyof typeof ListForumTopicsFilter];
+
+
+export const ListForumTopicsFilter = {
+  all: 'all',
+  show_tell: 'show_tell',
+  question: 'question',
+  recommendation: 'recommendation',
+  info: 'info',
+  poll: 'poll',
+  solved: 'solved',
+} as const;
+
+export type ListForumTopicsBoard = typeof ListForumTopicsBoard[keyof typeof ListForumTopicsBoard];
+
+
+export const ListForumTopicsBoard = {
+  fitting: 'fitting',
+  fabric: 'fabric',
+  machines: 'machines',
+  patterns: 'patterns',
+  beginners: 'beginners',
+  mending: 'mending',
+  meetups: 'meetups',
+} as const;
+
+export type ListForumTopicsSort = typeof ListForumTopicsSort[keyof typeof ListForumTopicsSort];
+
+
+export const ListForumTopicsSort = {
+  hot: 'hot',
+  new: 'new',
+  unanswered: 'unanswered',
+} as const;
+
+export type GetForumDiscussionsParams = {
+catalogId?: number;
+makeId?: number;
+};
 
 export type GetHomeFeedParams = {
 cursor?: string;

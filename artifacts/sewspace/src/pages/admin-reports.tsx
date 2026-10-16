@@ -29,7 +29,7 @@ const REASON_LABEL: Record<ReportReason, string> = {
   intellectual_property: 'Copied work or pattern piracy',
   other: 'Something else',
 };
-const KIND_LABEL = { post: 'Post', comment: 'Comment', profile: 'Profile', review: 'Review', challenge: 'Challenge' } as const;
+const KIND_LABEL = { post: 'Post', comment: 'Comment', profile: 'Profile', review: 'Review', challenge: 'Challenge', topic: 'Forum topic', forum_reply: 'Forum reply' } as const;
 
 function ReportCard({ report }: { report: Report }) {
   const client = useQueryClient();

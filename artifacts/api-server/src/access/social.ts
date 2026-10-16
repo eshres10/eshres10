@@ -7,6 +7,8 @@ import {
   profilesTable,
   publicProfilesView,
   challengesTable,
+  forumRepliesTable,
+  forumTopicsTable,
   reportsTable,
   reviewsTable,
   savesTable,
@@ -22,6 +24,7 @@ import type { Viewer } from "./viewer";
 import { visibleTo } from "./visibility";
 import { visibleReview } from "./catalog";
 import { visibleChallenge } from "./challenges";
+import { visibleForumItem } from "./forum";
 
 // Likes, comments, saves, follows, blocks and reports. Every action starts by
 // checking, here, that the viewer may see what they act on; RLS (migration
@@ -270,6 +273,12 @@ async function reportTarget(db: Tx, viewer: Viewer, kind: ReportKind, rawId: str
   }
   const id = Number(rawId);
   if (!Number.isInteger(id) || id <= 0) return null;
+  if (kind === "topic" || kind === "forum_reply") {
+    const item = await visibleForumItem(db, viewer, kind, id);
+    if (!item) return null;
+    const [author] = await db.select().from(publicProfilesView).where(eq(publicProfilesView.userId, item.userId));
+    return { id: String(id), userId: item.userId, snapshot: { authorHandle: author?.handle ?? null, authorName: author?.name ?? null, text: item.text, imageUrl: null, link: item.link } };
+  }
   if (kind === "review") {
     const found = await visibleReview(db, viewer, id);
     if (!found) return null;
@@ -348,11 +357,13 @@ export interface ReportView {
 async function reportViews(db: Tx, rows: Report[]): Promise<ReportView[]> {
   if (!rows.length) return [];
   const ids = (kind: ReportKind) => [...new Set(rows.filter((r) => r.targetKind === kind).map((r) => Number(r.targetId)))].filter(Number.isInteger);
-  const postIds = ids("post"), commentIds = ids("comment"), reviewIds = ids("review");
+  const postIds = ids("post"), commentIds = ids("comment"), reviewIds = ids("review"), topicIds = ids("topic"), forumReplyIds = ids("forum_reply");
   // Admins can read reported posts and comments through RLS (migration 0005).
   const posts = postIds.length ? await db.select({ id: postsTable.id }).from(postsTable).where(inArray(postsTable.id, postIds)) : [];
   const comments = commentIds.length ? await db.select({ id: commentsTable.id }).from(commentsTable).where(inArray(commentsTable.id, commentIds)) : [];
   const reviews = reviewIds.length ? await db.select({ id: reviewsTable.id }).from(reviewsTable).where(inArray(reviewsTable.id, reviewIds)) : [];
+  const topics = topicIds.length ? await db.select({ id: forumTopicsTable.id }).from(forumTopicsTable).where(inArray(forumTopicsTable.id, topicIds)) : [];
+  const forumReplies = forumReplyIds.length ? await db.select({ id: forumRepliesTable.id }).from(forumRepliesTable).where(inArray(forumRepliesTable.id, forumReplyIds)) : [];
   const challengeSlugs = [...new Set(rows.filter((r) => r.targetKind === "challenge").map((r) => r.targetId))];
   const challenges = challengeSlugs.length ? await db.select({ slug: challengesTable.slug }).from(challengesTable).where(inArray(challengesTable.slug, challengeSlugs)) : [];
   const reporters = await db.select().from(publicProfilesView).where(inArray(publicProfilesView.userId, [...new Set(rows.map((r) => r.reporterId))]));
@@ -366,6 +377,8 @@ async function reportViews(db: Tx, rows: Report[]): Promise<ReportView[]> {
     comment: new Set(comments.map((c) => String(c.id))),
     review: new Set(reviews.map((r) => String(r.id))),
     challenge: new Set(challenges.map((c) => c.slug)),
+    topic: new Set(topics.map((t) => String(t.id))),
+    forum_reply: new Set(forumReplies.map((r) => String(r.id))),
   };
   const reporterMap = new Map(reporters.map((r) => [r.userId, r]));
   const openMap = new Map(open.map((o) => [`${o.kind}:${o.id}`, o.n]));
@@ -418,6 +431,8 @@ export async function resolveReport(
     if (report.targetKind === "post") await db.delete(postsTable).where(eq(postsTable.id, targetId));
     else if (report.targetKind === "review") await db.delete(reviewsTable).where(eq(reviewsTable.id, targetId));
     else if (report.targetKind === "challenge") await db.delete(challengesTable).where(eq(challengesTable.slug, report.targetId));
+    else if (report.targetKind === "topic") await db.delete(forumTopicsTable).where(eq(forumTopicsTable.id, targetId));
+    else if (report.targetKind === "forum_reply") await db.delete(forumRepliesTable).where(eq(forumRepliesTable.id, targetId));
     else await db.delete(commentsTable).where(eq(commentsTable.id, targetId));
     // Every open report on the same thing is settled by the removal.
     await db.update(reportsTable).set({ status: "removed", ...done }).where(and(

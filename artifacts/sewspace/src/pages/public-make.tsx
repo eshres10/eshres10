@@ -7,6 +7,7 @@ import { Loading } from '@/components/common';
 import { PublicHeader } from '@/components/shell/PublicHeader';
 import { VisibilityBadge } from '@/components/visibility';
 import { swatch } from '@/lib/swatch';
+import { Discussions } from '@/components/forum/Discussions';
 import NotFound from '@/pages/not-found';
 
 const STAGES: Record<string, string> = { planning: 'Planning', cutting: 'Cutting', sewing: 'Sewing', fitting: 'Fitting', finished: 'Finished' };
@@ -151,6 +152,7 @@ export function PublicMakePage({ id }: { id: number }) {
                 </ol>
               </Section>
             )}
+            <Discussions makeId={m.id} />
           </div>
         </div>
       </main>

@@ -15,4 +15,6 @@ export const ReportInputTargetKind = {
   profile: 'profile',
   review: 'review',
   challenge: 'challenge',
+  topic: 'topic',
+  forum_reply: 'forum_reply',
 } as const;

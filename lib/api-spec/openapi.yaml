@@ -28,6 +28,8 @@ tags:
     description: Shared pattern and product pages, and reviews
   - name: challenges
     description: Hashtag challenges with entries
+  - name: forum
+    description: Boards, topics, replies, votes and polls
 paths:
   /public/profiles/{handle}:
     get:
@@ -744,6 +746,270 @@ paths:
       responses:
         "204": { description: Done }
         "404": { description: Not found or not yours to remove }
+  /public/forum/topics:
+    get:
+      operationId: listForumTopics
+      tags: [public]
+      summary: "Topics, newest activity first (hot), newest (new) or without replies (unanswered). Works signed out."
+      parameters:
+        - name: filter
+          in: query
+          required: false
+          schema: { type: string, enum: [all, show_tell, question, recommendation, info, poll, solved], default: all }
+        - name: board
+          in: query
+          required: false
+          schema: { type: string, enum: [fitting, fabric, machines, patterns, beginners, mending, meetups] }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string, enum: [hot, new, unanswered], default: hot }
+        - { name: q, in: query, required: false, schema: { type: string, maxLength: 80 } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumTopicPage" }
+  /public/forum/overview:
+    get:
+      operationId: getForumOverview
+      tags: [public]
+      summary: "Counts for the filters and boards."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumOverview" }
+  /public/forum/helpers:
+    get:
+      operationId: getForumHelpers
+      tags: [public]
+      summary: "Most accepted answers in the last 30 days."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: 
+                type: array
+                items: { $ref: "#/components/schemas/ForumHelper" }
+  /public/forum/discussions:
+    get:
+      operationId: getForumDiscussions
+      tags: [public]
+      summary: "Topics about a shared pattern/product page or a make."
+      parameters:
+        - { name: catalogId, in: query, required: false, schema: { type: integer } }
+        - { name: makeId, in: query, required: false, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: 
+                type: array
+                items: { $ref: "#/components/schemas/ForumTopicSummary" }
+  /public/forum/topics/{id}:
+    get:
+      operationId: getForumTopic
+      tags: [public]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumTopic" }
+        "404": { description: Not found }
+  /public/forum/topics/{id}/replies:
+    get:
+      operationId: getForumReplies
+      tags: [public]
+      summary: "Replies: the accepted answer first, then most upvoted, each with its replies."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: 
+                type: array
+                items: { $ref: "#/components/schemas/ForumReply" }
+        "404": { description: Not found }
+  /forum/topics:
+    post:
+      operationId: createForumTopic
+      tags: [forum]
+      summary: "Start a topic. Show & tell can also go to your feed as a public post."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ForumTopicInput" }
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumTopic" }
+        "400": { description: Invalid }
+        "409": { description: Choose a handle first }
+        "429": { description: Too many topics }
+  /forum/topics/{id}:
+    patch:
+      operationId: updateForumTopic
+      tags: [forum]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ForumTopicUpdate" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumTopic" }
+        "404": { description: Not found }
+    delete:
+      operationId: deleteForumTopic
+      tags: [forum]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Done }
+        "404": { description: Not found }
+  /forum/topics/{id}/accepted:
+    put:
+      operationId: setAcceptedAnswer
+      tags: [forum]
+      summary: "The asker marks (or clears) the answer that worked."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/AcceptInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumTopic" }
+        "400": { description: Not a reply to this question }
+        "404": { description: Not found }
+  /forum/topics/{id}/moderate:
+    post:
+      operationId: moderateForumTopic
+      tags: [forum]
+      summary: "Admins pin or lock a topic."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ModerateInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumTopic" }
+        "403": { description: Admins only }
+        "404": { description: Not found }
+  /forum/topics/{id}/replies:
+    post:
+      operationId: createForumReply
+      tags: [forum]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ForumReplyInput" }
+      responses:
+        "201":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumReply" }
+        "400": { description: Invalid reply }
+        "403": { description: The topic is locked }
+        "409": { description: Choose a handle first }
+        "429": { description: Too many replies }
+        "404": { description: Not found }
+  /forum/topics/{id}/poll:
+    put:
+      operationId: voteForumPoll
+      tags: [forum]
+      summary: "Vote, or change your vote, while the poll is open."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PollVoteInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumPoll" }
+        "400": { description: Closed or not an option }
+        "404": { description: Not found }
+  /forum/replies/{id}:
+    delete:
+      operationId: deleteForumReply
+      tags: [forum]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Done }
+        "404": { description: Not found }
+  /forum/votes/{kind}/{id}:
+    put:
+      operationId: upvoteForum
+      tags: [forum]
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema: { type: string, enum: [topic, reply] }
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumVoteState" }
+        "400": { description: Not your own }
+        "404": { description: Not found }
+    delete:
+      operationId: removeForumUpvote
+      tags: [forum]
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema: { type: string, enum: [topic, reply] }
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ForumVoteState" }
   /feed:
     get:
       operationId: getHomeFeed
@@ -1779,8 +2045,8 @@ components:
     ReportInput:
       type: object
       properties:
-        targetKind: { type: string, enum: [post, comment, profile, review, challenge] }
-        targetId: { type: string, description: "Post, comment or review id, a profile handle, or a challenge slug" }
+        targetKind: { type: string, enum: [post, comment, profile, review, challenge, topic, forum_reply] }
+        targetId: { type: string, description: "Post, comment, review, topic or forum reply id, a profile handle, or a challenge slug" }
         reason: { $ref: "#/components/schemas/ReportReason" }
         details: { type: string, maxLength: 1000 }
       required: [targetKind, targetId, reason]
@@ -1798,7 +2064,7 @@ components:
       type: object
       properties:
         id: { type: integer }
-        targetKind: { type: string, enum: [post, comment, profile, review, challenge] }
+        targetKind: { type: string, enum: [post, comment, profile, review, challenge, topic, forum_reply] }
         targetId: { type: string }
         reason: { $ref: "#/components/schemas/ReportReason" }
         details: { type: string }
@@ -2066,6 +2332,218 @@ components:
       properties:
         postId: { type: integer }
       required: [postId]
+    ForumBoard:
+      type: string
+      enum: [fitting, fabric, machines, patterns, beginners, mending, meetups]
+    ForumKind:
+      type: string
+      enum: [show_tell, question, recommendation, info, poll]
+    ForumPoll:
+      type: object
+      description: Option votes are null until you vote, unless you wrote the poll or it has closed.
+      properties:
+        closesAt: { type: string, format: date-time }
+        open: { type: boolean }
+        total: { type: integer }
+        revealed: { type: boolean }
+        myOptionId: { type: integer, nullable: true }
+        options:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: integer }
+              label: { type: string }
+              votes: { type: integer, nullable: true }
+            required: [id, label, votes]
+      required: [closesAt, open, total, revealed, myOptionId, options]
+    ForumTopicSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        board: { $ref: "#/components/schemas/ForumBoard" }
+        kind: { $ref: "#/components/schemas/ForumKind" }
+        title: { type: string }
+        excerpt: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        author: { $ref: "#/components/schemas/PublicPerson" }
+        createdAt: { type: string, format: date-time }
+        lastActivityAt: { type: string, format: date-time }
+        votes: { type: integer }
+        replies: { type: integer }
+        votedByMe: { type: boolean }
+        solved: { type: boolean }
+        pinned: { type: boolean }
+        locked: { type: boolean }
+        poll:
+          allOf: [{ $ref: "#/components/schemas/ForumPoll" }]
+          nullable: true
+        acceptedAnswer:
+          type: object
+          nullable: true
+          properties:
+            author: { type: string }
+            excerpt: { type: string }
+          required: [author, excerpt]
+        topRecommendations:
+          type: array
+          description: Pages most recommended in replies (recommendation topics)
+          items:
+            type: object
+            properties:
+              catalog: { $ref: "#/components/schemas/CatalogRef" }
+              count: { type: integer }
+            required: [catalog, count]
+      required: [id, board, kind, title, excerpt, tags, author, createdAt, lastActivityAt, votes, replies, votedByMe, solved, pinned, locked, poll, acceptedAnswer, topRecommendations]
+    ForumTopic:
+      allOf:
+        - { $ref: "#/components/schemas/ForumTopicSummary" }
+        - type: object
+          properties:
+            body: { type: string }
+            catalog:
+              allOf: [{ $ref: "#/components/schemas/CatalogRef" }]
+              nullable: true
+            make:
+              type: object
+              nullable: true
+              description: The author's make, only when the viewer may see it
+              properties:
+                id: { type: integer }
+                name: { type: string }
+                coverImageUrl: { type: string, nullable: true }
+              required: [id, name, coverImageUrl]
+            post:
+              allOf: [{ $ref: "#/components/schemas/FeedPost" }]
+              nullable: true
+              description: The feed post this was shared as (show & tell), when visible
+            acceptedReplyId: { type: integer, nullable: true }
+            isMine: { type: boolean }
+            canModerate: { type: boolean }
+          required: [body, catalog, make, post, acceptedReplyId, isMine, canModerate]
+    ForumTopicPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ForumTopicSummary" }
+        nextCursor: { type: string, nullable: true }
+      required: [items, nextCursor]
+    ForumOverview:
+      type: object
+      properties:
+        total: { type: integer }
+        solved: { type: integer }
+        kinds:
+          type: array
+          items:
+            type: object
+            properties:
+              kind: { $ref: "#/components/schemas/ForumKind" }
+              count: { type: integer }
+            required: [kind, count]
+        boards:
+          type: array
+          items:
+            type: object
+            properties:
+              board: { $ref: "#/components/schemas/ForumBoard" }
+              count: { type: integer }
+            required: [board, count]
+      required: [total, solved, kinds, boards]
+    ForumHelper:
+      type: object
+      properties:
+        person: { $ref: "#/components/schemas/PublicPerson" }
+        accepted: { type: integer }
+      required: [person, accepted]
+    ForumReplyChild:
+      type: object
+      properties:
+        id: { type: integer }
+        body: { type: string }
+        author: { $ref: "#/components/schemas/PublicPerson" }
+        createdAt: { type: string, format: date-time }
+        votes: { type: integer }
+        votedByMe: { type: boolean }
+        isMine: { type: boolean }
+        catalog:
+          allOf: [{ $ref: "#/components/schemas/CatalogRef" }]
+          nullable: true
+      required: [id, body, author, createdAt, votes, votedByMe, isMine, catalog]
+    ForumReply:
+      allOf:
+        - { $ref: "#/components/schemas/ForumReplyChild" }
+        - type: object
+          properties:
+            accepted: { type: boolean }
+            replies:
+              type: array
+              items: { $ref: "#/components/schemas/ForumReplyChild" }
+          required: [accepted, replies]
+    ForumTopicInput:
+      type: object
+      properties:
+        board: { $ref: "#/components/schemas/ForumBoard" }
+        kind: { $ref: "#/components/schemas/ForumKind" }
+        title: { type: string, minLength: 3, maxLength: 140 }
+        body: { type: string, maxLength: 10000 }
+        tags:
+          type: array
+          maxItems: 5
+          items: { type: string, maxLength: 30 }
+        catalogId: { type: integer, nullable: true }
+        makeId: { type: integer, nullable: true }
+        pollOptions:
+          type: array
+          maxItems: 6
+          items: { type: string, maxLength: 80 }
+        pollDays: { type: integer, enum: [1, 3, 7] }
+        shareToFeed: { type: boolean, description: Show & tell only - also post it publicly to your feed }
+        mediaIds:
+          type: array
+          maxItems: 10
+          items: { type: integer }
+      required: [board, kind, title]
+    ForumTopicUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 3, maxLength: 140 }
+        body: { type: string, maxLength: 10000 }
+        tags:
+          type: array
+          maxItems: 5
+          items: { type: string, maxLength: 30 }
+    ForumReplyInput:
+      type: object
+      properties:
+        body: { type: string, minLength: 1, maxLength: 5000 }
+        parentId: { type: integer, nullable: true }
+        catalogId: { type: integer, nullable: true, description: Recommend a shared pattern or product page }
+      required: [body]
+    AcceptInput:
+      type: object
+      properties:
+        replyId: { type: integer, nullable: true }
+      required: [replyId]
+    ModerateInput:
+      type: object
+      properties:
+        pinned: { type: boolean }
+        locked: { type: boolean }
+    PollVoteInput:
+      type: object
+      properties:
+        optionId: { type: integer }
+      required: [optionId]
+    ForumVoteState:
+      type: object
+      properties:
+        voted: { type: boolean }
+        votes: { type: integer }
+      required: [voted, votes]
     ErrorResponse:
       type: object
       properties:

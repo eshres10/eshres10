@@ -18,6 +18,7 @@ import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
 import { capitalise, ReviewForm, Stars } from '@/components/catalog/parts';
 import { Loading } from '@/components/common';
+import { Discussions } from '@/components/forum/Discussions';
 import { SafetyMenu } from '@/components/social/SafetyMenu';
 import { Sheet } from '@/components/social/Sheet';
 import { timeAgo } from '@/lib/time';
@@ -246,6 +247,8 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
             </div>
           : <p className="rounded-[30px] bg-white px-6 py-8 text-sm text-subtle">No shared makes yet. Link this {e.kind} to one of yours from your studio, and share the make.</p>}
       </section>
+
+      <Discussions catalogId={e.id} />
 
       <section aria-labelledby="reviews-title" className="rounded-[30px] bg-white p-6">
         <h2 id="reviews-title" className="font-display text-[26px] tracking-[-.04em]">Reviews</h2>

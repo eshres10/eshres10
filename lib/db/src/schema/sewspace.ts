@@ -264,7 +264,7 @@ export const savesTable = pgTable("sewspace_saves", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.userId, t.postId] })]);
 
-export const REPORT_KINDS = ["post", "comment", "profile", "review", "challenge"] as const;
+export const REPORT_KINDS = ["post", "comment", "profile", "review", "challenge", "topic", "forum_reply"] as const;
 export const REPORT_REASONS = ["spam", "harassment", "nudity", "violence", "intellectual_property", "other"] as const;
 export const REPORT_STATUSES = ["open", "removed", "dismissed"] as const;
 
@@ -359,6 +359,68 @@ export const challengeEntriesTable = pgTable("sewspace_challenge_entries", {
 });
 
 export type Challenge = typeof challengesTable.$inferSelect;
+
+// Phase 7: the forum (migration 0008).
+export const FORUM_BOARDS = ["fitting", "fabric", "machines", "patterns", "beginners", "mending", "meetups"] as const;
+export const FORUM_KINDS = ["show_tell", "question", "recommendation", "info", "poll"] as const;
+export type ForumBoard = (typeof FORUM_BOARDS)[number];
+export type ForumKind = (typeof FORUM_KINDS)[number];
+
+export const forumTopicsTable = pgTable("sewspace_forum_topics", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  board: text("board").$type<ForumBoard>().notNull(),
+  kind: text("kind").$type<ForumKind>().notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull().default(""),
+  tags: text("tags").array().notNull().default([]),
+  catalogId: integer("catalog_id").references(() => catalogTable.id, { onDelete: "set null" }),
+  projectId: integer("project_id").references(() => projectsTable.id, { onDelete: "set null" }),
+  postId: integer("post_id").references(() => postsTable.id, { onDelete: "set null" }),
+  acceptedReplyId: integer("accepted_reply_id"),
+  pinned: boolean("pinned").notNull().default(false),
+  locked: boolean("locked").notNull().default(false),
+  pollClosesAt: timestamp("poll_closes_at", { withTimezone: true }),
+  voteCount: integer("vote_count").notNull().default(0),
+  replyCount: integer("reply_count").notNull().default(0),
+  ...timestamps,
+  lastActivityAt: timestamp("last_activity_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const forumRepliesTable = pgTable("sewspace_forum_replies", {
+  id: serial("id").primaryKey(),
+  topicId: integer("topic_id").notNull().references(() => forumTopicsTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  parentId: integer("parent_id"),
+  body: text("body").notNull(),
+  catalogId: integer("catalog_id").references(() => catalogTable.id, { onDelete: "set null" }),
+  voteCount: integer("vote_count").notNull().default(0),
+  ...timestamps,
+});
+
+export const forumVotesTable = pgTable("sewspace_forum_votes", {
+  targetKind: text("target_kind").$type<"topic" | "reply">().notNull(),
+  targetId: integer("target_id").notNull(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.targetKind, t.targetId, t.userId] })]);
+
+export const forumPollOptionsTable = pgTable("sewspace_forum_poll_options", {
+  id: serial("id").primaryKey(),
+  topicId: integer("topic_id").notNull().references(() => forumTopicsTable.id, { onDelete: "cascade" }),
+  position: smallint("position").notNull(),
+  label: text("label").notNull(),
+});
+
+export const forumPollVotesTable = pgTable("sewspace_forum_poll_votes", {
+  topicId: integer("topic_id").notNull().references(() => forumTopicsTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  optionId: integer("option_id").notNull().references(() => forumPollOptionsTable.id, { onDelete: "cascade" }),
+  votedAt: timestamp("voted_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.topicId, t.userId] })]);
+
+export type ForumTopic = typeof forumTopicsTable.$inferSelect;
+export type ForumReply = typeof forumRepliesTable.$inferSelect;
 
 export type Comment = typeof commentsTable.$inferSelect;
 export type Report = typeof reportsTable.$inferSelect;
