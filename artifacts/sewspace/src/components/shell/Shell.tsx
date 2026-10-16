@@ -54,7 +54,7 @@ function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: (
   const me = useMyProfile();
   return (
     <div className="flex h-full flex-col gap-[22px]">
-      <Logo mark="black" href="/studio" />
+      <Logo href="/studio" />
       {[...navGroups, ...(me?.isAdmin ? [adminGroup] : [])].map(group => (
         <nav key={group.label} aria-label={group.label}>
           <div className="px-3 pb-1.5 text-[11px] font-bold uppercase tracking-[.16em]">{group.label}</div>
