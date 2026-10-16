@@ -11,7 +11,7 @@ const { getProfileMakes, getProfilePage, getProfileUsed, viewerFor } = await imp
 // for the owner, a follower, another user, signed out, and blocked both ways.
 const dir = mkdtempSync(path.join(tmpdir(), "sewspace-tabs-"));
 const indexHtmlPath = path.join(dir, "index.html");
-writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Sewspace</title></head><body></body></html>`);
+writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Seams Club</title></head><body></body></html>`);
 const origin = await startApp({ indexHtmlPath });
 const rae = as(origin, "t_rae"); // owner
 const flo = as(origin, "t_flo"); // follows Rae

@@ -90,7 +90,7 @@ export function AdminReportsPage() {
   const me = useGetProfile();
   const [status, setStatus] = useState<Status>('open');
   const reports = useListReports({ status }, { query: { enabled: Boolean(me.data?.isAdmin) } });
-  useEffect(() => { document.title = 'Reports · SewSpace'; }, []);
+  useEffect(() => { document.title = 'Reports · Seams Club'; }, []);
   if (me.isLoading) return <Loading />;
   if (!me.data?.isAdmin) return <NotFound embedded />;
   return (

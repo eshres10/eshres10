@@ -17,7 +17,7 @@ export function PublicHeader() {
           <Link href="/catalog" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Patterns</Link>
         </span>
         {isSignedIn ? (
-          <Link href="/feed" className="inline-flex min-h-[44px] items-center rounded-full bg-ink px-[22px] text-[15px] font-semibold text-white no-underline">Open SewSpace</Link>
+          <Link href="/feed" className="inline-flex min-h-[44px] items-center rounded-full bg-ink px-[22px] text-[15px] font-semibold text-white no-underline">Open Seams Club</Link>
         ) : (
           <div className="flex gap-2">
             <Link href={authHref('sign-in')} className="hidden min-h-[44px] items-center rounded-full border border-ink px-[22px] text-[15px] font-medium text-ink no-underline sm:inline-flex">Log in</Link>

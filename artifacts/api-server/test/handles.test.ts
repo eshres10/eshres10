@@ -19,6 +19,10 @@ test("every route word from the brief is reserved", () => {
   for (const word of ["admin", "api", "explore", "feed", "forum", "settings", "studio", "challenges", "patterns", "products", "makes", "sign-in", "sign-up", "help"]) {
     assert.ok(RESERVED_HANDLES.has(word), word);
   }
+  for (const brandHandle of ["sewspace", "seamsclub", "seams_club"]) {
+    assert.ok(RESERVED_HANDLES.has(brandHandle), brandHandle);
+    assert.equal(handleProblem(brandHandle), "reserved");
+  }
   assert.equal(handleProblem("forum"), "reserved");
   assert.equal(handleProblem("vite"), "reserved");
 });

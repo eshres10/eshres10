@@ -39,7 +39,7 @@ export function CatalogPage() {
   const [adding, setAdding] = useState(false);
   const ask = useRequireSignIn();
   useEffect(() => { const t = setTimeout(() => setDebounced(q), 250); return () => clearTimeout(t); }, [q]);
-  useEffect(() => { document.title = 'Sewing patterns and supplies · SewSpace'; }, []);
+  useEffect(() => { document.title = 'Sewing patterns and supplies · Seams Club'; }, []);
   const list = useListCatalog({ kind, q: debounced.trim() || undefined });
   const setKind = (next: Kind) => setLocation(next === 'pattern' ? '/catalog' : '/catalog?kind=product', { replace: true });
 

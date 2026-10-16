@@ -21,7 +21,7 @@ function guessCategory(kind: ItemKind, garmentType?: string): string {
 }
 
 /**
- * "On SewSpace: Willa Dress" under a studio item, or a button to link it to a
+  * "On Seams Club: Willa Dress" under a studio item, or a button to link it to a
  * shared page (search, or add a new page). Linking never shares the item itself.
  */
 export function CatalogLink({ kind, itemId, catalogId, name, maker, garmentType }: {
@@ -33,15 +33,15 @@ export function CatalogLink({ kind, itemId, catalogId, name, maker, garmentType 
     <div className="mt-3 flex flex-wrap items-center gap-x-2 text-xs">
       {catalogId && linked.data
         ? <>
-            <span className="text-subtle">On SewSpace:</span>
+            <span className="text-subtle">On Seams Club:</span>
             <Link href={catalogPath(linked.data)} className="inline-flex min-h-[32px] items-center gap-1 font-bold text-blue-ink"><ExternalLink size={12} aria-hidden="true" />{linked.data.name}</Link>
             <button type="button" onClick={() => setOpen(true)} className="min-h-[32px] font-semibold text-subtle underline">Change</button>
           </>
         : <button type="button" onClick={() => setOpen(true)} className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full border border-line px-3 font-semibold hover:bg-canvas">
-            <Link2 size={13} aria-hidden="true" />Link to a SewSpace page
+            <Link2 size={13} aria-hidden="true" />Link to a Seams Club page
           </button>}
       {open && (
-        <Sheet label="Link to a SewSpace page" onClose={() => setOpen(false)}>
+        <Sheet label="Link to a Seams Club page" onClose={() => setOpen(false)}>
           <LinkPicker kind={kind} itemId={itemId} current={catalogId ?? null} name={name} maker={maker ?? ''} category={guessCategory(kind, garmentType)} onDone={() => setOpen(false)} />
         </Sheet>
       )}
@@ -81,7 +81,7 @@ function LinkPicker({ kind, itemId, current, name, maker, category, onDone }: {
   }
   return (
     <div className="space-y-4">
-      <h2 className="font-display text-2xl">Link to a SewSpace page</h2>
+      <h2 className="font-display text-2xl">Link to a Seams Club page</h2>
       <p className="text-sm text-subtle">Your makes using this {kind} will show on that page, for the people who can already see them. The item itself stays as private as you set it.</p>
       <label className="relative block">
         <span className="sr-only">Search pages</span>

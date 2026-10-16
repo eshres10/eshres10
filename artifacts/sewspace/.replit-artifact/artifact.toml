@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Sewspace"
+title = "Seams Club"
 description = "A warm, visual digital sewing studio for organizing fabrics, threads, patterns, measurements, and sewing projects with AI-powered guidance."
 version = "1.0.0"
 id = "artifacts/sewspace"

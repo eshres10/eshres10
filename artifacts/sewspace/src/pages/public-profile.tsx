@@ -53,7 +53,7 @@ function ShareButton({ name }: { name: string }) {
   const share = async () => {
     const url = window.location.href.split('?')[0];
     try {
-      if (navigator.share) await navigator.share({ title: `${name} on SewSpace`, url });
+      if (navigator.share) await navigator.share({ title: `${name} on Seams Club`, url });
       else {
         await navigator.clipboard.writeText(url);
         setCopied(true);
@@ -334,7 +334,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
   const p = profile.data;
 
   useEffect(() => {
-    if (p) document.title = `${p.name} (@${p.handle}) · SewSpace`;
+    if (p) document.title = `${p.name} (@${p.handle}) · Seams Club`;
   }, [p]);
 
   if (profile.isLoading) return <AdaptiveLayout><Loading /></AdaptiveLayout>;

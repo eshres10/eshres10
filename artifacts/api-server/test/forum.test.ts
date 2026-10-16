@@ -13,7 +13,7 @@ const { getTopic, listReplies, viewerFor } = await import("../src/access");
 // reports and blocks.
 const dir = mkdtempSync(path.join(tmpdir(), "sewspace-forum-"));
 const indexHtmlPath = path.join(dir, "index.html");
-writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Sewspace</title></head><body></body></html>`);
+writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Seams Club</title></head><body></body></html>`);
 const origin = await startApp({ indexHtmlPath });
 
 const ask = as(origin, "q_ask");
@@ -171,7 +171,7 @@ test("reports, deletes and blocks", async () => {
 test("page HTML and sitemap", async () => {
   const html = await fetch(`${origin}/forum/topics/${ids.question}`);
   assert.equal(html.status, 200);
-  assert.match(await html.text(), /<title>How do I stop linen shifting while I cut\? · Question · SewSpace forum<\/title>/);
+  assert.match(await html.text(), /<title>How do I stop linen shifting while I cut\? · Question · Seams Club forum<\/title>/);
   assert.equal((await fetch(`${origin}/forum`)).status, 200);
   assert.equal((await fetch(`${origin}/forum/topics/999999`)).status, 404);
   assert.match(await (await fetch(`${origin}/sitemap.xml`)).text(), new RegExp(`/forum/topics/${ids.question}<`));

@@ -22,7 +22,7 @@ export function ChallengesPage() {
   const list = useListChallenges({ status: tab });
   const ask = useRequireSignIn();
   const [starting, setStarting] = useState(false);
-  useEffect(() => { document.title = 'Sewing challenges · SewSpace'; }, []);
+  useEffect(() => { document.title = 'Sewing challenges · Seams Club'; }, []);
   return (
     <div className="mx-auto max-w-[1232px]">
       <div className="flex flex-wrap items-end justify-between gap-3">

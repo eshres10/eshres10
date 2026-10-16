@@ -7,7 +7,7 @@ import { as, ownerSql, startApp } from "./harness";
 
 const dir = mkdtempSync(path.join(tmpdir(), "sewspace-vis-"));
 const indexHtmlPath = path.join(dir, "index.html");
-writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Sewspace</title></head><body><div id="root"></div></body></html>`);
+writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Seams Club</title></head><body><div id="root"></div></body></html>`);
 const origin = await startApp({ indexHtmlPath });
 
 const ann = as(origin, "v_ann"); // owner
@@ -121,7 +121,7 @@ test("your studio lists only your own items, even when others share theirs", asy
 test("make pages get meta tags and appear in the sitemap only when public", async () => {
   const page = await anon("GET", `/makes/${make.id}`);
   assert.equal(page.status, 200);
-  assert.match(page.text, /<title>Linen wrap dress by @v\.ann · SewSpace<\/title>/);
+  assert.match(page.text, /<title>Linen wrap dress by @v\.ann · Seams Club<\/title>/);
   assert.match(page.text, /og:image" content="http:\/\/127\.0\.0\.1:\d+\/api\/storage\/objects\/uploads\//);
   assert.match(page.headers.get("cache-control") ?? "", /public/);
   assert.equal((await anon("GET", `/makes/${forFollowers.id}`)).status, 404);

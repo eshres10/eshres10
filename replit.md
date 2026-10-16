@@ -1,4 +1,4 @@
-# SewSpace
+# Seams Club
 
 A social space for the sewing community built on a private sewing studio. **Read `CLAUDE.md` first**: it has the stack, the agreed decisions, access rules and gotchas.
 

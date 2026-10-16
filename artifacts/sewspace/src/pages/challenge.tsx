@@ -155,7 +155,7 @@ export function ChallengePage({ slug }: { slug: string }) {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
-  useEffect(() => { const c = page.data?.challenge; if (c) document.title = `#${c.tag}: ${c.title} · SewSpace`; }, [page.data]);
+  useEffect(() => { const c = page.data?.challenge; if (c) document.title = `#${c.tag}: ${c.title} · Seams Club`; }, [page.data]);
 
   if (page.isLoading) return <Loading />;
   if (!page.data) return <NotFound embedded />;
@@ -180,7 +180,7 @@ export function ChallengePage({ slug }: { slug: string }) {
     setLocation(`/new?challenge=${c.slug}`);
   };
   const share = async () => {
-    if (await shareLink(window.location.href.split('#')[0], `#${c.tag} on SewSpace`)) { setCopied(true); setTimeout(() => setCopied(false), 2000); }
+    if (await shareLink(window.location.href.split('#')[0], `#${c.tag} on Seams Club`)) { setCopied(true); setTimeout(() => setCopied(false), 2000); }
   };
 
   return (

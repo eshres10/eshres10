@@ -172,7 +172,7 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
   const reviews = useGetCatalogReviews(kind as 'pattern', slug, { query: { retry: false, enabled: valid } });
   useEffect(() => {
     const e = page.data?.entry;
-    if (e) document.title = `${e.name}${e.maker ? ` by ${e.maker}` : ''} · SewSpace`;
+    if (e) document.title = `${e.name}${e.maker ? ` by ${e.maker}` : ''} · Seams Club`;
   }, [page.data]);
   useEffect(() => {
     if (reviews.data && window.location.hash.startsWith('#review-')) document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
@@ -215,7 +215,7 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
           {e.description && <p className="mt-5 max-w-xl whitespace-pre-line text-[15px] leading-relaxed">{e.description}</p>}
           <div className="mt-6"><Actions page={page.data} /></div>
           <p className="mt-4 text-sm text-subtle">
-            {e.kind === 'pattern' && 'Pattern files are never shared on SewSpace. '}
+            {e.kind === 'pattern' && 'Pattern files are never shared on Seams Club. '}
             {e.url && <a href={e.url} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex items-center gap-1 font-semibold text-blue-ink">Buy it from the {e.kind === 'pattern' ? 'designer' : 'shop'}<ExternalLink size={13} aria-hidden="true" /></a>}
           </p>
         </div>

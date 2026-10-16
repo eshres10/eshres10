@@ -45,7 +45,7 @@ function Tile({ post }: { post: FeedPost }) {
 export function ExplorePage() {
   const [kind, setKind] = useState<Kind>('all');
   const [sort, setSort] = useState<Sort>('recent');
-  useEffect(() => { document.title = 'Explore · SewSpace'; }, []);
+  useEffect(() => { document.title = 'Explore · Seams Club'; }, []);
   const feed = useInfiniteQuery({
     queryKey: FEED_KEYS.explore(kind, sort),
     queryFn: ({ pageParam }) => getExploreFeed({ kind, sort, ...(pageParam ? { cursor: pageParam } : {}) }),

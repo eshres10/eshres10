@@ -13,7 +13,7 @@ export function PostPage({ id }: { id: number }) {
   const post = useGetPublicPost(id, { query: { retry: false, enabled: Number.isFinite(id) } });
   useEffect(() => {
     const p = post.data;
-    if (p) document.title = p.caption ? `${p.author.name} on SewSpace: “${p.caption.slice(0, 60)}”` : `@${p.author.handle} on SewSpace`;
+    if (p) document.title = p.caption ? `${p.author.name} on Seams Club: “${p.caption.slice(0, 60)}”` : `@${p.author.handle} on Seams Club`;
   }, [post.data]);
   if (post.isLoading) return <Loading />;
   if (!post.data) return <NotFound embedded />;

@@ -50,7 +50,7 @@ export function PublicMakePage({ id }: { id: number }) {
   const m = make.data;
 
   useEffect(() => {
-    if (m) document.title = `${m.name}${m.owner ? ` by @${m.owner.handle}` : ''} · SewSpace`;
+    if (m) document.title = `${m.name}${m.owner ? ` by @${m.owner.handle}` : ''} · Seams Club`;
   }, [m]);
 
   if (make.isLoading) return <><PublicHeader /><main className="mx-auto max-w-[1232px] px-4 pt-7"><Loading /></main></>;

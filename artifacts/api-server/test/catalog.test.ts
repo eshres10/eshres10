@@ -12,7 +12,7 @@ const { getCatalogPage, listReviews, viewerFor } = await import("../src/access")
 // helpful votes, and what each kind of viewer sees on a page.
 const dir = mkdtempSync(path.join(tmpdir(), "sewspace-catalog-"));
 const indexHtmlPath = path.join(dir, "index.html");
-writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Sewspace</title></head><body></body></html>`);
+writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Seams Club</title></head><body></body></html>`);
 const origin = await startApp({ indexHtmlPath });
 
 const kim = as(origin, "k_kim"); // makes things with the pattern
@@ -189,7 +189,7 @@ test("page HTML and sitemap", async () => {
   const page = await fetch(`${origin}/catalog/pattern/fernhill-willa-dress`);
   assert.equal(page.status, 200);
   const html = await page.text();
-  assert.match(html, /<title>Willa Dress by Fernhill Patterns · Sewing pattern · SewSpace<\/title>/);
+  assert.match(html, /<title>Willa Dress by Fernhill Patterns · Sewing pattern · Seams Club<\/title>/);
   assert.match(html, /rel="canonical" href="[^"]*\/catalog\/pattern\/fernhill-willa-dress"/);
   assert.equal(page.headers.get("cache-control"), "public, max-age=60");
   assert.equal((await fetch(`${origin}/catalog`)).status, 200);

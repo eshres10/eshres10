@@ -7,7 +7,7 @@ import { FeedList } from '@/components/feed/FeedList';
 
 /** Posts you saved (private to you), most recently saved first. */
 export function SavedPage() {
-  useEffect(() => { document.title = 'Saved · SewSpace'; }, []);
+  useEffect(() => { document.title = 'Saved · Seams Club'; }, []);
   return (
     <div className="mx-auto max-w-[600px]">
       <p className="mb-4 text-sm text-subtle">Only you can see what you've saved. Posts that are deleted or no longer shared with you drop off this list.</p>

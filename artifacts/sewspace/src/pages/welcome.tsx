@@ -68,9 +68,9 @@ export function WelcomePage() {
       <main className="grid min-h-[100dvh] place-items-center px-4 py-10">
         <section className="w-full max-w-[460px] rounded-[40px] bg-white p-7 sm:p-10">
           <Logo />
-          <p className="eyebrow mt-8">Welcome to SewSpace</p>
+          <p className="eyebrow mt-8">Welcome to Seams Club</p>
           <h1 className="mt-2 font-display text-[34px] leading-[1.05]">Choose your handle</h1>
-          <p className="mt-3 text-[15px] leading-relaxed text-subtle">It's how people find you and your makes. Your profile page will be at sewspace/@handle. You can change it later in settings.</p>
+          <p className="mt-3 text-[15px] leading-relaxed text-subtle">It's how people find you and your makes. Your profile page will be at seamsclub.app/@handle. You can change it later in settings.</p>
           <div className="mt-7"><WelcomeForm /></div>
         </section>
       </main>

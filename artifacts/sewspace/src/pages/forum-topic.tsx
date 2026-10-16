@@ -143,7 +143,7 @@ export function ForumTopicPage({ id }: { id: number }) {
   const [replyTo, setReplyTo] = useState<{ id: number; handle: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  useEffect(() => { if (topic.data) document.title = `${topic.data.title} · Forum · SewSpace`; }, [topic.data]);
+  useEffect(() => { if (topic.data) document.title = `${topic.data.title} · Forum · Seams Club`; }, [topic.data]);
   useEffect(() => {
     const hash = window.location.hash.slice(1);
     if (replies.data && hash) document.getElementById(hash)?.scrollIntoView();

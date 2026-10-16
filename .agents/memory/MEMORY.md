@@ -1,0 +1,1 @@
+- [Manual web builds](manual-web-build-env.md) — direct Vite builds need the artifact's `PORT` and `BASE_PATH` environment variables.

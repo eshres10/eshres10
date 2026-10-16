@@ -28,7 +28,7 @@ export function ForumPage() {
   const [composing, setComposing] = useState(false);
   const ask = useRequireSignIn();
   useEffect(() => { const t = setTimeout(() => setDebounced(q), 300); return () => clearTimeout(t); }, [q]);
-  useEffect(() => { document.title = 'Forum · SewSpace'; }, []);
+  useEffect(() => { document.title = 'Forum · Seams Club'; }, []);
 
   const go = (next: Record<string, string | undefined>) => {
     const p = new URLSearchParams(params);

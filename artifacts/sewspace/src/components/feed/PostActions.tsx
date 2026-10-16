@@ -63,7 +63,7 @@ export function PostActions({ post, onComment }: { post: FeedPost; onComment?: (
     }
   };
   const share = async () => {
-    if (await shareLink(postUrl(post.id), `@${post.author.handle} on SewSpace`)) {
+    if (await shareLink(postUrl(post.id), `@${post.author.handle} on Seams Club`)) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     }

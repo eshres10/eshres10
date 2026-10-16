@@ -108,7 +108,7 @@ export function SafetyMenu({ kind, targetId, what, authorHandle, label, leaveOnB
   return (
     <>
       <button type="button" aria-label={label} style={{ width: size, height: size }}
-        onClick={() => { if (ask({ title: `Sign in to report or block`, body: "Reports go to the SewSpace admins. You'll come straight back here." })) setView('menu'); }}
+        onClick={() => { if (ask({ title: `Sign in to report or block`, body: "Reports go to the Seams Club admins. You'll come straight back here." })) setView('menu'); }}
         className="grid shrink-0 place-items-center rounded-full hover:bg-canvas">
         <MoreHorizontal size={20} />
       </button>
