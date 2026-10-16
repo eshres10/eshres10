@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SewSpace mobile — new post</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #f2f2f2; font-family: 'Inter', system-ui, sans-serif; color: #000">
+
+  <header style="position: absolute; left: 12px; right: 12px; top: 12px; z-index: 2; display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 24px; padding: 6px; box-shadow: rgba(0,0,0,.2) 0 10px 10px -5px">
+    <a href="MFeed.dc.html" aria-label="Discard and close" style="width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></a>
+    <span style="flex: 1; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.04em">New post</span>
+    <button style="min-height: 44px; padding: 0 22px; border: 0; border-radius: 3000px; background: #e6e51e; font: inherit; font-size: 15px; font-weight: 700">Post</button>
+  </header>
+
+  <div style="position: absolute; left: 12px; right: 12px; top: 80px; bottom: 12px; overflow: hidden; display: flex; flex-direction: column; gap: 10px">
+    <div role="tablist" aria-label="Post type" style="display: flex; gap: 4px; background: #fff; border-radius: 3000px; padding: 4px">
+      <button role="tab" aria-selected="true" style="flex: 1; min-height: 40px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-weight: 700; font-size: 14px">Photos</button>
+      <button role="tab" aria-selected="false" style="flex: 1; min-height: 40px; border: 0; border-radius: 3000px; background: transparent; font: inherit; font-weight: 700; font-size: 14px">Status</button>
+    </div>
+
+    <div style="background: #fff; border-radius: 24px; padding: 12px">
+      <div style="display: flex; gap: 8px">
+        <span style="position: relative; width: 84px; height: 105px; flex-shrink: 0; border-radius: 16px; overflow: hidden"><img src="/_blob/e9b9124af50eb749d99a9f4a4477d928" alt="Sailor collar top" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center 20%"><span style="position: absolute; left: 6px; top: 6px; background: #e6e51e; border-radius: 3000px; padding: 1px 7px; font-size: 10px; font-weight: 700">Cover</span></span>
+        <img src="/_blob/5bf905114ac1edcca363e2d2dc675860" alt="Knot bag from the offcuts" style="width: 84px; height: 105px; flex-shrink: 0; border-radius: 16px; object-fit: cover">
+        <img src="/_blob/973249613519f24b590d1a29562f5378" alt="The linen before cutting" style="width: 84px; height: 105px; flex-shrink: 0; border-radius: 16px; object-fit: cover">
+        <button aria-label="Add photos" style="width: 84px; height: 105px; flex-shrink: 0; border-radius: 16px; border: 2px dashed #bbb; background: #fafafa; display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.camera}}"></path></svg></button>
+      </div>
+      <p style="margin: 8px 0 0; font-size: 12px; color: #555">3 of 10 photos · resized and compressed automatically</p>
+    </div>
+
+    <label style="display: block; background: #fff; border-radius: 24px; padding: 12px 14px">
+      <span style="display: block; font-size: 12px; font-weight: 700; color: #555">Caption</span>
+      <textarea rows="3" style="margin-top: 4px; width: 100%; border: 0; resize: none; font: inherit; font-size: 15px; line-height: 1.5; outline: none">Sailor collar set is done! Plus a little knot bag from the offcuts, because nothing goes to waste.</textarea>
+    </label>
+
+    <div style="background: #fff; border-radius: 24px; padding: 6px 14px">
+      <div style="display: flex; align-items: center; gap: 12px; min-height: 52px; border-bottom: 1px solid #e6e6e6">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.kanban}}"></path></svg>
+        <span style="flex: 1; font-size: 14px; font-weight: 600">Make</span>
+        <span style="display: inline-flex; align-items: center; gap: 6px; background: #e6e51e; border-radius: 3000px; padding: 5px 6px 5px 12px; font-size: 13px; font-weight: 700">Sailor collar set <button aria-label="Remove make tag" style="width: 22px; height: 22px; border: 0; border-radius: 50%; background: #000; display: grid; place-items: center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button></span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; min-height: 52px; border-bottom: 1px solid #e6e6e6">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.book}}"></path></svg>
+        <span style="flex: 1; font-size: 14px; font-weight: 600">Pattern</span>
+        <span style="font-size: 13px; color: #555">Bayside Sailor Top · from make</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 12px; min-height: 52px">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.tag}}"></path></svg>
+        <span style="flex: 1; font-size: 14px; font-weight: 600">Fabric or product</span>
+        <button style="min-height: 34px; padding: 0 12px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 13px; font-weight: 600">Add tag</button>
+      </div>
+    </div>
+
+    <div style="background: #fff; border-radius: 24px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.trophy}}"></path></svg>
+      <span style="flex: 1"><span style="display: block; font-size: 14px; font-weight: 600">Enter in a challenge</span><span style="display: block; font-size: 12px; color: #555">Sew From Your Stash · starts in 9 days</span></span>
+      <button role="switch" aria-checked="false" aria-label="Enter in Sew From Your Stash" style="width: 52px; height: 32px; border: 0; padding: 0; border-radius: 3000px; background: #8a8a8a; position: relative"><span style="position: absolute; left: 4px; top: 4px; width: 24px; height: 24px; border-radius: 50%; background: #fff"></span></button>
+    </div>
+
+    <div style="background: #000; color: #fff; border-radius: 24px; padding: 14px">
+      <div style="font-size: 13px; font-weight: 700">Who can see this?</div>
+      <div role="radiogroup" aria-label="Visibility" style="margin-top: 10px; display: flex; gap: 4px; background: #2a2a2a; border-radius: 3000px; padding: 4px">
+        <sc-for list="{{vis}}" as="v" hint-placeholder-count="3">
+          <button role="radio" aria-checked="{{v.checked}}" onClick="{{v.pick}}" style="flex: 1; display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 40px; border: 0; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; {{v.style}}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{v.icon}}"></path></svg>{{v.label}}</button>
+        </sc-for>
+      </div>
+      <p style="margin: 10px 0 0; font-size: 12px; line-height: 1.5; color: #c9c9c9">{{visNote}}</p>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { vis: 'public' }; }
+  renderVals() {
+    var self = this;
+    var i = {
+      camera: "M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z M12 10a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+      kanban: "M3 3h18v18H3z M8 7v7 M12 7v4 M16 7v9",
+      book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z",
+      tag: "M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l8.59-8.59a1 1 0 0 0 0-1.41z M7 7h.01",
+      trophy: "M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 22h16 M18 2H6v7a6 6 0 0 0 12 0V2Z",
+      globe: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+      users: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
+      lock: "M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4"
+    };
+    var notes = {
+      'public': 'Anyone can see it, even without an account. It also appears on the pattern page.',
+      followers: 'Only your followers will see this post.',
+      'private': 'Only you. Handy for drafts and progress you are not ready to share.'
+    };
+    var v = this.state.vis;
+    var opts = [{ id: 'public', label: 'Public', icon: i.globe }, { id: 'followers', label: 'Followers', icon: i.users }, { id: 'private', label: 'Only me', icon: i.lock }];
+    return {
+      i: i,
+      visNote: notes[v],
+      vis: opts.map(function (o) {
+        var sel = o.id === v;
+        return { label: o.label, icon: o.icon, checked: sel ? 'true' : 'false', style: sel ? 'background:#e6e51e;color:#000' : 'background:transparent;color:#fff', pick: function () { self.setState({ vis: o.id }); } };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>

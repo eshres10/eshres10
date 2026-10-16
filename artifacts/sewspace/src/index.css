@@ -1,0 +1,133 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --font-sans: var(--app-font-sans);
+  --font-serif: var(--app-font-serif);
+  --font-mono: var(--app-font-mono);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* SewSpace design tokens (docs/design). Use these, not hex values. */
+  --color-yellow: #e6e51e;
+  --color-ink: #000000;
+  --color-red: #f34646;
+  --color-red-ink: #c42a2a;
+  --color-blue: #466cf3;
+  --color-blue-ink: #2f55d4;
+  --color-peach: #ff8562;
+  --color-peach-soft: #ffe4df;
+  --color-canvas: #f2f2f2;
+  --color-line: #e6e6e6;
+  --color-subtle: #555555;
+  --font-display: 'Poppins', system-ui, sans-serif;
+  --radius-card: 30px;
+  --radius-pill: 3000px;
+  --shadow-float: rgba(0, 0, 0, .2) 0 10px 10px -5px;
+}
+
+:root {
+  --background: 0 0% 95%;
+  --foreground: 0 0% 0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 0%;
+  --border: 0 0% 90%;
+  --input: 0 0% 70%;
+  --ring: 60 80% 51%;
+  --primary: 60 80% 51%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 14 100% 69%;
+  --muted: 0 0% 90%;
+  --muted-foreground: 0 0% 35%;
+  --accent: 228 88% 61%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 88% 61%;
+  --app-font-sans: 'Inter', system-ui, sans-serif;
+  --app-font-serif: 'Poppins', system-ui, sans-serif;
+  --app-font-mono: 'Inter', system-ui, sans-serif;
+  --radius: 1rem;
+  --shadow-soft: rgba(0, 0, 0, .2) 0 10px 10px -5px;
+  --shadow-card: none;
+  --style-yellow: #e6e51e;
+  --style-red: #f34646;
+  --style-blue: #466cf3;
+  --style-peach: #ff8562;
+  --style-black: #000;
+  --style-white: #fff;
+  --style-canvas: #f2f2f2;
+  --style-line: #e6e6e6;
+  --style-red-ink: #c42a2a;
+}
+.dark {
+  --background: 0 0% 5%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 100%;
+  --border: 0 0% 25%;
+  --input: 0 0% 35%;
+  --ring: 60 80% 51%;
+  --primary: 60 80% 51%;
+  --primary-foreground: 0 0% 0%;
+  --secondary: 14 100% 69%;
+  --muted: 0 0% 16%;
+  --muted-foreground: 0 0% 72%;
+  --accent: 228 88% 61%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 88% 61%;
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground antialiased;
+    background-image: radial-gradient(#d4d4d4 1px, transparent 1px);
+    background-size: 20px 20px;
+  }
+  button, a, input, textarea, select { -webkit-tap-highlight-color: transparent; }
+}
+
+@layer utilities {
+  .font-display { font-family: var(--app-font-serif); font-weight: 700; letter-spacing: -.055em; }
+  .font-mono-custom { font-family: var(--app-font-mono); }
+  .paper-grain::after { content: ''; position: fixed; inset: 0; pointer-events: none; opacity: 0; z-index: 50; }
+}
+
+.studio-card { background: #fff; border: 1px solid var(--style-line); border-radius: 30px !important; box-shadow: none; }
+.field { width: 100%; min-height: 46px; font-size: 16px; font-weight: 400; border: 1px solid #000; background: #fff; border-radius: 16px; padding: .7rem .85rem; color: #000; outline: none; transition: border-color .18s ease, box-shadow .18s ease; }
+.field[data-testid^="input-search-"] { padding-left: 2.5rem; }
+.field[aria-required="true"] { border-color: #000; }
+label:has(.field[required]) > span:first-child::after { content: " *"; color: var(--style-red); }
+.field:focus { border-color: #000; box-shadow: 0 0 0 4px rgba(230,229,30,.55); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .45rem; border-radius: 3000px; padding: .7rem 1.15rem; min-height: 44px; font-size: .84rem; font-weight: 700; transition: transform .18s ease, background-color .18s ease, color .18s ease; }
+.btn:hover { transform: translateY(-1px); }
+.btn-primary { background: var(--style-yellow); color: #000; }
+.btn-primary:hover { background: #000; color: #fff; }
+.btn-quiet { background: #fff; color: #000; border: 1px solid #000; }
+.btn-quiet:hover { background: var(--style-yellow); }
+.btn-line { border: 1px solid #000; color: #000; background: #fff; }
+.btn-line:hover { background: #000; color: #fff; }
+.eyebrow { color: #000; font-family: var(--app-font-sans); text-transform: uppercase; letter-spacing: .16em; font-size: 11px; font-weight: 700; }
+.eyebrow-red { color: var(--style-red-ink, #c42a2a); }
+.fade-up { animation: fade-up .55s ease both; }
+.delay-1 { animation-delay: .08s; }
+.delay-2 { animation-delay: .16s; }
+.delay-3 { animation-delay: .24s; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }

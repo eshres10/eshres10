@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SewSpace — Make log</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+</style>
+</helmet>
+<div style="min-height: 100vh; background-color: #f2f2f2; background-image: radial-gradient(#d4d4d4 1px, transparent 1px); background-size: 20px 20px; font-family: 'Inter', system-ui, sans-serif; color: #000; padding: 18px; display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+
+  <aside style="flex: 1 1 260px; max-width: 100%; background: #e6e51e; border-radius: 30px; padding: 22px 16px; display: flex; flex-direction: column; gap: 22px">
+    <a href="AppFeed.dc.html" style="display: flex; align-items: center; gap: 10px; padding: 0 8px; text-decoration: none; color: #000">
+      <span style="width: 36px; height: 36px; border-radius: 11px; background: #000; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#e6e51e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.scissors}}"></path></svg></span>
+      <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.04em">sewspace</span>
+    </a>
+    <sc-for list="{{nav}}" as="g" hint-placeholder-count="3">
+      <nav aria-label="{{g.label}}">
+        <div style="padding: 0 12px 6px; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">{{g.label}}</div>
+        <sc-for list="{{g.items}}" as="n" hint-placeholder-count="4">
+          <a href="{{n.href}}" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 12px; border-radius: 18px; text-decoration: none; font-size: 14px; font-weight: 600; {{n.style}}"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{n.icon}}"></path></svg>{{n.label}}</a>
+        </sc-for>
+      </nav>
+    </sc-for>
+  </aside>
+
+  <div style="flex: 999 1 640px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+    <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; background: #fff; border-radius: 30px; padding: 10px 12px 10px 18px; box-shadow: rgba(0,0,0,.2) 0 10px 10px -5px">
+      <a href="#" style="display: inline-flex; align-items: center; gap: 6px; min-height: 44px; font-size: 14px; font-weight: 600; text-decoration: none"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="{{i.back}}"></path></svg>Projects &amp; makes</a>
+      <span style="margin-left: auto; font-size: 13px; color: #555">Saved just now</span>
+      <button style="min-height: 44px; padding: 0 18px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 14px; font-weight: 600">Edit details</button>
+    </header>
+
+    <section style="background: #fff; border-radius: 34px; padding: clamp(22px, 3vw, 34px); display: flex; flex-wrap: wrap; gap: 24px; align-items: center">
+      <img src="/_blob/e9b9124af50eb749d99a9f4a4477d928" alt="Sailor collar top in brown linen" style="width: 132px; height: 132px; flex-shrink: 0; border-radius: 28px; object-fit: cover; object-position: center 20%">
+      <div style="flex: 1 1 320px; min-width: 0">
+        <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center"><span style="background: #ff8562; border-radius: 3000px; padding: 4px 11px; font-size: 12px; font-weight: 700">Fitting</span><span style="font-size: 13px; color: #555">Started 21 Sep</span></div>
+        <h1 style="margin: 10px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: clamp(30px, 3.4vw, 44px); line-height: 1.05; letter-spacing: -0.05em">Sailor collar set</h1>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; font-size: 13px"><span>6 of 8 steps</span><b>75%</b></div>
+        <div style="margin-top: 6px; height: 10px; border-radius: 3000px; background: #f2f2f2; overflow: hidden"><div style="width: 75%; height: 100%; background: #000; border-radius: 3000px"></div></div>
+      </div>
+    </section>
+
+    <section aria-label="Who can see this make" style="background: #000; color: #fff; border-radius: 34px; padding: 24px; display: flex; flex-wrap: wrap; gap: 18px 24px; align-items: center">
+      <div style="flex: 1 1 260px">
+        <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.04em">Who can see this make?</h2>
+        <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.5; color: #d6d6d6">{{visNote}}</p>
+      </div>
+      <div role="radiogroup" aria-label="Visibility" style="display: flex; gap: 4px; background: #2a2a2a; border-radius: 3000px; padding: 4px">
+        <sc-for list="{{vis}}" as="v" hint-placeholder-count="3">
+          <button role="radio" aria-checked="{{v.checked}}" onClick="{{v.pick}}" style="display: inline-flex; align-items: center; gap: 7px; min-height: 42px; padding: 0 16px; border: 0; border-radius: 3000px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; {{v.style}}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{v.icon}}"></path></svg>{{v.label}}</button>
+        </sc-for>
+      </div>
+      <div style="flex: 1 1 100%; display: flex; flex-wrap: wrap; gap: 8px; border-top: 1px solid #3a3a3a; padding-top: 16px">
+        <button style="display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 18px; border: 0; border-radius: 3000px; background: #e6e51e; font: inherit; font-size: 14px; font-weight: 700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.send}}"></path></svg>Share as a post</button>
+        <button style="display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 18px; border: 1px solid #fff; border-radius: 3000px; background: transparent; color: #fff; font: inherit; font-size: 14px; font-weight: 600"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.trophy}}"></path></svg>Enter in a challenge</button>
+        <span style="align-self: center; font-size: 12px; color: #c9c9c9">Measurements and pattern files are never shared.</span>
+      </div>
+    </section>
+
+    <div style="display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+      <main style="flex: 999 1 480px; min-width: 0; display: flex; flex-direction: column; gap: 18px">
+        <section style="background: #fff; border-radius: 34px; padding: 26px">
+          <div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.04em">Steps</h2><button style="min-height: 38px; padding: 0 14px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 13px; font-weight: 600">Add step</button></div>
+          <ol style="margin: 14px 0 0; padding: 0; list-style: none">
+            <sc-for list="{{steps}}" as="s" hint-placeholder-count="8">
+              <li style="display: flex; align-items: center; gap: 12px; min-height: 48px; border-top: 1px solid #e6e6e6">
+                <span style="width: 24px; height: 24px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center; {{s.box}}"><sc-if value="{{s.done}}" hint-placeholder-val="{{false}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></sc-if></span>
+                <span style="flex: 1; font-size: 15px; {{s.text}}">{{s.title}}</span>
+              </li>
+            </sc-for>
+          </ol>
+        </section>
+        <section style="background: #fff; border-radius: 34px; padding: 26px">
+          <div style="display: flex; justify-content: space-between; align-items: center"><h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.04em">Progress photos</h2><button style="min-height: 38px; padding: 0 14px; border: 0; border-radius: 3000px; background: #ff8562; font: inherit; font-size: 13px; font-weight: 600">Add photos</button></div>
+          <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px">
+            <img src="/_blob/973249613519f24b590d1a29562f5378" alt="The chocolate linen before cutting" style="display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 18px">
+            <img src="/_blob/e9b9124af50eb749d99a9f4a4477d928" alt="First fitting of the sailor top" style="display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 18px; object-position: center 20%">
+            <img src="/_blob/5bf905114ac1edcca363e2d2dc675860" alt="Knot bag sewn from the offcuts" style="display: block; width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 18px">
+            <span style="aspect-ratio: 1/1; border-radius: 18px; border: 2px dashed #ccc; display: grid; place-items: center; font-size: 13px; color: #555">Drop photos</span>
+          </div>
+        </section>
+        <section style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px">
+          <sc-for list="{{journal}}" as="j" hint-placeholder-count="4">
+            <div style="background: #fff; border-radius: 26px; padding: 18px">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #c42a2a">{{j.title}}</div>
+              <p style="margin: 8px 0 0; font-size: 14px; line-height: 1.55">{{j.text}}</p>
+            </div>
+          </sc-for>
+        </section>
+      </main>
+
+      <aside style="flex: 1 1 320px; display: flex; flex-direction: column; gap: 18px">
+        <section style="background: #fff; border-radius: 34px; padding: 24px">
+          <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.04em">Materials</h2>
+          <div style="margin-top: 12px; display: flex; flex-direction: column">
+            <sc-for list="{{materials}}" as="m" hint-placeholder-count="6">
+              <div style="display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid #e6e6e6">
+                <span style="width: 36px; height: 36px; flex-shrink: 0; border-radius: 12px; display: grid; place-items: center; {{m.chip}}"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{m.icon}}"></path></svg></span>
+                <span style="flex: 1; min-width: 0"><span style="display: block; font-size: 12px; color: #555">{{m.kind}}</span><span style="display: block; font-size: 14px; font-weight: 600">{{m.name}}</span></span>
+                <sc-if value="{{m.link}}" hint-placeholder-val="{{false}}"><a href="Pattern.dc.html" style="font-size: 13px; font-weight: 600">{{m.link}}</a></sc-if>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+
+        <section aria-label="Sewing assistant" style="background: #fff; border-radius: 34px; overflow: hidden; border: 2px solid #000">
+          <div style="display: flex; align-items: center; gap: 10px; background: #000; color: #fff; padding: 16px 20px">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#e6e51e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.sparkles}}"></path></svg>
+            <span style="flex: 1"><span style="display: block; font-weight: 700; font-size: 15px">Ask about this make</span><span style="display: block; font-size: 12px; color: #c9c9c9">Reads this project and your stash only</span></span>
+            <button aria-label="Close assistant" style="width: 36px; height: 36px; border: 0; border-radius: 50%; background: #2a2a2a; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button>
+          </div>
+          <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; line-height: 1.5">
+            <div style="align-self: flex-end; max-width: 88%; background: #e6e51e; border-radius: 18px 18px 4px 18px; padding: 10px 14px">Is 2.4 m enough if I lengthen the skirt by 5 cm?</div>
+            <div style="max-width: 92%; background: #f2f2f2; border-radius: 18px 18px 18px 4px; padding: 10px 14px">Yes. The pattern asks for 2.1 m at 140 cm wide for your size. Adding 5 cm to the front and back panels uses about 10 cm more, so you'd have roughly 20 cm spare. Lay all pieces out before cutting the waistband.</div>
+            <div style="display: flex; flex-wrap: wrap; gap: 6px">
+              <button style="min-height: 36px; padding: 0 12px; border: 1px solid #e6e6e6; border-radius: 3000px; background: #fff; font: inherit; font-size: 12px; font-weight: 600">Suggest a lining</button>
+              <button style="min-height: 36px; padding: 0 12px; border: 1px solid #e6e6e6; border-radius: 3000px; background: #fff; font: inherit; font-size: 12px; font-weight: 600">Fix my waistband gap</button>
+            </div>
+            <label style="display: flex; gap: 8px; margin-top: 4px"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Message</span><input placeholder="Ask a sewing question…" style="flex: 1; min-height: 44px; border: 1px solid #000; border-radius: 16px; padding: 0 14px; font: inherit; font-size: 14px"><button aria-label="Send" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: #e6e51e; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.send}}"></path></svg></button></label>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1800}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { vis: 'private' }; }
+  renderVals() {
+    var self = this;
+    var i = {
+      scissors: "M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M20 4 8.12 15.88 M14.47 14.48 20 20 M8.12 8.12 12 12",
+      back: "m15 18-6-6 6-6",
+      send: "m22 2-7 20-4-9-9-4Z M22 2 11 13",
+      trophy: "M6 9H4.5a2.5 2.5 0 0 1 0-5H6 M18 9h1.5a2.5 2.5 0 0 0 0-5H18 M4 22h16 M18 2H6v7a6 6 0 0 0 12 0V2Z",
+      sparkles: "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z M19 3v4 M17 5h4",
+      globe: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+      users: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
+      lock: "M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4",
+      home: "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10",
+      compass: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z m4.24 5.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z",
+      kanban: "M3 3h18v18H3z M8 7v7 M12 7v4 M16 7v9",
+      layers: "m12 2 10 5-10 5L2 7z M2 17l10 5 10-5 M2 12l10 5 10-5",
+      spool: "M7 3h10 M7 21h10 M8 3v18 M16 3v18 M8 8h8 M8 12h8 M8 16h8",
+      book: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z",
+      ruler: "M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4z M7.5 10.5l2 2 M10.5 7.5l2 2 M13.5 4.5l2 2",
+      tag: "M12 2H2v10l9.29 9.29a1 1 0 0 0 1.41 0l8.59-8.59a1 1 0 0 0 0-1.41z M7 7h.01"
+    };
+    var on = 'background:#000;color:#fff', off = 'background:transparent;color:#000';
+    var notes = {
+      'private': 'Only you can see it. Your stash and patterns are private by default too.',
+      followers: 'People who follow you can see it on your profile and in their feed.',
+      'public': 'Anyone can see it, including people without an account. It will appear on the pattern page.'
+    };
+    var v = this.state.vis;
+    var opts = [{ id: 'private', label: 'Private', icon: i.lock }, { id: 'followers', label: 'Followers', icon: i.users }, { id: 'public', label: 'Public', icon: i.globe }];
+    var stepList = [['Pre-wash and press linen', true], ['Trace size 12, lengthen skirt 5 cm', true], ['Cut top, collar and skirt', true], ['Sew collar and facing', true], ['Attach collar, sew side seams', true], ['Gather skirt and attach waistband', true], ['Buttonholes and buttons', false], ['Hem both pieces and final press', false]];
+    return {
+      i: i,
+      visNote: notes[v],
+      vis: opts.map(function (o) {
+        var sel = o.id === v;
+        return { label: o.label, icon: o.icon, checked: sel ? 'true' : 'false', style: sel ? 'background:#e6e51e;color:#000' : 'background:transparent;color:#fff', pick: function () { self.setState({ vis: o.id }); } };
+      }),
+      nav: [
+        { label: 'Community', items: [
+          { label: 'Home', icon: i.home, style: off, href: 'AppFeed.dc.html' },
+          { label: 'Explore', icon: i.compass, style: off, href: '#' },
+          { label: 'Forum', icon: "M14 9a2 2 0 0 1-2 2H6l-4 4V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2z M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1", style: off, href: 'Forum.dc.html' },
+          { label: 'Challenges', icon: i.trophy, style: off, href: '#' }
+        ] },
+        { label: 'My studio', items: [
+          { label: 'Projects & makes', icon: i.kanban, style: on, href: '#' },
+          { label: 'Fabric stash', icon: i.layers, style: off, href: '#' },
+          { label: 'Thread drawer', icon: i.spool, style: off, href: '#' },
+          { label: 'Pattern library', icon: i.book, style: off, href: '#' },
+          { label: 'Measurements', icon: i.ruler, style: off, href: '#' }
+        ] },
+        { label: 'Help', items: [
+          { label: 'Sewing assistant', icon: i.sparkles, style: off, href: '#' }
+        ] }
+      ],
+      steps: stepList.map(function (s) { return { title: s[0], done: s[1], box: s[1] ? 'background:#e6e51e;border:2px solid #000' : 'background:#fff;border:2px solid #000', text: s[1] ? 'color:#555;text-decoration:line-through' : 'color:#000' }; }),
+      journal: [
+        { title: 'Notes', text: 'Cutting layout left enough offcut for a little knot bag.' },
+        { title: 'Alterations', text: 'Lengthened 5 cm at the lengthen line. Planning a 1 cm swayback.' },
+        { title: 'Problems', text: 'Linen shifted while cutting the back panel.' },
+        { title: 'Solutions', text: 'Starched the fabric and used pattern weights instead of pins.' }
+      ],
+      materials: [
+        { kind: 'Pattern', name: 'Bayside Sailor Top + A-line Skirt', link: 'Pattern page', icon: i.book, chip: 'background:#e6e51e;color:#000' },
+        { kind: 'Fabric', name: 'Chocolate linen · 2.4 m', link: 'Fabric page', icon: i.layers, chip: 'background:#466cf3;color:#fff' },
+        { kind: 'Thread', name: 'Brown all-purpose', link: '', icon: i.spool, chip: 'background:#ff8562;color:#000' },
+        { kind: 'Size made', name: '12, lengthened 5 cm', link: '', icon: i.tag, chip: 'background:#f2f2f2;color:#000' },
+        { kind: 'Notions', name: '20 cm invisible zip', link: 'Product page', icon: i.tag, chip: 'background:#f2f2f2;color:#000' },
+        { kind: 'Measurements', name: 'September 2026 · private', link: '', icon: i.lock, chip: 'background:#000;color:#fff' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SewSpace mobile — sign in to interact</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background-color: #f2f2f2; background-image: radial-gradient(#d4d4d4 1px, transparent 1px); background-size: 20px 20px; font-family: 'Inter', system-ui, sans-serif; color: #000">
+
+  <header style="position: absolute; left: 12px; right: 12px; top: 12px; display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 24px; padding: 6px 6px 6px 14px; box-shadow: rgba(0,0,0,.2) 0 10px 10px -5px">
+    <span style="width: 30px; height: 30px; border-radius: 9px; background: #e6e51e; display: grid; place-items: center"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.scissors}}"></path></svg></span>
+    <span style="flex: 1; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.04em">sewspace</span>
+    <a href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 16px; background: #000; color: #fff; border-radius: 3000px; text-decoration: none; font-size: 14px; font-weight: 700">Join</a>
+  </header>
+
+  <article aria-hidden="true" style="position: absolute; left: 12px; right: 12px; top: 80px; background: #fff; border-radius: 26px; overflow: hidden">
+    <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px"><span style="width: 36px; height: 36px; border-radius: 50%; background: #000; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px">D</span><div style="font-weight: 700; font-size: 14px">the.denim.drawer</div></div>
+    <img src="/_blob/1192463bd0067b49a26194ff1b40ec1c" alt="Denim pinafore over a cutwork blouse" style="display: block; width: 100%; aspect-ratio: 4/5; object-fit: cover">
+    <div style="display: flex; align-items: center; gap: 6px; padding: 8px 10px"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round"><path d="{{i.heart}}"></path></svg><b style="font-size: 14px">1.2k</b></div>
+  </article>
+
+  <div style="position: absolute; inset: 0; background: rgba(0,0,0,.45)"></div>
+
+  <div role="dialog" aria-labelledby="signin-title" style="position: absolute; left: 8px; right: 8px; bottom: 8px; background: #fff; border-radius: 32px; padding: 12px 20px 22px">
+    <span style="display: block; width: 44px; height: 5px; margin: 0 auto 18px; border-radius: 3000px; background: #d4d4d4"></span>
+    <span style="width: 56px; height: 56px; border-radius: 18px; background: #f34646; display: grid; place-items: center"><svg width="28" height="28" viewBox="0 0 24 24" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="{{i.heart}}"></path></svg></span>
+    <h1 id="signin-title" style="margin: 16px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 28px; line-height: 1.05; letter-spacing: -0.05em">Sign in to like this make</h1>
+    <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.5; color: #3a3a3a">It's free. You'll come straight back to this post, and your like will be saved.</p>
+    <div style="margin-top: 20px; display: flex; flex-direction: column; gap: 8px">
+      <button style="min-height: 52px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 15px; font-weight: 700">Continue with Google</button>
+      <button style="min-height: 52px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 15px; font-weight: 700">Continue with Apple</button>
+      <button style="min-height: 52px; border: 0; border-radius: 3000px; background: #e6e51e; font: inherit; font-size: 15px; font-weight: 700">Sign up with email</button>
+      <button style="min-height: 52px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 15px; font-weight: 700">I already have an account</button>
+    </div>
+    <button style="margin-top: 10px; width: 100%; min-height: 44px; border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 600; color: #555">Keep browsing</button>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      i: {
+        scissors: "M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M20 4 8.12 15.88 M14.47 14.48 20 20 M8.12 8.12 12 12",
+        heart: "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

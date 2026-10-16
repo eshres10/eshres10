@@ -7,7 +7,10 @@ id = "3B4_FFSkEVBkAeYMFRJ2e"
 [[services]]
 localPort = 8080
 name = "API Server"
-paths = ["/api"]
+# "/@", "/makes", "/posts", "/sitemap.xml" and "/robots.txt" come here so the server can inject <head> tags for
+# public pages (src/routes/seo.ts). In development, other "/@..." paths
+# (Vite's /@vite/client, /@fs/...) are forwarded back to the Vite dev server.
+paths = ["/api", "/@", "/makes", "/posts", "/sitemap.xml", "/robots.txt"]
 
 [services.development]
 run = "pnpm --filter @workspace/api-server run dev"

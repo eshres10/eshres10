@@ -33,6 +33,8 @@ export default defineConfig({
         fetch: {
           includeHttpResponseReturnType: false,
         },
+        // Newer orval cannot always detect the installed react-query; pin to v5.
+        query: { version: 5 },
         mutator: {
           path: path.resolve(apiClientReactSrc, "custom-fetch.ts"),
           name: "customFetch",

@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Sewspace"
+description = "A warm, visual digital sewing studio for organizing fabrics, threads, patterns, measurements, and sewing projects with AI-powered guidance."
+version = "1.0.0"
+id = "artifacts/sewspace"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 23614
+
+[services.development]
+run = "pnpm --filter @workspace/sewspace run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/sewspace", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/sewspace/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "23614"
+BASE_PATH = "/"

@@ -1,6 +1,6 @@
-# [Project name]
+# SewSpace
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+A social space for the sewing community built on a private sewing studio. **Read `CLAUDE.md` first**: it has the stack, the agreed decisions, access rules and gotchas.
 
 ## Run & Operate
 
@@ -8,7 +8,7 @@ _Replace the heading above with the project's name, and this line with one sente
 - `pnpm run typecheck` — full typecheck across all packages
 - `pnpm run build` — typecheck + build all packages
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate API hooks and Zod schemas from the OpenAPI spec
-- `pnpm --filter @workspace/db run push` — push DB schema changes (dev only)
+- `pnpm --filter @workspace/db run migrate` — apply SQL migrations in `lib/db/migrations` (runs automatically at API startup). Do not use `drizzle-kit push`.
 - Required env: `DATABASE_URL` — Postgres connection string
 
 ## Stack

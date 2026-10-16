@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SewSpace — Explore</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+</style>
+</helmet>
+<div style="min-height: 100vh; background-color: #f2f2f2; background-image: radial-gradient(#d4d4d4 1px, transparent 1px); background-size: 20px 20px; font-family: 'Inter', system-ui, sans-serif; color: #000; padding-bottom: 48px">
+
+  <header style="max-width: 1312px; margin: 0 auto; padding: 20px 16px 0">
+    <nav aria-label="Main" style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; background: #fff; border-radius: 30px; padding: 12px 14px 12px 22px; box-shadow: rgba(0,0,0,.2) 0 10px 10px -5px">
+      <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #000">
+        <span style="width: 36px; height: 36px; border-radius: 11px; background: #e6e51e; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.scissors}}"></path></svg></span>
+        <span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.04em">sewspace</span>
+      </a>
+      <label style="flex: 1 1 260px; position: relative; display: block">
+        <span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Search</span>
+        <svg style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%)" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="{{i.search}}"></path></svg>
+        <input type="search" placeholder="Search makes, patterns, sewists, #challenges" style="width: 100%; min-height: 46px; border: 1px solid #000; border-radius: 16px; padding: 0 16px 0 44px; font: inherit; font-size: 15px; background: #fff">
+      </label>
+      <div style="display: flex; gap: 8px; margin-left: auto">
+        <a href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border: 1px solid #000; border-radius: 3000px; text-decoration: none; font-weight: 500; font-size: 15px">Log in</a>
+        <a href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; background: #000; color: #fff; border-radius: 3000px; text-decoration: none; font-weight: 600; font-size: 15px">Join free</a>
+      </div>
+    </nav>
+  </header>
+
+  <main style="max-width: 1312px; margin: 0 auto; padding: 28px 16px 0">
+    <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 14px 20px; background: #e6e51e; border-radius: 24px; padding: 16px 20px">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.heart}}"></path></svg>
+      <p style="margin: 0; flex: 1 1 320px; font-size: 15px; font-weight: 500">You're browsing as a guest. Sign in to like, comment, follow sewists and join challenges. We'll bring you right back here.</p>
+      <a href="#" style="display: inline-flex; align-items: center; min-height: 44px; padding: 0 20px; background: #000; color: #fff; border-radius: 3000px; text-decoration: none; font-weight: 600; font-size: 14px">Sign in or join</a>
+    </div>
+
+    <div style="margin-top: 36px; display: flex; flex-wrap: wrap; align-items: flex-end; justify-content: space-between; gap: 16px">
+      <div>
+        <div style="color: #c42a2a; font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">Discover</div>
+        <h1 style="margin: 8px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: clamp(38px, 5vw, 60px); line-height: 1; letter-spacing: -0.06em">Explore</h1>
+      </div>
+      <div role="tablist" aria-label="Sort" style="display: flex; gap: 4px; background: #fff; border-radius: 3000px; padding: 4px">
+        <button role="tab" aria-selected="true" style="min-height: 40px; padding: 0 20px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-weight: 600; font-size: 14px">Popular</button>
+        <button role="tab" aria-selected="false" style="min-height: 40px; padding: 0 20px; border: 0; border-radius: 3000px; background: transparent; font: inherit; font-weight: 600; font-size: 14px">Recent</button>
+        <button role="tab" aria-selected="false" style="min-height: 40px; padding: 0 20px; border: 0; border-radius: 3000px; background: transparent; font: inherit; font-weight: 600; font-size: 14px">Makes only</button>
+      </div>
+    </div>
+
+    <div style="margin-top: 18px; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px">
+      <sc-for list="{{chips}}" as="c" hint-placeholder-count="10">
+        <button style="flex-shrink: 0; min-height: 40px; padding: 0 16px; border-radius: 3000px; font: inherit; font-size: 14px; font-weight: 600; {{c.style}}">{{c.label}}</button>
+      </sc-for>
+    </div>
+
+    <div style="margin-top: 24px; display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-start">
+      <section aria-label="Posts" style="flex: 999 1 560px; min-width: 0; columns: 250px; column-gap: 14px">
+        <sc-for list="{{posts}}" as="p" hint-placeholder-count="12">
+          <article style="break-inside: avoid; margin-bottom: 14px; background: #fff; border-radius: 24px; overflow: hidden">
+            <div style="position: relative; background: #e6e6e6"><img src="{{p.img}}" alt="{{p.alt}}" style="display: block; width: 100%; height: auto">
+              <sc-if value="{{p.multi}}" hint-placeholder-val="{{false}}"><span style="position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,.72); color: #fff; border-radius: 3000px; padding: 3px 9px; font-size: 11px; font-weight: 600">{{p.multi}}</span></sc-if>
+              <sc-if value="{{p.challenge}}" hint-placeholder-val="{{false}}"><span style="position: absolute; left: 10px; top: 10px; background: #e6e51e; border-radius: 3000px; padding: 3px 10px; font-size: 11px; font-weight: 700">{{p.challenge}}</span></sc-if>
+            </div>
+            <div style="padding: 12px 14px 14px">
+              <p style="margin: 0; font-size: 14px; line-height: 1.45">{{p.caption}}</p>
+              <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px">
+                <span style="width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 11px; font-weight: 700; {{p.av}}">{{p.initial}}</span>
+                <span style="flex: 1; font-size: 13px; font-weight: 600">@{{p.h}}</span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 13px; color: #3a3a3a"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="{{i.heart}}"></path></svg>{{p.likes}}</span>
+              </div>
+            </div>
+          </article>
+        </sc-for>
+      </section>
+
+      <aside style="flex: 1 1 300px; display: flex; flex-direction: column; gap: 16px">
+        <section style="background: #fff; border-radius: 30px; padding: 22px">
+          <div style="display: flex; justify-content: space-between; align-items: baseline"><h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Trending challenges</h2><a href="Challenge.dc.html" style="font-size: 13px; font-weight: 600">All</a></div>
+          <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 12px">
+            <sc-for list="{{challenges}}" as="c" hint-placeholder-count="3">
+              <a href="Challenge.dc.html" style="display: flex; gap: 12px; align-items: center; text-decoration: none; color: #000">
+                <img src="{{c.img}}" alt="" style="width: 52px; height: 52px; flex-shrink: 0; border-radius: 16px; object-fit: cover">
+                <span style="flex: 1; min-width: 0"><span style="display: block; font-weight: 700; font-size: 14px">{{c.title}}</span><span style="display: block; font-size: 12px; color: #555">{{c.meta}}</span></span>
+                <span style="border-radius: 3000px; padding: 3px 9px; font-size: 11px; font-weight: 700; {{c.pill}}">{{c.status}}</span>
+              </a>
+            </sc-for>
+          </div>
+        </section>
+        <section style="background: #fff; border-radius: 30px; padding: 22px">
+          <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Popular patterns</h2>
+          <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 4px">
+            <sc-for list="{{patterns}}" as="p" hint-placeholder-count="4">
+              <a href="Pattern.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 52px; text-decoration: none; color: #000; border-top: 1px solid #e6e6e6; padding-top: 8px">
+                <span style="flex: 1"><span style="display: block; font-weight: 600; font-size: 14px">{{p.name}}</span><span style="display: block; font-size: 12px; color: #555">{{p.designer}} · {{p.makes}} makes</span></span>
+                <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 700"><svg width="14" height="14" viewBox="0 0 24 24" fill="#000" stroke="#000" stroke-width="1.5" aria-hidden="true"><path d="{{i.star}}"></path></svg>{{p.rating}}</span>
+              </a>
+            </sc-for>
+          </div>
+        </section>
+        <section style="background: #000; color: #fff; border-radius: 30px; padding: 22px">
+          <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Sewists to follow</h2>
+          <div style="margin-top: 14px; display: flex; flex-direction: column; gap: 12px">
+            <sc-for list="{{people}}" as="u" hint-placeholder-count="3">
+              <div style="display: flex; align-items: center; gap: 12px">
+                <span style="width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; {{u.av}}">{{u.initial}}</span>
+                <a href="Profile.dc.html" style="flex: 1; color: #fff; text-decoration: none"><span style="display: block; font-weight: 600; font-size: 14px">{{u.name}}</span><span style="display: block; font-size: 12px; color: #c9c9c9">{{u.meta}}</span></a>
+                <button style="min-height: 36px; padding: 0 14px; border: 0; border-radius: 3000px; background: #e6e51e; font: inherit; font-size: 13px; font-weight: 700">Follow</button>
+              </div>
+            </sc-for>
+          </div>
+        </section>
+      </aside>
+    </div>
+  </main>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":2000}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var sw = {
+      gingham: "background-color:#ff8562;background-image:linear-gradient(90deg,rgba(255,255,255,.5) 50%,transparent 50%),linear-gradient(rgba(255,255,255,.5) 50%,transparent 50%);background-size:28px 28px",
+      stripe: "background:repeating-linear-gradient(90deg,#e6e51e 0 16px,#000 16px 20px)",
+      dots: "background-color:#466cf3;background-image:radial-gradient(#fff 2.5px,transparent 3px);background-size:18px 18px",
+      denim: "background-color:#2c4672;background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.09) 0 2px,transparent 2px 7px)",
+      linen: "background-color:#e9e0cc;background-image:repeating-linear-gradient(0deg,rgba(0,0,0,.05) 0 1px,transparent 1px 4px),repeating-linear-gradient(90deg,rgba(0,0,0,.04) 0 1px,transparent 1px 5px)",
+      floral: "background-color:#f34646;background-image:radial-gradient(circle at 30% 30%,#e6e51e 0 5px,transparent 6px),radial-gradient(circle at 70% 70%,#fff 0 4px,transparent 5px);background-size:34px 34px",
+      check: "background-color:#fff;background-image:linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%),linear-gradient(45deg,#000 25%,transparent 25%,transparent 75%,#000 75%);background-size:20px 20px;background-position:0 0,10px 10px",
+      emerald: "background-color:#1f6b55;background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.08) 0 1px,transparent 1px 6px)"
+    };
+    var P = {
+      blue_floral: '/_blob/057c4fedc8c7a51b83d0aa3f797c4b48', dark_floral: '/_blob/769e9f00331c5518d858d9a671756c46', ikat: '/_blob/070d0dbfa6770629d474769422fdcce8',
+      linen_stack: '/_blob/623f53848a0fba7bb103667b6cd6d996', orange_linen: '/_blob/544eca3d47a401399c1e405afd3fada4', polka: '/_blob/f6078638415aa9a1943ae3aab1bedae6',
+      rolls: '/_blob/91375372928539e1e7afc9e791509906', shop: '/_blob/55887fc2105646d7b1f47c4296ac5891', solids: '/_blob/973249613519f24b590d1a29562f5378',
+      velvet: '/_blob/0b6b01103b47174ea4ec4c0f6db6b9f7', blue_gown: '/_blob/701b827f636929720e8290d66c043951', blue_linen: '/_blob/5fb545dfebc25a3ab288dabc4d4f34cc',
+      bow_blouse: '/_blob/378fd54e9a610caf64290fbec065ccf9', butterfly: '/_blob/f91b3526340d65ba4402e367501c7827', denim_pinafore: '/_blob/1192463bd0067b49a26194ff1b40ec1c',
+      dirndl: '/_blob/a61bdc356ada728b0e1c50c4248e64b1', gingham_top: '/_blob/c974cd96842b2dd8418f09777861290e', gold_gown: '/_blob/1f26346581fa5b1d2b3ba2642b997bb1',
+      green_gingham: '/_blob/e551a46b8280f8ecc8ee3ab17952c2bf', knot_bag: '/_blob/5bf905114ac1edcca363e2d2dc675860', lavender: '/_blob/188ffd136f4c0ada8a70caa52d09ec3b',
+      patchwork: '/_blob/cedd8232af110501083827e498f729f6', pink_floral: '/_blob/31f9090e0f46023c17a2689be64e6db3', plaid_skirt: '/_blob/3fb41ae12053aadbcaf96b90bd6f28ea',
+      red_dress: '/_blob/0a8ae6a44e186ecaeb7322a09be76d15', red_skirt: '/_blob/c14805936ea42c8a216102adbfceffbc', sailor: '/_blob/e9b9124af50eb749d99a9f4a4477d928',
+      slip_dress: '/_blob/156a03273ae96fc256def755c3066a37', sweatshirt: '/_blob/b15aceab26480c18148934a44710873a', wrap_vest: '/_blob/a93207f7db6c002a302477269ae8ce59',
+      yellow_halter: '/_blob/b24763864c8c89e98667824487e6a6eb'
+    };
+    var av = { y: 'background:#e6e51e;color:#000', b: 'background:#466cf3;color:#fff', k: 'background:#000;color:#fff', p: 'background:#ff8562;color:#000' };
+    var chipLabels = ['All', 'Dresses', 'Tops', 'Trousers', 'Outerwear', 'Bags', 'Denim', 'Linen', 'Knits', 'Mending', 'Beginner friendly'];
+    return {
+      i: {
+        scissors: "M6 3a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M6 15a3 3 0 1 0 0 6 3 3 0 0 0 0-6z M20 4 8.12 15.88 M14.47 14.48 20 20 M8.12 8.12 12 12",
+        heart: "M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z",
+        search: "M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z m10 18-4.3-4.3",
+        star: "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01z"
+      },
+      chips: chipLabels.map(function (l, n) { return { label: l, style: n === 0 ? 'background:#000;color:#fff;border:1px solid #000' : 'background:#fff;color:#000;border:1px solid #e6e6e6' }; }),
+      posts: [
+        { h: 'the.denim.drawer', initial: 'D', av: av.k, likes: '1.2k', img: P.denim_pinafore, alt: 'Denim pinafore dress', multi: '1/6', challenge: '#OctoberDenim', caption: 'Denim pinafore with contrast topstitching. Wore it out the same day.' },
+        { h: 'mara.makes', initial: 'M', av: av.b, likes: '312', img: P.lavender, alt: 'Lavender sprig drawstring dress', multi: '', challenge: '', caption: 'Willa Dress, lengthened 2cm. Wearing it everywhere.' },
+        { h: 'kofi_tailors', initial: 'K', av: av.y, likes: '845', img: P.bow_blouse, alt: 'Striped blouse with a big neck bow', multi: '1/3', challenge: '', caption: 'Striped poplin blouse with a big bow. Pattern hack notes in the make log.' },
+        { h: 'junesews', initial: 'J', av: av.p, likes: '528', img: P.blue_linen, alt: 'Blue linen slip dress', multi: '', challenge: '', caption: 'Linen slip dress. Made the straps adjustable for once.' },
+        { h: 'stitchandbloom', initial: 'S', av: av.b, likes: '96', img: P.butterfly, alt: 'Patchwork butterfly wings costume', multi: '', challenge: 'Stash', caption: 'Butterfly wings for my niece, entirely from scraps I have hoarded since 2021.' },
+        { h: 'priya.pins', initial: 'P', av: av.y, likes: '407', img: P.red_dress, alt: 'Red linen sundress', multi: '1/2', challenge: '', caption: 'Red linen sundress with a dropped waist. Lined in voile.' },
+        { h: 'slowseams', initial: 'S', av: av.k, likes: '233', img: P.green_gingham, alt: 'Green floral gingham dress', multi: '', challenge: '', caption: 'Floral gingham dress with an elastic waist. Pockets, obviously.' },
+        { h: 'hemline.hal', initial: 'H', av: av.p, likes: '61', img: P.plaid_skirt, alt: 'Red plaid gathered maxi skirt', multi: '1/3', challenge: '', caption: 'Self-drafted skirt in one morning, with enough left for a top.' },
+        { h: 'ada_alters', initial: 'A', av: av.b, likes: '178', img: P.patchwork, alt: 'Colour-blocked sweatshirt with a plaid skirt', multi: '1/4', challenge: '', caption: 'Colour-blocked sweatshirt from three leftover knits.' },
+        { h: 'ama.sews', initial: 'A', av: av.y, likes: '342', img: P.yellow_halter, alt: 'Yellow and brown halter dress', multi: '', challenge: '', caption: 'Halter dress with a flounce. Matched the print down the front seam.' }
+      ],
+      challenges: [
+        { title: '#OctoberDenimChallenge', meta: '12 days left · 486 joined', status: 'Active', pill: 'background:#e6e51e;color:#000', img: P.denim_pinafore },
+        { title: 'Sew From Your Stash', meta: 'Starts in 9 days', status: 'Soon', pill: 'background:#fff;color:#2f55d4;border:2px solid #2f55d4', img: P.linen_stack },
+        { title: 'Make It Mend', meta: '3 days left · 211 joined', status: 'Active', pill: 'background:#e6e51e;color:#000', img: P.wrap_vest }
+      ],
+      patterns: [
+        { name: 'Willa Dress', designer: 'Fernhill Patterns', makes: '214', rating: '4.6' },
+        { name: 'Harbour Wide Leg', designer: 'Linden & Co', makes: '187', rating: '4.4' },
+        { name: 'Everyday Box Tee', designer: 'Northside Studio', makes: '402', rating: '4.8' },
+        { name: 'Field Chore Coat', designer: 'Oakwork Patterns', makes: '96', rating: '4.2' }
+      ],
+      people: [
+        { name: 'June Okafor', initial: 'J', av: av.y, meta: '@junesews · 128 makes' },
+        { name: 'Kofi Mensah', initial: 'K', av: av.b, meta: '@kofi_tailors · tailoring' },
+        { name: 'Ada Lindqvist', initial: 'A', av: av.p, meta: '@ada_alters · mending' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
