@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { PatternStatus } from './patternStatus';
+import type { Visibility } from './visibility';
 
 export interface Pattern {
   id: number;
@@ -35,5 +36,6 @@ export interface Pattern {
   /** @nullable */
   pdfFileName: string | null;
   status: PatternStatus;
+  visibility: Visibility;
   isDemo: boolean;
 }

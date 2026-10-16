@@ -10,6 +10,7 @@ import {
   getListProjectsQueryKey
 } from '@workspace/api-client-react';
 import { ProjectFormModal } from './ProjectForm';
+import { VisibilityBadge } from '@/components/visibility';
 
 export function ProjectsList() {
   const [search, setSearch] = useState('');
@@ -149,6 +150,7 @@ export function ProjectsList() {
 
               <div className="p-5">
                 <h3 className="font-display text-[1.45rem] leading-tight text-ink line-clamp-1">{project.name}</h3>
+                <VisibilityBadge value={project.visibility} className="mt-1.5" />
 
                 <div className="mt-4">
                   <div className="mb-2 flex justify-between font-mono-custom text-xs text-subtle">

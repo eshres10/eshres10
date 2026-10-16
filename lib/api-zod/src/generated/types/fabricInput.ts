@@ -5,8 +5,11 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { Visibility } from './visibility';
 
 export interface FabricInput {
+  /** Defaults to private */
+  visibility?: Visibility;
   /** @minLength 1 */
   name: string;
   type: string;

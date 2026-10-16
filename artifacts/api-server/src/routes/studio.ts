@@ -84,7 +84,7 @@ import {
 import { getUserId } from "../middlewares/auth";
 import { scoped, type Reply } from "../lib/scoped";
 import { ensureProfile } from "./profile";
-import { findForeignObjectField, IMAGE_FIELD, PDF_FIELD, type UploadPurpose } from "../access";
+import { findForeignObjectField, IMAGE_FIELD, PDF_FIELD, publishedAtFor, type UploadPurpose } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { ObjectNotFoundError, ObjectStorageService } from "../lib/objectStorage";
 
@@ -136,6 +136,7 @@ function fabricResponse(row: typeof fabricsTable.$inferSelect) {
     weight: row.weight,
     notes: row.notes,
     imageUrl: row.imageUrl,
+    visibility: row.visibility,
     isDemo: row.isDemo,
   };
 }
@@ -151,6 +152,7 @@ function threadResponse(row: typeof threadsTable.$inferSelect) {
     quantity: row.quantity,
     notes: row.notes,
     imageUrl: row.imageUrl,
+    visibility: row.visibility,
     isDemo: row.isDemo,
   };
 }
@@ -173,6 +175,7 @@ function patternResponse(row: typeof patternsTable.$inferSelect) {
     pdfUrl: row.pdfUrl,
     pdfFileName: row.pdfFileName,
     status: row.status,
+    visibility: row.visibility,
     isDemo: row.isDemo,
   };
 }
@@ -194,6 +197,9 @@ function projectResponse(row: typeof projectsTable.$inferSelect) {
     problems: row.problems,
     solutions: row.solutions,
     completedAt: row.completedAt,
+    visibility: row.visibility,
+    size: row.size,
+    publishedAt: row.publishedAt,
     isDemo: row.isDemo,
   };
 }
@@ -580,6 +586,7 @@ router.post("/projects", scoped(async (req, res, db): Promise<void> => {
     .values({
       ...parsed.data,
       completedAt: dateString(parsed.data.completedAt),
+      publishedAt: publishedAtFor(null, parsed.data.visibility),
       userId: userId(req),
       isDemo: false,
     })
@@ -602,7 +609,7 @@ router.patch("/projects/:id", scoped(async (req, res, db): Promise<void> => {
   if (await rejectsForeignFiles(db, req, res, body.data, { coverImageUrl: IMAGE_FIELD }, existing)) return;
   const [row] = await db
     .update(projectsTable)
-    .set({ ...body.data, completedAt: dateString(body.data.completedAt) })
+    .set({ ...body.data, completedAt: dateString(body.data.completedAt), publishedAt: publishedAtFor(existing, body.data.visibility) })
     .where(and(eq(projectsTable.id, params.data.id), eq(projectsTable.userId, userId(req))))
     .returning();
   if (!row) {

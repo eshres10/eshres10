@@ -3,6 +3,7 @@ import healthRouter from "./health";
 import publicRouter from "./public";
 import profileRouter from "./profile";
 import studioRouter from "./studio";
+import visibilityRouter from "./visibility";
 import storageRouter, { objectReadRouter } from "./storage";
 import { requireAuth } from "../middlewares/auth";
 
@@ -17,6 +18,7 @@ router.use(objectReadRouter);
 router.use(requireAuth);
 router.use(profileRouter);
 router.use(studioRouter);
+router.use(visibilityRouter);
 router.use(storageRouter);
 
 export default router;

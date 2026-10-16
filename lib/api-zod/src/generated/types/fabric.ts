@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { Visibility } from './visibility';
 
 export interface Fabric {
   id: number;
@@ -26,5 +27,6 @@ export interface Fabric {
   notes: string | null;
   /** @nullable */
   imageUrl: string | null;
+  visibility: Visibility;
   isDemo: boolean;
 }

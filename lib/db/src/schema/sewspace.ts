@@ -5,6 +5,7 @@ import {
   jsonb,
   pgTable,
   pgView,
+  primaryKey,
   real,
   serial,
   text,
@@ -13,6 +14,10 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
+
+// Who can see a row: everyone, the owner's followers, or only the owner.
+export const VISIBILITIES = ["public", "followers", "private"] as const;
+export type Visibility = (typeof VISIBILITIES)[number];
 
 const timestamps = {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -51,6 +56,7 @@ export const fabricsTable = pgTable("sewspace_fabrics", {
   weight: text("weight"),
   notes: text("notes"),
   imageUrl: text("image_url"),
+  visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   isDemo: boolean("is_demo").notNull().default(false),
   ...timestamps,
 });
@@ -66,6 +72,7 @@ export const threadsTable = pgTable("sewspace_threads", {
   quantity: real("quantity"),
   notes: text("notes"),
   imageUrl: text("image_url"),
+  visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   isDemo: boolean("is_demo").notNull().default(false),
   ...timestamps,
 });
@@ -88,6 +95,7 @@ export const patternsTable = pgTable("sewspace_patterns", {
   pdfUrl: text("pdf_url"),
   pdfFileName: text("pdf_file_name"),
   status: text("status").notNull().default("want_to_make"),
+  visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   isDemo: boolean("is_demo").notNull().default(false),
   ...timestamps,
 });
@@ -131,6 +139,10 @@ export const projectsTable = pgTable("sewspace_projects", {
   problems: text("problems"),
   solutions: text("solutions"),
   completedAt: date("completed_at", { mode: "string" }),
+  // Phase 1: who can see this make, its size, and when it was first shared.
+  visibility: text("visibility").$type<Visibility>().notNull().default("private"),
+  size: text("size"),
+  publishedAt: timestamp("published_at", { withTimezone: true }),
   isDemo: boolean("is_demo").notNull().default(false),
   ...timestamps,
 });
@@ -172,6 +184,18 @@ export const uploadsTable = pgTable("sewspace_uploads", {
   purpose: text("purpose").notNull().default("image"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const followsTable = pgTable("sewspace_follows", {
+  followerId: varchar("follower_id", { length: 255 }).notNull(),
+  followeeId: varchar("followee_id", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.followerId, t.followeeId] })]);
+
+export const blocksTable = pgTable("sewspace_blocks", {
+  blockerId: varchar("blocker_id", { length: 255 }).notNull(),
+  blockedId: varchar("blocked_id", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.blockerId, t.blockedId] })]);
 
 // Read-only view of profile fields that anyone may see (migration 0001).
 export const publicProfilesView = pgView("sewspace_public_profiles", {

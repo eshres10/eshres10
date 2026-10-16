@@ -25,6 +25,73 @@ export const GetPublicProfileResponse = zod.object({
 
 
 /**
+ * Returns 404 when the make doesn't exist or isn't visible to this viewer (private, followers-only for a non-follower, or a block either way). Never includes measurements or pattern PDFs.
+ * @summary A make (project) the viewer is allowed to see. Works signed out for public makes.
+ */
+export const GetPublicMakeParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetPublicMakeResponse = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "status": zod.string(),
+  "progress": zod.number().int(),
+  "size": zod.string().nullable(),
+  "description": zod.string().nullable(),
+  "notes": zod.string().nullable(),
+  "alterations": zod.string().nullable(),
+  "problems": zod.string().nullable(),
+  "solutions": zod.string().nullable(),
+  "coverImageUrl": zod.string().nullable(),
+  "completedAt": zod.coerce.date().nullable(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "isOwner": zod.boolean(),
+  "owner": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]),
+  "steps": zod.array(zod.object({
+  "title": zod.string(),
+  "completed": zod.boolean()
+})),
+  "photos": zod.array(zod.object({
+  "url": zod.string(),
+  "caption": zod.string().nullable()
+})),
+  "materials": zod.array(zod.object({
+  "kind": zod.enum(['pattern', 'fabric', 'thread']),
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "detail": zod.string().nullable().describe('e.g. designer, or fibre and composition'),
+  "color": zod.string().nullable(),
+  "imageUrl": zod.string().nullable()
+}).describe('A pattern, fabric or thread used in a make, shown only when the viewer may see it.'))
+})
+
+
+/**
+ * @summary Change who can see one of your makes, fabrics, threads or patterns
+ */
+export const SetVisibilityParams = zod.object({
+  "kind": zod.enum(['project', 'fabric', 'thread', 'pattern']),
+  "id": zod.coerce.number().int()
+})
+
+export const SetVisibilityBody = zod.object({
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.')
+})
+
+export const SetVisibilityResponse = zod.object({
+  "kind": zod.enum(['project', 'fabric', 'thread', 'pattern']),
+  "id": zod.number().int(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.')
+})
+
+
+/**
  * @summary Check whether a handle can be claimed by the signed-in user
  */
 export const CheckHandleAvailabilityQueryParams = zod.object({
@@ -132,6 +199,9 @@ export const GetDashboardResponse = zod.object({
   "problems": zod.string().nullable(),
   "solutions": zod.string().nullable(),
   "completedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "size": zod.string().nullable(),
+  "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
   "isDemo": zod.boolean()
 }),zod.null()]),
   "recentFabrics": zod.array(zod.object({
@@ -147,6 +217,7 @@ export const GetDashboardResponse = zod.object({
   "weight": zod.string().nullable(),
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })),
   "recentPatterns": zod.array(zod.object({
@@ -166,6 +237,7 @@ export const GetDashboardResponse = zod.object({
   "pdfUrl": zod.string().nullable(),
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 }))
 })
@@ -191,6 +263,7 @@ export const ListFabricsResponseItem = zod.object({
   "weight": zod.string().nullable(),
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })
 export const ListFabricsResponse = zod.array(ListFabricsResponseItem)
@@ -203,6 +276,7 @@ export const ListFabricsResponse = zod.array(ListFabricsResponseItem)
 
 
 export const CreateFabricBody = zod.object({
+  "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "name": zod.string().min(1),
   "type": zod.string(),
   "color": zod.string(),
@@ -229,6 +303,7 @@ export const CreateFabricResponse = zod.object({
   "weight": zod.string().nullable(),
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })
 
@@ -244,6 +319,7 @@ export const UpdateFabricParams = zod.object({
 
 
 export const UpdateFabricBody = zod.object({
+  "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "name": zod.string().min(1),
   "type": zod.string(),
   "color": zod.string(),
@@ -270,6 +346,7 @@ export const UpdateFabricResponse = zod.object({
   "weight": zod.string().nullable(),
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })
 
@@ -301,6 +378,7 @@ export const ListThreadsResponseItem = zod.object({
   "quantity": zod.number().nullable(),
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })
 export const ListThreadsResponse = zod.array(ListThreadsResponseItem)
@@ -310,6 +388,7 @@ export const ListThreadsResponse = zod.array(ListThreadsResponseItem)
  * @summary Add a thread to the stash
  */
 export const CreateThreadBody = zod.object({
+  "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "brand": zod.string(),
   "color": zod.string(),
   "colorName": zod.string(),
@@ -330,6 +409,7 @@ export const CreateThreadResponse = zod.object({
   "quantity": zod.number().nullable(),
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })
 
@@ -342,6 +422,7 @@ export const UpdateThreadParams = zod.object({
 })
 
 export const UpdateThreadBody = zod.object({
+  "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "brand": zod.string(),
   "color": zod.string(),
   "colorName": zod.string(),
@@ -362,6 +443,7 @@ export const UpdateThreadResponse = zod.object({
   "quantity": zod.number().nullable(),
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })
 
@@ -400,6 +482,7 @@ export const ListPatternsResponseItem = zod.object({
   "pdfUrl": zod.string().nullable(),
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })
 export const ListPatternsResponse = zod.array(ListPatternsResponseItem)
@@ -409,6 +492,7 @@ export const ListPatternsResponse = zod.array(ListPatternsResponseItem)
  * @summary Add a sewing pattern
  */
 export const CreatePatternBody = zod.object({
+  "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "name": zod.string(),
   "designer": zod.string().nullish(),
   "garmentType": zod.string(),
@@ -443,6 +527,7 @@ export const CreatePatternResponse = zod.object({
   "pdfUrl": zod.string().nullable(),
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })
 
@@ -455,6 +540,7 @@ export const UpdatePatternParams = zod.object({
 })
 
 export const UpdatePatternBody = zod.object({
+  "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "name": zod.string(),
   "designer": zod.string().nullish(),
   "garmentType": zod.string(),
@@ -489,6 +575,7 @@ export const UpdatePatternResponse = zod.object({
   "pdfUrl": zod.string().nullable(),
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 })
 
@@ -552,6 +639,9 @@ export const ListProjectsResponseItem = zod.object({
   "problems": zod.string().nullable(),
   "solutions": zod.string().nullable(),
   "completedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "size": zod.string().nullable(),
+  "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
   "isDemo": zod.boolean()
 })
 export const ListProjectsResponse = zod.array(ListProjectsResponseItem)
@@ -566,6 +656,7 @@ export const createProjectBodyProgressMax = 100;
 
 
 export const CreateProjectBody = zod.object({
+  "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "name": zod.string(),
   "status": zod.enum(['planning', 'cutting', 'sewing', 'fitting', 'finished']).optional(),
   "progress": zod.number().int().min(createProjectBodyProgressMin).max(createProjectBodyProgressMax).optional(),
@@ -579,6 +670,7 @@ export const CreateProjectBody = zod.object({
   "alterations": zod.string().nullish(),
   "problems": zod.string().nullish(),
   "solutions": zod.string().nullish(),
+  "size": zod.string().nullish(),
   "completedAt": zod.coerce.date().nullish()
 })
 
@@ -603,6 +695,9 @@ export const CreateProjectResponse = zod.object({
   "problems": zod.string().nullable(),
   "solutions": zod.string().nullable(),
   "completedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "size": zod.string().nullable(),
+  "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
   "isDemo": zod.boolean()
 })
 
@@ -635,6 +730,9 @@ export const GetProjectResponse = zod.object({
   "problems": zod.string().nullable(),
   "solutions": zod.string().nullable(),
   "completedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "size": zod.string().nullable(),
+  "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
   "isDemo": zod.boolean()
 }).and(zod.object({
   "steps": zod.array(zod.object({
@@ -672,6 +770,7 @@ export const updateProjectBodyOneProgressMax = 100;
 
 
 export const UpdateProjectBody = zod.object({
+  "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "name": zod.string(),
   "status": zod.enum(['planning', 'cutting', 'sewing', 'fitting', 'finished']).optional(),
   "progress": zod.number().int().min(updateProjectBodyOneProgressMin).max(updateProjectBodyOneProgressMax).optional(),
@@ -685,6 +784,7 @@ export const UpdateProjectBody = zod.object({
   "alterations": zod.string().nullish(),
   "problems": zod.string().nullish(),
   "solutions": zod.string().nullish(),
+  "size": zod.string().nullish(),
   "completedAt": zod.coerce.date().nullish()
 })
 
@@ -709,6 +809,9 @@ export const UpdateProjectResponse = zod.object({
   "problems": zod.string().nullable(),
   "solutions": zod.string().nullable(),
   "completedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "size": zod.string().nullable(),
+  "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
   "isDemo": zod.boolean()
 })
 
@@ -1066,6 +1169,7 @@ export const GetRecommendationsResponseItem = zod.object({
   "pdfUrl": zod.string().nullable(),
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 }),
   "fabric": zod.object({
@@ -1081,6 +1185,7 @@ export const GetRecommendationsResponseItem = zod.object({
   "weight": zod.string().nullable(),
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean()
 }),
   "suitability": zod.number().int(),

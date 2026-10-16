@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Loader2, X } from 'lucide-react';
+import { VisibilityPicker, type Visibility } from '@/components/visibility';
+import { uploadFile } from '@/lib/upload';
 import {
   useListPatterns,
   useListFabrics,
@@ -8,7 +10,6 @@ import {
   useListMeasurementProfiles,
   useCreateProject,
   useUpdateProject,
-  useRequestUploadUrl,
   getListProjectsQueryKey,
   getGetProjectQueryKey
 } from '@workspace/api-client-react';
@@ -24,7 +25,6 @@ export function ProjectFormModal({
   const client = useQueryClient();
   const create = useCreateProject();
   const update = useUpdateProject();
-  const upload = useRequestUploadUrl();
 
   const { data: patterns = [] } = useListPatterns();
   const { data: fabrics = [] } = useListFabrics();
@@ -44,7 +44,9 @@ export function ProjectFormModal({
     notes: project?.notes || '',
     alterations: project?.alterations || '',
     problems: project?.problems || '',
-    solutions: project?.solutions || ''
+    solutions: project?.solutions || '',
+    size: project?.size || '',
+    visibility: (project?.visibility as Visibility) || 'private'
   });
 
   const [uploading, setUploading] = useState(false);
@@ -57,10 +59,7 @@ export function ProjectFormModal({
     setUploading(true);
     setUploadError('');
     try {
-      const res = await upload.mutateAsync({ data: { name: file.name, size: file.size, contentType: file.type } });
-      const uploaded = await fetch(res.uploadURL, { method: 'PUT', headers: { 'Content-Type': file.type }, body: file });
-      if (!uploaded.ok) throw new Error('Upload failed');
-      const url = `/api/storage/objects/${res.objectPath.replace(/^\/objects\//, '')}`;
+      const { url } = await uploadFile(file, 'image');
       setForm((f: any) => ({ ...f, coverImageUrl: url }));
     } catch (err: any) {
       setUploadError(err.message || 'Could not upload image');
@@ -87,6 +86,8 @@ export function ProjectFormModal({
       alterations: form.alterations || null,
       problems: form.problems || null,
       solutions: form.solutions || null,
+      size: form.size.trim() || null,
+      visibility: form.visibility,
     };
 
     const done = (data: any) => {
@@ -147,6 +148,16 @@ export function ProjectFormModal({
                 <option value="finished">Finished</option>
               </select>
             </label>
+
+            <label>
+              <span className="mb-1.5 block text-xs font-semibold text-subtle">Size made</span>
+              <input value={form.size} onChange={e => setForm({ ...form, size: e.target.value })} data-testid="input-size" className="field bg-white" placeholder="E.g. 12, graded to 14 at the hip" maxLength={60} />
+            </label>
+
+            <div className="md:col-span-2">
+              <VisibilityPicker value={form.visibility} onChange={visibility => setForm({ ...form, visibility })}
+                legend="Who can see this make" note="Your measurements and pattern PDFs are never shown." />
+            </div>
 
             <label>
               <span className="mb-1.5 block text-xs font-semibold text-subtle">Progress %</span>

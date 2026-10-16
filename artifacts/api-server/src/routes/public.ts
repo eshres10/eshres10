@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
-import { GetPublicProfileResponse } from "@workspace/api-zod";
-import { getPublicProfile } from "../access";
+import { GetPublicMakeParams, GetPublicMakeResponse, GetPublicProfileResponse } from "@workspace/api-zod";
+import { getMakeForViewer, getPublicProfile } from "../access";
+import { viewerOf } from "../middlewares/auth";
 import { scoped } from "../lib/scoped";
 
 // Read-only routes that work without signing in. Everything here must go
@@ -14,6 +15,16 @@ router.get("/public/profiles/:handle", scoped(async (req, res, db): Promise<void
     return;
   }
   res.json(GetPublicProfileResponse.parse(profile));
+}));
+
+router.get("/public/makes/:id", scoped(async (req, res, db): Promise<void> => {
+  const params = GetPublicMakeParams.safeParse(req.params);
+  const make = params.success ? await getMakeForViewer(db, viewerOf(req), params.data.id) : null;
+  if (!make) {
+    res.status(404).json({ error: "Make not found" });
+    return;
+  }
+  res.json(GetPublicMakeResponse.parse(make));
 }));
 
 export default router;

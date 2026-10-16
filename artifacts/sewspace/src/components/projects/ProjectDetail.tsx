@@ -15,6 +15,7 @@ import {
 import { ProjectFormModal } from './ProjectForm';
 import { ProjectSteps } from './ProjectSteps';
 import { ProjectPhotos } from './ProjectPhotos';
+import { ProjectSharing } from './ProjectSharing';
 
 export function ProjectDetail() {
   const [, params] = useRoute('/projects/:id');
@@ -146,6 +147,7 @@ export function ProjectDetail() {
 
         {/* Sidebar Column */}
         <div className="space-y-6">
+          <ProjectSharing project={project} />
           {/* Materials Card */}
           <div className="studio-card rounded-xl p-6">
             <h3 className="font-display text-2xl text-ink">Materials</h3>

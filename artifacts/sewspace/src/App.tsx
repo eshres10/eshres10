@@ -17,6 +17,7 @@ import { FabricPage, PatternsPage, ThreadPage } from '@/pages/stash';
 import { Studio } from '@/pages/studio';
 import { ProjectsList, ProjectDetail } from '@/components/projects';
 import { SignInPromptProvider } from '@/components/auth/SignInPrompt';
+import { PublicMakePage } from '@/pages/public-make';
 import { PublicProfilePage } from '@/pages/public-profile';
 import { SettingsPage } from '@/pages/settings';
 import { WelcomePage } from '@/pages/welcome';
@@ -60,6 +61,7 @@ function Router() {
     <Route path="/marketplace" component={InShellMarketplace} />
     <Route path="/settings" component={InShellSettingsPage} />
     <Route path="/welcome" component={WelcomePage} />
+    <Route path="/makes/:id">{(params: { id: string }) => <PublicMakePage id={Number(params.id)} />}</Route>
     <Route path="/sign-in/*?" component={() => <ClerkAuth mode="sign-in" />} />
     <Route path="/sign-up/*?" component={() => <ClerkAuth mode="sign-up" />} />
     <Route path="/:segment" component={HandleRoute} />

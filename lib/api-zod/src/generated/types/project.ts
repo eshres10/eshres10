@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ProjectStatus } from './projectStatus';
+import type { Visibility } from './visibility';
 
 export interface Project {
   id: number;
@@ -38,5 +39,13 @@ export interface Project {
   solutions: string | null;
   /** @nullable */
   completedAt: Date | null;
+  visibility: Visibility;
+  /** @nullable */
+  size: string | null;
+  /**
+     * First time the make was shared beyond private
+     * @nullable
+     */
+  publishedAt: Date | null;
   isDemo: boolean;
 }

@@ -3,7 +3,7 @@ import path from "node:path";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { withUser } from "@workspace/db";
-import { getPublicProfile, HANDLE_PATH_PATTERN, listPublicHandles } from "../access";
+import { getMakeForViewer, getPublicProfile, HANDLE_PATH_PATTERN, listPublicHandles, listPublicMakes } from "../access";
 import { logger } from "../lib/logger";
 
 // Server-rendered <head> tags for public pages, so search engines and link
@@ -106,9 +106,12 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
     return html;
   }
 
-  async function sendPage(req: Request, res: Response, meta: PageMeta, status = 200): Promise<void> {
+  // Pages that depend on who is asking (followers-only makes) must not be
+  // stored by shared caches; public pages for signed-out visitors may be.
+  async function sendPage(req: Request, res: Response, meta: PageMeta, status = 200, shared = true): Promise<void> {
     const html = injectMeta(await template(req), meta, originOf(req));
-    res.status(status).type("html").set("Cache-Control", "public, max-age=60").send(html);
+    const cache = shared && !req.viewer?.userId ? "public, max-age=60" : "private, no-store";
+    res.status(status).type("html").set("Cache-Control", cache).send(html);
   }
 
   const notFound: PageMeta = {
@@ -153,14 +156,43 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
       .send(["User-agent: *", "Allow: /", ...disallow.map((p) => `Disallow: ${p}`), "", `Sitemap: ${originOf(req)}/sitemap.xml`, ""].join("\n"));
   });
 
+  // Make pages: /makes/:id. Visible to whoever may see the make; the SPA
+  // renders the page, this only fills in the <head>.
+  router.get(/^\/makes\/(\d+)\/?$/, async (req, res, next) => {
+    try {
+      const id = Number((req.params as Record<string, string>)[0]);
+      const make = await withUser(req.viewer?.userId ?? null, (db) => getMakeForViewer(db, req.viewer ?? { userId: null, isAdmin: false }, id));
+      if (!make) return sendPage(req, res, notFound, 404);
+      const by = make.owner ? ` by @${make.owner.handle}` : "";
+      const summary = make.description || make.alterations || make.notes || `A ${make.status === "finished" ? "finished make" : "make in progress"} on SewSpace.`;
+      await sendPage(req, res, {
+        title: `${make.name}${by} · SewSpace`,
+        description: truncate(summary, MAX_DESCRIPTION),
+        canonicalPath: `/makes/${make.id}`,
+        imageUrl: make.coverImageUrl ?? make.photos[0]?.url ?? null,
+        type: "article",
+        noindex: make.visibility !== "public",
+      }, 200, make.visibility === "public");
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get(/^\/makes(\/.*)?$/, (req, res, next) => {
+    sendPage(req, res, notFound, 404).catch(next);
+  });
+
   router.get("/sitemap.xml", async (req, res, next) => {
     try {
       const origin = originOf(req);
-      const handles = await withUser(null, (db) => listPublicHandles(db));
+      const [handles, makes] = await withUser(null, (db) => Promise.all([listPublicHandles(db), listPublicMakes(db)]));
       const urls = [
         `<url><loc>${escapeHtml(origin)}/</loc></url>`,
         ...handles.map(
           (h) => `<url><loc>${escapeHtml(`${origin}/@${h.handle}`)}</loc><lastmod>${h.joinedAt.toISOString().slice(0, 10)}</lastmod></url>`,
+        ),
+        ...makes.map(
+          (m) => `<url><loc>${escapeHtml(`${origin}/makes/${m.id}`)}</loc><lastmod>${m.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,
         ),
       ];
       res

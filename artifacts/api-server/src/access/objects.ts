@@ -5,11 +5,13 @@ import {
   profilesTable,
   projectPhotosTable,
   projectsTable,
+  publicProfilesView,
   threadsTable,
   uploadsTable,
   type Tx,
 } from "@workspace/db";
 import type { Viewer } from "./viewer";
+import { visibleTo } from "./visibility";
 
 export type UploadPurpose = "image" | "avatar" | "pattern_pdf" | "visualization";
 
@@ -33,19 +35,53 @@ export function urlForObjectPath(objectPath: string): string {
 }
 
 // Whether the viewer may download a stored object:
-//   1. it is registered in sewspace_uploads and RLS lets the viewer see that row
-//      (their own upload, or a public avatar), or
-//   2. legacy fallback: the viewer owns a row that references the object.
+//   - the uploader always can;
+//   - an 'avatar' upload, once it is the avatar of a profile with a handle;
+//   - an 'image' upload, when it is shown on a row of its owner that the
+//     viewer may see (visibleTo): a fabric, thread, pattern cover, make cover
+//     or make photo;
+//   - legacy files with no upload record: when the viewer owns a row that
+//     references them.
+// Pattern PDFs and AI visualisations are never readable by anyone else.
+// Row-level security applies the same rule underneath (migration 0002).
 // Callers return 404 when this is false, never 403.
 export async function canReadObject(db: Tx, viewer: Viewer, objectPath: string): Promise<boolean> {
-  const [registered] = await db
-    .select({ objectPath: uploadsTable.objectPath })
+  const url = urlForObjectPath(objectPath);
+  const [upload] = await db
+    .select({ userId: uploadsTable.userId, purpose: uploadsTable.purpose })
     .from(uploadsTable)
     .where(eq(uploadsTable.objectPath, objectPath))
     .limit(1);
-  if (registered) return true;
-  if (!viewer.userId) return false;
-  return ownsRowReferencing(db, viewer.userId, urlForObjectPath(objectPath));
+  if (!upload) return viewer.userId ? ownsRowReferencing(db, viewer.userId, url) : false;
+  if (upload.userId === viewer.userId) return true;
+  if (upload.purpose === "avatar") {
+    const [profile] = await db
+      .select({ handle: publicProfilesView.handle })
+      .from(publicProfilesView)
+      .where(and(eq(publicProfilesView.userId, upload.userId), eq(publicProfilesView.avatarUrl, url)))
+      .limit(1);
+    return Boolean(profile);
+  }
+  if (upload.purpose === "image") return shownOnVisibleRow(db, viewer, upload.userId, url);
+  return false;
+}
+
+async function shownOnVisibleRow(db: Tx, viewer: Viewer, ownerId: string, url: string): Promise<boolean> {
+  const checks: Array<Promise<unknown[]>> = [
+    db.select({ id: fabricsTable.id }).from(fabricsTable)
+      .where(and(eq(fabricsTable.userId, ownerId), eq(fabricsTable.imageUrl, url), visibleTo(fabricsTable, viewer))).limit(1),
+    db.select({ id: threadsTable.id }).from(threadsTable)
+      .where(and(eq(threadsTable.userId, ownerId), eq(threadsTable.imageUrl, url), visibleTo(threadsTable, viewer))).limit(1),
+    db.select({ id: patternsTable.id }).from(patternsTable)
+      .where(and(eq(patternsTable.userId, ownerId), eq(patternsTable.coverImageUrl, url), visibleTo(patternsTable, viewer))).limit(1),
+    db.select({ id: projectsTable.id }).from(projectsTable)
+      .where(and(eq(projectsTable.userId, ownerId), eq(projectsTable.coverImageUrl, url), visibleTo(projectsTable, viewer))).limit(1),
+    db.select({ id: projectPhotosTable.id }).from(projectPhotosTable)
+      .innerJoin(projectsTable, eq(projectsTable.id, projectPhotosTable.projectId))
+      .where(and(eq(projectPhotosTable.userId, ownerId), eq(projectsTable.userId, ownerId), eq(projectPhotosTable.url, url), visibleTo(projectsTable, viewer))).limit(1),
+  ];
+  for (const rows of await Promise.all(checks)) if (rows.length) return true;
+  return false;
 }
 
 async function ownsRowReferencing(db: Tx, userId: string, url: string): Promise<boolean> {

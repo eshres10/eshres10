@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { Visibility } from './visibility';
 
 export interface Thread {
   id: number;
@@ -20,5 +21,6 @@ export interface Thread {
   notes: string | null;
   /** @nullable */
   imageUrl: string | null;
+  visibility: Visibility;
   isDemo: boolean;
 }

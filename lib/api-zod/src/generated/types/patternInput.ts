@@ -6,8 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { PatternInputStatus } from './patternInputStatus';
+import type { Visibility } from './visibility';
 
 export interface PatternInput {
+  /** Defaults to private */
+  visibility?: Visibility;
   name: string;
   /** @nullable */
   designer?: string | null;

@@ -5,8 +5,11 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { Visibility } from './visibility';
 
 export interface ThreadInput {
+  /** Defaults to private */
+  visibility?: Visibility;
   brand: string;
   color: string;
   colorName: string;

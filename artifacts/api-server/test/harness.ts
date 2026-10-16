@@ -91,6 +91,19 @@ export function as(origin: string, user: string | null) {
   };
 }
 
+/**
+ * Run fn as the database owner with app.user_id set but WITHOUT switching to
+ * the RLS role, so row-level security is bypassed. Lets tests prove the access
+ * module enforces the rules on its own.
+ */
+export async function withoutRls<T>(userId: string | null, fn: (tx: any) => Promise<T>): Promise<T> {
+  const { sql } = await import("drizzle-orm");
+  return dbModule.ownerDb.transaction(async (tx: any) => {
+    await tx.execute(sql`SELECT set_config('app.user_id', ${userId ?? ""}, true)`);
+    return fn(tx);
+  });
+}
+
 /** Run SQL as the database owner (bypasses RLS), for test setup only. */
 export async function ownerSql(text: string, params: unknown[] = []) {
   return dbModule.pool.query(text, params);

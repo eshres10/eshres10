@@ -33,6 +33,44 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/PublicProfile" }
         "404": { description: Profile not found }
+  /public/makes/{id}:
+    get:
+      operationId: getPublicMake
+      tags: [public]
+      summary: A make (project) the viewer is allowed to see. Works signed out for public makes.
+      description: Returns 404 when the make doesn't exist or isn't visible to this viewer (private, followers-only for a non-follower, or a block either way). Never includes measurements or pattern PDFs.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: The make
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/PublicMake" }
+        "404": { description: Not found or not visible }
+  /visibility/{kind}/{id}:
+    put:
+      operationId: setVisibility
+      tags: [studio]
+      summary: Change who can see one of your makes, fabrics, threads or patterns
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema: { type: string, enum: [project, fabric, thread, pattern] }
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/VisibilityChange" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/VisibilityResult" }
+        "404": { description: Not one of your items }
   /handles/availability:
     get:
       operationId: checkHandleAvailability
@@ -690,6 +728,81 @@ components:
         avatarUrl: { type: string, nullable: true }
         joinedAt: { type: string, format: date-time }
       required: [handle, name, bio, avatarUrl, joinedAt]
+    Visibility:
+      type: string
+      enum: [public, followers, private]
+      description: "public: anyone, signed out included. followers: your followers. private: only you."
+    VisibilityChange:
+      type: object
+      properties:
+        visibility: { $ref: "#/components/schemas/Visibility" }
+      required: [visibility]
+    VisibilityResult:
+      type: object
+      properties:
+        kind: { type: string, enum: [project, fabric, thread, pattern] }
+        id: { type: integer }
+        visibility: { $ref: "#/components/schemas/Visibility" }
+      required: [kind, id, visibility]
+    PublicPerson:
+      type: object
+      properties:
+        handle: { type: string }
+        name: { type: string }
+        avatarUrl: { type: string, nullable: true }
+      required: [handle, name, avatarUrl]
+    PublicMaterial:
+      type: object
+      description: A pattern, fabric or thread used in a make, shown only when the viewer may see it.
+      properties:
+        kind: { type: string, enum: [pattern, fabric, thread] }
+        id: { type: integer }
+        name: { type: string }
+        detail: { type: string, nullable: true, description: "e.g. designer, or fibre and composition" }
+        color: { type: string, nullable: true }
+        imageUrl: { type: string, nullable: true }
+      required: [kind, id, name, detail, color, imageUrl]
+    PublicMake:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        status: { type: string }
+        progress: { type: integer }
+        size: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        notes: { type: string, nullable: true }
+        alterations: { type: string, nullable: true }
+        problems: { type: string, nullable: true }
+        solutions: { type: string, nullable: true }
+        coverImageUrl: { type: string, nullable: true }
+        completedAt: { type: string, format: date, nullable: true }
+        publishedAt: { type: string, format: date-time, nullable: true }
+        visibility: { $ref: "#/components/schemas/Visibility" }
+        isOwner: { type: boolean }
+        owner:
+          allOf: [{ $ref: "#/components/schemas/PublicPerson" }]
+          nullable: true
+        steps:
+          type: array
+          items:
+            type: object
+            properties:
+              title: { type: string }
+              completed: { type: boolean }
+            required: [title, completed]
+        photos:
+          type: array
+          items:
+            type: object
+            properties:
+              url: { type: string }
+              caption: { type: string, nullable: true }
+            required: [url, caption]
+        materials:
+          type: array
+          items: { $ref: "#/components/schemas/PublicMaterial" }
+      required: [id, name, status, progress, size, description, notes, alterations, problems, solutions, coverImageUrl, completedAt, publishedAt, visibility, isOwner, owner, steps, photos, materials]
     ErrorResponse:
       type: object
       properties:
@@ -722,12 +835,14 @@ components:
         weight: { type: string, nullable: true }
         notes: { type: string, nullable: true }
         imageUrl: { type: string, nullable: true }
+        visibility: { $ref: "#/components/schemas/Visibility" }
         isDemo: { type: boolean }
-      required: [id, name, type, color, width, quantity, unit, composition, stretch, weight, notes, imageUrl, isDemo]
+      required: [visibility, id, name, type, color, width, quantity, unit, composition, stretch, weight, notes, imageUrl, isDemo]
     FabricInput:
       type: object
       required: [name, type, color]
       properties:
+        visibility: { $ref: "#/components/schemas/Visibility", description: Defaults to private }
         name: { type: string, minLength: 1 }
         type: { type: string }
         color: { type: string }
@@ -754,12 +869,14 @@ components:
         quantity: { type: number, nullable: true }
         notes: { type: string, nullable: true }
         imageUrl: { type: string, nullable: true }
+        visibility: { $ref: "#/components/schemas/Visibility" }
         isDemo: { type: boolean }
-      required: [id, brand, color, colorName, type, weight, quantity, notes, imageUrl, isDemo]
+      required: [visibility, id, brand, color, colorName, type, weight, quantity, notes, imageUrl, isDemo]
     ThreadInput:
       type: object
       required: [brand, color, colorName, type]
       properties:
+        visibility: { $ref: "#/components/schemas/Visibility", description: Defaults to private }
         brand: { type: string }
         color: { type: string }
         colorName: { type: string }
@@ -790,12 +907,14 @@ components:
         pdfUrl: { type: string, nullable: true }
         pdfFileName: { type: string, nullable: true }
         status: { type: string, enum: [want_to_make, purchased, made, favorite] }
+        visibility: { $ref: "#/components/schemas/Visibility" }
         isDemo: { type: boolean }
-      required: [id, name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, coverImageUrl, pdfUrl, pdfFileName, status, isDemo]
+      required: [visibility, id, name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, coverImageUrl, pdfUrl, pdfFileName, status, isDemo]
     PatternInput:
       type: object
       required: [name, garmentType, difficulty]
       properties:
+        visibility: { $ref: "#/components/schemas/Visibility", description: Defaults to private }
         name: { type: string }
         designer: { type: string, nullable: true }
         garmentType: { type: string }
@@ -852,12 +971,16 @@ components:
         problems: { type: string, nullable: true }
         solutions: { type: string, nullable: true }
         completedAt: { type: string, format: date, nullable: true }
+        visibility: { $ref: "#/components/schemas/Visibility" }
+        size: { type: string, nullable: true }
+        publishedAt: { type: string, format: date-time, nullable: true, description: First time the make was shared beyond private }
         isDemo: { type: boolean }
-      required: [id, name, status, progress, patternId, fabricId, threadId, measurementProfileId, coverImageUrl, notes, alterations, problems, solutions, completedAt, isDemo]
+      required: [visibility, size, publishedAt, id, name, status, progress, patternId, fabricId, threadId, measurementProfileId, coverImageUrl, notes, alterations, problems, solutions, completedAt, isDemo]
     ProjectInput:
       type: object
       required: [name]
       properties:
+        visibility: { $ref: "#/components/schemas/Visibility", description: Defaults to private }
         name: { type: string }
         status: { type: string, enum: [planning, cutting, sewing, fitting, finished] }
         progress: { type: integer, minimum: 0, maximum: 100 }
@@ -871,6 +994,7 @@ components:
         alterations: { type: string, nullable: true }
         problems: { type: string, nullable: true }
         solutions: { type: string, nullable: true }
+        size: { type: string, nullable: true }
         completedAt: { type: string, format: date, nullable: true }
     ProjectUpdate:
       allOf:

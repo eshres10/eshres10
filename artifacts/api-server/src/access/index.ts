@@ -6,3 +6,5 @@ export * from "./handles";
 export * from "./profiles";
 export * from "./objects";
 export * from "./studio";
+export * from "./visibility";
+export * from "./makes";

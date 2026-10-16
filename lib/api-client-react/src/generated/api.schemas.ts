@@ -45,6 +45,114 @@ export interface PublicProfile {
   joinedAt: string;
 }
 
+/**
+ * public: anyone, signed out included. followers: your followers. private: only you.
+ */
+export type Visibility = typeof Visibility[keyof typeof Visibility];
+
+
+export const Visibility = {
+  public: 'public',
+  followers: 'followers',
+  private: 'private',
+} as const;
+
+export interface VisibilityChange {
+  visibility: Visibility;
+}
+
+export type VisibilityResultKind = typeof VisibilityResultKind[keyof typeof VisibilityResultKind];
+
+
+export const VisibilityResultKind = {
+  project: 'project',
+  fabric: 'fabric',
+  thread: 'thread',
+  pattern: 'pattern',
+} as const;
+
+export interface VisibilityResult {
+  kind: VisibilityResultKind;
+  id: number;
+  visibility: Visibility;
+}
+
+export interface PublicPerson {
+  handle: string;
+  name: string;
+  /** @nullable */
+  avatarUrl: string | null;
+}
+
+export type PublicMaterialKind = typeof PublicMaterialKind[keyof typeof PublicMaterialKind];
+
+
+export const PublicMaterialKind = {
+  pattern: 'pattern',
+  fabric: 'fabric',
+  thread: 'thread',
+} as const;
+
+/**
+ * A pattern, fabric or thread used in a make, shown only when the viewer may see it.
+ */
+export interface PublicMaterial {
+  kind: PublicMaterialKind;
+  id: number;
+  name: string;
+  /**
+     * e.g. designer, or fibre and composition
+     * @nullable
+     */
+  detail: string | null;
+  /** @nullable */
+  color: string | null;
+  /** @nullable */
+  imageUrl: string | null;
+}
+
+export type PublicMakeStepsItem = {
+  title: string;
+  completed: boolean;
+};
+
+export type PublicMakePhotosItem = {
+  url: string;
+  /** @nullable */
+  caption: string | null;
+};
+
+export interface PublicMake {
+  id: number;
+  name: string;
+  status: string;
+  progress: number;
+  /** @nullable */
+  size: string | null;
+  /** @nullable */
+  description: string | null;
+  /** @nullable */
+  notes: string | null;
+  /** @nullable */
+  alterations: string | null;
+  /** @nullable */
+  problems: string | null;
+  /** @nullable */
+  solutions: string | null;
+  /** @nullable */
+  coverImageUrl: string | null;
+  /** @nullable */
+  completedAt: string | null;
+  /** @nullable */
+  publishedAt: string | null;
+  visibility: Visibility;
+  isOwner: boolean;
+  owner: PublicPerson | null;
+  steps: PublicMakeStepsItem[];
+  photos: PublicMakePhotosItem[];
+  materials: PublicMaterial[];
+}
+
 export interface ErrorResponse {
   error: string;
 }
@@ -101,10 +209,13 @@ export interface Fabric {
   notes: string | null;
   /** @nullable */
   imageUrl: string | null;
+  visibility: Visibility;
   isDemo: boolean;
 }
 
 export interface FabricInput {
+  /** Defaults to private */
+  visibility?: Visibility;
   /** @minLength 1 */
   name: string;
   type: string;
@@ -142,10 +253,13 @@ export interface Thread {
   notes: string | null;
   /** @nullable */
   imageUrl: string | null;
+  visibility: Visibility;
   isDemo: boolean;
 }
 
 export interface ThreadInput {
+  /** Defaults to private */
+  visibility?: Visibility;
   brand: string;
   color: string;
   colorName: string;
@@ -200,6 +314,7 @@ export interface Pattern {
   /** @nullable */
   pdfFileName: string | null;
   status: PatternStatus;
+  visibility: Visibility;
   isDemo: boolean;
 }
 
@@ -214,6 +329,8 @@ export const PatternInputStatus = {
 } as const;
 
 export interface PatternInput {
+  /** Defaults to private */
+  visibility?: Visibility;
   name: string;
   /** @nullable */
   designer?: string | null;
@@ -328,6 +445,14 @@ export interface Project {
   solutions: string | null;
   /** @nullable */
   completedAt: string | null;
+  visibility: Visibility;
+  /** @nullable */
+  size: string | null;
+  /**
+     * First time the make was shared beyond private
+     * @nullable
+     */
+  publishedAt: string | null;
   isDemo: boolean;
 }
 
@@ -343,6 +468,8 @@ export const ProjectInputStatus = {
 } as const;
 
 export interface ProjectInput {
+  /** Defaults to private */
+  visibility?: Visibility;
   name: string;
   status?: ProjectInputStatus;
   /**
@@ -370,6 +497,8 @@ export interface ProjectInput {
   problems?: string | null;
   /** @nullable */
   solutions?: string | null;
+  /** @nullable */
+  size?: string | null;
   /** @nullable */
   completedAt?: string | null;
 }

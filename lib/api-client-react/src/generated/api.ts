@@ -58,6 +58,7 @@ import type {
   ProjectStepInput,
   ProjectStepUpdate,
   ProjectUpdate,
+  PublicMake,
   PublicProfile,
   Recommendation,
   Thread,
@@ -65,6 +66,8 @@ import type {
   ThreadUpdate,
   UploadRequest,
   UploadResponse,
+  VisibilityChange,
+  VisibilityResult,
   Visualization,
   VisualizationInput
 } from './api.schemas';
@@ -196,6 +199,199 @@ export function useGetPublicProfile<TData = Awaited<ReturnType<typeof getPublicP
 
 
 
+
+export const getGetPublicMakeUrl = (id: number,) => {
+
+
+
+
+  return `/api/public/makes/${id}`
+}
+
+/**
+ * Returns 404 when the make doesn't exist or isn't visible to this viewer (private, followers-only for a non-follower, or a block either way). Never includes measurements or pattern PDFs.
+ * @summary A make (project) the viewer is allowed to see. Works signed out for public makes.
+ */
+export const getPublicMake = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<PublicMake> => {
+
+  return customFetch<PublicMake>(getGetPublicMakeUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicMakeQueryKey = (id: number,) => {
+    return [
+    `/api/public/makes/${id}`
+    ] as const;
+    }
+
+
+export const getGetPublicMakeQueryOptions = <TData = Awaited<ReturnType<typeof getPublicMake>>, TError = ErrorType<void>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicMake>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicMakeQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicMake>>> = ({ signal }) => getPublicMake(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicMake>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPublicMakeQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicMake>>>
+export type GetPublicMakeQueryError = ErrorType<void>
+
+
+export function useGetPublicMake<TData = Awaited<ReturnType<typeof getPublicMake>>, TError = ErrorType<void>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicMake>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicMake>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicMake>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicMake<TData = Awaited<ReturnType<typeof getPublicMake>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicMake>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicMake>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicMake>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicMake<TData = Awaited<ReturnType<typeof getPublicMake>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicMake>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary A make (project) the viewer is allowed to see. Works signed out for public makes.
+ */
+
+export function useGetPublicMake<TData = Awaited<ReturnType<typeof getPublicMake>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicMake>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPublicMakeQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSetVisibilityUrl = (kind: 'project' | 'fabric' | 'thread' | 'pattern',
+    id: number,) => {
+
+
+
+
+  return `/api/visibility/${kind}/${id}`
+}
+
+/**
+ * @summary Change who can see one of your makes, fabrics, threads or patterns
+ */
+export const setVisibility = async (kind: 'project' | 'fabric' | 'thread' | 'pattern',
+    id: number,
+    visibilityChange: VisibilityChange, options?: Parameters<typeof customFetch>[1]): Promise<VisibilityResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<VisibilityResult>(getSetVisibilityUrl(kind,id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(visibilityChange)
+  }
+);}
+
+
+
+
+
+export const getSetVisibilityMutationKey = () => ['setVisibility'] as const;
+
+export const getSetVisibilityMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setVisibility>>, TError,SetVisibilityMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setVisibility>>, TError,SetVisibilityMutationVariables, TContext> => {
+
+const mutationKey = getSetVisibilityMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setVisibility>>, SetVisibilityMutationVariables> = (props) => {
+          const {kind,id,data} = props ?? {};
+
+          return  setVisibility(kind,id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetVisibilityMutationResult = NonNullable<Awaited<ReturnType<typeof setVisibility>>>
+    export type SetVisibilityMutationBody = BodyType<VisibilityChange>
+    export type SetVisibilityMutationError = ErrorType<void>
+    export type SetVisibilityMutationVariables = {kind: 'project' | 'fabric' | 'thread' | 'pattern';id: number;data: BodyType<VisibilityChange>}
+
+    /**
+ * @summary Change who can see one of your makes, fabrics, threads or patterns
+ */
+export const useSetVisibility = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setVisibility>>, TError,SetVisibilityMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof setVisibility>>,
+        TError,
+        SetVisibilityMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetVisibilityMutationOptions(options), queryClient);
+    }
 
 export const getCheckHandleAvailabilityUrl = (params: CheckHandleAvailabilityParams,) => {
   const normalizedParams = new URLSearchParams();

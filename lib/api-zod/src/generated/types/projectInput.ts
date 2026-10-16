@@ -6,8 +6,11 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ProjectInputStatus } from './projectInputStatus';
+import type { Visibility } from './visibility';
 
 export interface ProjectInput {
+  /** Defaults to private */
+  visibility?: Visibility;
   name: string;
   status?: ProjectInputStatus;
   /**
@@ -35,6 +38,8 @@ export interface ProjectInput {
   problems?: string | null;
   /** @nullable */
   solutions?: string | null;
+  /** @nullable */
+  size?: string | null;
   /** @nullable */
   completedAt?: Date | null;
 }
