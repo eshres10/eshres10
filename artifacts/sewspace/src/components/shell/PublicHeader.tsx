@@ -11,7 +11,7 @@ export function PublicHeader() {
       <nav aria-label="Main" className="flex items-center justify-between gap-3 rounded-[30px] bg-white py-2 pl-4 pr-2 shadow-float sm:py-3 sm:pl-[22px] sm:pr-3.5">
         <Logo />
         {isSignedIn ? (
-          <Link href="/studio" className="inline-flex min-h-[44px] items-center rounded-full bg-ink px-[22px] text-[15px] font-semibold text-white no-underline">Open your studio</Link>
+          <Link href="/feed" className="inline-flex min-h-[44px] items-center rounded-full bg-ink px-[22px] text-[15px] font-semibold text-white no-underline">Open SewSpace</Link>
         ) : (
           <div className="flex gap-2">
             <Link href={authHref('sign-in')} className="hidden min-h-[44px] items-center rounded-full border border-ink px-[22px] text-[15px] font-medium text-ink no-underline sm:inline-flex">Log in</Link>

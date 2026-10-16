@@ -197,6 +197,44 @@ export const blocksTable = pgTable("sewspace_blocks", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.blockerId, t.blockedId] })]);
 
+// Phase 2: processed images (full + thumbnail) and posts.
+export const mediaTable = pgTable("sewspace_media", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  fullPath: text("full_path").notNull().unique(),
+  thumbPath: text("thumb_path").notNull().unique(),
+  sourcePath: text("source_path"),
+  width: integer("width").notNull(),
+  height: integer("height").notNull(),
+  color: text("color"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const POST_KINDS = ["status", "photo"] as const;
+export type PostKind = (typeof POST_KINDS)[number];
+
+export const postsTable = pgTable("sewspace_posts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  kind: text("kind").$type<PostKind>().notNull(),
+  caption: text("caption").notNull().default(""),
+  visibility: text("visibility").$type<Visibility>().notNull().default("private"),
+  projectId: integer("project_id").references(() => projectsTable.id, { onDelete: "set null" }),
+  patternId: integer("pattern_id").references(() => patternsTable.id, { onDelete: "set null" }),
+  fabricId: integer("fabric_id").references(() => fabricsTable.id, { onDelete: "set null" }),
+  ...timestamps,
+});
+
+export const postMediaTable = pgTable("sewspace_post_media", {
+  postId: integer("post_id").notNull().references(() => postsTable.id, { onDelete: "cascade" }),
+  mediaId: integer("media_id").notNull().references(() => mediaTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  position: integer("position").notNull().default(0),
+}, (t) => [primaryKey({ columns: [t.postId, t.mediaId] })]);
+
+export type Media = typeof mediaTable.$inferSelect;
+export type Post = typeof postsTable.$inferSelect;
+
 // Read-only view of profile fields that anyone may see (migration 0001).
 export const publicProfilesView = pgView("sewspace_public_profiles", {
   userId: varchar("user_id", { length: 255 }).notNull(),

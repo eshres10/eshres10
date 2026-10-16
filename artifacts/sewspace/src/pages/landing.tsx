@@ -11,7 +11,7 @@ export function Landing() {
   const dashboard = useGetDashboard({ query: { queryKey: getGetDashboardQueryKey(), enabled: Boolean(isSignedIn) } });
   const [, setLocation] = useLocation();
   useEffect(() => {
-    if (isSignedIn && dashboard.data) setLocation('/studio');
+    if (isSignedIn && dashboard.data) setLocation('/feed');
   }, [dashboard.data, isSignedIn, setLocation]);
   const tools = [
     ['Stash', 'Fabrics, threads, patterns — catalogued your way.', Palette, '/stash/fabrics'],

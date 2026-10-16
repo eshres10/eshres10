@@ -16,7 +16,7 @@ import {
 const defaultStorage = new ObjectStorageService();
 
 // Tests swap in a fake via app.locals.objectStorage; production uses Replit Object Storage.
-function storageFor(req: Request): ObjectStorageService {
+export function storageFor(req: Request): ObjectStorageService {
   return (req.app.locals.objectStorage as ObjectStorageService | undefined) ?? defaultStorage;
 }
 

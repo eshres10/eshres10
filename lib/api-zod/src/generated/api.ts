@@ -92,6 +92,246 @@ export const SetVisibilityResponse = zod.object({
 
 
 /**
+ * @summary A post the viewer may see. Works signed out for public posts.
+ */
+export const GetPublicPostParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetPublicPostResponse = zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})
+
+
+/**
+ * @summary Recent public posts from everyone (Discover). Works signed out; hides people you've blocked or who blocked you.
+ */
+export const getExploreFeedQueryKindDefault = `all`;
+
+export const GetExploreFeedQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional(),
+  "kind": zod.enum(['all', 'photo', 'status', 'make']).default(getExploreFeedQueryKindDefault)
+})
+
+export const GetExploreFeedResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})),
+  "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
+})
+
+
+/**
+ * @summary Posts from people you follow, and your own, newest first.
+ */
+export const GetHomeFeedQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional()
+})
+
+export const GetHomeFeedResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})),
+  "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
+})
+
+
+/**
+ * @summary Process an uploaded image into a 1600 px WebP and a 400 px thumbnail, with EXIF/GPS removed.
+ */
+export const CreateMediaBody = zod.object({
+  "objectPath": zod.string().describe('objectPath returned by /storage/uploads/request-url (an image you uploaded)')
+})
+
+export const CreateMediaResponse = zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})
+
+
+/**
+ * @summary Post a status (text only) or 1–10 photos with a caption.
+ */
+export const createPostBodyCaptionMax = 2200;
+
+export const createPostBodyMediaIdsMax = 10;
+
+
+
+export const CreatePostBody = zod.object({
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string().max(createPostBodyCaptionMax),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "mediaIds": zod.array(zod.number().int()).max(createPostBodyMediaIdsMax).optional(),
+  "projectId": zod.number().int().nullish(),
+  "patternId": zod.number().int().nullish(),
+  "fabricId": zod.number().int().nullish()
+})
+
+export const CreatePostResponse = zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})
+
+
+/**
+ * @summary Edit your post's caption, visibility or tags.
+ */
+export const UpdatePostParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updatePostBodyCaptionMax = 2200;
+
+
+
+export const UpdatePostBody = zod.object({
+  "caption": zod.string().max(updatePostBodyCaptionMax).optional(),
+  "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "projectId": zod.number().int().nullish(),
+  "patternId": zod.number().int().nullish(),
+  "fabricId": zod.number().int().nullish()
+})
+
+export const UpdatePostResponse = zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})
+
+
+/**
+ * @summary Delete your post.
+ */
+export const DeletePostParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeletePostResponse = zod.void()
+
+
+/**
  * @summary Check whether a handle can be claimed by the signed-in user
  */
 export const CheckHandleAvailabilityQueryParams = zod.object({

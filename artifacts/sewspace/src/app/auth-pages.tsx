@@ -6,7 +6,7 @@ import { basePath } from '@/lib/clerk';
 export function ClerkAuth({ mode }: { mode: 'sign-in' | 'sign-up' }) {
   return <main className="grid min-h-[100dvh] place-items-center px-4 py-8">
     {mode === 'sign-in'
-      ? <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} fallbackRedirectUrl={`${basePath}/studio`} />
+      ? <SignIn routing="path" path={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} fallbackRedirectUrl={`${basePath}/feed`} />
       : <SignUp routing="path" path={`${basePath}/sign-up`} signInUrl={`${basePath}/sign-in`} fallbackRedirectUrl={`${basePath}/welcome`} />}
   </main>;
 }

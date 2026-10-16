@@ -28,7 +28,8 @@ const dbModule = await import("@workspace/db");
 const { createApp } = await import("../src/app");
 
 /** Objects "stored" by the fake storage, keyed by object path. */
-export const storedObjects = new Map<string, { body: string; contentType: string }>();
+export const storedObjects = new Map<string, { body: string | Buffer; contentType: string }>();
+const { ObjectNotFoundError } = await import("../src/lib/objectStorage");
 let uploadCounter = 0;
 
 const fakeStorage = {
@@ -45,10 +46,21 @@ const fakeStorage = {
   },
   async downloadObject(file: { objectPath: string }) {
     const obj = storedObjects.get(file.objectPath) ?? { body: "file", contentType: "image/webp" };
-    return new Response(obj.body, { headers: { "Content-Type": obj.contentType, "Cache-Control": "private, max-age=3600" } });
+    return new Response(typeof obj.body === "string" ? obj.body : new Uint8Array(obj.body), { headers: { "Content-Type": obj.contentType, "Cache-Control": "private, max-age=3600" } });
   },
   async searchPublicObject() {
     return null;
+  },
+  async readObjectEntity(objectPath: string) {
+    const obj = storedObjects.get(objectPath);
+    if (!obj) throw new ObjectNotFoundError();
+    return Buffer.isBuffer(obj.body) ? obj.body : Buffer.from(obj.body);
+  },
+  async saveObjectEntity(data: Buffer, contentType: string, directory = "generated") {
+    uploadCounter += 1;
+    const objectPath = `/objects/${directory}/saved-${process.pid}-${uploadCounter}.webp`;
+    storedObjects.set(objectPath, { body: data, contentType });
+    return objectPath;
   },
 };
 

@@ -18,6 +18,8 @@ tags:
     description: File upload helpers
   - name: public
     description: Read-only endpoints that work without signing in
+  - name: feed
+    description: Posts and feeds
 paths:
   /public/profiles/{handle}:
     get:
@@ -71,6 +73,130 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/VisibilityResult" }
         "404": { description: Not one of your items }
+  /public/posts/{id}:
+    get:
+      operationId: getPublicPost
+      tags: [public]
+      summary: A post the viewer may see. Works signed out for public posts.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: The post
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedPost" }
+        "404": { description: Not found or not visible }
+  /public/explore:
+    get:
+      operationId: getExploreFeed
+      tags: [public]
+      summary: Recent public posts from everyone (Discover). Works signed out; hides people you've blocked or who blocked you.
+      parameters:
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+        - name: kind
+          in: query
+          required: false
+          schema: { type: string, enum: [all, photo, status, make], default: all }
+      responses:
+        "200":
+          description: A page of posts, newest first
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedPage" }
+  /feed:
+    get:
+      operationId: getHomeFeed
+      tags: [feed]
+      summary: Posts from people you follow, and your own, newest first.
+      parameters:
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: A page of posts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedPage" }
+  /media:
+    post:
+      operationId: createMedia
+      tags: [feed]
+      summary: Process an uploaded image into a 1600 px WebP and a 400 px thumbnail, with EXIF/GPS removed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MediaInput" }
+      responses:
+        "201":
+          description: Processed image, ready to attach to a post
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Media" }
+        "400":
+          description: Not one of your image uploads, or not a readable image
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /posts:
+    post:
+      operationId: createPost
+      tags: [feed]
+      summary: Post a status (text only) or 1–10 photos with a caption.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PostInput" }
+      responses:
+        "201":
+          description: The new post
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedPost" }
+        "400":
+          description: Invalid post
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "409":
+          description: Choose a handle before posting
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+        "429":
+          description: Posting too fast
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ErrorResponse" }
+  /posts/{id}:
+    patch:
+      operationId: updatePost
+      tags: [feed]
+      summary: Edit your post's caption, visibility or tags.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/PostUpdate" }
+      responses:
+        "200":
+          description: Updated post
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedPost" }
+        "404": { description: Not your post }
+    delete:
+      operationId: deletePost
+      tags: [feed]
+      summary: Delete your post.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Deleted }
+        "404": { description: Not your post }
   /handles/availability:
     get:
       operationId: checkHandleAvailability
@@ -803,6 +929,77 @@ components:
           type: array
           items: { $ref: "#/components/schemas/PublicMaterial" }
       required: [id, name, status, progress, size, description, notes, alterations, problems, solutions, coverImageUrl, completedAt, publishedAt, visibility, isOwner, owner, steps, photos, materials]
+    MediaInput:
+      type: object
+      properties:
+        objectPath: { type: string, description: "objectPath returned by /storage/uploads/request-url (an image you uploaded)" }
+      required: [objectPath]
+    Media:
+      type: object
+      properties:
+        id: { type: integer }
+        url: { type: string, description: Full image, at most 1600 px }
+        thumbUrl: { type: string, description: Thumbnail, at most 400 px }
+        width: { type: integer }
+        height: { type: integer }
+        color: { type: string, nullable: true, description: Dominant colour as a placeholder while loading }
+      required: [id, url, thumbUrl, width, height, color]
+    PostTag:
+      type: object
+      properties:
+        kind: { type: string, enum: [make, pattern, fabric] }
+        id: { type: integer }
+        name: { type: string }
+      required: [kind, id, name]
+    FeedPost:
+      type: object
+      properties:
+        id: { type: integer }
+        kind: { type: string, enum: [status, photo] }
+        caption: { type: string }
+        visibility: { $ref: "#/components/schemas/Visibility" }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        author: { $ref: "#/components/schemas/PublicPerson" }
+        isOwner: { type: boolean }
+        media:
+          type: array
+          items: { $ref: "#/components/schemas/Media" }
+        tags:
+          type: array
+          description: Tagged make, pattern or fabric, only when the viewer may see it.
+          items: { $ref: "#/components/schemas/PostTag" }
+      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags]
+    FeedPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/FeedPost" }
+        nextCursor: { type: string, nullable: true, description: Pass back as ?cursor= for the next page; null at the end }
+      required: [items, nextCursor]
+    PostInput:
+      type: object
+      properties:
+        kind: { type: string, enum: [status, photo] }
+        caption: { type: string, maxLength: 2200 }
+        visibility: { $ref: "#/components/schemas/Visibility" }
+        mediaIds:
+          type: array
+          maxItems: 10
+          items: { type: integer }
+        projectId: { type: integer, nullable: true }
+        patternId: { type: integer, nullable: true }
+        fabricId: { type: integer, nullable: true }
+      required: [kind, caption, visibility]
+    PostUpdate:
+      type: object
+      properties:
+        caption: { type: string, maxLength: 2200 }
+        visibility: { $ref: "#/components/schemas/Visibility" }
+        projectId: { type: integer, nullable: true }
+        patternId: { type: integer, nullable: true }
+        fabricId: { type: integer, nullable: true }
     ErrorResponse:
       type: object
       properties:

@@ -153,6 +153,107 @@ export interface PublicMake {
   materials: PublicMaterial[];
 }
 
+export interface MediaInput {
+  /** objectPath returned by /storage/uploads/request-url (an image you uploaded) */
+  objectPath: string;
+}
+
+export interface Media {
+  id: number;
+  /** Full image */
+  url: string;
+  /** Thumbnail */
+  thumbUrl: string;
+  width: number;
+  height: number;
+  /**
+     * Dominant colour as a placeholder while loading
+     * @nullable
+     */
+  color: string | null;
+}
+
+export type PostTagKind = typeof PostTagKind[keyof typeof PostTagKind];
+
+
+export const PostTagKind = {
+  make: 'make',
+  pattern: 'pattern',
+  fabric: 'fabric',
+} as const;
+
+export interface PostTag {
+  kind: PostTagKind;
+  id: number;
+  name: string;
+}
+
+export type FeedPostKind = typeof FeedPostKind[keyof typeof FeedPostKind];
+
+
+export const FeedPostKind = {
+  status: 'status',
+  photo: 'photo',
+} as const;
+
+export interface FeedPost {
+  id: number;
+  kind: FeedPostKind;
+  caption: string;
+  visibility: Visibility;
+  createdAt: string;
+  updatedAt: string;
+  author: PublicPerson;
+  isOwner: boolean;
+  media: Media[];
+  /** Tagged make, pattern or fabric, only when the viewer may see it. */
+  tags: PostTag[];
+}
+
+export interface FeedPage {
+  items: FeedPost[];
+  /**
+     * Pass back as ?cursor= for the next page; null at the end
+     * @nullable
+     */
+  nextCursor: string | null;
+}
+
+export type PostInputKind = typeof PostInputKind[keyof typeof PostInputKind];
+
+
+export const PostInputKind = {
+  status: 'status',
+  photo: 'photo',
+} as const;
+
+export interface PostInput {
+  kind: PostInputKind;
+  /** @maxLength 2200 */
+  caption: string;
+  visibility: Visibility;
+  /** @maxItems 10 */
+  mediaIds?: number[];
+  /** @nullable */
+  projectId?: number | null;
+  /** @nullable */
+  patternId?: number | null;
+  /** @nullable */
+  fabricId?: number | null;
+}
+
+export interface PostUpdate {
+  /** @maxLength 2200 */
+  caption?: string;
+  visibility?: Visibility;
+  /** @nullable */
+  projectId?: number | null;
+  /** @nullable */
+  patternId?: number | null;
+  /** @nullable */
+  fabricId?: number | null;
+}
+
 export interface ErrorResponse {
   error: string;
 }
@@ -707,6 +808,25 @@ export interface UploadResponse {
 }
 
 export type SearchParameter = string;
+
+export type GetExploreFeedParams = {
+cursor?: string;
+kind?: GetExploreFeedKind;
+};
+
+export type GetExploreFeedKind = typeof GetExploreFeedKind[keyof typeof GetExploreFeedKind];
+
+
+export const GetExploreFeedKind = {
+  all: 'all',
+  photo: 'photo',
+  status: 'status',
+  make: 'make',
+} as const;
+
+export type GetHomeFeedParams = {
+cursor?: string;
+};
 
 export type CheckHandleAvailabilityParams = {
 handle: string;

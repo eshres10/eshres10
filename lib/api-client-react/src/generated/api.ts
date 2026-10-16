@@ -34,6 +34,10 @@ import type {
   Fabric,
   FabricInput,
   FabricUpdate,
+  FeedPage,
+  FeedPost,
+  GetExploreFeedParams,
+  GetHomeFeedParams,
   HealthStatus,
   ListFabricsParams,
   ListPatternsParams,
@@ -41,11 +45,15 @@ import type {
   MeasurementProfile,
   MeasurementProfileInput,
   MeasurementProfileUpdate,
+  Media,
+  MediaInput,
   Pattern,
   PatternInput,
   PatternPdfAnalysis,
   PatternPdfAnalysisRequest,
   PatternUpdate,
+  PostInput,
+  PostUpdate,
   Profile,
   ProfileUpdate,
   Project,
@@ -391,6 +399,662 @@ export const useSetVisibility = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getSetVisibilityMutationOptions(options), queryClient);
+    }
+
+export const getGetPublicPostUrl = (id: number,) => {
+
+
+
+
+  return `/api/public/posts/${id}`
+}
+
+/**
+ * @summary A post the viewer may see. Works signed out for public posts.
+ */
+export const getPublicPost = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<FeedPost> => {
+
+  return customFetch<FeedPost>(getGetPublicPostUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPublicPostQueryKey = (id: number,) => {
+    return [
+    `/api/public/posts/${id}`
+    ] as const;
+    }
+
+
+export const getGetPublicPostQueryOptions = <TData = Awaited<ReturnType<typeof getPublicPost>>, TError = ErrorType<void>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPost>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPublicPostQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPublicPost>>> = ({ signal }) => getPublicPost(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPublicPost>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPublicPostQueryResult = NonNullable<Awaited<ReturnType<typeof getPublicPost>>>
+export type GetPublicPostQueryError = ErrorType<void>
+
+
+export function useGetPublicPost<TData = Awaited<ReturnType<typeof getPublicPost>>, TError = ErrorType<void>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPost>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicPost>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicPost<TData = Awaited<ReturnType<typeof getPublicPost>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPost>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPublicPost>>,
+          TError,
+          Awaited<ReturnType<typeof getPublicPost>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPublicPost<TData = Awaited<ReturnType<typeof getPublicPost>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPost>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary A post the viewer may see. Works signed out for public posts.
+ */
+
+export function useGetPublicPost<TData = Awaited<ReturnType<typeof getPublicPost>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPublicPost>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPublicPostQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetExploreFeedUrl = (params?: GetExploreFeedParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/explore?${stringifiedParams}` : `/api/public/explore`
+}
+
+/**
+ * @summary Recent public posts from everyone (Discover). Works signed out; hides people you've blocked or who blocked you.
+ */
+export const getExploreFeed = async (params?: GetExploreFeedParams, options?: Parameters<typeof customFetch>[1]): Promise<FeedPage> => {
+
+  return customFetch<FeedPage>(getGetExploreFeedUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetExploreFeedQueryKey = (params?: GetExploreFeedParams,) => {
+    return [
+    `/api/public/explore`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetExploreFeedQueryOptions = <TData = Awaited<ReturnType<typeof getExploreFeed>>, TError = ErrorType<unknown>>(params?: GetExploreFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreFeed>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExploreFeedQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExploreFeed>>> = ({ signal }) => getExploreFeed(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExploreFeed>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetExploreFeedQueryResult = NonNullable<Awaited<ReturnType<typeof getExploreFeed>>>
+export type GetExploreFeedQueryError = ErrorType<unknown>
+
+
+export function useGetExploreFeed<TData = Awaited<ReturnType<typeof getExploreFeed>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetExploreFeedParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreFeed>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExploreFeed>>,
+          TError,
+          Awaited<ReturnType<typeof getExploreFeed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExploreFeed<TData = Awaited<ReturnType<typeof getExploreFeed>>, TError = ErrorType<unknown>>(
+ params?: GetExploreFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreFeed>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExploreFeed>>,
+          TError,
+          Awaited<ReturnType<typeof getExploreFeed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExploreFeed<TData = Awaited<ReturnType<typeof getExploreFeed>>, TError = ErrorType<unknown>>(
+ params?: GetExploreFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreFeed>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Recent public posts from everyone (Discover). Works signed out; hides people you've blocked or who blocked you.
+ */
+
+export function useGetExploreFeed<TData = Awaited<ReturnType<typeof getExploreFeed>>, TError = ErrorType<unknown>>(
+ params?: GetExploreFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreFeed>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetExploreFeedQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetHomeFeedUrl = (params?: GetHomeFeedParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/feed?${stringifiedParams}` : `/api/feed`
+}
+
+/**
+ * @summary Posts from people you follow, and your own, newest first.
+ */
+export const getHomeFeed = async (params?: GetHomeFeedParams, options?: Parameters<typeof customFetch>[1]): Promise<FeedPage> => {
+
+  return customFetch<FeedPage>(getGetHomeFeedUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetHomeFeedQueryKey = (params?: GetHomeFeedParams,) => {
+    return [
+    `/api/feed`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetHomeFeedQueryOptions = <TData = Awaited<ReturnType<typeof getHomeFeed>>, TError = ErrorType<unknown>>(params?: GetHomeFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeFeed>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetHomeFeedQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHomeFeed>>> = ({ signal }) => getHomeFeed(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHomeFeed>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetHomeFeedQueryResult = NonNullable<Awaited<ReturnType<typeof getHomeFeed>>>
+export type GetHomeFeedQueryError = ErrorType<unknown>
+
+
+export function useGetHomeFeed<TData = Awaited<ReturnType<typeof getHomeFeed>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetHomeFeedParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeFeed>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHomeFeed>>,
+          TError,
+          Awaited<ReturnType<typeof getHomeFeed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetHomeFeed<TData = Awaited<ReturnType<typeof getHomeFeed>>, TError = ErrorType<unknown>>(
+ params?: GetHomeFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeFeed>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getHomeFeed>>,
+          TError,
+          Awaited<ReturnType<typeof getHomeFeed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetHomeFeed<TData = Awaited<ReturnType<typeof getHomeFeed>>, TError = ErrorType<unknown>>(
+ params?: GetHomeFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeFeed>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Posts from people you follow, and your own, newest first.
+ */
+
+export function useGetHomeFeed<TData = Awaited<ReturnType<typeof getHomeFeed>>, TError = ErrorType<unknown>>(
+ params?: GetHomeFeedParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeFeed>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetHomeFeedQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateMediaUrl = () => {
+
+
+
+
+  return `/api/media`
+}
+
+/**
+ * @summary Process an uploaded image into a 1600 px WebP and a 400 px thumbnail, with EXIF/GPS removed.
+ */
+export const createMedia = async (mediaInput: MediaInput, options?: Parameters<typeof customFetch>[1]): Promise<Media> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Media>(getCreateMediaUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mediaInput)
+  }
+);}
+
+
+
+
+
+export const getCreateMediaMutationKey = () => ['createMedia'] as const;
+
+export const getCreateMediaMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMedia>>, TError,CreateMediaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createMedia>>, TError,CreateMediaMutationVariables, TContext> => {
+
+const mutationKey = getCreateMediaMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createMedia>>, CreateMediaMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createMedia(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateMediaMutationResult = NonNullable<Awaited<ReturnType<typeof createMedia>>>
+    export type CreateMediaMutationBody = BodyType<MediaInput>
+    export type CreateMediaMutationError = ErrorType<ErrorResponse>
+    export type CreateMediaMutationVariables = {data: BodyType<MediaInput>}
+
+    /**
+ * @summary Process an uploaded image into a 1600 px WebP and a 400 px thumbnail, with EXIF/GPS removed.
+ */
+export const useCreateMedia = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createMedia>>, TError,CreateMediaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createMedia>>,
+        TError,
+        CreateMediaMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateMediaMutationOptions(options), queryClient);
+    }
+
+export const getCreatePostUrl = () => {
+
+
+
+
+  return `/api/posts`
+}
+
+/**
+ * @summary Post a status (text only) or 1–10 photos with a caption.
+ */
+export const createPost = async (postInput: PostInput, options?: Parameters<typeof customFetch>[1]): Promise<FeedPost> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FeedPost>(getCreatePostUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(postInput)
+  }
+);}
+
+
+
+
+
+export const getCreatePostMutationKey = () => ['createPost'] as const;
+
+export const getCreatePostMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPost>>, TError,CreatePostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createPost>>, TError,CreatePostMutationVariables, TContext> => {
+
+const mutationKey = getCreatePostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createPost>>, CreatePostMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createPost(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreatePostMutationResult = NonNullable<Awaited<ReturnType<typeof createPost>>>
+    export type CreatePostMutationBody = BodyType<PostInput>
+    export type CreatePostMutationError = ErrorType<ErrorResponse>
+    export type CreatePostMutationVariables = {data: BodyType<PostInput>}
+
+    /**
+ * @summary Post a status (text only) or 1–10 photos with a caption.
+ */
+export const useCreatePost = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createPost>>, TError,CreatePostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createPost>>,
+        TError,
+        CreatePostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreatePostMutationOptions(options), queryClient);
+    }
+
+export const getUpdatePostUrl = (id: number,) => {
+
+
+
+
+  return `/api/posts/${id}`
+}
+
+/**
+ * @summary Edit your post's caption, visibility or tags.
+ */
+export const updatePost = async (id: number,
+    postUpdate: PostUpdate, options?: Parameters<typeof customFetch>[1]): Promise<FeedPost> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<FeedPost>(getUpdatePostUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(postUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdatePostMutationKey = () => ['updatePost'] as const;
+
+export const getUpdatePostMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePost>>, TError,UpdatePostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updatePost>>, TError,UpdatePostMutationVariables, TContext> => {
+
+const mutationKey = getUpdatePostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updatePost>>, UpdatePostMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updatePost(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdatePostMutationResult = NonNullable<Awaited<ReturnType<typeof updatePost>>>
+    export type UpdatePostMutationBody = BodyType<PostUpdate>
+    export type UpdatePostMutationError = ErrorType<void>
+    export type UpdatePostMutationVariables = {id: number;data: BodyType<PostUpdate>}
+
+    /**
+ * @summary Edit your post's caption, visibility or tags.
+ */
+export const useUpdatePost = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updatePost>>, TError,UpdatePostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updatePost>>,
+        TError,
+        UpdatePostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdatePostMutationOptions(options), queryClient);
+    }
+
+export const getDeletePostUrl = (id: number,) => {
+
+
+
+
+  return `/api/posts/${id}`
+}
+
+/**
+ * @summary Delete your post.
+ */
+export const deletePost = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeletePostUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeletePostMutationKey = () => ['deletePost'] as const;
+
+export const getDeletePostMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,DeletePostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,DeletePostMutationVariables, TContext> => {
+
+const mutationKey = getDeletePostMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deletePost>>, DeletePostMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deletePost(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeletePostMutationResult = NonNullable<Awaited<ReturnType<typeof deletePost>>>
+
+    export type DeletePostMutationError = ErrorType<void>
+    export type DeletePostMutationVariables = {id: number}
+
+    /**
+ * @summary Delete your post.
+ */
+export const useDeletePost = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deletePost>>, TError,DeletePostMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deletePost>>,
+        TError,
+        DeletePostMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeletePostMutationOptions(options), queryClient);
     }
 
 export const getCheckHandleAvailabilityUrl = (params: CheckHandleAvailabilityParams,) => {

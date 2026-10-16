@@ -6,7 +6,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import { ClerkAuth } from '@/app/auth-pages';
-import { Shell } from '@/components/shell/Shell';
+import { AdaptiveLayout, Shell } from '@/components/shell/Shell';
 import { basePath, clerkAppearance, clerkProxyUrl, clerkPubKey } from '@/lib/clerk';
 import { AIStudio } from '@/pages/ai-studio';
 import { Assistant } from '@/pages/assistant';
@@ -18,6 +18,10 @@ import { Studio } from '@/pages/studio';
 import { ProjectsList, ProjectDetail } from '@/components/projects';
 import { SignInPromptProvider } from '@/components/auth/SignInPrompt';
 import { PublicMakePage } from '@/pages/public-make';
+import { ComposePage } from '@/pages/compose';
+import { ExplorePage } from '@/pages/explore';
+import { FeedPage } from '@/pages/feed';
+import { PostPage } from '@/pages/post';
 import { PublicProfilePage } from '@/pages/public-profile';
 import { SettingsPage } from '@/pages/settings';
 import { WelcomePage } from '@/pages/welcome';
@@ -27,6 +31,8 @@ const queryClient = new QueryClient();
 // Signed-in pages, wrapped once at module level so navigation doesn't remount them.
 const studio = (Page: React.ComponentType) => () => <Shell><Page /></Shell>;
 const InShellStudio = studio(Studio);
+const InShellFeedPage = studio(FeedPage);
+const InShellComposePage = studio(ComposePage);
 const InShellFabricPage = studio(FabricPage);
 const InShellThreadPage = studio(ThreadPage);
 const InShellPatternsPage = studio(PatternsPage);
@@ -60,12 +66,16 @@ function Router() {
     <Route path="/assistant" component={InShellAssistant} />
     <Route path="/marketplace" component={InShellMarketplace} />
     <Route path="/settings" component={InShellSettingsPage} />
+    <Route path="/feed" component={InShellFeedPage} />
+    <Route path="/new" component={InShellComposePage} />
+    <Route path="/explore">{() => <AdaptiveLayout><ExplorePage /></AdaptiveLayout>}</Route>
+    <Route path="/posts/:id">{(params: { id: string }) => <AdaptiveLayout><PostPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
     <Route path="/welcome" component={WelcomePage} />
     <Route path="/makes/:id">{(params: { id: string }) => <PublicMakePage id={Number(params.id)} />}</Route>
     <Route path="/sign-in/*?" component={() => <ClerkAuth mode="sign-in" />} />
     <Route path="/sign-up/*?" component={() => <ClerkAuth mode="sign-up" />} />
     <Route path="/:segment" component={HandleRoute} />
-    <Route component={NotFound} />
+    <Route>{() => <NotFound />}</Route>
   </Switch>;
 }
 

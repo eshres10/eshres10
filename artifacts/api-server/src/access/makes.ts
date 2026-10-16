@@ -38,16 +38,14 @@ export async function getMakeForViewer(db: Tx, viewer: Viewer, id: number) {
     .from(publicProfilesView)
     .where(eq(publicProfilesView.userId, make.userId))
     .limit(1);
-  const [steps, photos] = await Promise.all([
-    db.select({ title: projectStepsTable.title, completed: projectStepsTable.completed })
-      .from(projectStepsTable)
-      .where(and(eq(projectStepsTable.projectId, make.id), eq(projectStepsTable.userId, make.userId)))
-      .orderBy(asc(projectStepsTable.position), asc(projectStepsTable.id)),
-    db.select({ url: projectPhotosTable.url, caption: projectPhotosTable.caption })
-      .from(projectPhotosTable)
-      .where(and(eq(projectPhotosTable.projectId, make.id), eq(projectPhotosTable.userId, make.userId)))
-      .orderBy(asc(projectPhotosTable.position), asc(projectPhotosTable.id)),
-  ]);
+  const steps = await db.select({ title: projectStepsTable.title, completed: projectStepsTable.completed })
+    .from(projectStepsTable)
+    .where(and(eq(projectStepsTable.projectId, make.id), eq(projectStepsTable.userId, make.userId)))
+    .orderBy(asc(projectStepsTable.position), asc(projectStepsTable.id));
+  const photos = await db.select({ url: projectPhotosTable.url, caption: projectPhotosTable.caption })
+    .from(projectPhotosTable)
+    .where(and(eq(projectPhotosTable.projectId, make.id), eq(projectPhotosTable.userId, make.userId)))
+    .orderBy(asc(projectPhotosTable.position), asc(projectPhotosTable.id));
 
   const materials: PublicMaterial[] = [];
   if (make.patternId) {

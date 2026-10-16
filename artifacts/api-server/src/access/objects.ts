@@ -1,7 +1,10 @@
 import { and, eq, inArray, or, type SQL } from "drizzle-orm";
 import {
   fabricsTable,
+  mediaTable,
   patternsTable,
+  postMediaTable,
+  postsTable,
   profilesTable,
   projectPhotosTable,
   projectsTable,
@@ -67,7 +70,7 @@ export async function canReadObject(db: Tx, viewer: Viewer, objectPath: string):
 }
 
 async function shownOnVisibleRow(db: Tx, viewer: Viewer, ownerId: string, url: string): Promise<boolean> {
-  const checks: Array<Promise<unknown[]>> = [
+  const checks: Array<PromiseLike<unknown[]>> = [
     db.select({ id: fabricsTable.id }).from(fabricsTable)
       .where(and(eq(fabricsTable.userId, ownerId), eq(fabricsTable.imageUrl, url), visibleTo(fabricsTable, viewer))).limit(1),
     db.select({ id: threadsTable.id }).from(threadsTable)
@@ -79,13 +82,23 @@ async function shownOnVisibleRow(db: Tx, viewer: Viewer, ownerId: string, url: s
     db.select({ id: projectPhotosTable.id }).from(projectPhotosTable)
       .innerJoin(projectsTable, eq(projectsTable.id, projectPhotosTable.projectId))
       .where(and(eq(projectPhotosTable.userId, ownerId), eq(projectsTable.userId, ownerId), eq(projectPhotosTable.url, url), visibleTo(projectsTable, viewer))).limit(1),
+    // Processed post photos: the full image or thumbnail of media on a visible post.
+    db.select({ id: mediaTable.id }).from(mediaTable)
+      .innerJoin(postMediaTable, eq(postMediaTable.mediaId, mediaTable.id))
+      .innerJoin(postsTable, eq(postsTable.id, postMediaTable.postId))
+      .where(and(
+        eq(mediaTable.userId, ownerId), eq(postsTable.userId, ownerId),
+        or(eq(mediaTable.fullPath, url.replace(/^\/api\/storage/, "")), eq(mediaTable.thumbPath, url.replace(/^\/api\/storage/, ""))) as SQL,
+        visibleTo(postsTable, viewer),
+      )).limit(1),
   ];
-  for (const rows of await Promise.all(checks)) if (rows.length) return true;
+  // One query at a time: a request transaction has a single connection.
+  for (const check of checks) if ((await check).length) return true;
   return false;
 }
 
 async function ownsRowReferencing(db: Tx, userId: string, url: string): Promise<boolean> {
-  const checks: Array<Promise<unknown[]>> = [
+  const checks: Array<PromiseLike<unknown[]>> = [
     db.select({ id: fabricsTable.id }).from(fabricsTable).where(and(eq(fabricsTable.userId, userId), eq(fabricsTable.imageUrl, url))).limit(1),
     db.select({ id: threadsTable.id }).from(threadsTable).where(and(eq(threadsTable.userId, userId), eq(threadsTable.imageUrl, url))).limit(1),
     db.select({ id: patternsTable.id }).from(patternsTable)
@@ -94,7 +107,8 @@ async function ownsRowReferencing(db: Tx, userId: string, url: string): Promise<
     db.select({ id: projectPhotosTable.id }).from(projectPhotosTable).where(and(eq(projectPhotosTable.userId, userId), eq(projectPhotosTable.url, url))).limit(1),
     db.select({ id: profilesTable.id }).from(profilesTable).where(and(eq(profilesTable.userId, userId), eq(profilesTable.avatarUrl, url))).limit(1),
   ];
-  for (const rows of await Promise.all(checks)) if (rows.length) return true;
+  // One query at a time: a request transaction has a single connection.
+  for (const check of checks) if ((await check).length) return true;
   return false;
 }
 

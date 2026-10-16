@@ -139,7 +139,7 @@ export class ObjectStorageService {
     directory: string = 'generated',
   ): Promise<string> {
     const privateObjectDir = this.getPrivateObjectDir().replace(/\/+$/, '');
-    const extension = contentType === 'image/png' ? '.png' : '';
+    const extension = contentType === 'image/png' ? '.png' : contentType === 'image/webp' ? '.webp' : '';
     const entityId = `${directory}/${randomUUID()}${extension}`;
     const { bucketName, objectName } = parseObjectPath(
       `${privateObjectDir}/${entityId}`,
@@ -150,6 +150,13 @@ export class ObjectStorageService {
       metadata: { cacheControl: 'private, max-age=31536000' },
     });
     return `/objects/${entityId}`;
+  }
+
+  /** Reads a whole stored object into memory (used to process uploaded images). */
+  async readObjectEntity(objectPath: string): Promise<Buffer> {
+    const file = await this.getObjectEntityFile(objectPath);
+    const [contents] = await file.download();
+    return contents;
   }
 
   async getObjectEntityFile(objectPath: string): Promise<File> {

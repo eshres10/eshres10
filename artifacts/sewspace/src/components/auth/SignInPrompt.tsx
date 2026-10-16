@@ -54,10 +54,10 @@ function SignInSheet({ reason, close }: { reason: SignInReason; close: () => voi
   return (
     <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/45 p-2 sm:items-center" onClick={e => { if (e.target === e.currentTarget) close(); }}>
       <div role="dialog" aria-modal="true" aria-labelledby="sign-in-title" className="w-full max-w-[440px] rounded-[32px] bg-white px-5 pb-[calc(1.4rem+env(safe-area-inset-bottom))] pt-3 sm:p-7">
-        <span className="mx-auto mb-4 block h-[5px] w-11 rounded-full bg-[#d4d4d4] sm:hidden" aria-hidden="true" />
+        <span className="mx-auto mb-4 block h-[5px] w-11 rounded-full bg-line sm:hidden" aria-hidden="true" />
         <span className="grid h-14 w-14 place-items-center rounded-[18px] bg-red" aria-hidden="true"><Heart size={28} className="fill-white text-white" /></span>
         <h2 id="sign-in-title" className="mt-4 font-display text-[28px] leading-[1.05]">{reason.title}</h2>
-        <p className="mt-2 text-[15px] leading-relaxed text-[#3a3a3a]">{reason.body ?? "It's free. You'll come straight back here afterwards."}</p>
+        <p className="mt-2 text-[15px] leading-relaxed text-subtle">{reason.body ?? "It's free. You'll come straight back here afterwards."}</p>
         <div className="mt-5 flex flex-col gap-2">
           <button ref={firstButton} type="button" onClick={() => setLocation(authHref('sign-up', returnTo))} className="min-h-[52px] rounded-full bg-yellow text-[15px] font-bold text-ink">Create a free account</button>
           <button type="button" onClick={() => setLocation(authHref('sign-in', returnTo))} className="min-h-[52px] rounded-full bg-ink text-[15px] font-bold text-white">I already have an account</button>

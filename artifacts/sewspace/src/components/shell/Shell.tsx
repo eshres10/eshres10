@@ -1,19 +1,25 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useGetProfile } from '@workspace/api-client-react';
-import { BookOpen, FolderKanban, Home, Layers, Menu, MessageCircle, Ruler, Sparkles, Spool, Store, X } from 'lucide-react';
+import { BookOpen, Compass, LayoutGrid, FolderKanban, Home, House, Layers, Menu, MessageCircle, Plus, Ruler, Scissors, Sparkles, Spool, Store, X } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
+import { useAuth } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
+import { PublicHeader } from '@/components/shell/PublicHeader';
 import { UserAvatar } from '@/components/avatar';
 import { Logo } from '@/components/brand/Logo';
 import { currentAppPath } from '@/lib/navigation';
 
 type NavItem = { href: string; label: string; icon: typeof Home };
 
-// Groups follow the design (Community / My studio / Help). Community items
-// (Home, Explore, Forum, Challenges, Saved) are added as their phases ship.
+// Groups follow the design (Community / My studio / Help). Forum, Challenges
+// and Saved join Community as their phases ship.
 export const navGroups: Array<{ label: string; items: NavItem[] }> = [
+  { label: 'Community', items: [
+    { href: '/feed', label: 'Home', icon: House },
+    { href: '/explore', label: 'Explore', icon: Compass },
+  ] },
   { label: 'My studio', items: [
-    { href: '/studio', label: 'Overview', icon: Home },
+    { href: '/studio', label: 'Overview', icon: LayoutGrid },
     { href: '/projects', label: 'Projects & makes', icon: FolderKanban },
     { href: '/stash/fabrics', label: 'Fabric stash', icon: Layers },
     { href: '/stash/threads', label: 'Thread drawer', icon: Spool },
@@ -72,25 +78,22 @@ function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: (
 
 function MobileTabBar({ location }: { location: string }) {
   const me = useMyProfile();
-  const tabs = [
-    { href: '/studio', label: 'Studio', icon: Home },
-    { href: '/projects', label: 'Projects', icon: FolderKanban },
-    { href: '/stash/fabrics', label: 'Stash', icon: Layers },
-    { href: '/assistant', label: 'Assistant', icon: MessageCircle },
-  ];
   const meHref = me?.handle ? `/@${me.handle}` : '/settings';
+  const tab = (href: string, label: string, Icon: typeof Home) => {
+    const active = isActive(location, href);
+    return (
+      <Link href={href} aria-label={label} aria-current={active ? 'page' : undefined}
+        className={`grid h-12 w-[52px] place-items-center rounded-[18px] ${active ? 'bg-ink text-white' : 'text-ink'}`}>
+        <Icon size={22} aria-hidden="true" />
+      </Link>
+    );
+  };
   return (
     <nav aria-label="App" className="fixed inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between rounded-[30px] bg-white px-3 py-2 shadow-float md:hidden">
-      {tabs.map(tab => {
-        const Icon = tab.icon;
-        const active = isActive(location, tab.href);
-        return (
-          <Link key={tab.href} href={tab.href} aria-label={tab.label} aria-current={active ? 'page' : undefined}
-            className={`grid h-12 w-[52px] place-items-center rounded-[18px] ${active ? 'bg-ink text-white' : 'text-ink'}`}>
-            <Icon size={22} aria-hidden="true" />
-          </Link>
-        );
-      })}
+      {tab('/feed', 'Home', House)}
+      {tab('/explore', 'Explore', Compass)}
+      <Link href="/new" aria-label="New post" className="grid h-[52px] w-[58px] place-items-center rounded-[20px] bg-yellow text-ink"><Plus size={26} aria-hidden="true" /></Link>
+      {tab('/studio', 'Studio', Scissors)}
       <Link href={meHref} aria-label="My profile" aria-current={location === meHref ? 'page' : undefined} className="grid h-12 w-[52px] place-items-center rounded-[18px]">
         <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} size={28} />
       </Link>
@@ -98,7 +101,7 @@ function MobileTabBar({ location }: { location: string }) {
   );
 }
 
-function ShellFrame({ children }: { children: ReactNode }) {
+export function ShellFrame({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [location] = useLocation();
   const profile = useGetProfile();
@@ -109,7 +112,9 @@ function ShellFrame({ children }: { children: ReactNode }) {
     return <Redirect to={`/welcome?next=${encodeURIComponent(currentAppPath())}`} replace />;
   }
 
-  const title = allItems.find(item => isActive(location, item.href))?.label ?? (location === '/settings' ? 'Profile & settings' : 'SewSpace');
+  const title = allItems.find(item => isActive(location, item.href))?.label
+    ?? ({ '/settings': 'Profile & settings', '/new': 'New post' } as Record<string, string>)[location]
+    ?? (location.startsWith('/posts/') ? 'Post' : 'SewSpace');
   return (
     <div className="min-h-[100dvh] pb-28 md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]">
       <aside className="sticky top-[18px] hidden h-[calc(100dvh-36px)] w-[260px] shrink-0 overflow-y-auto rounded-[30px] bg-yellow px-4 py-[22px] md:block">
@@ -127,11 +132,27 @@ function ShellFrame({ children }: { children: ReactNode }) {
         <header className="sticky top-[calc(.75rem+env(safe-area-inset-top))] z-30 mx-3 mt-3 flex items-center gap-3 rounded-[30px] bg-white py-2.5 pl-[22px] pr-3 shadow-float md:static md:mx-0 md:mt-0">
           <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="-ml-2 grid h-11 w-11 place-items-center rounded-full bg-canvas md:hidden"><Menu size={20} /></button>
           <h1 className="min-w-0 flex-1 truncate font-display text-[22px] tracking-[-.04em]">{title}</h1>
+          {location !== '/new' && <Link href="/new" className="hidden min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white no-underline md:inline-flex"><Plus size={16} aria-hidden="true" />New post</Link>}
           <Link href="/settings" aria-label="Profile & settings" className="hidden md:block"><UserAvatar name={profile.data?.name} avatarUrl={profile.data?.avatarUrl} size={40} /></Link>
         </header>
         <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8">{children}</main>
       </div>
       <MobileTabBar location={location} />
+    </div>
+  );
+}
+
+/**
+ * Layout for pages anyone can open (explore, posts): the app shell when signed
+ * in, the public header when signed out.
+ */
+export function AdaptiveLayout({ children }: { children: ReactNode }) {
+  const { isLoaded, isSignedIn } = useAuth();
+  if (isLoaded && isSignedIn) return <ShellFrame>{children}</ShellFrame>;
+  return (
+    <div className="min-h-[100dvh] pb-14">
+      <PublicHeader />
+      <main className="mx-auto max-w-[1232px] px-4 pt-7">{children}</main>
     </div>
   );
 }

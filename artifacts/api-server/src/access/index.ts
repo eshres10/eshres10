@@ -8,3 +8,4 @@ export * from "./objects";
 export * from "./studio";
 export * from "./visibility";
 export * from "./makes";
+export * from "./posts";

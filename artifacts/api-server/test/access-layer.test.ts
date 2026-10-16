@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { as, ownerSql, startApp, withoutRls } from "./harness";
 
 // Imported after the harness has pointed DATABASE_URL at the test database.
-const { canReadObject, getMakeForViewer, viewerFor } = await import("../src/access");
+const { canReadObject, getMakeForViewer, getPostForViewer, viewerFor } = await import("../src/access");
 
 // The access module is the first line of defence; row-level security is the
 // second. These tests run the module with RLS bypassed, so each rule must hold
@@ -43,4 +43,22 @@ test("module alone: files", async () => {
   assert.equal(await read("l_bob", path), false, "blocked");
   assert.equal(await read(null, pdfUp.json.objectPath), false, "pattern PDF");
   assert.equal(await read("l_ann", pdfUp.json.objectPath), true, "owner");
+});
+
+test("module alone: posts for owner, follower, other, signed out, blocked", async () => {
+  const mk = async (visibility: string) => (await ownerSql(
+    "INSERT INTO sewspace_posts (user_id, kind, caption, visibility) VALUES ('l_ann', 'status', 'x', $1) RETURNING id", [visibility])).rows[0].id as number;
+  const [pub, fol, prv] = [await mk("public"), await mk("followers"), await mk("private")];
+  const seesPost = async (user: string | null, id: number) =>
+    Boolean(await withoutRls(user, (tx) => getPostForViewer(tx, viewerFor(user), id)));
+  const table: Array<[string | null, boolean, boolean, boolean]> = [
+    ["l_ann", true, true, true],
+    ["l_fred", true, true, false],
+    ["l_sam", true, false, false],
+    [null, true, false, false],
+    ["l_bob", false, false, false],
+  ];
+  for (const [user, p, f, x] of table) {
+    assert.deepEqual([await seesPost(user, pub), await seesPost(user, fol), await seesPost(user, prv)], [p, f, x], `viewer ${user}`);
+  }
 });

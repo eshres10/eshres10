@@ -3,7 +3,7 @@ import path from "node:path";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { withUser } from "@workspace/db";
-import { getMakeForViewer, getPublicProfile, HANDLE_PATH_PATTERN, listPublicHandles, listPublicMakes } from "../access";
+import { getMakeForViewer, getPostForViewer, getPublicProfile, HANDLE_PATH_PATTERN, listPublicHandles, listPublicMakes, listPublicPosts } from "../access";
 import { logger } from "../lib/logger";
 
 // Server-rendered <head> tags for public pages, so search engines and link
@@ -149,7 +149,7 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
 
   // Served here (not as a static file) so the Sitemap line can be absolute.
   router.get("/robots.txt", (req, res) => {
-    const disallow = ["/api/", "/studio", "/settings", "/welcome", "/sign-in", "/sign-up", "/stash/", "/projects", "/measurements", "/assistant", "/ai-studio", "/marketplace"];
+    const disallow = ["/api/", "/feed", "/new", "/studio", "/settings", "/welcome", "/sign-in", "/sign-up", "/stash/", "/projects", "/measurements", "/assistant", "/ai-studio", "/marketplace"];
     res
       .type("text/plain")
       .set("Cache-Control", "public, max-age=3600")
@@ -178,6 +178,31 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
     }
   });
 
+  // Post pages: /posts/:id.
+  router.get(/^\/posts\/(\d+)\/?$/, async (req, res, next) => {
+    try {
+      const id = Number((req.params as Record<string, string>)[0]);
+      const viewer = req.viewer ?? { userId: null, isAdmin: false };
+      const post = await withUser(viewer.userId, (db) => getPostForViewer(db, viewer, id));
+      if (!post) return sendPage(req, res, notFound, 404);
+      const caption = post.caption.trim();
+      await sendPage(req, res, {
+        title: caption ? `${post.author.name} on SewSpace: “${truncate(caption, 60)}”` : `${post.author.name} (@${post.author.handle}) on SewSpace`,
+        description: truncate(caption || `A post by @${post.author.handle} on SewSpace.`, MAX_DESCRIPTION),
+        canonicalPath: `/posts/${post.id}`,
+        imageUrl: post.media[0]?.url ?? post.author.avatarUrl,
+        type: "article",
+        noindex: post.visibility !== "public",
+      }, 200, post.visibility === "public");
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get(/^\/posts(\/.*)?$/, (req, res, next) => {
+    sendPage(req, res, notFound, 404).catch(next);
+  });
+
   router.get(/^\/makes(\/.*)?$/, (req, res, next) => {
     sendPage(req, res, notFound, 404).catch(next);
   });
@@ -185,11 +210,18 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
   router.get("/sitemap.xml", async (req, res, next) => {
     try {
       const origin = originOf(req);
-      const [handles, makes] = await withUser(null, (db) => Promise.all([listPublicHandles(db), listPublicMakes(db)]));
+      const { handles, makes, posts } = await withUser(null, async (db) => ({
+        handles: await listPublicHandles(db),
+        makes: await listPublicMakes(db),
+        posts: await listPublicPosts(db, 20000),
+      }));
       const urls = [
         `<url><loc>${escapeHtml(origin)}/</loc></url>`,
         ...handles.map(
           (h) => `<url><loc>${escapeHtml(`${origin}/@${h.handle}`)}</loc><lastmod>${h.joinedAt.toISOString().slice(0, 10)}</lastmod></url>`,
+        ),
+        ...posts.map(
+          (p) => `<url><loc>${escapeHtml(`${origin}/posts/${p.id}`)}</loc><lastmod>${p.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,
         ),
         ...makes.map(
           (m) => `<url><loc>${escapeHtml(`${origin}/makes/${m.id}`)}</loc><lastmod>${m.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,

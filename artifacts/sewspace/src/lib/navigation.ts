@@ -8,7 +8,7 @@ export function currentAppPath(): string {
 }
 
 /** Only allow returning to a path inside this app (never another site). */
-export function safeReturnPath(value: string | null | undefined, fallback = '/studio'): string {
+export function safeReturnPath(value: string | null | undefined, fallback = '/feed'): string {
   if (!value) return fallback;
   let path = value;
   try {

@@ -83,6 +83,7 @@ import {
 } from "@workspace/api-zod";
 import { getUserId } from "../middlewares/auth";
 import { scoped, type Reply } from "../lib/scoped";
+import { sequence } from "../lib/sequence";
 import { ensureProfile } from "./profile";
 import { findForeignObjectField, IMAGE_FIELD, PDF_FIELD, publishedAtFor, type UploadPurpose } from "../access";
 import { viewerOf } from "../middlewares/auth";
@@ -266,13 +267,13 @@ router.get("/dashboard", scoped(async (req, res, db): Promise<void> => {
   const uid = userId(req);
   await ensureProfile(db, uid);
   const [profile] = await db.select().from(profilesTable).where(eq(profilesTable.userId, uid));
-  const [fabrics, threads, patterns, projects, recentFabrics, recentPatterns] = await Promise.all([
-    db.select({ id: fabricsTable.id }).from(fabricsTable).where(eq(fabricsTable.userId, uid)),
-    db.select({ id: threadsTable.id }).from(threadsTable).where(eq(threadsTable.userId, uid)),
-    db.select({ id: patternsTable.id }).from(patternsTable).where(eq(patternsTable.userId, uid)),
-    db.select().from(projectsTable).where(and(eq(projectsTable.userId, uid), ne(projectsTable.status, "finished"))).orderBy(asc(projectsTable.id)),
-    db.select().from(fabricsTable).where(eq(fabricsTable.userId, uid)).orderBy(desc(fabricsTable.createdAt)).limit(3),
-    db.select().from(patternsTable).where(eq(patternsTable.userId, uid)).orderBy(desc(patternsTable.createdAt)).limit(3),
+  const [fabrics, threads, patterns, projects, recentFabrics, recentPatterns] = await sequence([
+    () => db.select({ id: fabricsTable.id }).from(fabricsTable).where(eq(fabricsTable.userId, uid)),
+    () => db.select({ id: threadsTable.id }).from(threadsTable).where(eq(threadsTable.userId, uid)),
+    () => db.select({ id: patternsTable.id }).from(patternsTable).where(eq(patternsTable.userId, uid)),
+    () => db.select().from(projectsTable).where(and(eq(projectsTable.userId, uid), ne(projectsTable.status, "finished"))).orderBy(asc(projectsTable.id)),
+    () => db.select().from(fabricsTable).where(eq(fabricsTable.userId, uid)).orderBy(desc(fabricsTable.createdAt)).limit(3),
+    () => db.select().from(patternsTable).where(eq(patternsTable.userId, uid)).orderBy(desc(patternsTable.createdAt)).limit(3),
   ]);
   res.json(
     GetDashboardResponse.parse({
@@ -648,13 +649,13 @@ router.get("/projects/:id", scoped(async (req, res, db): Promise<void> => {
     res.status(404).json({ error: "Project not found" });
     return;
   }
-  const [steps, photos] = await Promise.all([
-    db
+  const [steps, photos] = await sequence([
+    () => db
       .select()
       .from(projectStepsTable)
       .where(and(eq(projectStepsTable.projectId, project.id), eq(projectStepsTable.userId, uid)))
       .orderBy(asc(projectStepsTable.position), asc(projectStepsTable.id)),
-    db
+    () => db
       .select()
       .from(projectPhotosTable)
       .where(and(eq(projectPhotosTable.projectId, project.id), eq(projectPhotosTable.userId, uid)))
@@ -963,17 +964,16 @@ router.post("/assistant/messages", async (req, res): Promise<void> => {
       .where(and(eq(projectsTable.id, parsed.data.projectId!), eq(projectsTable.userId, uid)));
 
     if (project) {
-      const [pattern, fabric, measurements] = await Promise.all([
-        project.patternId
-          ? db.select().from(patternsTable).where(and(eq(patternsTable.id, project.patternId), eq(patternsTable.userId, uid))).then(rows => rows[0])
-          : Promise.resolve(undefined),
-        project.fabricId
-          ? db.select().from(fabricsTable).where(and(eq(fabricsTable.id, project.fabricId), eq(fabricsTable.userId, uid))).then(rows => rows[0])
-          : Promise.resolve(undefined),
-        project.measurementProfileId
-          ? db.select().from(measurementProfilesTable).where(and(eq(measurementProfilesTable.id, project.measurementProfileId), eq(measurementProfilesTable.userId, uid))).then(rows => rows[0])
-          : Promise.resolve(undefined),
-      ]);
+      // One query at a time: this runs inside a single-connection transaction.
+      const pattern = project.patternId
+        ? (await db.select().from(patternsTable).where(and(eq(patternsTable.id, project.patternId), eq(patternsTable.userId, uid))))[0]
+        : undefined;
+      const fabric = project.fabricId
+        ? (await db.select().from(fabricsTable).where(and(eq(fabricsTable.id, project.fabricId), eq(fabricsTable.userId, uid))))[0]
+        : undefined;
+      const measurements = project.measurementProfileId
+        ? (await db.select().from(measurementProfilesTable).where(and(eq(measurementProfilesTable.id, project.measurementProfileId), eq(measurementProfilesTable.userId, uid))))[0]
+        : undefined;
 
       projectContext = JSON.stringify({
         project: {
@@ -1096,9 +1096,9 @@ Show one adult model wearing the completed garment in a warm, minimal sewing-stu
 
 router.get("/recommendations", scoped(async (req, res, db): Promise<void> => {
   const uid = userId(req);
-  const [patterns, fabrics] = await Promise.all([
-    db.select().from(patternsTable).where(eq(patternsTable.userId, uid)),
-    db.select().from(fabricsTable).where(eq(fabricsTable.userId, uid)),
+  const [patterns, fabrics] = await sequence([
+    () => db.select().from(patternsTable).where(eq(patternsTable.userId, uid)),
+    () => db.select().from(fabricsTable).where(eq(fabricsTable.userId, uid)),
   ]);
   // A recommendation pairs a pattern with a fabric; with no fabric there is nothing to pair.
   if (!fabrics.length) {

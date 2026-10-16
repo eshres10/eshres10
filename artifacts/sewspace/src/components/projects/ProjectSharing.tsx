@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getGetProjectQueryKey, getListProjectsQueryKey, useSetVisibility } from '@workspace/api-client-react';
-import { Check, Copy, ExternalLink } from 'lucide-react';
+import { Check, Copy, ExternalLink, Send } from 'lucide-react';
 import { Link } from 'wouter';
 import { VisibilityPicker, type Visibility } from '@/components/visibility';
 
@@ -39,6 +39,7 @@ export function ProjectSharing({ project }: { project: { id: number; visibility:
           note="Measurements and pattern PDFs are never shown." />
       </div>
       {setVisibility.isError && <p role="alert" className="mt-2 text-sm font-semibold text-red-ink">That didn't save. Try again.</p>}
+      <Link href={`/new?make=${project.id}`} className="btn btn-primary mt-4 w-full no-underline" data-testid="button-share-as-post"><Send size={15} aria-hidden="true" />Share as a post</Link>
       {value !== 'private' && (
         <div className="mt-4 space-y-2">
           <p className="truncate rounded-2xl bg-canvas px-3 py-2 text-xs text-subtle" title={link}>{link}</p>
