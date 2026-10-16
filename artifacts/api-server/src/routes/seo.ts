@@ -3,7 +3,7 @@ import path from "node:path";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { withUser } from "@workspace/db";
-import { getMakeForViewer, getPostForViewer, getPublicProfile, HANDLE_PATH_PATTERN, listPublicHandles, listPublicMakes, listPublicPosts } from "../access";
+import { getCatalogPage, getMakeForViewer, getPostForViewer, getPublicProfile, HANDLE_PATH_PATTERN, listCatalogForSitemap, listPublicHandles, listPublicMakes, listPublicPosts } from "../access";
 import { logger } from "../lib/logger";
 
 // Server-rendered <head> tags for public pages, so search engines and link
@@ -199,6 +199,36 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
     }
   });
 
+  // Shared pattern and product pages: /catalog/pattern/:slug, /catalog/product/:slug.
+  router.get(/^\/catalog\/(pattern|product)\/([a-z0-9-]+)\/?$/, async (req, res, next) => {
+    try {
+      const [kind, slug] = [(req.params as Record<string, string>)[0], (req.params as Record<string, string>)[1]] as ["pattern" | "product", string];
+      const viewer = req.viewer ?? { userId: null, isAdmin: false };
+      const page = await withUser(viewer.userId, (db) => getCatalogPage(db, viewer, kind, slug));
+      if (!page) return sendPage(req, res, notFound, 404);
+      const e = page.entry;
+      const by = e.maker ? ` by ${e.maker}` : "";
+      const rating = e.stats.rating !== null ? ` Rated ${e.stats.rating}/5 from ${e.stats.reviews} review${e.stats.reviews === 1 ? "" : "s"}.` : "";
+      const fallback = kind === "pattern" ? `Makes, reviews and fit notes for the ${e.name} sewing pattern${by}.` : `Reviews and makes using ${e.name}${by}.`;
+      await sendPage(req, res, {
+        title: `${e.name}${by} · ${kind === "pattern" ? "Sewing pattern" : "Sewing supplies"} · SewSpace`,
+        description: truncate(`${e.description || fallback}${rating}`, MAX_DESCRIPTION),
+        canonicalPath: `/catalog/${kind}/${e.slug}`,
+        imageUrl: page.makes.find((m) => m.coverImageUrl)?.coverImageUrl ?? null,
+        type: "article",
+      }, 200, !viewer.userId);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get(/^\/catalog(\/.*)?$/, (req, res, next) => {
+    const browse = /^\/catalog\/?$/.test(req.path);
+    sendPage(req, res, browse
+      ? { title: "Sewing patterns and supplies · SewSpace", description: "Reviews, fit notes and real makes for sewing patterns, fabrics and supplies, from the SewSpace community.", canonicalPath: "/catalog" }
+      : notFound, browse ? 200 : 404).catch(next);
+  });
+
   router.get(/^\/posts(\/.*)?$/, (req, res, next) => {
     sendPage(req, res, notFound, 404).catch(next);
   });
@@ -210,10 +240,11 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
   router.get("/sitemap.xml", async (req, res, next) => {
     try {
       const origin = originOf(req);
-      const { handles, makes, posts } = await withUser(null, async (db) => ({
+      const { handles, makes, posts, catalog } = await withUser(null, async (db) => ({
         handles: await listPublicHandles(db),
         makes: await listPublicMakes(db),
         posts: await listPublicPosts(db, 20000),
+        catalog: await listCatalogForSitemap(db, 20000),
       }));
       const urls = [
         `<url><loc>${escapeHtml(origin)}/</loc></url>`,
@@ -222,6 +253,9 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
         ),
         ...posts.map(
           (p) => `<url><loc>${escapeHtml(`${origin}/posts/${p.id}`)}</loc><lastmod>${p.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,
+        ),
+        ...catalog.map(
+          (c) => `<url><loc>${escapeHtml(`${origin}/catalog/${c.kind}/${c.slug}`)}</loc><lastmod>${c.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,
         ),
         ...makes.map(
           (m) => `<url><loc>${escapeHtml(`${origin}/makes/${m.id}`)}</loc><lastmod>${m.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,

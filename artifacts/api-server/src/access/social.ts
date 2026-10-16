@@ -7,6 +7,7 @@ import {
   profilesTable,
   publicProfilesView,
   reportsTable,
+  reviewsTable,
   savesTable,
   type Comment,
   type Post,
@@ -18,6 +19,7 @@ import { findProfile } from "./profile-tabs";
 import { normaliseHandle } from "./handles";
 import type { Viewer } from "./viewer";
 import { visibleTo } from "./visibility";
+import { visibleReview } from "./catalog";
 
 // Likes, comments, saves, follows, blocks and reports. Every action starts by
 // checking, here, that the viewer may see what they act on; RLS (migration
@@ -256,6 +258,16 @@ async function reportTarget(db: Tx, viewer: Viewer, kind: ReportKind, rawId: str
   }
   const id = Number(rawId);
   if (!Number.isInteger(id) || id <= 0) return null;
+  if (kind === "review") {
+    const found = await visibleReview(db, viewer, id);
+    if (!found) return null;
+    const [author] = await db.select().from(publicProfilesView).where(eq(publicProfilesView.userId, found.review.userId));
+    return {
+      id: String(id),
+      userId: found.review.userId,
+      snapshot: { authorHandle: author?.handle ?? null, authorName: author?.name ?? null, text: found.review.body || `${found.review.rating}/5`, imageUrl: null, link: `/catalog/${found.kind}/${found.slug}#review-${id}` },
+    };
+  }
   if (kind === "post") {
     const post = await visiblePost(db, viewer, id);
     const [view] = post ? await hydratePosts(db, viewer, [post]) : [];
@@ -324,21 +336,26 @@ export interface ReportView {
 async function reportViews(db: Tx, rows: Report[]): Promise<ReportView[]> {
   if (!rows.length) return [];
   const ids = (kind: ReportKind) => [...new Set(rows.filter((r) => r.targetKind === kind).map((r) => Number(r.targetId)))].filter(Number.isInteger);
-  const postIds = ids("post"), commentIds = ids("comment");
+  const postIds = ids("post"), commentIds = ids("comment"), reviewIds = ids("review");
   // Admins can read reported posts and comments through RLS (migration 0005).
   const posts = postIds.length ? await db.select({ id: postsTable.id }).from(postsTable).where(inArray(postsTable.id, postIds)) : [];
   const comments = commentIds.length ? await db.select({ id: commentsTable.id }).from(commentsTable).where(inArray(commentsTable.id, commentIds)) : [];
+  const reviews = reviewIds.length ? await db.select({ id: reviewsTable.id }).from(reviewsTable).where(inArray(reviewsTable.id, reviewIds)) : [];
   const reporters = await db.select().from(publicProfilesView).where(inArray(publicProfilesView.userId, [...new Set(rows.map((r) => r.reporterId))]));
   const open = await db
     .select({ kind: reportsTable.targetKind, id: reportsTable.targetId, n: count() })
     .from(reportsTable)
     .where(eq(reportsTable.status, "open"))
     .groupBy(reportsTable.targetKind, reportsTable.targetId);
-  const livePosts = new Set(posts.map((p) => String(p.id))), liveComments = new Set(comments.map((c) => String(c.id)));
+  const live = {
+    post: new Set(posts.map((p) => String(p.id))),
+    comment: new Set(comments.map((c) => String(c.id))),
+    review: new Set(reviews.map((r) => String(r.id))),
+  };
   const reporterMap = new Map(reporters.map((r) => [r.userId, r]));
   const openMap = new Map(open.map((o) => [`${o.kind}:${o.id}`, o.n]));
   return rows.map((r) => {
-    const stillExists = r.targetKind === "profile" || (r.targetKind === "post" ? livePosts : liveComments).has(r.targetId);
+    const stillExists = r.targetKind === "profile" || live[r.targetKind].has(r.targetId);
     const snap = r.snapshot as Partial<ReportTarget>;
     const who = reporterMap.get(r.reporterId);
     return {
@@ -384,6 +401,7 @@ export async function resolveReport(
     if (report.targetKind === "profile") return { ok: false, error: "cannot_remove" };
     const targetId = Number(report.targetId);
     if (report.targetKind === "post") await db.delete(postsTable).where(eq(postsTable.id, targetId));
+    else if (report.targetKind === "review") await db.delete(reviewsTable).where(eq(reviewsTable.id, targetId));
     else await db.delete(commentsTable).where(eq(commentsTable.id, targetId));
     // Every open report on the same thing is settled by the removal.
     await db.update(reportsTable).set({ status: "removed", ...done }).where(and(

@@ -129,7 +129,9 @@ export function PublicMakePage({ id }: { id: number }) {
                         : <span aria-hidden="true" className="h-12 w-12 rounded-[14px] border border-line" style={{ background: swatch(item.color) }} />}
                       <span className="min-w-0">
                         <span className="block text-[11px] font-bold uppercase tracking-[.16em] text-subtle">{KIND_LABEL[item.kind]}</span>
-                        <span className="block truncate font-semibold">{item.name}</span>
+                        {item.catalog
+                          ? <Link href={`/catalog/${item.catalog.kind}/${item.catalog.slug}`} className="block truncate font-semibold text-blue-ink">{item.name}</Link>
+                          : <span className="block truncate font-semibold">{item.name}</span>}
                         {item.detail && <span className="block truncate text-xs text-subtle">{item.detail}</span>}
                       </span>
                     </li>

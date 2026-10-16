@@ -28,6 +28,13 @@ import type {
   AssistantInput,
   AssistantResponse,
   BlockedPerson,
+  CatalogEntry,
+  CatalogInput,
+  CatalogLinkInput,
+  CatalogLinkResult,
+  CatalogList,
+  CatalogPage,
+  CatalogUpdate,
   CheckHandleAvailability200,
   CheckHandleAvailabilityParams,
   Comment,
@@ -45,7 +52,10 @@ import type {
   GetProfilePostsParams,
   GetSavedPostsParams,
   HealthStatus,
+  HelpfulState,
+  LibraryResult,
   LikeState,
+  ListCatalogParams,
   ListFabricsParams,
   ListPatternsParams,
   ListReportsParams,
@@ -83,6 +93,8 @@ import type {
   ReportInput,
   ReportReceipt,
   ReportResolution,
+  Review,
+  ReviewInput,
   SaveState,
   Thread,
   ThreadInput,
@@ -2243,6 +2255,1062 @@ export const useResolveReport = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getResolveReportMutationOptions(options), queryClient);
+    }
+
+export const getListCatalogUrl = (params?: ListCatalogParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/catalog?${stringifiedParams}` : `/api/public/catalog`
+}
+
+/**
+ * @summary Browse or search shared pattern and product pages. Works signed out.
+ */
+export const listCatalog = async (params?: ListCatalogParams, options?: Parameters<typeof customFetch>[1]): Promise<CatalogList> => {
+
+  return customFetch<CatalogList>(getListCatalogUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCatalogQueryKey = (params?: ListCatalogParams,) => {
+    return [
+    `/api/public/catalog`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListCatalogQueryOptions = <TData = Awaited<ReturnType<typeof listCatalog>>, TError = ErrorType<unknown>>(params?: ListCatalogParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCatalog>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCatalogQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCatalog>>> = ({ signal }) => listCatalog(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCatalog>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListCatalogQueryResult = NonNullable<Awaited<ReturnType<typeof listCatalog>>>
+export type ListCatalogQueryError = ErrorType<unknown>
+
+
+export function useListCatalog<TData = Awaited<ReturnType<typeof listCatalog>>, TError = ErrorType<unknown>>(
+ params: undefined |  ListCatalogParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCatalog>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCatalog>>,
+          TError,
+          Awaited<ReturnType<typeof listCatalog>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCatalog<TData = Awaited<ReturnType<typeof listCatalog>>, TError = ErrorType<unknown>>(
+ params?: ListCatalogParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCatalog>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCatalog>>,
+          TError,
+          Awaited<ReturnType<typeof listCatalog>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCatalog<TData = Awaited<ReturnType<typeof listCatalog>>, TError = ErrorType<unknown>>(
+ params?: ListCatalogParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCatalog>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Browse or search shared pattern and product pages. Works signed out.
+ */
+
+export function useListCatalog<TData = Awaited<ReturnType<typeof listCatalog>>, TError = ErrorType<unknown>>(
+ params?: ListCatalogParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCatalog>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListCatalogQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetCatalogPageUrl = (kind: 'pattern' | 'product',
+    slug: string,) => {
+
+
+
+
+  return `/api/public/catalog/${kind}/${slug}`
+}
+
+/**
+ * @summary A shared pattern or product page with its numbers, the makes the viewer may see, and the viewer's own review.
+ */
+export const getCatalogPage = async (kind: 'pattern' | 'product',
+    slug: string, options?: Parameters<typeof customFetch>[1]): Promise<CatalogPage> => {
+
+  return customFetch<CatalogPage>(getGetCatalogPageUrl(kind,slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCatalogPageQueryKey = (kind: 'pattern' | 'product',
+    slug: string,) => {
+    return [
+    `/api/public/catalog/${kind}/${slug}`
+    ] as const;
+    }
+
+
+export const getGetCatalogPageQueryOptions = <TData = Awaited<ReturnType<typeof getCatalogPage>>, TError = ErrorType<void>>(kind: 'pattern' | 'product',
+    slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogPage>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCatalogPageQueryKey(kind,slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCatalogPage>>> = ({ signal }) => getCatalogPage(kind,slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: kind !== null && kind !== undefined && slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCatalogPage>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCatalogPageQueryResult = NonNullable<Awaited<ReturnType<typeof getCatalogPage>>>
+export type GetCatalogPageQueryError = ErrorType<void>
+
+
+export function useGetCatalogPage<TData = Awaited<ReturnType<typeof getCatalogPage>>, TError = ErrorType<void>>(
+ kind: 'pattern' | 'product',
+    slug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogPage>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogPage>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogPage>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCatalogPage<TData = Awaited<ReturnType<typeof getCatalogPage>>, TError = ErrorType<void>>(
+ kind: 'pattern' | 'product',
+    slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogPage>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogPage>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogPage>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCatalogPage<TData = Awaited<ReturnType<typeof getCatalogPage>>, TError = ErrorType<void>>(
+ kind: 'pattern' | 'product',
+    slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogPage>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary A shared pattern or product page with its numbers, the makes the viewer may see, and the viewer's own review.
+ */
+
+export function useGetCatalogPage<TData = Awaited<ReturnType<typeof getCatalogPage>>, TError = ErrorType<void>>(
+ kind: 'pattern' | 'product',
+    slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogPage>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCatalogPageQueryOptions(kind,slug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetCatalogReviewsUrl = (kind: 'pattern' | 'product',
+    slug: string,) => {
+
+
+
+
+  return `/api/public/catalog/${kind}/${slug}/reviews`
+}
+
+/**
+ * @summary Reviews, most helpful first. Hides reviews from people on the other side of a block.
+ */
+export const getCatalogReviews = async (kind: 'pattern' | 'product',
+    slug: string, options?: Parameters<typeof customFetch>[1]): Promise<Review[]> => {
+
+  return customFetch<Review[]>(getGetCatalogReviewsUrl(kind,slug),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCatalogReviewsQueryKey = (kind: 'pattern' | 'product',
+    slug: string,) => {
+    return [
+    `/api/public/catalog/${kind}/${slug}/reviews`
+    ] as const;
+    }
+
+
+export const getGetCatalogReviewsQueryOptions = <TData = Awaited<ReturnType<typeof getCatalogReviews>>, TError = ErrorType<void>>(kind: 'pattern' | 'product',
+    slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogReviews>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCatalogReviewsQueryKey(kind,slug);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCatalogReviews>>> = ({ signal }) => getCatalogReviews(kind,slug, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: kind !== null && kind !== undefined && slug !== null && slug !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCatalogReviews>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCatalogReviewsQueryResult = NonNullable<Awaited<ReturnType<typeof getCatalogReviews>>>
+export type GetCatalogReviewsQueryError = ErrorType<void>
+
+
+export function useGetCatalogReviews<TData = Awaited<ReturnType<typeof getCatalogReviews>>, TError = ErrorType<void>>(
+ kind: 'pattern' | 'product',
+    slug: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogReviews>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogReviews>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogReviews>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCatalogReviews<TData = Awaited<ReturnType<typeof getCatalogReviews>>, TError = ErrorType<void>>(
+ kind: 'pattern' | 'product',
+    slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogReviews>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogReviews>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogReviews>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCatalogReviews<TData = Awaited<ReturnType<typeof getCatalogReviews>>, TError = ErrorType<void>>(
+ kind: 'pattern' | 'product',
+    slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogReviews>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Reviews, most helpful first. Hides reviews from people on the other side of a block.
+ */
+
+export function useGetCatalogReviews<TData = Awaited<ReturnType<typeof getCatalogReviews>>, TError = ErrorType<void>>(
+ kind: 'pattern' | 'product',
+    slug: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogReviews>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCatalogReviewsQueryOptions(kind,slug,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetCatalogEntryUrl = (id: number,) => {
+
+
+
+
+  return `/api/public/catalog-entries/${id}`
+}
+
+export const getCatalogEntry = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<CatalogEntry> => {
+
+  return customFetch<CatalogEntry>(getGetCatalogEntryUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCatalogEntryQueryKey = (id: number,) => {
+    return [
+    `/api/public/catalog-entries/${id}`
+    ] as const;
+    }
+
+
+export const getGetCatalogEntryQueryOptions = <TData = Awaited<ReturnType<typeof getCatalogEntry>>, TError = ErrorType<void>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogEntry>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCatalogEntryQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCatalogEntry>>> = ({ signal }) => getCatalogEntry(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCatalogEntry>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCatalogEntryQueryResult = NonNullable<Awaited<ReturnType<typeof getCatalogEntry>>>
+export type GetCatalogEntryQueryError = ErrorType<void>
+
+
+export function useGetCatalogEntry<TData = Awaited<ReturnType<typeof getCatalogEntry>>, TError = ErrorType<void>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogEntry>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogEntry>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogEntry>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCatalogEntry<TData = Awaited<ReturnType<typeof getCatalogEntry>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogEntry>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogEntry>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogEntry>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCatalogEntry<TData = Awaited<ReturnType<typeof getCatalogEntry>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogEntry>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+
+export function useGetCatalogEntry<TData = Awaited<ReturnType<typeof getCatalogEntry>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogEntry>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCatalogEntryQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateCatalogEntryUrl = () => {
+
+
+
+
+  return `/api/catalog`
+}
+
+/**
+ * @summary Add a shared page. If one with the same name and maker exists, returns that one (200) instead.
+ */
+export const createCatalogEntry = async (catalogInput: CatalogInput, options?: Parameters<typeof customFetch>[1]): Promise<CatalogEntry> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CatalogEntry>(getCreateCatalogEntryUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(catalogInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCatalogEntryMutationKey = () => ['createCatalogEntry'] as const;
+
+export const getCreateCatalogEntryMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCatalogEntry>>, TError,CreateCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCatalogEntry>>, TError,CreateCatalogEntryMutationVariables, TContext> => {
+
+const mutationKey = getCreateCatalogEntryMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCatalogEntry>>, CreateCatalogEntryMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCatalogEntry(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCatalogEntryMutationResult = NonNullable<Awaited<ReturnType<typeof createCatalogEntry>>>
+    export type CreateCatalogEntryMutationBody = BodyType<CatalogInput>
+    export type CreateCatalogEntryMutationError = ErrorType<void>
+    export type CreateCatalogEntryMutationVariables = {data: BodyType<CatalogInput>}
+
+    /**
+ * @summary Add a shared page. If one with the same name and maker exists, returns that one (200) instead.
+ */
+export const useCreateCatalogEntry = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCatalogEntry>>, TError,CreateCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createCatalogEntry>>,
+        TError,
+        CreateCatalogEntryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateCatalogEntryMutationOptions(options), queryClient);
+    }
+
+export const getUpdateCatalogEntryUrl = (id: number,) => {
+
+
+
+
+  return `/api/catalog/${id}`
+}
+
+/**
+ * @summary Correct an entry you added (admins can correct any).
+ */
+export const updateCatalogEntry = async (id: number,
+    catalogUpdate: CatalogUpdate, options?: Parameters<typeof customFetch>[1]): Promise<CatalogEntry> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CatalogEntry>(getUpdateCatalogEntryUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(catalogUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateCatalogEntryMutationKey = () => ['updateCatalogEntry'] as const;
+
+export const getUpdateCatalogEntryMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCatalogEntry>>, TError,UpdateCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateCatalogEntry>>, TError,UpdateCatalogEntryMutationVariables, TContext> => {
+
+const mutationKey = getUpdateCatalogEntryMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCatalogEntry>>, UpdateCatalogEntryMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateCatalogEntry(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateCatalogEntryMutationResult = NonNullable<Awaited<ReturnType<typeof updateCatalogEntry>>>
+    export type UpdateCatalogEntryMutationBody = BodyType<CatalogUpdate>
+    export type UpdateCatalogEntryMutationError = ErrorType<void>
+    export type UpdateCatalogEntryMutationVariables = {id: number;data: BodyType<CatalogUpdate>}
+
+    /**
+ * @summary Correct an entry you added (admins can correct any).
+ */
+export const useUpdateCatalogEntry = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCatalogEntry>>, TError,UpdateCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateCatalogEntry>>,
+        TError,
+        UpdateCatalogEntryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateCatalogEntryMutationOptions(options), queryClient);
+    }
+
+export const getSaveReviewUrl = (id: number,) => {
+
+
+
+
+  return `/api/catalog/${id}/review`
+}
+
+/**
+ * @summary Write or update your review.
+ */
+export const saveReview = async (id: number,
+    reviewInput: ReviewInput, options?: Parameters<typeof customFetch>[1]): Promise<Review> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Review>(getSaveReviewUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(reviewInput)
+  }
+);}
+
+
+
+
+
+export const getSaveReviewMutationKey = () => ['saveReview'] as const;
+
+export const getSaveReviewMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveReview>>, TError,SaveReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveReview>>, TError,SaveReviewMutationVariables, TContext> => {
+
+const mutationKey = getSaveReviewMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveReview>>, SaveReviewMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  saveReview(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveReviewMutationResult = NonNullable<Awaited<ReturnType<typeof saveReview>>>
+    export type SaveReviewMutationBody = BodyType<ReviewInput>
+    export type SaveReviewMutationError = ErrorType<void>
+    export type SaveReviewMutationVariables = {id: number;data: BodyType<ReviewInput>}
+
+    /**
+ * @summary Write or update your review.
+ */
+export const useSaveReview = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveReview>>, TError,SaveReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof saveReview>>,
+        TError,
+        SaveReviewMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveReviewMutationOptions(options), queryClient);
+    }
+
+export const getDeleteReviewUrl = (id: number,) => {
+
+
+
+
+  return `/api/catalog/${id}/review`
+}
+
+export const deleteReview = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteReviewUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteReviewMutationKey = () => ['deleteReview'] as const;
+
+export const getDeleteReviewMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteReview>>, TError,DeleteReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteReview>>, TError,DeleteReviewMutationVariables, TContext> => {
+
+const mutationKey = getDeleteReviewMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteReview>>, DeleteReviewMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteReview(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteReviewMutationResult = NonNullable<Awaited<ReturnType<typeof deleteReview>>>
+
+    export type DeleteReviewMutationError = ErrorType<unknown>
+    export type DeleteReviewMutationVariables = {id: number}
+
+    export const useDeleteReview = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteReview>>, TError,DeleteReviewMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteReview>>,
+        TError,
+        DeleteReviewMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteReviewMutationOptions(options), queryClient);
+    }
+
+export const getMarkReviewHelpfulUrl = (id: number,) => {
+
+
+
+
+  return `/api/reviews/${id}/helpful`
+}
+
+export const markReviewHelpful = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<HelpfulState> => {
+
+  return customFetch<HelpfulState>(getMarkReviewHelpfulUrl(id),
+  {
+    ...options,
+    method: 'PUT'
+
+
+  }
+);}
+
+
+
+
+
+export const getMarkReviewHelpfulMutationKey = () => ['markReviewHelpful'] as const;
+
+export const getMarkReviewHelpfulMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markReviewHelpful>>, TError,MarkReviewHelpfulMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof markReviewHelpful>>, TError,MarkReviewHelpfulMutationVariables, TContext> => {
+
+const mutationKey = getMarkReviewHelpfulMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markReviewHelpful>>, MarkReviewHelpfulMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  markReviewHelpful(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarkReviewHelpfulMutationResult = NonNullable<Awaited<ReturnType<typeof markReviewHelpful>>>
+
+    export type MarkReviewHelpfulMutationError = ErrorType<void>
+    export type MarkReviewHelpfulMutationVariables = {id: number}
+
+    export const useMarkReviewHelpful = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markReviewHelpful>>, TError,MarkReviewHelpfulMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof markReviewHelpful>>,
+        TError,
+        MarkReviewHelpfulMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMarkReviewHelpfulMutationOptions(options), queryClient);
+    }
+
+export const getUnmarkReviewHelpfulUrl = (id: number,) => {
+
+
+
+
+  return `/api/reviews/${id}/helpful`
+}
+
+export const unmarkReviewHelpful = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<HelpfulState> => {
+
+  return customFetch<HelpfulState>(getUnmarkReviewHelpfulUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getUnmarkReviewHelpfulMutationKey = () => ['unmarkReviewHelpful'] as const;
+
+export const getUnmarkReviewHelpfulMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unmarkReviewHelpful>>, TError,UnmarkReviewHelpfulMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unmarkReviewHelpful>>, TError,UnmarkReviewHelpfulMutationVariables, TContext> => {
+
+const mutationKey = getUnmarkReviewHelpfulMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unmarkReviewHelpful>>, UnmarkReviewHelpfulMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  unmarkReviewHelpful(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnmarkReviewHelpfulMutationResult = NonNullable<Awaited<ReturnType<typeof unmarkReviewHelpful>>>
+
+    export type UnmarkReviewHelpfulMutationError = ErrorType<unknown>
+    export type UnmarkReviewHelpfulMutationVariables = {id: number}
+
+    export const useUnmarkReviewHelpful = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unmarkReviewHelpful>>, TError,UnmarkReviewHelpfulMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unmarkReviewHelpful>>,
+        TError,
+        UnmarkReviewHelpfulMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUnmarkReviewHelpfulMutationOptions(options), queryClient);
+    }
+
+export const getAddCatalogPatternToLibraryUrl = (id: number,) => {
+
+
+
+
+  return `/api/catalog/${id}/library`
+}
+
+/**
+ * @summary Add this pattern to your (private) pattern library, linked to the page. Returns the existing one if already there.
+ */
+export const addCatalogPatternToLibrary = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LibraryResult> => {
+
+  return customFetch<LibraryResult>(getAddCatalogPatternToLibraryUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAddCatalogPatternToLibraryMutationKey = () => ['addCatalogPatternToLibrary'] as const;
+
+export const getAddCatalogPatternToLibraryMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addCatalogPatternToLibrary>>, TError,AddCatalogPatternToLibraryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addCatalogPatternToLibrary>>, TError,AddCatalogPatternToLibraryMutationVariables, TContext> => {
+
+const mutationKey = getAddCatalogPatternToLibraryMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addCatalogPatternToLibrary>>, AddCatalogPatternToLibraryMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  addCatalogPatternToLibrary(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddCatalogPatternToLibraryMutationResult = NonNullable<Awaited<ReturnType<typeof addCatalogPatternToLibrary>>>
+
+    export type AddCatalogPatternToLibraryMutationError = ErrorType<void>
+    export type AddCatalogPatternToLibraryMutationVariables = {id: number}
+
+    /**
+ * @summary Add this pattern to your (private) pattern library, linked to the page. Returns the existing one if already there.
+ */
+export const useAddCatalogPatternToLibrary = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addCatalogPatternToLibrary>>, TError,AddCatalogPatternToLibraryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addCatalogPatternToLibrary>>,
+        TError,
+        AddCatalogPatternToLibraryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddCatalogPatternToLibraryMutationOptions(options), queryClient);
+    }
+
+export const getSetCatalogLinkUrl = (kind: 'pattern' | 'fabric' | 'thread',
+    id: number,) => {
+
+
+
+
+  return `/api/catalog-links/${kind}/${id}`
+}
+
+/**
+ * @summary Link one of your patterns, fabrics or threads to a shared page (or unlink with null).
+ */
+export const setCatalogLink = async (kind: 'pattern' | 'fabric' | 'thread',
+    id: number,
+    catalogLinkInput: CatalogLinkInput, options?: Parameters<typeof customFetch>[1]): Promise<CatalogLinkResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CatalogLinkResult>(getSetCatalogLinkUrl(kind,id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(catalogLinkInput)
+  }
+);}
+
+
+
+
+
+export const getSetCatalogLinkMutationKey = () => ['setCatalogLink'] as const;
+
+export const getSetCatalogLinkMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setCatalogLink>>, TError,SetCatalogLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setCatalogLink>>, TError,SetCatalogLinkMutationVariables, TContext> => {
+
+const mutationKey = getSetCatalogLinkMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setCatalogLink>>, SetCatalogLinkMutationVariables> = (props) => {
+          const {kind,id,data} = props ?? {};
+
+          return  setCatalogLink(kind,id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetCatalogLinkMutationResult = NonNullable<Awaited<ReturnType<typeof setCatalogLink>>>
+    export type SetCatalogLinkMutationBody = BodyType<CatalogLinkInput>
+    export type SetCatalogLinkMutationError = ErrorType<void>
+    export type SetCatalogLinkMutationVariables = {kind: 'pattern' | 'fabric' | 'thread';id: number;data: BodyType<CatalogLinkInput>}
+
+    /**
+ * @summary Link one of your patterns, fabrics or threads to a shared page (or unlink with null).
+ */
+export const useSetCatalogLink = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setCatalogLink>>, TError,SetCatalogLinkMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof setCatalogLink>>,
+        TError,
+        SetCatalogLinkMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetCatalogLinkMutationOptions(options), queryClient);
     }
 
 export const getGetHomeFeedUrl = (params?: GetHomeFeedParams,) => {

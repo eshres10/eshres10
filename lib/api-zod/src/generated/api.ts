@@ -106,7 +106,12 @@ export const GetProfileMakesResponse = zod.object({
   "name": zod.string(),
   "detail": zod.string().nullable().describe('e.g. designer, or fibre and composition'),
   "color": zod.string().nullable(),
-  "imageUrl": zod.string().nullable()
+  "imageUrl": zod.string().nullable(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]).describe('The shared page this item is linked to, if any')
 }).describe('A pattern, fabric or thread used in a make, shown only when the viewer may see it.'))
 })),
   "inProgress": zod.array(zod.object({
@@ -126,7 +131,12 @@ export const GetProfileMakesResponse = zod.object({
   "name": zod.string(),
   "detail": zod.string().nullable().describe('e.g. designer, or fibre and composition'),
   "color": zod.string().nullable(),
-  "imageUrl": zod.string().nullable()
+  "imageUrl": zod.string().nullable(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]).describe('The shared page this item is linked to, if any')
 }).describe('A pattern, fabric or thread used in a make, shown only when the viewer may see it.'))
 }))
 })
@@ -146,7 +156,12 @@ export const GetProfileUsedResponse = zod.object({
   "name": zod.string(),
   "detail": zod.string().nullable().describe('e.g. designer, or fibre and composition'),
   "color": zod.string().nullable(),
-  "imageUrl": zod.string().nullable()
+  "imageUrl": zod.string().nullable(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]).describe('The shared page this item is linked to, if any')
 }).describe('A pattern, fabric or thread used in a make, shown only when the viewer may see it.').and(zod.object({
   "makes": zod.array(zod.object({
   "id": zod.number().int(),
@@ -200,7 +215,12 @@ export const GetPublicMakeResponse = zod.object({
   "name": zod.string(),
   "detail": zod.string().nullable().describe('e.g. designer, or fibre and composition'),
   "color": zod.string().nullable(),
-  "imageUrl": zod.string().nullable()
+  "imageUrl": zod.string().nullable(),
+  "catalog": zod.union([zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),zod.null()]).describe('The shared page this item is linked to, if any')
 }).describe('A pattern, fabric or thread used in a make, shown only when the viewer may see it.'))
 })
 
@@ -540,8 +560,8 @@ export const createReportBodyDetailsMax = 1000;
 
 
 export const CreateReportBody = zod.object({
-  "targetKind": zod.enum(['post', 'comment', 'profile']),
-  "targetId": zod.string().describe('Post or comment id'),
+  "targetKind": zod.enum(['post', 'comment', 'profile', 'review']),
+  "targetId": zod.string().describe('Post, comment or review id, or a profile handle'),
   "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
   "details": zod.string().max(createReportBodyDetailsMax).optional()
 })
@@ -559,7 +579,7 @@ export const ListReportsQueryParams = zod.object({
 
 export const ListReportsResponseItem = zod.object({
   "id": zod.number().int(),
-  "targetKind": zod.enum(['post', 'comment', 'profile']),
+  "targetKind": zod.enum(['post', 'comment', 'profile', 'review']),
   "targetId": zod.string(),
   "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
   "details": zod.string(),
@@ -597,7 +617,7 @@ export const ResolveReportBody = zod.object({
 
 export const ResolveReportResponse = zod.object({
   "id": zod.number().int(),
-  "targetKind": zod.enum(['post', 'comment', 'profile']),
+  "targetKind": zod.enum(['post', 'comment', 'profile', 'review']),
   "targetId": zod.string(),
   "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
   "details": zod.string(),
@@ -618,6 +638,442 @@ export const ResolveReportResponse = zod.object({
 }).describe('What was reported, as it was when reported'),
   "stillExists": zod.boolean(),
   "openReportsOnTarget": zod.number().int()
+})
+
+
+/**
+ * @summary Browse or search shared pattern and product pages. Works signed out.
+ */
+export const listCatalogQueryKindDefault = `pattern`;
+export const listCatalogQueryQMax = 80;
+
+
+
+export const ListCatalogQueryParams = zod.object({
+  "kind": zod.enum(['pattern', 'product']).default(listCatalogQueryKindDefault),
+  "q": zod.coerce.string().max(listCatalogQueryQMax).optional()
+})
+
+export const ListCatalogResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "maker": zod.string().describe('Designer (patterns) or brand (products)'),
+  "category": zod.string(),
+  "difficulty": zod.union([zod.literal('beginner'),zod.literal('intermediate'),zod.literal('advanced'),zod.literal(null)]).nullable(),
+  "sizes": zod.string().nullable(),
+  "fabricTypes": zod.string().nullable(),
+  "yardage": zod.string().nullable(),
+  "url": zod.string().nullable().describe('Where to buy it (designer or shop)'),
+  "description": zod.string(),
+  "canEdit": zod.boolean(),
+  "stats": zod.object({
+  "reviews": zod.number().int(),
+  "rating": zod.number().nullable(),
+  "fit": zod.number().nullable(),
+  "difficulty": zod.number().nullable(),
+  "instructions": zod.number().nullable(),
+  "runsSmall": zod.number().int(),
+  "runsTrue": zod.number().int(),
+  "runsLarge": zod.number().int(),
+  "makes": zod.number().int()
+}).describe('Review numbers count every review; makes counts what this viewer may see.')
+}))
+})
+
+
+/**
+ * @summary A shared pattern or product page with its numbers, the makes the viewer may see, and the viewer's own review.
+ */
+export const GetCatalogPageParams = zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.coerce.string()
+})
+
+export const GetCatalogPageResponse = zod.object({
+  "entry": zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "maker": zod.string().describe('Designer (patterns) or brand (products)'),
+  "category": zod.string(),
+  "difficulty": zod.union([zod.literal('beginner'),zod.literal('intermediate'),zod.literal('advanced'),zod.literal(null)]).nullable(),
+  "sizes": zod.string().nullable(),
+  "fabricTypes": zod.string().nullable(),
+  "yardage": zod.string().nullable(),
+  "url": zod.string().nullable().describe('Where to buy it (designer or shop)'),
+  "description": zod.string(),
+  "canEdit": zod.boolean(),
+  "stats": zod.object({
+  "reviews": zod.number().int(),
+  "rating": zod.number().nullable(),
+  "fit": zod.number().nullable(),
+  "difficulty": zod.number().nullable(),
+  "instructions": zod.number().nullable(),
+  "runsSmall": zod.number().int(),
+  "runsTrue": zod.number().int(),
+  "runsLarge": zod.number().int(),
+  "makes": zod.number().int()
+}).describe('Review numbers count every review; makes counts what this viewer may see.')
+}),
+  "makes": zod.array(zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable(),
+  "size": zod.string().nullable(),
+  "owner": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "usedWith": zod.string().nullable().describe('The fabric (on a pattern page) or pattern (on a product page), if the viewer may see it')
+})),
+  "fabricsUsed": zod.array(zod.object({
+  "name": zod.string(),
+  "count": zod.number().int()
+})).describe('Fabric types in the makes shown (pattern pages)'),
+  "myReview": zod.union([zod.object({
+  "id": zod.number().int(),
+  "rating": zod.number().int(),
+  "fit": zod.number().int().nullable(),
+  "difficulty": zod.number().int().nullable(),
+  "instructions": zod.number().int().nullable(),
+  "sizing": zod.union([zod.literal('small'),zod.literal('true'),zod.literal('large'),zod.literal(null)]).nullable(),
+  "sizeMade": zod.string().nullable(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "make": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable()
+}).nullable().describe('The reviewer\'s make, only when the viewer may see it'),
+  "helpfulCount": zod.number().int(),
+  "helpedByMe": zod.boolean(),
+  "isMine": zod.boolean()
+}),zod.null()]),
+  "inMyLibrary": zod.boolean().describe('You have a pattern')
+})
+
+
+/**
+ * @summary Reviews, most helpful first. Hides reviews from people on the other side of a block.
+ */
+export const GetCatalogReviewsParams = zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.coerce.string()
+})
+
+export const GetCatalogReviewsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "rating": zod.number().int(),
+  "fit": zod.number().int().nullable(),
+  "difficulty": zod.number().int().nullable(),
+  "instructions": zod.number().int().nullable(),
+  "sizing": zod.union([zod.literal('small'),zod.literal('true'),zod.literal('large'),zod.literal(null)]).nullable(),
+  "sizeMade": zod.string().nullable(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "make": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable()
+}).nullable().describe('The reviewer\'s make, only when the viewer may see it'),
+  "helpfulCount": zod.number().int(),
+  "helpedByMe": zod.boolean(),
+  "isMine": zod.boolean()
+})
+export const GetCatalogReviewsResponse = zod.array(GetCatalogReviewsResponseItem)
+
+
+export const GetCatalogEntryParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetCatalogEntryResponse = zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "maker": zod.string().describe('Designer (patterns) or brand (products)'),
+  "category": zod.string(),
+  "difficulty": zod.union([zod.literal('beginner'),zod.literal('intermediate'),zod.literal('advanced'),zod.literal(null)]).nullable(),
+  "sizes": zod.string().nullable(),
+  "fabricTypes": zod.string().nullable(),
+  "yardage": zod.string().nullable(),
+  "url": zod.string().nullable().describe('Where to buy it (designer or shop)'),
+  "description": zod.string(),
+  "canEdit": zod.boolean(),
+  "stats": zod.object({
+  "reviews": zod.number().int(),
+  "rating": zod.number().nullable(),
+  "fit": zod.number().nullable(),
+  "difficulty": zod.number().nullable(),
+  "instructions": zod.number().nullable(),
+  "runsSmall": zod.number().int(),
+  "runsTrue": zod.number().int(),
+  "runsLarge": zod.number().int(),
+  "makes": zod.number().int()
+}).describe('Review numbers count every review; makes counts what this viewer may see.')
+})
+
+
+/**
+ * @summary Add a shared page. If one with the same name and maker exists, returns that one (200) instead.
+ */
+export const createCatalogEntryBodyNameMax = 120;
+
+export const createCatalogEntryBodyMakerMax = 120;
+
+export const createCatalogEntryBodyCategoryMax = 40;
+
+export const createCatalogEntryBodySizesMax = 80;
+
+export const createCatalogEntryBodyFabricTypesMax = 120;
+
+export const createCatalogEntryBodyYardageMax = 80;
+
+export const createCatalogEntryBodyUrlMax = 500;
+
+export const createCatalogEntryBodyDescriptionMax = 2000;
+
+
+
+export const CreateCatalogEntryBody = zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "name": zod.string().min(1).max(createCatalogEntryBodyNameMax),
+  "maker": zod.string().max(createCatalogEntryBodyMakerMax).optional(),
+  "category": zod.string().min(1).max(createCatalogEntryBodyCategoryMax),
+  "difficulty": zod.union([zod.literal('beginner'),zod.literal('intermediate'),zod.literal('advanced'),zod.literal(null)]).nullish(),
+  "sizes": zod.string().max(createCatalogEntryBodySizesMax).nullish(),
+  "fabricTypes": zod.string().max(createCatalogEntryBodyFabricTypesMax).nullish(),
+  "yardage": zod.string().max(createCatalogEntryBodyYardageMax).nullish(),
+  "url": zod.string().max(createCatalogEntryBodyUrlMax).nullish(),
+  "description": zod.string().max(createCatalogEntryBodyDescriptionMax).optional()
+})
+
+export const CreateCatalogEntryResponse = zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "maker": zod.string().describe('Designer (patterns) or brand (products)'),
+  "category": zod.string(),
+  "difficulty": zod.union([zod.literal('beginner'),zod.literal('intermediate'),zod.literal('advanced'),zod.literal(null)]).nullable(),
+  "sizes": zod.string().nullable(),
+  "fabricTypes": zod.string().nullable(),
+  "yardage": zod.string().nullable(),
+  "url": zod.string().nullable().describe('Where to buy it (designer or shop)'),
+  "description": zod.string(),
+  "canEdit": zod.boolean(),
+  "stats": zod.object({
+  "reviews": zod.number().int(),
+  "rating": zod.number().nullable(),
+  "fit": zod.number().nullable(),
+  "difficulty": zod.number().nullable(),
+  "instructions": zod.number().nullable(),
+  "runsSmall": zod.number().int(),
+  "runsTrue": zod.number().int(),
+  "runsLarge": zod.number().int(),
+  "makes": zod.number().int()
+}).describe('Review numbers count every review; makes counts what this viewer may see.')
+})
+
+
+/**
+ * @summary Correct an entry you added (admins can correct any).
+ */
+export const UpdateCatalogEntryParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateCatalogEntryBodyNameMax = 120;
+
+export const updateCatalogEntryBodyMakerMax = 120;
+
+export const updateCatalogEntryBodyCategoryMax = 40;
+
+export const updateCatalogEntryBodySizesMax = 80;
+
+export const updateCatalogEntryBodyFabricTypesMax = 120;
+
+export const updateCatalogEntryBodyYardageMax = 80;
+
+export const updateCatalogEntryBodyUrlMax = 500;
+
+export const updateCatalogEntryBodyDescriptionMax = 2000;
+
+
+
+export const UpdateCatalogEntryBody = zod.object({
+  "name": zod.string().min(1).max(updateCatalogEntryBodyNameMax).optional(),
+  "maker": zod.string().max(updateCatalogEntryBodyMakerMax).optional(),
+  "category": zod.string().min(1).max(updateCatalogEntryBodyCategoryMax).optional(),
+  "difficulty": zod.union([zod.literal('beginner'),zod.literal('intermediate'),zod.literal('advanced'),zod.literal(null)]).nullish(),
+  "sizes": zod.string().max(updateCatalogEntryBodySizesMax).nullish(),
+  "fabricTypes": zod.string().max(updateCatalogEntryBodyFabricTypesMax).nullish(),
+  "yardage": zod.string().max(updateCatalogEntryBodyYardageMax).nullish(),
+  "url": zod.string().max(updateCatalogEntryBodyUrlMax).nullish(),
+  "description": zod.string().max(updateCatalogEntryBodyDescriptionMax).optional()
+})
+
+export const UpdateCatalogEntryResponse = zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "maker": zod.string().describe('Designer (patterns) or brand (products)'),
+  "category": zod.string(),
+  "difficulty": zod.union([zod.literal('beginner'),zod.literal('intermediate'),zod.literal('advanced'),zod.literal(null)]).nullable(),
+  "sizes": zod.string().nullable(),
+  "fabricTypes": zod.string().nullable(),
+  "yardage": zod.string().nullable(),
+  "url": zod.string().nullable().describe('Where to buy it (designer or shop)'),
+  "description": zod.string(),
+  "canEdit": zod.boolean(),
+  "stats": zod.object({
+  "reviews": zod.number().int(),
+  "rating": zod.number().nullable(),
+  "fit": zod.number().nullable(),
+  "difficulty": zod.number().nullable(),
+  "instructions": zod.number().nullable(),
+  "runsSmall": zod.number().int(),
+  "runsTrue": zod.number().int(),
+  "runsLarge": zod.number().int(),
+  "makes": zod.number().int()
+}).describe('Review numbers count every review; makes counts what this viewer may see.')
+})
+
+
+/**
+ * @summary Write or update your review.
+ */
+export const SaveReviewParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const saveReviewBodyRatingMax = 5;
+
+export const saveReviewBodyFitMax = 5;
+
+export const saveReviewBodyDifficultyMax = 5;
+
+export const saveReviewBodyInstructionsMax = 5;
+
+export const saveReviewBodySizeMadeMax = 40;
+
+export const saveReviewBodyBodyMax = 4000;
+
+
+
+export const SaveReviewBody = zod.object({
+  "rating": zod.number().int().min(1).max(saveReviewBodyRatingMax),
+  "fit": zod.number().int().min(1).max(saveReviewBodyFitMax).nullish(),
+  "difficulty": zod.number().int().min(1).max(saveReviewBodyDifficultyMax).nullish(),
+  "instructions": zod.number().int().min(1).max(saveReviewBodyInstructionsMax).nullish(),
+  "sizing": zod.union([zod.literal('small'),zod.literal('true'),zod.literal('large'),zod.literal(null)]).nullish(),
+  "sizeMade": zod.string().max(saveReviewBodySizeMadeMax).nullish(),
+  "body": zod.string().max(saveReviewBodyBodyMax).optional(),
+  "makeId": zod.number().int().nullish()
+})
+
+export const SaveReviewResponse = zod.object({
+  "id": zod.number().int(),
+  "rating": zod.number().int(),
+  "fit": zod.number().int().nullable(),
+  "difficulty": zod.number().int().nullable(),
+  "instructions": zod.number().int().nullable(),
+  "sizing": zod.union([zod.literal('small'),zod.literal('true'),zod.literal('large'),zod.literal(null)]).nullable(),
+  "sizeMade": zod.string().nullable(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "make": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable()
+}).nullable().describe('The reviewer\'s make, only when the viewer may see it'),
+  "helpfulCount": zod.number().int(),
+  "helpedByMe": zod.boolean(),
+  "isMine": zod.boolean()
+})
+
+
+export const DeleteReviewParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteReviewResponse = zod.void()
+
+
+export const MarkReviewHelpfulParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const MarkReviewHelpfulResponse = zod.object({
+  "helpful": zod.boolean(),
+  "helpfulCount": zod.number().int()
+})
+
+
+export const UnmarkReviewHelpfulParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UnmarkReviewHelpfulResponse = zod.object({
+  "helpful": zod.boolean(),
+  "helpfulCount": zod.number().int()
+})
+
+
+/**
+ * @summary Add this pattern to your (private) pattern library, linked to the page. Returns the existing one if already there.
+ */
+export const AddCatalogPatternToLibraryParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const AddCatalogPatternToLibraryResponse = zod.object({
+  "patternId": zod.number().int(),
+  "created": zod.boolean()
+})
+
+
+/**
+ * @summary Link one of your patterns, fabrics or threads to a shared page (or unlink with null).
+ */
+export const SetCatalogLinkParams = zod.object({
+  "kind": zod.enum(['pattern', 'fabric', 'thread']),
+  "id": zod.coerce.number().int()
+})
+
+export const SetCatalogLinkBody = zod.object({
+  "catalogId": zod.number().int().nullable()
+})
+
+export const SetCatalogLinkResponse = zod.object({
+  "kind": zod.enum(['pattern', 'fabric', 'thread']),
+  "id": zod.number().int(),
+  "catalogId": zod.number().int().nullable()
 })
 
 
@@ -924,7 +1380,8 @@ export const GetDashboardResponse = zod.object({
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })),
   "recentPatterns": zod.array(zod.object({
   "id": zod.number().int(),
@@ -944,7 +1401,8 @@ export const GetDashboardResponse = zod.object({
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 }))
 })
 
@@ -970,7 +1428,8 @@ export const ListFabricsResponseItem = zod.object({
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })
 export const ListFabricsResponse = zod.array(ListFabricsResponseItem)
 
@@ -1010,7 +1469,8 @@ export const CreateFabricResponse = zod.object({
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })
 
 
@@ -1053,7 +1513,8 @@ export const UpdateFabricResponse = zod.object({
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })
 
 
@@ -1085,7 +1546,8 @@ export const ListThreadsResponseItem = zod.object({
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })
 export const ListThreadsResponse = zod.array(ListThreadsResponseItem)
 
@@ -1116,7 +1578,8 @@ export const CreateThreadResponse = zod.object({
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })
 
 
@@ -1150,7 +1613,8 @@ export const UpdateThreadResponse = zod.object({
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })
 
 
@@ -1189,7 +1653,8 @@ export const ListPatternsResponseItem = zod.object({
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })
 export const ListPatternsResponse = zod.array(ListPatternsResponseItem)
 
@@ -1234,7 +1699,8 @@ export const CreatePatternResponse = zod.object({
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })
 
 
@@ -1282,7 +1748,8 @@ export const UpdatePatternResponse = zod.object({
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 })
 
 
@@ -1876,7 +2343,8 @@ export const GetRecommendationsResponseItem = zod.object({
   "pdfFileName": zod.string().nullable(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 }),
   "fabric": zod.object({
   "id": zod.number().int(),
@@ -1892,7 +2360,8 @@ export const GetRecommendationsResponseItem = zod.object({
   "notes": zod.string().nullable(),
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
 }),
   "suitability": zod.number().int(),
   "reason": zod.string()

@@ -29,4 +29,9 @@ export interface Fabric {
   imageUrl: string | null;
   visibility: Visibility;
   isDemo: boolean;
+  /**
+     * Shared catalog page this is linked to
+     * @nullable
+     */
+  catalogId: number | null;
 }

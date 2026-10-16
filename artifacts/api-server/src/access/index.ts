@@ -11,3 +11,5 @@ export * from "./makes";
 export * from "./posts";
 export * from "./profile-tabs";
 export * from "./social";
+export * from "./catalog";
+export * from "./catalog-refs";

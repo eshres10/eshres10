@@ -139,6 +139,7 @@ function fabricResponse(row: typeof fabricsTable.$inferSelect) {
     imageUrl: row.imageUrl,
     visibility: row.visibility,
     isDemo: row.isDemo,
+    catalogId: row.catalogId,
   };
 }
 
@@ -155,6 +156,7 @@ function threadResponse(row: typeof threadsTable.$inferSelect) {
     imageUrl: row.imageUrl,
     visibility: row.visibility,
     isDemo: row.isDemo,
+    catalogId: row.catalogId,
   };
 }
 
@@ -178,6 +180,7 @@ function patternResponse(row: typeof patternsTable.$inferSelect) {
     status: row.status,
     visibility: row.visibility,
     isDemo: row.isDemo,
+    catalogId: row.catalogId,
   };
 }
 

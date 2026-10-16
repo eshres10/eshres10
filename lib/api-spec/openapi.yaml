@@ -24,6 +24,8 @@ tags:
     description: Likes, comments, saves, follows, blocks and reports
   - name: admin
     description: Report review (ADMIN_USER_IDS only)
+  - name: catalog
+    description: Shared pattern and product pages, and reviews
 paths:
   /public/profiles/{handle}:
     get:
@@ -379,6 +381,209 @@ paths:
         "400": { description: Profiles can't be removed; dismiss instead }
         "403": { description: Not an admin }
         "404": { description: Not found }
+  /public/catalog:
+    get:
+      operationId: listCatalog
+      tags: [public]
+      summary: Browse or search shared pattern and product pages. Works signed out.
+      parameters:
+        - name: kind
+          in: query
+          required: false
+          schema: { type: string, enum: [pattern, product], default: pattern }
+        - { name: q, in: query, required: false, schema: { type: string, maxLength: 80 } }
+      responses:
+        "200":
+          description: Up to 60 entries, most reviewed first (or best match when searching)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogList" }
+  /public/catalog/{kind}/{slug}:
+    get:
+      operationId: getCatalogPage
+      tags: [public]
+      summary: A shared pattern or product page with its numbers, the makes the viewer may see, and the viewer's own review.
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema: { type: string, enum: [pattern, product] }
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: The page
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogPage" }
+        "404": { description: Not found }
+  /public/catalog/{kind}/{slug}/reviews:
+    get:
+      operationId: getCatalogReviews
+      tags: [public]
+      summary: Reviews, most helpful first. Hides reviews from people on the other side of a block.
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema: { type: string, enum: [pattern, product] }
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Reviews
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Review" }
+        "404": { description: Not found }
+  /public/catalog-entries/{id}:
+    get:
+      operationId: getCatalogEntry
+      tags: [public]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: The entry
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogEntry" }
+        "404": { description: Not found }
+  /catalog:
+    post:
+      operationId: createCatalogEntry
+      tags: [catalog]
+      summary: Add a shared page. If one with the same name and maker exists, returns that one (200) instead.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CatalogInput" }
+      responses:
+        "200":
+          description: An entry with this name and maker already existed
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogEntry" }
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogEntry" }
+        "400": { description: Invalid }
+        "409": { description: Choose a handle first }
+        "429": { description: Too many new pages today }
+  /catalog/{id}:
+    patch:
+      operationId: updateCatalogEntry
+      tags: [catalog]
+      summary: Correct an entry you added (admins can correct any).
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CatalogUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogEntry" }
+        "404": { description: Not found or not yours to edit }
+  /catalog/{id}/review:
+    put:
+      operationId: saveReview
+      tags: [catalog]
+      summary: Write or update your review.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ReviewInput" }
+      responses:
+        "200":
+          description: Your review
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Review" }
+        "400": { description: "Invalid, or the make isn't yours" }
+        "404": { description: Not found }
+        "409": { description: Choose a handle first }
+    delete:
+      operationId: deleteReview
+      tags: [catalog]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Deleted (or there was none) }
+  /reviews/{id}/helpful:
+    put:
+      operationId: markReviewHelpful
+      tags: [catalog]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Marked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HelpfulState" }
+        "400": { description: Not on your own review }
+        "404": { description: Not found }
+    delete:
+      operationId: unmarkReviewHelpful
+      tags: [catalog]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Unmarked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/HelpfulState" }
+  /catalog/{id}/library:
+    post:
+      operationId: addCatalogPatternToLibrary
+      tags: [catalog]
+      summary: Add this pattern to your (private) pattern library, linked to the page. Returns the existing one if already there.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: In your library
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LibraryResult" }
+        "400": { description: Only patterns go in the pattern library }
+        "404": { description: Not found }
+  /catalog-links/{kind}/{id}:
+    put:
+      operationId: setCatalogLink
+      tags: [catalog]
+      summary: Link one of your patterns, fabrics or threads to a shared page (or unlink with null).
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema: { type: string, enum: [pattern, fabric, thread] }
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CatalogLinkInput" }
+      responses:
+        "200":
+          description: Linked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogLinkResult" }
+        "400": { description: Patterns link to pattern pages; fabrics and threads to product pages }
+        "404": { description: "Not one of your items, or no such page" }
   /feed:
     get:
       operationId: getHomeFeed
@@ -1226,7 +1431,11 @@ components:
         detail: { type: string, nullable: true, description: "e.g. designer, or fibre and composition" }
         color: { type: string, nullable: true }
         imageUrl: { type: string, nullable: true }
-      required: [kind, id, name, detail, color, imageUrl]
+        catalog:
+          allOf: [{ $ref: "#/components/schemas/CatalogRef" }]
+          nullable: true
+          description: The shared page this item is linked to, if any
+      required: [kind, id, name, detail, color, imageUrl, catalog]
     PublicMake:
       type: object
       properties:
@@ -1405,8 +1614,8 @@ components:
     ReportInput:
       type: object
       properties:
-        targetKind: { type: string, enum: [post, comment, profile] }
-        targetId: { type: string, description: Post or comment id, or a profile handle }
+        targetKind: { type: string, enum: [post, comment, profile, review] }
+        targetId: { type: string, description: "Post, comment or review id, or a profile handle" }
         reason: { $ref: "#/components/schemas/ReportReason" }
         details: { type: string, maxLength: 1000 }
       required: [targetKind, targetId, reason]
@@ -1424,7 +1633,7 @@ components:
       type: object
       properties:
         id: { type: integer }
-        targetKind: { type: string, enum: [post, comment, profile] }
+        targetKind: { type: string, enum: [post, comment, profile, review] }
         targetId: { type: string }
         reason: { $ref: "#/components/schemas/ReportReason" }
         details: { type: string }
@@ -1445,6 +1654,172 @@ components:
         stillExists: { type: boolean }
         openReportsOnTarget: { type: integer }
       required: [id, targetKind, targetId, reason, details, status, createdAt, resolvedAt, reporter, target, stillExists, openReportsOnTarget]
+    CatalogRef:
+      type: object
+      properties:
+        kind: { type: string, enum: [pattern, product] }
+        slug: { type: string }
+        name: { type: string }
+      required: [kind, slug, name]
+    CatalogStats:
+      type: object
+      description: Review numbers count every review; makes counts what this viewer may see.
+      properties:
+        reviews: { type: integer }
+        rating: { type: number, nullable: true }
+        fit: { type: number, nullable: true }
+        difficulty: { type: number, nullable: true }
+        instructions: { type: number, nullable: true }
+        runsSmall: { type: integer }
+        runsTrue: { type: integer }
+        runsLarge: { type: integer }
+        makes: { type: integer }
+      required: [reviews, rating, fit, difficulty, instructions, runsSmall, runsTrue, runsLarge, makes]
+    CatalogEntry:
+      type: object
+      properties:
+        id: { type: integer }
+        kind: { type: string, enum: [pattern, product] }
+        slug: { type: string }
+        name: { type: string }
+        maker: { type: string, description: Designer (patterns) or brand (products) }
+        category: { type: string }
+        difficulty: { type: string, nullable: true, enum: [beginner, intermediate, advanced] }
+        sizes: { type: string, nullable: true }
+        fabricTypes: { type: string, nullable: true }
+        yardage: { type: string, nullable: true }
+        url: { type: string, nullable: true, description: Where to buy it (designer or shop) }
+        description: { type: string }
+        canEdit: { type: boolean }
+        stats: { $ref: "#/components/schemas/CatalogStats" }
+      required: [id, kind, slug, name, maker, category, difficulty, sizes, fabricTypes, yardage, url, description, canEdit, stats]
+    CatalogList:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/CatalogEntry" }
+      required: [items]
+    CatalogInput:
+      type: object
+      properties:
+        kind: { type: string, enum: [pattern, product] }
+        name: { type: string, minLength: 1, maxLength: 120 }
+        maker: { type: string, maxLength: 120 }
+        category: { type: string, minLength: 1, maxLength: 40 }
+        difficulty: { type: string, nullable: true, enum: [beginner, intermediate, advanced] }
+        sizes: { type: string, nullable: true, maxLength: 80 }
+        fabricTypes: { type: string, nullable: true, maxLength: 120 }
+        yardage: { type: string, nullable: true, maxLength: 80 }
+        url: { type: string, nullable: true, maxLength: 500 }
+        description: { type: string, maxLength: 2000 }
+      required: [kind, name, category]
+    CatalogUpdate:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        maker: { type: string, maxLength: 120 }
+        category: { type: string, minLength: 1, maxLength: 40 }
+        difficulty: { type: string, nullable: true, enum: [beginner, intermediate, advanced] }
+        sizes: { type: string, nullable: true, maxLength: 80 }
+        fabricTypes: { type: string, nullable: true, maxLength: 120 }
+        yardage: { type: string, nullable: true, maxLength: 80 }
+        url: { type: string, nullable: true, maxLength: 500 }
+        description: { type: string, maxLength: 2000 }
+    CatalogMake:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        coverImageUrl: { type: string, nullable: true }
+        size: { type: string, nullable: true }
+        owner: { $ref: "#/components/schemas/PublicPerson" }
+        usedWith: { type: string, nullable: true, description: "The fabric (on a pattern page) or pattern (on a product page), if the viewer may see it" }
+      required: [id, name, coverImageUrl, size, owner, usedWith]
+    CatalogPage:
+      type: object
+      properties:
+        entry: { $ref: "#/components/schemas/CatalogEntry" }
+        makes:
+          type: array
+          items: { $ref: "#/components/schemas/CatalogMake" }
+        fabricsUsed:
+          type: array
+          description: Fabric types in the makes shown (pattern pages)
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              count: { type: integer }
+            required: [name, count]
+        myReview:
+          allOf: [{ $ref: "#/components/schemas/Review" }]
+          nullable: true
+        inMyLibrary: { type: boolean, description: You have a pattern, fabric or thread linked to this page }
+      required: [entry, makes, fabricsUsed, myReview, inMyLibrary]
+    Review:
+      type: object
+      properties:
+        id: { type: integer }
+        rating: { type: integer }
+        fit: { type: integer, nullable: true }
+        difficulty: { type: integer, nullable: true }
+        instructions: { type: integer, nullable: true }
+        sizing: { type: string, nullable: true, enum: [small, "true", large] }
+        sizeMade: { type: string, nullable: true }
+        body: { type: string }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+        author: { $ref: "#/components/schemas/PublicPerson" }
+        make:
+          type: object
+          nullable: true
+          description: The reviewer's make, only when the viewer may see it
+          properties:
+            id: { type: integer }
+            name: { type: string }
+            coverImageUrl: { type: string, nullable: true }
+          required: [id, name, coverImageUrl]
+        helpfulCount: { type: integer }
+        helpedByMe: { type: boolean }
+        isMine: { type: boolean }
+      required: [id, rating, fit, difficulty, instructions, sizing, sizeMade, body, createdAt, updatedAt, author, make, helpfulCount, helpedByMe, isMine]
+    ReviewInput:
+      type: object
+      properties:
+        rating: { type: integer, minimum: 1, maximum: 5 }
+        fit: { type: integer, nullable: true, minimum: 1, maximum: 5 }
+        difficulty: { type: integer, nullable: true, minimum: 1, maximum: 5 }
+        instructions: { type: integer, nullable: true, minimum: 1, maximum: 5 }
+        sizing: { type: string, nullable: true, enum: [small, "true", large] }
+        sizeMade: { type: string, nullable: true, maxLength: 40 }
+        body: { type: string, maxLength: 4000 }
+        makeId: { type: integer, nullable: true }
+      required: [rating]
+    HelpfulState:
+      type: object
+      properties:
+        helpful: { type: boolean }
+        helpfulCount: { type: integer }
+      required: [helpful, helpfulCount]
+    LibraryResult:
+      type: object
+      properties:
+        patternId: { type: integer }
+        created: { type: boolean }
+      required: [patternId, created]
+    CatalogLinkInput:
+      type: object
+      properties:
+        catalogId: { type: integer, nullable: true }
+      required: [catalogId]
+    CatalogLinkResult:
+      type: object
+      properties:
+        kind: { type: string, enum: [pattern, fabric, thread] }
+        id: { type: integer }
+        catalogId: { type: integer, nullable: true }
+      required: [kind, id, catalogId]
     ErrorResponse:
       type: object
       properties:
@@ -1479,7 +1854,8 @@ components:
         imageUrl: { type: string, nullable: true }
         visibility: { $ref: "#/components/schemas/Visibility" }
         isDemo: { type: boolean }
-      required: [visibility, id, name, type, color, width, quantity, unit, composition, stretch, weight, notes, imageUrl, isDemo]
+        catalogId: { type: integer, nullable: true, description: Shared catalog page this is linked to }
+      required: [visibility, id, name, type, color, width, quantity, unit, composition, stretch, weight, notes, imageUrl, isDemo, catalogId]
     FabricInput:
       type: object
       required: [name, type, color]
@@ -1513,7 +1889,8 @@ components:
         imageUrl: { type: string, nullable: true }
         visibility: { $ref: "#/components/schemas/Visibility" }
         isDemo: { type: boolean }
-      required: [visibility, id, brand, color, colorName, type, weight, quantity, notes, imageUrl, isDemo]
+        catalogId: { type: integer, nullable: true, description: Shared catalog page this is linked to }
+      required: [visibility, id, brand, color, colorName, type, weight, quantity, notes, imageUrl, isDemo, catalogId]
     ThreadInput:
       type: object
       required: [brand, color, colorName, type]
@@ -1551,7 +1928,8 @@ components:
         status: { type: string, enum: [want_to_make, purchased, made, favorite] }
         visibility: { $ref: "#/components/schemas/Visibility" }
         isDemo: { type: boolean }
-      required: [visibility, id, name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, coverImageUrl, pdfUrl, pdfFileName, status, isDemo]
+        catalogId: { type: integer, nullable: true, description: Shared catalog page this is linked to }
+      required: [visibility, id, name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, coverImageUrl, pdfUrl, pdfFileName, status, isDemo, catalogId]
     PatternInput:
       type: object
       required: [name, garmentType, difficulty]

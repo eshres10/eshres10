@@ -8,6 +8,7 @@ import {
   primaryKey,
   real,
   serial,
+  smallint,
   text,
   timestamp,
   varchar,
@@ -57,6 +58,8 @@ export const fabricsTable = pgTable("sewspace_fabrics", {
   notes: text("notes"),
   imageUrl: text("image_url"),
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
+  // Phase 5: the shared catalog page this item is (migration 0006).
+  catalogId: integer("catalog_id"),
   isDemo: boolean("is_demo").notNull().default(false),
   ...timestamps,
 });
@@ -73,6 +76,8 @@ export const threadsTable = pgTable("sewspace_threads", {
   notes: text("notes"),
   imageUrl: text("image_url"),
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
+  // Phase 5: the shared catalog page this item is (migration 0006).
+  catalogId: integer("catalog_id"),
   isDemo: boolean("is_demo").notNull().default(false),
   ...timestamps,
 });
@@ -96,6 +101,8 @@ export const patternsTable = pgTable("sewspace_patterns", {
   pdfFileName: text("pdf_file_name"),
   status: text("status").notNull().default("want_to_make"),
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
+  // Phase 5: the shared catalog page this item is (migration 0006).
+  catalogId: integer("catalog_id"),
   isDemo: boolean("is_demo").notNull().default(false),
   ...timestamps,
 });
@@ -257,7 +264,7 @@ export const savesTable = pgTable("sewspace_saves", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.userId, t.postId] })]);
 
-export const REPORT_KINDS = ["post", "comment", "profile"] as const;
+export const REPORT_KINDS = ["post", "comment", "profile", "review"] as const;
 export const REPORT_REASONS = ["spam", "harassment", "nudity", "violence", "intellectual_property", "other"] as const;
 export const REPORT_STATUSES = ["open", "removed", "dismissed"] as const;
 
@@ -275,6 +282,51 @@ export const reportsTable = pgTable("sewspace_reports", {
   resolvedAt: timestamp("resolved_at", { withTimezone: true }),
   resolvedBy: varchar("resolved_by", { length: 255 }),
 });
+
+// Phase 5: shared pattern and product pages, and reviews (migration 0006).
+export const CATALOG_KINDS = ["pattern", "product"] as const;
+export type CatalogKind = (typeof CATALOG_KINDS)[number];
+
+export const catalogTable = pgTable("sewspace_catalog", {
+  id: serial("id").primaryKey(),
+  kind: text("kind").$type<CatalogKind>().notNull(),
+  slug: text("slug").notNull(),
+  name: text("name").notNull(),
+  maker: text("maker").notNull().default(""),
+  category: text("category").notNull(),
+  difficulty: text("difficulty"),
+  sizes: text("sizes"),
+  fabricTypes: text("fabric_types"),
+  yardage: text("yardage"),
+  url: text("url"),
+  description: text("description").notNull().default(""),
+  createdBy: varchar("created_by", { length: 255 }).notNull(),
+  ...timestamps,
+});
+
+export const reviewsTable = pgTable("sewspace_reviews", {
+  id: serial("id").primaryKey(),
+  catalogId: integer("catalog_id").notNull().references(() => catalogTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  rating: smallint("rating").notNull(),
+  fit: smallint("fit"),
+  difficulty: smallint("difficulty"),
+  instructions: smallint("instructions"),
+  sizing: text("sizing").$type<"small" | "true" | "large">(),
+  sizeMade: text("size_made"),
+  body: text("body").notNull().default(""),
+  makeId: integer("make_id").references(() => projectsTable.id, { onDelete: "set null" }),
+  ...timestamps,
+});
+
+export const reviewVotesTable = pgTable("sewspace_review_votes", {
+  reviewId: integer("review_id").notNull().references(() => reviewsTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.reviewId, t.userId] })]);
+
+export type CatalogEntry = typeof catalogTable.$inferSelect;
+export type Review = typeof reviewsTable.$inferSelect;
 
 export type Comment = typeof commentsTable.$inferSelect;
 export type Report = typeof reportsTable.$inferSelect;

@@ -20,6 +20,8 @@ import { SignInPromptProvider } from '@/components/auth/SignInPrompt';
 import { PublicMakePage } from '@/pages/public-make';
 import { ComposePage } from '@/pages/compose';
 import { SavedPage } from '@/pages/saved';
+import { CatalogPage } from '@/pages/catalog';
+import { CatalogEntryPage } from '@/pages/catalog-entry';
 import { AdminReportsPage } from '@/pages/admin-reports';
 import { ExplorePage } from '@/pages/explore';
 import { FeedPage } from '@/pages/feed';
@@ -74,6 +76,8 @@ function Router() {
     <Route path="/new" component={InShellComposePage} />
     <Route path="/saved" component={InShellSavedPage} />
     <Route path="/admin/reports" component={InShellAdminReports} />
+    <Route path="/catalog">{() => <AdaptiveLayout><CatalogPage /></AdaptiveLayout>}</Route>
+    <Route path="/catalog/:kind/:slug">{(params: { kind: string; slug: string }) => <AdaptiveLayout><CatalogEntryPage kind={params.kind} slug={params.slug} /></AdaptiveLayout>}</Route>
     <Route path="/explore">{() => <AdaptiveLayout><ExplorePage /></AdaptiveLayout>}</Route>
     <Route path="/posts/:id">{(params: { id: string }) => <AdaptiveLayout><PostPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
     <Route path="/welcome" component={WelcomePage} />

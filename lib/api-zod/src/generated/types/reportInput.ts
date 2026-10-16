@@ -10,7 +10,7 @@ import type { ReportReason } from './reportReason';
 
 export interface ReportInput {
   targetKind: ReportInputTargetKind;
-  /** Post or comment id */
+  /** Post, comment or review id, or a profile handle */
   targetId: string;
   reason: ReportReason;
   /** @maxLength 1000 */

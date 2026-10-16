@@ -85,6 +85,20 @@ export const PublicMaterialKind = {
   thread: 'thread',
 } as const;
 
+export type CatalogRefKind = typeof CatalogRefKind[keyof typeof CatalogRefKind];
+
+
+export const CatalogRefKind = {
+  pattern: 'pattern',
+  product: 'product',
+} as const;
+
+export interface CatalogRef {
+  kind: CatalogRefKind;
+  slug: string;
+  name: string;
+}
+
 /**
  * A pattern, fabric or thread used in a make, shown only when the viewer may see it.
  */
@@ -101,6 +115,8 @@ export interface PublicMaterial {
   color: string | null;
   /** @nullable */
   imageUrl: string | null;
+  /** The shared page this item is linked to, if any */
+  catalog: CatalogRef | null;
 }
 
 export interface MakeSummary {
@@ -391,11 +407,12 @@ export const ReportInputTargetKind = {
   post: 'post',
   comment: 'comment',
   profile: 'profile',
+  review: 'review',
 } as const;
 
 export interface ReportInput {
   targetKind: ReportInputTargetKind;
-  /** Post or comment id */
+  /** Post, comment or review id, or a profile handle */
   targetId: string;
   reason: ReportReason;
   /** @maxLength 1000 */
@@ -425,6 +442,7 @@ export const ReportTargetKind = {
   post: 'post',
   comment: 'comment',
   profile: 'profile',
+  review: 'review',
 } as const;
 
 export type ReportStatus = typeof ReportStatus[keyof typeof ReportStatus];
@@ -470,6 +488,346 @@ export interface Report {
   target: ReportTarget;
   stillExists: boolean;
   openReportsOnTarget: number;
+}
+
+/**
+ * Review numbers count every review; makes counts what this viewer may see.
+ */
+export interface CatalogStats {
+  reviews: number;
+  /** @nullable */
+  rating: number | null;
+  /** @nullable */
+  fit: number | null;
+  /** @nullable */
+  difficulty: number | null;
+  /** @nullable */
+  instructions: number | null;
+  runsSmall: number;
+  runsTrue: number;
+  runsLarge: number;
+  makes: number;
+}
+
+export type CatalogEntryKind = typeof CatalogEntryKind[keyof typeof CatalogEntryKind];
+
+
+export const CatalogEntryKind = {
+  pattern: 'pattern',
+  product: 'product',
+} as const;
+
+/**
+ * @nullable
+ */
+export type CatalogEntryDifficulty = typeof CatalogEntryDifficulty[keyof typeof CatalogEntryDifficulty] | null;
+
+
+export const CatalogEntryDifficulty = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced',
+} as const;
+
+export interface CatalogEntry {
+  id: number;
+  kind: CatalogEntryKind;
+  slug: string;
+  name: string;
+  /** Designer (patterns) or brand (products) */
+  maker: string;
+  category: string;
+  /** @nullable */
+  difficulty: CatalogEntryDifficulty;
+  /** @nullable */
+  sizes: string | null;
+  /** @nullable */
+  fabricTypes: string | null;
+  /** @nullable */
+  yardage: string | null;
+  /**
+     * Where to buy it (designer or shop)
+     * @nullable
+     */
+  url: string | null;
+  description: string;
+  canEdit: boolean;
+  stats: CatalogStats;
+}
+
+export interface CatalogList {
+  items: CatalogEntry[];
+}
+
+export type CatalogInputKind = typeof CatalogInputKind[keyof typeof CatalogInputKind];
+
+
+export const CatalogInputKind = {
+  pattern: 'pattern',
+  product: 'product',
+} as const;
+
+/**
+ * @nullable
+ */
+export type CatalogInputDifficulty = typeof CatalogInputDifficulty[keyof typeof CatalogInputDifficulty] | null;
+
+
+export const CatalogInputDifficulty = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced',
+} as const;
+
+export interface CatalogInput {
+  kind: CatalogInputKind;
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name: string;
+  /** @maxLength 120 */
+  maker?: string;
+  /**
+     * @minLength 1
+     * @maxLength 40
+     */
+  category: string;
+  /** @nullable */
+  difficulty?: CatalogInputDifficulty;
+  /**
+     * @maxLength 80
+     * @nullable
+     */
+  sizes?: string | null;
+  /**
+     * @maxLength 120
+     * @nullable
+     */
+  fabricTypes?: string | null;
+  /**
+     * @maxLength 80
+     * @nullable
+     */
+  yardage?: string | null;
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  url?: string | null;
+  /** @maxLength 2000 */
+  description?: string;
+}
+
+/**
+ * @nullable
+ */
+export type CatalogUpdateDifficulty = typeof CatalogUpdateDifficulty[keyof typeof CatalogUpdateDifficulty] | null;
+
+
+export const CatalogUpdateDifficulty = {
+  beginner: 'beginner',
+  intermediate: 'intermediate',
+  advanced: 'advanced',
+} as const;
+
+export interface CatalogUpdate {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name?: string;
+  /** @maxLength 120 */
+  maker?: string;
+  /**
+     * @minLength 1
+     * @maxLength 40
+     */
+  category?: string;
+  /** @nullable */
+  difficulty?: CatalogUpdateDifficulty;
+  /**
+     * @maxLength 80
+     * @nullable
+     */
+  sizes?: string | null;
+  /**
+     * @maxLength 120
+     * @nullable
+     */
+  fabricTypes?: string | null;
+  /**
+     * @maxLength 80
+     * @nullable
+     */
+  yardage?: string | null;
+  /**
+     * @maxLength 500
+     * @nullable
+     */
+  url?: string | null;
+  /** @maxLength 2000 */
+  description?: string;
+}
+
+export interface CatalogMake {
+  id: number;
+  name: string;
+  /** @nullable */
+  coverImageUrl: string | null;
+  /** @nullable */
+  size: string | null;
+  owner: PublicPerson;
+  /**
+     * The fabric (on a pattern page) or pattern (on a product page), if the viewer may see it
+     * @nullable
+     */
+  usedWith: string | null;
+}
+
+export type CatalogPageFabricsUsedItem = {
+  name: string;
+  count: number;
+};
+
+/**
+ * @nullable
+ */
+export type ReviewSizing = typeof ReviewSizing[keyof typeof ReviewSizing] | null;
+
+
+export const ReviewSizing = {
+  small: 'small',
+  true: 'true',
+  large: 'large',
+} as const;
+
+/**
+ * The reviewer's make, only when the viewer may see it
+ * @nullable
+ */
+export type ReviewMake = {
+  id: number;
+  name: string;
+  /** @nullable */
+  coverImageUrl: string | null;
+} | null;
+
+export interface Review {
+  id: number;
+  rating: number;
+  /** @nullable */
+  fit: number | null;
+  /** @nullable */
+  difficulty: number | null;
+  /** @nullable */
+  instructions: number | null;
+  /** @nullable */
+  sizing: ReviewSizing;
+  /** @nullable */
+  sizeMade: string | null;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+  author: PublicPerson;
+  /**
+     * The reviewer's make, only when the viewer may see it
+     * @nullable
+     */
+  make: ReviewMake;
+  helpfulCount: number;
+  helpedByMe: boolean;
+  isMine: boolean;
+}
+
+export interface CatalogPage {
+  entry: CatalogEntry;
+  makes: CatalogMake[];
+  /** Fabric types in the makes shown (pattern pages) */
+  fabricsUsed: CatalogPageFabricsUsedItem[];
+  myReview: Review | null;
+  /** You have a pattern */
+  inMyLibrary: boolean;
+}
+
+/**
+ * @nullable
+ */
+export type ReviewInputSizing = typeof ReviewInputSizing[keyof typeof ReviewInputSizing] | null;
+
+
+export const ReviewInputSizing = {
+  small: 'small',
+  true: 'true',
+  large: 'large',
+} as const;
+
+export interface ReviewInput {
+  /**
+     * @minimum 1
+     * @maximum 5
+     */
+  rating: number;
+  /**
+     * @minimum 1
+     * @maximum 5
+     * @nullable
+     */
+  fit?: number | null;
+  /**
+     * @minimum 1
+     * @maximum 5
+     * @nullable
+     */
+  difficulty?: number | null;
+  /**
+     * @minimum 1
+     * @maximum 5
+     * @nullable
+     */
+  instructions?: number | null;
+  /** @nullable */
+  sizing?: ReviewInputSizing;
+  /**
+     * @maxLength 40
+     * @nullable
+     */
+  sizeMade?: string | null;
+  /** @maxLength 4000 */
+  body?: string;
+  /** @nullable */
+  makeId?: number | null;
+}
+
+export interface HelpfulState {
+  helpful: boolean;
+  helpfulCount: number;
+}
+
+export interface LibraryResult {
+  patternId: number;
+  created: boolean;
+}
+
+export interface CatalogLinkInput {
+  /** @nullable */
+  catalogId: number | null;
+}
+
+export type CatalogLinkResultKind = typeof CatalogLinkResultKind[keyof typeof CatalogLinkResultKind];
+
+
+export const CatalogLinkResultKind = {
+  pattern: 'pattern',
+  fabric: 'fabric',
+  thread: 'thread',
+} as const;
+
+export interface CatalogLinkResult {
+  kind: CatalogLinkResultKind;
+  id: number;
+  /** @nullable */
+  catalogId: number | null;
 }
 
 export interface ErrorResponse {
@@ -530,6 +888,11 @@ export interface Fabric {
   imageUrl: string | null;
   visibility: Visibility;
   isDemo: boolean;
+  /**
+     * Shared catalog page this is linked to
+     * @nullable
+     */
+  catalogId: number | null;
 }
 
 export interface FabricInput {
@@ -574,6 +937,11 @@ export interface Thread {
   imageUrl: string | null;
   visibility: Visibility;
   isDemo: boolean;
+  /**
+     * Shared catalog page this is linked to
+     * @nullable
+     */
+  catalogId: number | null;
 }
 
 export interface ThreadInput {
@@ -635,6 +1003,11 @@ export interface Pattern {
   status: PatternStatus;
   visibility: Visibility;
   isDemo: boolean;
+  /**
+     * Shared catalog page this is linked to
+     * @nullable
+     */
+  catalogId: number | null;
 }
 
 export type PatternInputStatus = typeof PatternInputStatus[keyof typeof PatternInputStatus];
@@ -1073,6 +1446,22 @@ export const ListReportsStatus = {
   open: 'open',
   removed: 'removed',
   dismissed: 'dismissed',
+} as const;
+
+export type ListCatalogParams = {
+kind?: ListCatalogKind;
+/**
+ * @maxLength 80
+ */
+q?: string;
+};
+
+export type ListCatalogKind = typeof ListCatalogKind[keyof typeof ListCatalogKind];
+
+
+export const ListCatalogKind = {
+  pattern: 'pattern',
+  product: 'product',
 } as const;
 
 export type GetHomeFeedParams = {

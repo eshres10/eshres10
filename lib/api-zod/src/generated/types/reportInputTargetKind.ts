@@ -13,4 +13,5 @@ export const ReportInputTargetKind = {
   post: 'post',
   comment: 'comment',
   profile: 'profile',
+  review: 'review',
 } as const;

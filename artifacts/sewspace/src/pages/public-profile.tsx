@@ -278,7 +278,9 @@ function UsedItem({ item }: { item: UsedProduct }) {
           ? <span aria-hidden="true" className="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-canvas"><BookOpen size={20} /></span>
           : <span aria-hidden="true" className="h-12 w-12 shrink-0 rounded-[14px] border border-line" style={{ background: swatch(item.color) }} />}
       <span className="min-w-0 flex-1">
-        <span className="block truncate font-semibold">{item.name}</span>
+        {item.catalog
+          ? <Link href={`/catalog/${item.catalog.kind}/${item.catalog.slug}`} className="block truncate font-semibold text-blue-ink">{item.name}</Link>
+          : <span className="block truncate font-semibold">{item.name}</span>}
         {item.detail && <span className="block truncate text-xs text-subtle">{item.detail}</span>}
         <span className="mt-1 block text-xs text-subtle">
           Used in{' '}

@@ -38,4 +38,9 @@ export interface Pattern {
   status: PatternStatus;
   visibility: Visibility;
   isDemo: boolean;
+  /**
+     * Shared catalog page this is linked to
+     * @nullable
+     */
+  catalogId: number | null;
 }

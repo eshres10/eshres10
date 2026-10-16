@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useGetProfile } from '@workspace/api-client-react';
-import { Bookmark, BookOpen, Compass, Flag, LayoutGrid, FolderKanban, Home, House, Layers, Menu, MessageCircle, Plus, Ruler, Scissors, Sparkles, Spool, Store, X } from 'lucide-react';
+import { Bookmark, BookMarked, BookOpen, Compass, Flag, LayoutGrid, FolderKanban, Home, House, Layers, Menu, MessageCircle, Plus, Ruler, Scissors, Sparkles, Spool, Store, X } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
 import { useAuth } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
@@ -17,6 +17,7 @@ export const navGroups: Array<{ label: string; items: NavItem[] }> = [
   { label: 'Community', items: [
     { href: '/feed', label: 'Home', icon: House },
     { href: '/explore', label: 'Explore', icon: Compass },
+    { href: '/catalog', label: 'Patterns & supplies', icon: BookMarked },
     { href: '/saved', label: 'Saved', icon: Bookmark },
   ] },
   { label: 'My studio', items: [

@@ -9,6 +9,7 @@ import {
   threadsTable,
   type Tx,
 } from "@workspace/db";
+import { catalogRefs, type CatalogRef } from "./catalog-refs";
 import type { Viewer } from "./viewer";
 import { visibleTo } from "./visibility";
 
@@ -19,6 +20,8 @@ export interface PublicMaterial {
   detail: string | null;
   color: string | null;
   imageUrl: string | null;
+  /** The shared page this item is linked to, if any (Phase 5). */
+  catalog: CatalogRef | null;
 }
 
 function joinDetail(...parts: Array<string | null | undefined>): string | null {
@@ -48,21 +51,25 @@ export async function getMakeForViewer(db: Tx, viewer: Viewer, id: number) {
     .orderBy(asc(projectPhotosTable.position), asc(projectPhotosTable.id));
 
   const materials: PublicMaterial[] = [];
+  const linked: Array<number | null> = [];
   if (make.patternId) {
     const [p] = await db.select().from(patternsTable)
       .where(and(eq(patternsTable.id, make.patternId), eq(patternsTable.userId, make.userId), visibleTo(patternsTable, viewer)));
-    if (p) materials.push({ kind: "pattern", id: p.id, name: p.name, detail: joinDetail(p.designer, p.garmentType), color: null, imageUrl: p.coverImageUrl });
+    if (p) { materials.push({ kind: "pattern", id: p.id, name: p.name, detail: joinDetail(p.designer, p.garmentType), color: null, imageUrl: p.coverImageUrl, catalog: null }); linked.push(p.catalogId); }
   }
   if (make.fabricId) {
     const [f] = await db.select().from(fabricsTable)
       .where(and(eq(fabricsTable.id, make.fabricId), eq(fabricsTable.userId, make.userId), visibleTo(fabricsTable, viewer)));
-    if (f) materials.push({ kind: "fabric", id: f.id, name: f.name, detail: joinDetail(f.type, f.composition), color: f.color, imageUrl: f.imageUrl });
+    if (f) { materials.push({ kind: "fabric", id: f.id, name: f.name, detail: joinDetail(f.type, f.composition), color: f.color, imageUrl: f.imageUrl, catalog: null }); linked.push(f.catalogId); }
   }
   if (make.threadId) {
     const [t] = await db.select().from(threadsTable)
       .where(and(eq(threadsTable.id, make.threadId), eq(threadsTable.userId, make.userId), visibleTo(threadsTable, viewer)));
-    if (t) materials.push({ kind: "thread", id: t.id, name: `${t.brand} ${t.colorName}`, detail: joinDetail(t.type, t.weight), color: t.color, imageUrl: t.imageUrl });
+    if (t) { materials.push({ kind: "thread", id: t.id, name: `${t.brand} ${t.colorName}`, detail: joinDetail(t.type, t.weight), color: t.color, imageUrl: t.imageUrl, catalog: null }); linked.push(t.catalogId); }
   }
+
+  const refs = await catalogRefs(db, linked);
+  materials.forEach((m, i) => { m.catalog = refs.get(linked[i] ?? -1) ?? null; });
 
   return {
     id: make.id,

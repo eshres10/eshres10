@@ -6,6 +6,7 @@ import { normaliseHandle, handleProblem } from "./handles";
 import type { PublicProfile } from "./profiles";
 import type { Viewer } from "./viewer";
 import { visibleTo } from "./visibility";
+import { catalogRefs } from "./catalog-refs";
 
 // A profile page: the header with its numbers, and the Posts, Makes and Used
 // products tabs. Every list only holds what this viewer may see (visibleTo),
@@ -91,21 +92,24 @@ async function materialsOf(db: Tx, viewer: Viewer, uid: string, makes: Project[]
   const ids = (key: "patternId" | "fabricId" | "threadId") => [...new Set(makes.map((m) => m[key]).filter((id): id is number => id !== null))];
   const patternIds = ids("patternId"), fabricIds = ids("fabricId"), threadIds = ids("threadId");
   const found = new Map<string, PublicMaterial>();
+  const catalogOf = new Map<string, number | null>();
   if (patternIds.length) {
     const rows = await db.select().from(patternsTable)
       .where(and(inArray(patternsTable.id, patternIds), eq(patternsTable.userId, uid), visibleTo(patternsTable, viewer)));
-    for (const p of rows) found.set(`pattern:${p.id}`, { kind: "pattern", id: p.id, name: p.name, detail: joinDetail(p.designer, p.garmentType), color: null, imageUrl: p.coverImageUrl });
+    for (const p of rows) { found.set(`pattern:${p.id}`, { kind: "pattern", id: p.id, name: p.name, detail: joinDetail(p.designer, p.garmentType), color: null, imageUrl: p.coverImageUrl, catalog: null }); catalogOf.set(`pattern:${p.id}`, p.catalogId); }
   }
   if (fabricIds.length) {
     const rows = await db.select().from(fabricsTable)
       .where(and(inArray(fabricsTable.id, fabricIds), eq(fabricsTable.userId, uid), visibleTo(fabricsTable, viewer)));
-    for (const f of rows) found.set(`fabric:${f.id}`, { kind: "fabric", id: f.id, name: f.name, detail: joinDetail(f.type, f.composition), color: f.color, imageUrl: f.imageUrl });
+    for (const f of rows) { found.set(`fabric:${f.id}`, { kind: "fabric", id: f.id, name: f.name, detail: joinDetail(f.type, f.composition), color: f.color, imageUrl: f.imageUrl, catalog: null }); catalogOf.set(`fabric:${f.id}`, f.catalogId); }
   }
   if (threadIds.length) {
     const rows = await db.select().from(threadsTable)
       .where(and(inArray(threadsTable.id, threadIds), eq(threadsTable.userId, uid), visibleTo(threadsTable, viewer)));
-    for (const t of rows) found.set(`thread:${t.id}`, { kind: "thread", id: t.id, name: `${t.brand} ${t.colorName}`, detail: joinDetail(t.type, t.weight), color: t.color, imageUrl: t.imageUrl });
+    for (const t of rows) { found.set(`thread:${t.id}`, { kind: "thread", id: t.id, name: `${t.brand} ${t.colorName}`, detail: joinDetail(t.type, t.weight), color: t.color, imageUrl: t.imageUrl, catalog: null }); catalogOf.set(`thread:${t.id}`, t.catalogId); }
   }
+  const refs = await catalogRefs(db, [...catalogOf.values()]);
+  for (const [key, m] of found) m.catalog = refs.get(catalogOf.get(key) ?? -1) ?? null;
   return found;
 }
 

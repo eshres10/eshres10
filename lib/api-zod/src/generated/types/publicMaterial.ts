@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { CatalogRef } from './catalogRef';
 import type { PublicMaterialKind } from './publicMaterialKind';
 
 /**
@@ -23,4 +24,6 @@ export interface PublicMaterial {
   color: string | null;
   /** @nullable */
   imageUrl: string | null;
+  /** The shared page this item is linked to, if any */
+  catalog: CatalogRef | null;
 }
