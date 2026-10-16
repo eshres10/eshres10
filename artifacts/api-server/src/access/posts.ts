@@ -1,5 +1,7 @@
-import { and, asc, desc, eq, gt, inArray, isNotNull, lt, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, desc, eq, gt, inArray, isNotNull, isNull, lt, or, sql, type SQL } from "drizzle-orm";
 import {
+  challengeEntriesTable,
+  challengesTable,
   fabricsTable,
   followsTable,
   likesTable,
@@ -47,6 +49,7 @@ export interface FeedPostView {
   commentCount: number;
   likedByMe: boolean;
   savedByMe: boolean;
+  challenges: Array<{ slug: string; tag: string }>;
 }
 
 // Cursors are opaque to clients: "<created_at ISO>|<id>" in base64url.
@@ -106,6 +109,12 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
   const saved = viewer.userId
     ? await db.select({ postId: savesTable.postId }).from(savesTable).where(and(eq(savesTable.userId, viewer.userId), inArray(savesTable.postId, ids)))
     : [];
+  // Challenges each post is a live entry in (the challenge must be visible too).
+  const entries = await db
+    .select({ postId: challengeEntriesTable.postId, slug: challengesTable.slug, tag: challengesTable.tag })
+    .from(challengeEntriesTable)
+    .innerJoin(challengesTable, eq(challengesTable.id, challengeEntriesTable.challengeId))
+    .where(and(inArray(challengeEntriesTable.postId, ids), isNull(challengeEntriesTable.removedAt), viewer.userId ? sql`NOT sewspace_blocked_with(${challengesTable.createdBy})` : undefined));
   const countMap = new Map(counts.rows.map((r) => [Number(r.post_id), r]));
   const likedSet = new Set(liked.map((l) => l.postId)), savedSet = new Set(saved.map((x) => x.postId));
   const byId = <T extends { id: number }>(rows: T[]) => new Map(rows.map((r) => [r.id, r]));
@@ -137,6 +146,7 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
       commentCount: Number(countMap.get(post.id)?.comments ?? 0),
       likedByMe: likedSet.has(post.id),
       savedByMe: savedSet.has(post.id),
+      challenges: entries.filter((e) => e.postId === post.id).map(({ slug, tag }) => ({ slug, tag })),
     }];
   });
 }

@@ -6,6 +6,7 @@ import {
   postsTable,
   profilesTable,
   publicProfilesView,
+  challengesTable,
   reportsTable,
   reviewsTable,
   savesTable,
@@ -20,6 +21,7 @@ import { normaliseHandle } from "./handles";
 import type { Viewer } from "./viewer";
 import { visibleTo } from "./visibility";
 import { visibleReview } from "./catalog";
+import { visibleChallenge } from "./challenges";
 
 // Likes, comments, saves, follows, blocks and reports. Every action starts by
 // checking, here, that the viewer may see what they act on; RLS (migration
@@ -256,6 +258,16 @@ async function reportTarget(db: Tx, viewer: Viewer, kind: ReportKind, rawId: str
     if (!p) return null;
     return { id: p.handle, userId: p.userId, snapshot: { authorHandle: p.handle, authorName: p.name, text: p.bio || null, imageUrl: p.avatarUrl, link: `/@${p.handle}` } };
   }
+  if (kind === "challenge") {
+    const c = await visibleChallenge(db, viewer, rawId);
+    if (!c) return null;
+    const [host] = await db.select().from(publicProfilesView).where(eq(publicProfilesView.userId, c.createdBy));
+    return {
+      id: c.slug,
+      userId: c.createdBy,
+      snapshot: { authorHandle: host?.handle ?? null, authorName: host?.name ?? null, text: `#${c.tag}: ${c.title}\n${c.description}`.trim(), imageUrl: null, link: `/challenges/${c.slug}` },
+    };
+  }
   const id = Number(rawId);
   if (!Number.isInteger(id) || id <= 0) return null;
   if (kind === "review") {
@@ -341,6 +353,8 @@ async function reportViews(db: Tx, rows: Report[]): Promise<ReportView[]> {
   const posts = postIds.length ? await db.select({ id: postsTable.id }).from(postsTable).where(inArray(postsTable.id, postIds)) : [];
   const comments = commentIds.length ? await db.select({ id: commentsTable.id }).from(commentsTable).where(inArray(commentsTable.id, commentIds)) : [];
   const reviews = reviewIds.length ? await db.select({ id: reviewsTable.id }).from(reviewsTable).where(inArray(reviewsTable.id, reviewIds)) : [];
+  const challengeSlugs = [...new Set(rows.filter((r) => r.targetKind === "challenge").map((r) => r.targetId))];
+  const challenges = challengeSlugs.length ? await db.select({ slug: challengesTable.slug }).from(challengesTable).where(inArray(challengesTable.slug, challengeSlugs)) : [];
   const reporters = await db.select().from(publicProfilesView).where(inArray(publicProfilesView.userId, [...new Set(rows.map((r) => r.reporterId))]));
   const open = await db
     .select({ kind: reportsTable.targetKind, id: reportsTable.targetId, n: count() })
@@ -351,6 +365,7 @@ async function reportViews(db: Tx, rows: Report[]): Promise<ReportView[]> {
     post: new Set(posts.map((p) => String(p.id))),
     comment: new Set(comments.map((c) => String(c.id))),
     review: new Set(reviews.map((r) => String(r.id))),
+    challenge: new Set(challenges.map((c) => c.slug)),
   };
   const reporterMap = new Map(reporters.map((r) => [r.userId, r]));
   const openMap = new Map(open.map((o) => [`${o.kind}:${o.id}`, o.n]));
@@ -402,6 +417,7 @@ export async function resolveReport(
     const targetId = Number(report.targetId);
     if (report.targetKind === "post") await db.delete(postsTable).where(eq(postsTable.id, targetId));
     else if (report.targetKind === "review") await db.delete(reviewsTable).where(eq(reviewsTable.id, targetId));
+    else if (report.targetKind === "challenge") await db.delete(challengesTable).where(eq(challengesTable.slug, report.targetId));
     else await db.delete(commentsTable).where(eq(commentsTable.id, targetId));
     // Every open report on the same thing is settled by the removal.
     await db.update(reportsTable).set({ status: "removed", ...done }).where(and(

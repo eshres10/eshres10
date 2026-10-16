@@ -16,7 +16,7 @@ import {
   type ProfileStats,
   type UsedProduct,
 } from '@workspace/api-client-react';
-import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Share2, ShoppingBag, Spool, UserCheck, UserPlus } from 'lucide-react';
+import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Share2, ShoppingBag, Spool, Trophy, UserCheck, UserPlus } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState, Loading } from '@/components/common';
@@ -108,6 +108,11 @@ function Stats({ stats }: { stats: ProfileStats }) {
       {chip(stats.makes, stats.makes === 1 ? 'make' : 'makes')}
       {chip(stats.followers, stats.followers === 1 ? 'follower' : 'followers')}
       {chip(stats.following, 'following')}
+      {stats.challengesEntered > 0 && (
+        <span className="inline-flex items-center gap-2 rounded-[20px] bg-yellow px-[18px] py-3">
+          <Trophy size={18} aria-hidden="true" /><span className="text-sm font-semibold">{stats.challengesEntered} challenge{stats.challengesEntered === 1 ? '' : 's'} entered</span>
+        </span>
+      )}
     </div>
   );
 }

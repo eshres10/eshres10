@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getGetPublicPostQueryKey, useDeletePost, useUpdatePost, type FeedPost } from '@workspace/api-client-react';
-import { BookOpen, ChevronLeft, ChevronRight, Layers, Loader2, MoreHorizontal, Pencil, Scissors, Trash2, X } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Layers, Loader2, MoreHorizontal, Pencil, Scissors, Trash2, Trophy, X } from 'lucide-react';
 import { Link } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { VisibilityBadge, VisibilityPicker, type Visibility } from '@/components/visibility';
@@ -136,6 +136,15 @@ export function PostCard({ post, full = false, onDeleted, onComment }: { post: F
         {post.kind === 'status'
           ? <p className={`whitespace-pre-line break-words ${post.caption.length < 140 ? 'font-display text-[22px] leading-snug tracking-[-.03em]' : 'text-[15px] leading-relaxed'}`}>{post.caption}</p>
           : <Caption post={post} full={full} />}
+        {post.challenges.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {post.challenges.map(c => (
+              <Link key={c.slug} href={`/challenges/${c.slug}`} className="inline-flex min-h-[32px] items-center gap-1.5 rounded-full bg-yellow px-3 text-xs font-bold text-ink no-underline">
+                <Trophy size={13} aria-hidden="true" />#{c.tag}
+              </Link>
+            ))}
+          </div>
+        )}
         {post.tags.length > 0 && (
           <div className="mt-3.5 flex flex-wrap gap-2">
             {post.tags.map(tag => {

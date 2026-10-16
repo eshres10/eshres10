@@ -3,7 +3,7 @@ import path from "node:path";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { withUser } from "@workspace/db";
-import { getCatalogPage, getMakeForViewer, getPostForViewer, getPublicProfile, HANDLE_PATH_PATTERN, listCatalogForSitemap, listPublicHandles, listPublicMakes, listPublicPosts } from "../access";
+import { getCatalogPage, getChallengePage, listChallengesForSitemap, getMakeForViewer, getPostForViewer, getPublicProfile, HANDLE_PATH_PATTERN, listCatalogForSitemap, listPublicHandles, listPublicMakes, listPublicPosts } from "../access";
 import { logger } from "../lib/logger";
 
 // Server-rendered <head> tags for public pages, so search engines and link
@@ -199,6 +199,33 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
     }
   });
 
+  // Challenges: /challenges/:slug and the /challenges index.
+  router.get(/^\/challenges\/([a-z0-9]{3,30})\/?$/i, async (req, res, next) => {
+    try {
+      const slug = (req.params as Record<string, string>)[0];
+      const viewer = req.viewer ?? { userId: null, isAdmin: false };
+      const page = await withUser(viewer.userId, (db) => getChallengePage(db, viewer, slug));
+      if (!page) return sendPage(req, res, notFound, 404);
+      const c = page.challenge;
+      const when = `${c.startsAt.toISOString().slice(0, 10)} to ${c.endsAt.toISOString().slice(0, 10)}`;
+      await sendPage(req, res, {
+        title: `#${c.tag}: ${c.title} · SewSpace challenge`,
+        description: truncate(`${c.description || `A sewing challenge hosted by @${c.host.handle}.`} ${when}. ${c.entries} entries.`, MAX_DESCRIPTION),
+        canonicalPath: `/challenges/${c.slug}`,
+        type: "article",
+      }, 200, !viewer.userId);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get(/^\/challenges(\/.*)?$/, (req, res, next) => {
+    const index = /^\/challenges\/?$/.test(req.path);
+    sendPage(req, res, index
+      ? { title: "Sewing challenges · SewSpace", description: "Join a sewing challenge, share your make with the tag, and cheer on everyone else's.", canonicalPath: "/challenges" }
+      : notFound, index ? 200 : 404).catch(next);
+  });
+
   // Shared pattern and product pages: /catalog/pattern/:slug, /catalog/product/:slug.
   router.get(/^\/catalog\/(pattern|product)\/([a-z0-9-]+)\/?$/, async (req, res, next) => {
     try {
@@ -240,11 +267,12 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
   router.get("/sitemap.xml", async (req, res, next) => {
     try {
       const origin = originOf(req);
-      const { handles, makes, posts, catalog } = await withUser(null, async (db) => ({
+      const { handles, makes, posts, catalog, challenges } = await withUser(null, async (db) => ({
         handles: await listPublicHandles(db),
         makes: await listPublicMakes(db),
         posts: await listPublicPosts(db, 20000),
         catalog: await listCatalogForSitemap(db, 20000),
+        challenges: await listChallengesForSitemap(db),
       }));
       const urls = [
         `<url><loc>${escapeHtml(origin)}/</loc></url>`,
@@ -253,6 +281,9 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
         ),
         ...posts.map(
           (p) => `<url><loc>${escapeHtml(`${origin}/posts/${p.id}`)}</loc><lastmod>${p.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,
+        ),
+        ...challenges.map(
+          (c) => `<url><loc>${escapeHtml(`${origin}/challenges/${c.slug}`)}</loc><lastmod>${c.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,
         ),
         ...catalog.map(
           (c) => `<url><loc>${escapeHtml(`${origin}/catalog/${c.kind}/${c.slug}`)}</loc><lastmod>${c.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,

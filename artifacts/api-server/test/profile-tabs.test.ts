@@ -65,7 +65,7 @@ test("profile header: counts what each viewer may see, never private fields", as
     const r = await user("GET", "/api/public/profiles/rae.tabs");
     assert.equal(r.status, 200, `${label}: ${r.text}`);
     // Ben's follow ended when Rae blocked him (migration 0005), so 1 follower.
-    assert.deepEqual(r.json.stats, { posts: e.posts, makes: e.makes, followers: 1, following: 1, followersOnlyPosts: e.lockedPosts, followersOnlyMakes: e.lockedMakes }, label);
+    assert.deepEqual(r.json.stats, { posts: e.posts, makes: e.makes, followers: 1, following: 1, followersOnlyPosts: e.lockedPosts, followersOnlyMakes: e.lockedMakes, challengesEntered: 0 }, label);
     assert.equal(r.json.isMe, e.isMe, label);
     assert.ok(!/units|metric|experience|t_rae/.test(r.text), `${label}: private fields leaked`);
   }

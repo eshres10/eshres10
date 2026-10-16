@@ -16,4 +16,6 @@ export interface ProfileStats {
   following: number;
   followersOnlyPosts: number;
   followersOnlyMakes: number;
+  /** Challenges with at least one entry the viewer can see */
+  challengesEntered: number;
 }

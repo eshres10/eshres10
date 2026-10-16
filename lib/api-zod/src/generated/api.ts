@@ -28,7 +28,8 @@ export const GetPublicProfileResponse = zod.object({
   "followers": zod.number().int(),
   "following": zod.number().int(),
   "followersOnlyPosts": zod.number().int(),
-  "followersOnlyMakes": zod.number().int()
+  "followersOnlyMakes": zod.number().int(),
+  "challengesEntered": zod.number().int().describe('Challenges with at least one entry the viewer can see')
 }).describe('Posts and makes count only what this viewer may see. The followersOnly counts are the followers-only posts and makes the viewer can\'t see (0 for the owner and followers); private items are never counted.'),
   "followedByMe": zod.boolean().describe('True when the signed-in viewer follows this person')
 }).describe('Fields of a profile that anyone may see. Never includes units, experience or other private data.')
@@ -75,7 +76,11 @@ export const GetProfilePostsResponse = zod.object({
   "likeCount": zod.number().int(),
   "commentCount": zod.number().int(),
   "likedByMe": zod.boolean(),
-  "savedByMe": zod.boolean()
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -280,7 +285,11 @@ export const GetPublicPostResponse = zod.object({
   "likeCount": zod.number().int(),
   "commentCount": zod.number().int(),
   "likedByMe": zod.boolean(),
-  "savedByMe": zod.boolean()
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
 })
 
 
@@ -326,7 +335,11 @@ export const GetExploreFeedResponse = zod.object({
   "likeCount": zod.number().int(),
   "commentCount": zod.number().int(),
   "likedByMe": zod.boolean(),
-  "savedByMe": zod.boolean()
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -497,7 +510,11 @@ export const GetSavedPostsResponse = zod.object({
   "likeCount": zod.number().int(),
   "commentCount": zod.number().int(),
   "likedByMe": zod.boolean(),
-  "savedByMe": zod.boolean()
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -560,8 +577,8 @@ export const createReportBodyDetailsMax = 1000;
 
 
 export const CreateReportBody = zod.object({
-  "targetKind": zod.enum(['post', 'comment', 'profile', 'review']),
-  "targetId": zod.string().describe('Post, comment or review id, or a profile handle'),
+  "targetKind": zod.enum(['post', 'comment', 'profile', 'review', 'challenge']),
+  "targetId": zod.string().describe('Post, comment or review id, a profile handle, or a challenge slug'),
   "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
   "details": zod.string().max(createReportBodyDetailsMax).optional()
 })
@@ -579,7 +596,7 @@ export const ListReportsQueryParams = zod.object({
 
 export const ListReportsResponseItem = zod.object({
   "id": zod.number().int(),
-  "targetKind": zod.enum(['post', 'comment', 'profile', 'review']),
+  "targetKind": zod.enum(['post', 'comment', 'profile', 'review', 'challenge']),
   "targetId": zod.string(),
   "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
   "details": zod.string(),
@@ -617,7 +634,7 @@ export const ResolveReportBody = zod.object({
 
 export const ResolveReportResponse = zod.object({
   "id": zod.number().int(),
-  "targetKind": zod.enum(['post', 'comment', 'profile', 'review']),
+  "targetKind": zod.enum(['post', 'comment', 'profile', 'review', 'challenge']),
   "targetId": zod.string(),
   "reason": zod.enum(['spam', 'harassment', 'nudity', 'violence', 'intellectual_property', 'other']),
   "details": zod.string(),
@@ -1078,6 +1095,323 @@ export const SetCatalogLinkResponse = zod.object({
 
 
 /**
+ * @summary Challenges by status. Works signed out; hides challenges hosted by people on the other side of a block.
+ */
+export const listChallengesQueryStatusDefault = `active`;
+
+export const ListChallengesQueryParams = zod.object({
+  "status": zod.enum(['active', 'upcoming', 'ended']).default(listChallengesQueryStatusDefault)
+})
+
+export const ListChallengesResponseItem = zod.object({
+  "slug": zod.string(),
+  "tag": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "startsAt": zod.coerce.date(),
+  "endsAt": zod.coerce.date(),
+  "status": zod.enum(['upcoming', 'active', 'ended']),
+  "host": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "members": zod.number().int(),
+  "entries": zod.number().int(),
+  "joinedByMe": zod.boolean()
+})
+export const ListChallengesResponse = zod.array(ListChallengesResponseItem)
+
+
+export const GetChallengePageParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const GetChallengePageResponse = zod.object({
+  "challenge": zod.object({
+  "slug": zod.string(),
+  "tag": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "startsAt": zod.coerce.date(),
+  "endsAt": zod.coerce.date(),
+  "status": zod.enum(['upcoming', 'active', 'ended']),
+  "host": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "members": zod.number().int(),
+  "entries": zod.number().int(),
+  "joinedByMe": zod.boolean()
+}).and(zod.object({
+  "rules": zod.string().describe('One rule per line'),
+  "isHost": zod.boolean()
+})),
+  "memberPreview": zod.array(zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+})).describe('Up to 8 people who joined')
+})
+
+
+/**
+ * @summary Entries the viewer may see. Removed entries are left out.
+ */
+export const GetChallengeEntriesParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const getChallengeEntriesQuerySortDefault = `liked`;
+
+export const GetChallengeEntriesQueryParams = zod.object({
+  "sort": zod.enum(['liked', 'newest', 'following']).default(getChallengeEntriesQuerySortDefault),
+  "cursor": zod.coerce.string().optional()
+})
+
+export const GetChallengeEntriesResponse = zod.object({
+  "items": zod.array(zod.object({
+  "entryId": zod.number().int(),
+  "post": zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
+}),
+  "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
+  "isMine": zod.boolean()
+})),
+  "nextCursor": zod.string().nullable()
+})
+
+
+/**
+ * @summary Start a challenge. You host it.
+ */
+export const createChallengeBodyTagMin = 3;
+export const createChallengeBodyTagMax = 30;
+
+
+export const createChallengeBodyTagRegExp = new RegExp('^[A-Za-z0-9]+$');
+export const createChallengeBodyTitleMax = 80;
+
+export const createChallengeBodyDescriptionMax = 2000;
+
+export const createChallengeBodyRulesMax = 2000;
+
+
+
+export const CreateChallengeBody = zod.object({
+  "tag": zod.string().min(createChallengeBodyTagMin).max(createChallengeBodyTagMax).regex(createChallengeBodyTagRegExp),
+  "title": zod.string().min(1).max(createChallengeBodyTitleMax),
+  "description": zod.string().max(createChallengeBodyDescriptionMax).optional(),
+  "rules": zod.string().max(createChallengeBodyRulesMax).optional(),
+  "startsAt": zod.coerce.date(),
+  "endsAt": zod.coerce.date()
+})
+
+export const CreateChallengeResponse = zod.object({
+  "slug": zod.string(),
+  "tag": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "startsAt": zod.coerce.date(),
+  "endsAt": zod.coerce.date(),
+  "status": zod.enum(['upcoming', 'active', 'ended']),
+  "host": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "members": zod.number().int(),
+  "entries": zod.number().int(),
+  "joinedByMe": zod.boolean()
+}).and(zod.object({
+  "rules": zod.string().describe('One rule per line'),
+  "isHost": zod.boolean()
+}))
+
+
+/**
+ * @summary Running challenges you've joined (to enter a post).
+ */
+export const ListJoinedChallengesResponseItem = zod.object({
+  "slug": zod.string(),
+  "tag": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "startsAt": zod.coerce.date(),
+  "endsAt": zod.coerce.date(),
+  "status": zod.enum(['upcoming', 'active', 'ended']),
+  "host": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "members": zod.number().int(),
+  "entries": zod.number().int(),
+  "joinedByMe": zod.boolean()
+})
+export const ListJoinedChallengesResponse = zod.array(ListJoinedChallengesResponseItem)
+
+
+/**
+ * @summary Reword your challenge. The tag and dates stay as announced.
+ */
+export const UpdateChallengeParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const updateChallengeBodyTitleMax = 80;
+
+export const updateChallengeBodyDescriptionMax = 2000;
+
+export const updateChallengeBodyRulesMax = 2000;
+
+
+
+export const UpdateChallengeBody = zod.object({
+  "title": zod.string().min(1).max(updateChallengeBodyTitleMax).optional(),
+  "description": zod.string().max(updateChallengeBodyDescriptionMax).optional(),
+  "rules": zod.string().max(updateChallengeBodyRulesMax).optional()
+})
+
+export const UpdateChallengeResponse = zod.object({
+  "slug": zod.string(),
+  "tag": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "startsAt": zod.coerce.date(),
+  "endsAt": zod.coerce.date(),
+  "status": zod.enum(['upcoming', 'active', 'ended']),
+  "host": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "members": zod.number().int(),
+  "entries": zod.number().int(),
+  "joinedByMe": zod.boolean()
+}).and(zod.object({
+  "rules": zod.string().describe('One rule per line'),
+  "isHost": zod.boolean()
+}))
+
+
+export const JoinChallengeParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const JoinChallengeResponse = zod.object({
+  "joined": zod.boolean(),
+  "members": zod.number().int()
+})
+
+
+export const LeaveChallengeParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const LeaveChallengeResponse = zod.object({
+  "joined": zod.boolean(),
+  "members": zod.number().int()
+})
+
+
+/**
+ * @summary Enter one of your public posts while the challenge runs. Joins you if needed.
+ */
+export const EnterChallengeParams = zod.object({
+  "slug": zod.coerce.string()
+})
+
+export const EnterChallengeBody = zod.object({
+  "postId": zod.number().int()
+})
+
+export const EnterChallengeResponse = zod.object({
+  "entryId": zod.number().int(),
+  "post": zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
+}),
+  "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
+  "isMine": zod.boolean()
+})
+
+
+/**
+ * @summary Withdraw your entry, or (as the host) remove someone's entry.
+ */
+export const DeleteChallengeEntryParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteChallengeEntryResponse = zod.void()
+
+
+/**
  * @summary Posts from people you follow, and your own, newest first.
  */
 export const GetHomeFeedQueryParams = zod.object({
@@ -1114,7 +1448,11 @@ export const GetHomeFeedResponse = zod.object({
   "likeCount": zod.number().int(),
   "commentCount": zod.number().int(),
   "likedByMe": zod.boolean(),
-  "savedByMe": zod.boolean()
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -1185,7 +1523,11 @@ export const CreatePostResponse = zod.object({
   "likeCount": zod.number().int(),
   "commentCount": zod.number().int(),
   "likedByMe": zod.boolean(),
-  "savedByMe": zod.boolean()
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
 })
 
 
@@ -1237,7 +1579,11 @@ export const UpdatePostResponse = zod.object({
   "likeCount": zod.number().int(),
   "commentCount": zod.number().int(),
   "likedByMe": zod.boolean(),
-  "savedByMe": zod.boolean()
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string()
+})).describe('Challenges this post is a (not removed) entry in')
 })
 
 

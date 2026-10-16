@@ -26,6 +26,8 @@ tags:
     description: Report review (ADMIN_USER_IDS only)
   - name: catalog
     description: Shared pattern and product pages, and reviews
+  - name: challenges
+    description: Hashtag challenges with entries
 paths:
   /public/profiles/{handle}:
     get:
@@ -584,6 +586,164 @@ paths:
               schema: { $ref: "#/components/schemas/CatalogLinkResult" }
         "400": { description: Patterns link to pattern pages; fabrics and threads to product pages }
         "404": { description: "Not one of your items, or no such page" }
+  /public/challenges:
+    get:
+      operationId: listChallenges
+      tags: [public]
+      summary: Challenges by status. Works signed out; hides challenges hosted by people on the other side of a block.
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema: { type: string, enum: [active, upcoming, ended], default: active }
+      responses:
+        "200":
+          description: "Active: ending soonest first. Upcoming: starting soonest first. Ended: most recent first."
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChallengeSummary" }
+  /public/challenges/{slug}:
+    get:
+      operationId: getChallengePage
+      tags: [public]
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: The challenge
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChallengePage" }
+        "404": { description: Not found }
+  /public/challenges/{slug}/entries:
+    get:
+      operationId: getChallengeEntries
+      tags: [public]
+      summary: Entries the viewer may see. Removed entries are left out.
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string, enum: [liked, newest, following], default: liked }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: A page of entries
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChallengeEntryPage" }
+        "404": { description: Not found }
+  /challenges:
+    post:
+      operationId: createChallenge
+      tags: [challenges]
+      summary: Start a challenge. You host it.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChallengeInput" }
+      responses:
+        "201":
+          description: Started
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Challenge" }
+        "400": { description: Invalid tag or dates }
+        "409": { description: "Tag already used, or choose a handle first" }
+        "429": { description: Too many challenges }
+  /challenges/joined:
+    get:
+      operationId: listJoinedChallenges
+      tags: [challenges]
+      summary: Running challenges you've joined (to enter a post).
+      responses:
+        "200":
+          description: Challenges
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ChallengeSummary" }
+  /challenges/{slug}:
+    patch:
+      operationId: updateChallenge
+      tags: [challenges]
+      summary: Reword your challenge. The tag and dates stay as announced.
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ChallengeUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Challenge" }
+        "404": { description: Not found or not yours }
+  /challenges/{slug}/membership:
+    put:
+      operationId: joinChallenge
+      tags: [challenges]
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Joined
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MembershipState" }
+        "400": { description: The challenge has ended }
+        "404": { description: Not found }
+    delete:
+      operationId: leaveChallenge
+      tags: [challenges]
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Left
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MembershipState" }
+        "404": { description: Not found }
+  /challenges/{slug}/entries:
+    post:
+      operationId: enterChallenge
+      tags: [challenges]
+      summary: Enter one of your public posts while the challenge runs. Joins you if needed.
+      parameters:
+        - { name: slug, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/EntryInput" }
+      responses:
+        "201":
+          description: Entered
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ChallengeEntry" }
+        "400": { description: "Not running, not a public post of yours, or removed before" }
+        "404": { description: Not found }
+        "409": { description: Already entered }
+  /challenge-entries/{id}:
+    delete:
+      operationId: deleteChallengeEntry
+      tags: [challenges]
+      summary: Withdraw your entry, or (as the host) remove someone's entry.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Done }
+        "404": { description: Not found or not yours to remove }
   /feed:
     get:
       operationId: getHomeFeed
@@ -1348,7 +1508,8 @@ components:
         following: { type: integer }
         followersOnlyPosts: { type: integer }
         followersOnlyMakes: { type: integer }
-      required: [posts, makes, followers, following, followersOnlyPosts, followersOnlyMakes]
+        challengesEntered: { type: integer, description: Challenges with at least one entry the viewer can see }
+      required: [posts, makes, followers, following, followersOnlyPosts, followersOnlyMakes, challengesEntered]
     MakeSummary:
       type: object
       properties:
@@ -1521,7 +1682,11 @@ components:
         commentCount: { type: integer }
         likedByMe: { type: boolean }
         savedByMe: { type: boolean }
-      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe]
+        challenges:
+          type: array
+          description: Challenges this post is a (not removed) entry in
+          items: { $ref: "#/components/schemas/ChallengeRef" }
+      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges]
     FeedPage:
       type: object
       properties:
@@ -1614,8 +1779,8 @@ components:
     ReportInput:
       type: object
       properties:
-        targetKind: { type: string, enum: [post, comment, profile, review] }
-        targetId: { type: string, description: "Post, comment or review id, or a profile handle" }
+        targetKind: { type: string, enum: [post, comment, profile, review, challenge] }
+        targetId: { type: string, description: "Post, comment or review id, a profile handle, or a challenge slug" }
         reason: { $ref: "#/components/schemas/ReportReason" }
         details: { type: string, maxLength: 1000 }
       required: [targetKind, targetId, reason]
@@ -1633,7 +1798,7 @@ components:
       type: object
       properties:
         id: { type: integer }
-        targetKind: { type: string, enum: [post, comment, profile, review] }
+        targetKind: { type: string, enum: [post, comment, profile, review, challenge] }
         targetId: { type: string }
         reason: { $ref: "#/components/schemas/ReportReason" }
         details: { type: string }
@@ -1820,6 +1985,87 @@ components:
         id: { type: integer }
         catalogId: { type: integer, nullable: true }
       required: [kind, id, catalogId]
+    ChallengeRef:
+      type: object
+      properties:
+        slug: { type: string }
+        tag: { type: string }
+      required: [slug, tag]
+    ChallengeSummary:
+      type: object
+      properties:
+        slug: { type: string }
+        tag: { type: string }
+        title: { type: string }
+        description: { type: string }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+        status: { type: string, enum: [upcoming, active, ended] }
+        host: { $ref: "#/components/schemas/PublicPerson" }
+        members: { type: integer }
+        entries: { type: integer }
+        joinedByMe: { type: boolean }
+      required: [slug, tag, title, description, startsAt, endsAt, status, host, members, entries, joinedByMe]
+    Challenge:
+      allOf:
+        - { $ref: "#/components/schemas/ChallengeSummary" }
+        - type: object
+          properties:
+            rules: { type: string, description: One rule per line }
+            isHost: { type: boolean }
+          required: [rules, isHost]
+    ChallengePage:
+      type: object
+      properties:
+        challenge: { $ref: "#/components/schemas/Challenge" }
+        memberPreview:
+          type: array
+          description: Up to 8 people who joined
+          items: { $ref: "#/components/schemas/PublicPerson" }
+      required: [challenge, memberPreview]
+    ChallengeEntry:
+      type: object
+      properties:
+        entryId: { type: integer }
+        post: { $ref: "#/components/schemas/FeedPost" }
+        canRemove: { type: boolean, description: You host the challenge (and it isn't your entry) }
+        isMine: { type: boolean }
+      required: [entryId, post, canRemove, isMine]
+    ChallengeEntryPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ChallengeEntry" }
+        nextCursor: { type: string, nullable: true }
+      required: [items, nextCursor]
+    ChallengeInput:
+      type: object
+      properties:
+        tag: { type: string, minLength: 3, maxLength: 30, pattern: "^[A-Za-z0-9]+$" }
+        title: { type: string, minLength: 1, maxLength: 80 }
+        description: { type: string, maxLength: 2000 }
+        rules: { type: string, maxLength: 2000 }
+        startsAt: { type: string, format: date-time }
+        endsAt: { type: string, format: date-time }
+      required: [tag, title, startsAt, endsAt]
+    ChallengeUpdate:
+      type: object
+      properties:
+        title: { type: string, minLength: 1, maxLength: 80 }
+        description: { type: string, maxLength: 2000 }
+        rules: { type: string, maxLength: 2000 }
+    MembershipState:
+      type: object
+      properties:
+        joined: { type: boolean }
+        members: { type: integer }
+      required: [joined, members]
+    EntryInput:
+      type: object
+      properties:
+        postId: { type: integer }
+      required: [postId]
     ErrorResponse:
       type: object
       properties:

@@ -14,4 +14,5 @@ export const ReportTargetKind = {
   comment: 'comment',
   profile: 'profile',
   review: 'review',
+  challenge: 'challenge',
 } as const;

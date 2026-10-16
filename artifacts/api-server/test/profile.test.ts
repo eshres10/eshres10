@@ -59,7 +59,7 @@ test("public profile is readable signed out and shows public fields only", async
   const res = await anon("GET", "/api/public/profiles/ANN.SEWS");
   assert.equal(res.status, 200, res.text);
   assert.deepEqual(Object.keys(res.json).sort(), ["avatarUrl", "bio", "followedByMe", "handle", "isMe", "joinedAt", "name", "stats"]);
-  assert.deepEqual(Object.keys(res.json.stats).sort(), ["followers", "followersOnlyMakes", "followersOnlyPosts", "following", "makes", "posts"]);
+  assert.deepEqual(Object.keys(res.json.stats).sort(), ["challengesEntered", "followers", "followersOnlyMakes", "followersOnlyPosts", "following", "makes", "posts"]);
   assert.equal(res.json.handle, "ann.sews");
   assert.equal(res.json.name, "Ann");
   assert.equal((await anon("GET", "/api/public/profiles/nobody.here")).status, 404);

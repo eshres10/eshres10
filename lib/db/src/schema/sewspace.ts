@@ -264,7 +264,7 @@ export const savesTable = pgTable("sewspace_saves", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.userId, t.postId] })]);
 
-export const REPORT_KINDS = ["post", "comment", "profile", "review"] as const;
+export const REPORT_KINDS = ["post", "comment", "profile", "review", "challenge"] as const;
 export const REPORT_REASONS = ["spam", "harassment", "nudity", "violence", "intellectual_property", "other"] as const;
 export const REPORT_STATUSES = ["open", "removed", "dismissed"] as const;
 
@@ -327,6 +327,38 @@ export const reviewVotesTable = pgTable("sewspace_review_votes", {
 
 export type CatalogEntry = typeof catalogTable.$inferSelect;
 export type Review = typeof reviewsTable.$inferSelect;
+
+// Phase 6: challenges (migration 0007).
+export const challengesTable = pgTable("sewspace_challenges", {
+  id: serial("id").primaryKey(),
+  slug: text("slug").notNull().unique(),
+  tag: text("tag").notNull(),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  rules: text("rules").notNull().default(""),
+  startsAt: timestamp("starts_at", { withTimezone: true }).notNull(),
+  endsAt: timestamp("ends_at", { withTimezone: true }).notNull(),
+  createdBy: varchar("created_by", { length: 255 }).notNull(),
+  ...timestamps,
+});
+
+export const challengeMembersTable = pgTable("sewspace_challenge_members", {
+  challengeId: integer("challenge_id").notNull().references(() => challengesTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  joinedAt: timestamp("joined_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.challengeId, t.userId] })]);
+
+export const challengeEntriesTable = pgTable("sewspace_challenge_entries", {
+  id: serial("id").primaryKey(),
+  challengeId: integer("challenge_id").notNull().references(() => challengesTable.id, { onDelete: "cascade" }),
+  postId: integer("post_id").notNull().references(() => postsTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  removedAt: timestamp("removed_at", { withTimezone: true }),
+  removedBy: varchar("removed_by", { length: 255 }),
+});
+
+export type Challenge = typeof challengesTable.$inferSelect;
 
 export type Comment = typeof commentsTable.$inferSelect;
 export type Report = typeof reportsTable.$inferSelect;

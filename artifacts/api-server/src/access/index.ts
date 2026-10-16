@@ -13,3 +13,4 @@ export * from "./profile-tabs";
 export * from "./social";
 export * from "./catalog";
 export * from "./catalog-refs";
+export * from "./challenges";

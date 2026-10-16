@@ -21,6 +21,8 @@ import { PublicMakePage } from '@/pages/public-make';
 import { ComposePage } from '@/pages/compose';
 import { SavedPage } from '@/pages/saved';
 import { CatalogPage } from '@/pages/catalog';
+import { ChallengesPage } from '@/pages/challenges';
+import { ChallengePage } from '@/pages/challenge';
 import { CatalogEntryPage } from '@/pages/catalog-entry';
 import { AdminReportsPage } from '@/pages/admin-reports';
 import { ExplorePage } from '@/pages/explore';
@@ -76,6 +78,8 @@ function Router() {
     <Route path="/new" component={InShellComposePage} />
     <Route path="/saved" component={InShellSavedPage} />
     <Route path="/admin/reports" component={InShellAdminReports} />
+    <Route path="/challenges">{() => <AdaptiveLayout><ChallengesPage /></AdaptiveLayout>}</Route>
+    <Route path="/challenges/:slug">{(params: { slug: string }) => <AdaptiveLayout><ChallengePage slug={params.slug} /></AdaptiveLayout>}</Route>
     <Route path="/catalog">{() => <AdaptiveLayout><CatalogPage /></AdaptiveLayout>}</Route>
     <Route path="/catalog/:kind/:slug">{(params: { kind: string; slug: string }) => <AdaptiveLayout><CatalogEntryPage kind={params.kind} slug={params.slug} /></AdaptiveLayout>}</Route>
     <Route path="/explore">{() => <AdaptiveLayout><ExplorePage /></AdaptiveLayout>}</Route>

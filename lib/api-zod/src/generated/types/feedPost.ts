@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { ChallengeRef } from './challengeRef';
 import type { FeedPostKind } from './feedPostKind';
 import type { Media } from './media';
 import type { PostTag } from './postTag';
@@ -27,4 +28,6 @@ export interface FeedPost {
   commentCount: number;
   likedByMe: boolean;
   savedByMe: boolean;
+  /** Challenges this post is a (not removed) entry in */
+  challenges: ChallengeRef[];
 }

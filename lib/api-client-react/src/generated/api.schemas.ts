@@ -45,6 +45,8 @@ export interface ProfileStats {
   following: number;
   followersOnlyPosts: number;
   followersOnlyMakes: number;
+  /** Challenges with at least one entry the viewer can see */
+  challengesEntered: number;
 }
 
 /**
@@ -270,6 +272,11 @@ export const FeedPostKind = {
   photo: 'photo',
 } as const;
 
+export interface ChallengeRef {
+  slug: string;
+  tag: string;
+}
+
 export interface FeedPost {
   id: number;
   kind: FeedPostKind;
@@ -286,6 +293,8 @@ export interface FeedPost {
   commentCount: number;
   likedByMe: boolean;
   savedByMe: boolean;
+  /** Challenges this post is a (not removed) entry in */
+  challenges: ChallengeRef[];
 }
 
 export interface FeedPage {
@@ -408,11 +417,12 @@ export const ReportInputTargetKind = {
   comment: 'comment',
   profile: 'profile',
   review: 'review',
+  challenge: 'challenge',
 } as const;
 
 export interface ReportInput {
   targetKind: ReportInputTargetKind;
-  /** Post, comment or review id, or a profile handle */
+  /** Post, comment or review id, a profile handle, or a challenge slug */
   targetId: string;
   reason: ReportReason;
   /** @maxLength 1000 */
@@ -443,6 +453,7 @@ export const ReportTargetKind = {
   comment: 'comment',
   profile: 'profile',
   review: 'review',
+  challenge: 'challenge',
 } as const;
 
 export type ReportStatus = typeof ReportStatus[keyof typeof ReportStatus];
@@ -828,6 +839,96 @@ export interface CatalogLinkResult {
   id: number;
   /** @nullable */
   catalogId: number | null;
+}
+
+export type ChallengeSummaryStatus = typeof ChallengeSummaryStatus[keyof typeof ChallengeSummaryStatus];
+
+
+export const ChallengeSummaryStatus = {
+  upcoming: 'upcoming',
+  active: 'active',
+  ended: 'ended',
+} as const;
+
+export interface ChallengeSummary {
+  slug: string;
+  tag: string;
+  title: string;
+  description: string;
+  startsAt: string;
+  endsAt: string;
+  status: ChallengeSummaryStatus;
+  host: PublicPerson;
+  members: number;
+  entries: number;
+  joinedByMe: boolean;
+}
+
+export type Challenge = ChallengeSummary & {
+  /** One rule per line */
+  rules: string;
+  isHost: boolean;
+};
+
+export interface ChallengePage {
+  challenge: Challenge;
+  /** Up to 8 people who joined */
+  memberPreview: PublicPerson[];
+}
+
+export interface ChallengeEntry {
+  entryId: number;
+  post: FeedPost;
+  /** You host the challenge (and it isn't your entry) */
+  canRemove: boolean;
+  isMine: boolean;
+}
+
+export interface ChallengeEntryPage {
+  items: ChallengeEntry[];
+  /** @nullable */
+  nextCursor: string | null;
+}
+
+export interface ChallengeInput {
+  /**
+     * @minLength 3
+     * @maxLength 30
+     * @pattern ^[A-Za-z0-9]+$
+     */
+  tag: string;
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  title: string;
+  /** @maxLength 2000 */
+  description?: string;
+  /** @maxLength 2000 */
+  rules?: string;
+  startsAt: string;
+  endsAt: string;
+}
+
+export interface ChallengeUpdate {
+  /**
+     * @minLength 1
+     * @maxLength 80
+     */
+  title?: string;
+  /** @maxLength 2000 */
+  description?: string;
+  /** @maxLength 2000 */
+  rules?: string;
+}
+
+export interface MembershipState {
+  joined: boolean;
+  members: number;
+}
+
+export interface EntryInput {
+  postId: number;
 }
 
 export interface ErrorResponse {
@@ -1462,6 +1563,33 @@ export type ListCatalogKind = typeof ListCatalogKind[keyof typeof ListCatalogKin
 export const ListCatalogKind = {
   pattern: 'pattern',
   product: 'product',
+} as const;
+
+export type ListChallengesParams = {
+status?: ListChallengesStatus;
+};
+
+export type ListChallengesStatus = typeof ListChallengesStatus[keyof typeof ListChallengesStatus];
+
+
+export const ListChallengesStatus = {
+  active: 'active',
+  upcoming: 'upcoming',
+  ended: 'ended',
+} as const;
+
+export type GetChallengeEntriesParams = {
+sort?: GetChallengeEntriesSort;
+cursor?: string;
+};
+
+export type GetChallengeEntriesSort = typeof GetChallengeEntriesSort[keyof typeof GetChallengeEntriesSort];
+
+
+export const GetChallengeEntriesSort = {
+  liked: 'liked',
+  newest: 'newest',
+  following: 'following',
 } as const;
 
 export type GetHomeFeedParams = {

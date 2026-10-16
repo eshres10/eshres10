@@ -7,6 +7,7 @@ import type { PublicProfile } from "./profiles";
 import type { Viewer } from "./viewer";
 import { visibleTo } from "./visibility";
 import { catalogRefs } from "./catalog-refs";
+import { challengesEntered } from "./challenges";
 
 // A profile page: the header with its numbers, and the Posts, Makes and Used
 // products tabs. Every list only holds what this viewer may see (visibleTo),
@@ -36,6 +37,7 @@ export interface ProfileStats {
   following: number;
   followersOnlyPosts: number;
   followersOnlyMakes: number;
+  challengesEntered: number;
 }
 
 export type ProfilePage = PublicProfile & { isMe: boolean; stats: ProfileStats; followedByMe: boolean };
@@ -71,6 +73,7 @@ export async function getProfilePage(db: Tx, viewer: Viewer, handle: string): Pr
       following: Number(f?.following ?? 0),
       followersOnlyPosts: Number(l?.posts ?? 0),
       followersOnlyMakes: Number(l?.makes ?? 0),
+      challengesEntered: await challengesEntered(db, viewer, uid),
     },
   };
 }

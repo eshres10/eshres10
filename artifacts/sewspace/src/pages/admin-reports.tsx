@@ -29,7 +29,7 @@ const REASON_LABEL: Record<ReportReason, string> = {
   intellectual_property: 'Copied work or pattern piracy',
   other: 'Something else',
 };
-const KIND_LABEL = { post: 'Post', comment: 'Comment', profile: 'Profile', review: 'Review' } as const;
+const KIND_LABEL = { post: 'Post', comment: 'Comment', profile: 'Profile', review: 'Review', challenge: 'Challenge' } as const;
 
 function ReportCard({ report }: { report: Report }) {
   const client = useQueryClient();
@@ -96,7 +96,7 @@ export function AdminReportsPage() {
   return (
     <div className="mx-auto max-w-[760px]">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <p className="text-sm text-subtle">Removing deletes the post or comment for everyone and closes every open report on it. Profiles can only be dismissed; block or contact the person instead.</p>
+        <p className="text-sm text-subtle">Removing deletes the post or comment for everyone and closes every open report on it. Removing a challenge deletes it with its entries list (the posts stay). Profiles can only be dismissed; block or contact the person instead.</p>
         <div role="tablist" aria-label="Report status" className="flex gap-1 rounded-full bg-white p-1">
           {STATUSES.map(s => (
             <button key={s.id} type="button" role="tab" aria-selected={status === s.id} onClick={() => setStatus(s.id)}

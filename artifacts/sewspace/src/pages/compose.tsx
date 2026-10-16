@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { createMedia, useCreatePost, useListFabrics, useListPatterns, useListProjects, type Media } from '@workspace/api-client-react';
-import { ArrowLeft, ArrowRight, BookOpen, ImagePlus, Layers, Loader2, Scissors, X } from 'lucide-react';
+import { createMedia, enterChallenge, useCreatePost, useListFabrics, useListJoinedChallenges, useListPatterns, useListProjects, type Media } from '@workspace/api-client-react';
+import { ArrowLeft, ArrowRight, BookOpen, ImagePlus, Layers, Loader2, Scissors, Trophy, X } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { VisibilityPicker, type Visibility } from '@/components/visibility';
@@ -40,6 +40,14 @@ export function ComposePage() {
   const [projectId, setProjectId] = useState<number | null>(Number(params.get('make')) || null);
   const [patternId, setPatternId] = useState<number | null>(null);
   const [fabricId, setFabricId] = useState<number | null>(null);
+  // Entering a challenge (from its "Enter a post" button, or picked here).
+  const joined = useListJoinedChallenges();
+  const [challenge, setChallenge] = useState<string>(params.get('challenge')?.toLowerCase() ?? '');
+  const [entryError, setEntryError] = useState<string | null>(null);
+  const challengeOptions = useMemo(() => {
+    const list = (joined.data ?? []).map(c => ({ slug: c.slug, label: `#${c.tag}` }));
+    return challenge && !list.some(c => c.slug === challenge) ? [...list, { slug: challenge, label: `#${challenge}` }] : list;
+  }, [joined.data, challenge]);
 
   // Tagging a make brings its pattern and fabric along, unless already chosen.
   const make = useMemo(() => projects.data?.find(p => p.id === projectId), [projects.data, projectId]);
@@ -75,7 +83,7 @@ export function ComposePage() {
 
   const uploading = photos.some(p => p.status === 'uploading');
   const readyMedia = photos.filter(p => p.status === 'ready' && p.media).map(p => p.media!.id);
-  const canPost = !create.isPending && !uploading && (kind === 'photo' ? readyMedia.length > 0 : caption.trim().length > 0);
+  const canPost = !create.isPending && !uploading && !(challenge && visibility !== 'public') && (kind === 'photo' ? readyMedia.length > 0 : caption.trim().length > 0);
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,8 +91,21 @@ export function ComposePage() {
     create.mutate({
       data: { kind, caption: caption.trim(), visibility, mediaIds: kind === 'photo' ? readyMedia : [], projectId, patternId, fabricId },
     }, {
-      onSuccess: post => {
+      onSuccess: async post => {
         client.invalidateQueries({ queryKey: FEED_KEYS.all });
+        if (challenge && visibility === 'public') {
+          try {
+            await enterChallenge(challenge, { postId: post.id });
+            client.invalidateQueries();
+            setLocation(`/challenges/${challenge}`);
+            return;
+          } catch (error) {
+            // The post exists; say why it isn't entered, then show it.
+            setEntryError(errorMessage(error, "Your post is up, but it couldn't be entered in the challenge."));
+            setTimeout(() => setLocation(`/posts/${post.id}`), 2500);
+            return;
+          }
+        }
         setLocation(`/posts/${post.id}`);
       },
     });
@@ -160,10 +181,25 @@ export function ComposePage() {
       </section>
       {(projectId || patternId || fabricId) && <p className="px-3 text-xs text-subtle">Tagged items show on the post only for people who can already see them.</p>}
 
+      {challengeOptions.length > 0 && (
+        <section className="rounded-[24px] bg-white px-3.5 py-1.5" aria-label="Challenge">
+          <label className="flex min-h-[56px] items-center gap-3">
+            <Trophy size={18} aria-hidden="true" />
+            <span className="flex-1 text-sm font-semibold">Enter in a challenge</span>
+            <select value={challenge} onChange={e => { setChallenge(e.target.value); if (e.target.value) setVisibility('public'); }} className="max-w-[60%] rounded-full border border-ink bg-white px-3 py-1.5 text-sm font-semibold">
+              <option value="">None</option>
+              {challengeOptions.map(c => <option key={c.slug} value={c.slug}>{c.label}</option>)}
+            </select>
+          </label>
+        </section>
+      )}
+
       <section className="rounded-[24px] bg-white p-3.5">
         <VisibilityPicker value={visibility} onChange={setVisibility} legend="Who can see this post" />
+        {challenge && visibility !== 'public' && <p className="mt-2 text-xs font-semibold text-red-ink">Challenge entries must be public. Choose Public, or pick no challenge.</p>}
       </section>
 
+      {entryError && <p role="alert" className="px-3 text-sm font-semibold text-red-ink">{entryError}</p>}
       {create.isError && <p role="alert" className="px-3 text-sm font-semibold text-red-ink">{errorMessage(create.error, "That didn't post. Try again.")}</p>}
     </form>
   );
