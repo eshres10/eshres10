@@ -35,6 +35,49 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/PublicProfile" }
         "404": { description: Profile not found }
+  /public/profiles/{handle}/posts:
+    get:
+      operationId: getProfilePosts
+      tags: [public]
+      summary: A person's posts that the viewer may see, newest first. Works signed out.
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: A page of posts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedPage" }
+        "404": { description: Profile not found (or blocked either way) }
+  /public/profiles/{handle}/makes:
+    get:
+      operationId: getProfileMakes
+      tags: [public]
+      summary: A person's makes that the viewer may see, finished first. Works signed out.
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Finished makes and shared makes in progress
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileMakes" }
+        "404": { description: Profile not found (or blocked either way) }
+  /public/profiles/{handle}/used:
+    get:
+      operationId: getProfileUsed
+      tags: [public]
+      summary: Patterns, fabrics and threads used in the person's makes, each with the makes it was used in. Only items and makes the viewer may see.
+      parameters:
+        - { name: handle, in: path, required: true, schema: { type: string } }
+      responses:
+        "200":
+          description: Used products
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ProfileUsed" }
+        "404": { description: Profile not found (or blocked either way) }
   /public/makes/{id}:
     get:
       operationId: getPublicMake
@@ -853,7 +896,69 @@ components:
         bio: { type: string }
         avatarUrl: { type: string, nullable: true }
         joinedAt: { type: string, format: date-time }
-      required: [handle, name, bio, avatarUrl, joinedAt]
+        isMe: { type: boolean, description: True when this is the signed-in viewer's own profile }
+        stats: { $ref: "#/components/schemas/ProfileStats" }
+      required: [handle, name, bio, avatarUrl, joinedAt, isMe, stats]
+    ProfileStats:
+      type: object
+      description: Posts and makes count only what this viewer may see. The followersOnly counts are the followers-only posts and makes the viewer can't see (0 for the owner and followers); private items are never counted.
+      properties:
+        posts: { type: integer }
+        makes: { type: integer }
+        followers: { type: integer }
+        following: { type: integer }
+        followersOnlyPosts: { type: integer }
+        followersOnlyMakes: { type: integer }
+      required: [posts, makes, followers, following, followersOnlyPosts, followersOnlyMakes]
+    MakeSummary:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        status: { type: string }
+        progress: { type: integer }
+        size: { type: string, nullable: true }
+        alterations: { type: string, nullable: true }
+        coverImageUrl: { type: string, nullable: true }
+        completedAt: { type: string, format: date, nullable: true }
+        publishedAt: { type: string, format: date-time, nullable: true }
+        visibility: { $ref: "#/components/schemas/Visibility" }
+        materials:
+          type: array
+          items: { $ref: "#/components/schemas/PublicMaterial" }
+      required: [id, name, status, progress, size, alterations, coverImageUrl, completedAt, publishedAt, visibility, materials]
+    ProfileMakes:
+      type: object
+      properties:
+        finished:
+          type: array
+          items: { $ref: "#/components/schemas/MakeSummary" }
+        inProgress:
+          type: array
+          items: { $ref: "#/components/schemas/MakeSummary" }
+      required: [finished, inProgress]
+    UsedProduct:
+      allOf:
+        - { $ref: "#/components/schemas/PublicMaterial" }
+        - type: object
+          properties:
+            makes:
+              type: array
+              items:
+                type: object
+                properties:
+                  id: { type: integer }
+                  name: { type: string }
+                  coverImageUrl: { type: string, nullable: true }
+                required: [id, name, coverImageUrl]
+          required: [makes]
+    ProfileUsed:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/UsedProduct" }
+      required: [items]
     Visibility:
       type: string
       enum: [public, followers, private]

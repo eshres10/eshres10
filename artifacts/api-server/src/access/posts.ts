@@ -118,7 +118,8 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
   });
 }
 
-async function page(db: Tx, viewer: Viewer, where: SQL, cursor: string | undefined) {
+/** One page of posts matching `where` that the viewer may see, newest first. */
+export async function pagePosts(db: Tx, viewer: Viewer, where: SQL, cursor: string | undefined) {
   const rows = await db
     .select()
     .from(postsTable)
@@ -134,7 +135,7 @@ async function page(db: Tx, viewer: Viewer, where: SQL, cursor: string | undefin
 export function homeFeed(db: Tx, viewer: Viewer, cursor?: string) {
   if (!viewer.userId) throw new Error("homeFeed needs a signed-in viewer");
   const following = sql`${postsTable.userId} IN (SELECT ${followsTable.followeeId} FROM ${followsTable} WHERE ${followsTable.followerId} = ${viewer.userId})`;
-  return page(db, viewer, or(eq(postsTable.userId, viewer.userId), following) as SQL, cursor);
+  return pagePosts(db, viewer, or(eq(postsTable.userId, viewer.userId), following) as SQL, cursor);
 }
 
 export type ExploreKind = "all" | "photo" | "status" | "make";
@@ -145,7 +146,7 @@ export function exploreFeed(db: Tx, viewer: Viewer, kind: ExploreKind = "all", c
   if (kind === "photo") filters.push(eq(postsTable.kind, "photo"));
   if (kind === "status") filters.push(eq(postsTable.kind, "status"));
   if (kind === "make") filters.push(isNotNull(postsTable.projectId));
-  return page(db, viewer, and(...filters) as SQL, cursor);
+  return pagePosts(db, viewer, and(...filters) as SQL, cursor);
 }
 
 /** One post, if the viewer may see it. */

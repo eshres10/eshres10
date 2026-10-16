@@ -114,7 +114,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
 
   const title = allItems.find(item => isActive(location, item.href))?.label
     ?? ({ '/settings': 'Profile & settings', '/new': 'New post' } as Record<string, string>)[location]
-    ?? (location.startsWith('/posts/') ? 'Post' : 'SewSpace');
+    ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'SewSpace');
   return (
     <div className="min-h-[100dvh] pb-28 md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]">
       <aside className="sticky top-[18px] hidden h-[calc(100dvh-36px)] w-[260px] shrink-0 overflow-y-auto rounded-[30px] bg-yellow px-4 py-[22px] md:block">

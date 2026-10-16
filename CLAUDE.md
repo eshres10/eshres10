@@ -33,7 +33,7 @@ Development happens in this repo; Replit runs and deploys it. Work is done in ph
 - **No private accounts or follow requests in v1:** followers-only content covers it.
 - **Ask the owner first** before adding any other dependency or paid service (including image moderation).
 
-## Access rules (current: Phase 2)
+## Access rules (current: Phase 3)
 **Visibility** (`public` / `followers` / `private`, default `private`) exists on posts, projects (makes), fabrics, threads and patterns. Measurements have none: never shared. (The composer preselects Public for posts; the database default is still private.)
 
 The rule (TypeScript `visibleTo()` in `access/visibility.ts`; SQL `sewspace_can_view()` in migration 0002 — **keep them identical**):
@@ -53,7 +53,8 @@ The rule (TypeScript `visibleTo()` in `access/visibility.ts`; SQL `sewspace_can_
 | Post photos (`sewspace_media`, full + thumb files) | follow their post | | | | |
 | Post tags (make/pattern/fabric) | shown only if the viewer may see the tagged item | | | | |
 | Measurements | read/write | never | never | never | never |
-| Profile: name, handle, bio, avatar, joined | read/write | read | read | read | read (Phase 4 hides) |
+| Profile: name, handle, bio, avatar, joined | read/write | read | read | read | nothing (404, avatar file too) |
+| Profile counts: followers, following, followers-only posts/makes | read | read | read | read | nothing |
 | Profile: units, experience, garments | read/write | never | never | never | never |
 | Image upload | read | when shown on a row they may see (or it's a public avatar) | | | |
 | Pattern PDF / AI visualisation upload | read | never | never | never | never |
@@ -65,12 +66,13 @@ The rule (TypeScript `visibleTo()` in `access/visibility.ts`; SQL `sewspace_can_
 - Posts may only use the author's own media and tag the author's own items (RLS `owner_all` WITH CHECK + API checks). Posting needs a handle and is limited to 30 posts/hour.
 - Feeds: Home = people you follow + you (`homeFeed`); Explore = public posts (`exploreFeed`, blocks still apply). Both use `visibleTo` and opaque cursors (`created_at|id`, base64url), 20 per page. "Popular" ordering waits for likes (Phase 4).
 - Follows and blocks tables exist (Phase 1) but are only written by tests until Phase 4 adds the actions. You only see follows you're part of and blocks you made; `sewspace_blocked_with(other)` answers block checks for pairs that include the caller.
+- Profiles (Phase 3): `sewspace_public_profiles` hides profiles on the other side of a block, and `sewspace_is_public_avatar` hides their avatar (migration 0004). Header numbers come from SECURITY DEFINER `sewspace_follow_counts(uid)` and `sewspace_followers_only_counts(uid)`, which return numbers only (follows and others' followers-only rows stay unreadable). Posts/makes counts are what the viewer may see; private items are never counted, not even as "locked". Tabs (`access/profile-tabs.ts`): Posts = the person's visible posts; Makes = visible makes, finished first then in progress; Used = visible patterns/fabrics/threads linked from visible makes, each with those makes. An item hidden from the viewer is left out even if the make is visible (stash/patterns default to private, so the Used tab is often empty).
 - Tests: the SQL suite tests RLS alone; `api-server/test/access-layer.test.ts` runs the access module with RLS bypassed (`withoutRls`) so each layer is proven on its own. Keep both when adding rules.
 
 ## Where things live
 - API routes: `artifacts/api-server/src/routes/` — `public.ts` (no sign-in: profiles, makes, posts, explore), `posts.ts` (`POST /api/media`, posts CRUD, `GET /api/feed`), `profile.ts`, `studio.ts`, `visibility.ts` (`PUT /api/visibility/:kind/:id`), `storage.ts` (`objectReadRouter` is mounted before `requireAuth` because public avatars must load signed out), `seo.ts` (HTML for `/@handle`, `/makes/:id`, `/posts/:id`, `/sitemap.xml`, `/robots.txt`).
 - Viewer: `req.viewer` set by `attachViewer` (`middlewares/auth.ts`); Clerk in production, header stub only via `createApp({ testUserId })` in tests.
-- Web: `src/App.tsx` (routes), `src/components/shell/` (signed-in sidebar/header/tab bar, public header), `src/components/auth/` (`RequireSignIn`, `useRequireSignIn` sign-in sheet), `src/pages/*` (public: `public-profile.tsx`, `public-make.tsx`, `explore.tsx`, `post.tsx`; signed in: `feed.tsx`, `compose.tsx`), `src/components/feed/` (PostCard, FeedList), `AdaptiveLayout` in `components/shell/Shell.tsx` (app shell when signed in, public header when not), `src/components/visibility.tsx` (picker + badge), design tokens in `src/index.css`.
+- Web: `src/App.tsx` (routes), `src/components/shell/` (signed-in sidebar/header/tab bar, public header), `src/components/auth/` (`RequireSignIn`, `useRequireSignIn` sign-in sheet), `src/pages/*` (public: `public-profile.tsx` (tabs via `?tab=posts|makes|used`), `public-make.tsx`, `explore.tsx`, `post.tsx`; signed in: `feed.tsx`, `compose.tsx`), `src/components/feed/` (PostCard, FeedList), `AdaptiveLayout` in `components/shell/Shell.tsx` (app shell when signed in, public header when not), `src/components/visibility.tsx` (picker + badge), design tokens in `src/index.css`.
 - Design reference: `docs/design/*.dc.html` (mockups only; never copy their photos into the app).
 
 ## Design tokens (`src/index.css` → Tailwind classes)
@@ -91,6 +93,7 @@ Replit routes by path prefix. The web artifact serves `/` statically; the API ar
 - In tests, import app code with `await import()` after `./harness`, so `DATABASE_URL` is set first.
 - `PATCH` bodies for stash/patterns/projects are full objects (spec uses `allOf` of the input schema).
 - `@workspace/integrations-openai-ai-server` throws on import without its env vars; tests set placeholders.
+- Operations with both path and query parameters get a Zod schema and a TS type with the same name in `lib/api-zod`; re-export the Zod one explicitly in `lib/api-zod/src/index.ts` (see `GetProfilePostsParams`).
 - Orval is pinned to emit react-query v5 hooks (`orval.config.ts`).
 - The migration runner marks `0000_baseline.sql` as applied on databases created by the old `drizzle-kit push`.
 - Emergency rollback for a migration lives in `lib/db/migrations/rollback/` (use with the previous API build).
@@ -98,4 +101,6 @@ Replit routes by path prefix. The web artifact serves `/` statically; the API ar
 ## Build order
 0. Foundations ✅ — file privacy fix, handles + settings, public/signed-in API split, access module + RLS, no demo seeding, sign-in that returns, robots/sitemap/meta.
 1. Privacy controls and public read access ✅ — visibility on makes/stash/patterns, follows + blocks tables, `/makes/:id` public page with meta + sitemap, sharing panel.
-2. Posts and feeds ✅ — status and multi-photo posts with tags and visibility, sharp image pipeline, Home (Following/Discover) and public Explore feeds, `/posts/:id` with meta + sitemap, composer, mobile tab bar. 3. Profiles with tabs. 4. Likes, comments, follows, save, share, report/block, admin review. 5. Shared pattern/product pages and reviews. 6. Challenges. 7. Forum. 8. AI assistant upgrade.
+2. Posts and feeds ✅ — status and multi-photo posts with tags and visibility, sharp image pipeline, Home (Following/Discover) and public Explore feeds, `/posts/:id` with meta + sitemap, composer, mobile tab bar.
+3. Profiles with tabs ✅ — header with counts, Posts grid with followers-only notice, Makes (finished + on the table), Used products linking to makes, blocked profiles 404.
+4. Likes, comments, follows, save, share, report/block, admin review. 5. Shared pattern/product pages and reviews. 6. Challenges. 7. Forum. 8. AI assistant upgrade.

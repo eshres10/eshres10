@@ -6,13 +6,10 @@ import { UserAvatar } from '@/components/avatar';
 import { Loading } from '@/components/common';
 import { PublicHeader } from '@/components/shell/PublicHeader';
 import { VisibilityBadge } from '@/components/visibility';
+import { swatch } from '@/lib/swatch';
 import NotFound from '@/pages/not-found';
 
 const STAGES: Record<string, string> = { planning: 'Planning', cutting: 'Cutting', sewing: 'Sewing', fitting: 'Fitting', finished: 'Finished' };
-/** A stored colour if the browser understands it ("#287b63", "teal"), else the peach placeholder. */
-function swatch(color: string | null): string {
-  return color && typeof CSS !== 'undefined' && CSS.supports('color', color) ? color : '#ff8562';
-}
 
 const KIND_LABEL: Record<string, string> = { pattern: 'Pattern', fabric: 'Fabric', thread: 'Thread' };
 

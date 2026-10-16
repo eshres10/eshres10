@@ -7,8 +7,12 @@ import {
   GetPublicPostParams,
   GetPublicPostResponse,
   GetPublicProfileResponse,
+  GetProfileMakesResponse,
+  GetProfilePostsQueryParams,
+  GetProfilePostsResponse,
+  GetProfileUsedResponse,
 } from "@workspace/api-zod";
-import { exploreFeed, getMakeForViewer, getPostForViewer, getPublicProfile } from "../access";
+import { exploreFeed, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { scoped } from "../lib/scoped";
 
@@ -16,13 +20,42 @@ import { scoped } from "../lib/scoped";
 // through the access module and return public fields only.
 const router: IRouter = Router();
 
+// Profile pages. A profile on the other side of a block is "not found".
 router.get("/public/profiles/:handle", scoped(async (req, res, db): Promise<void> => {
-  const profile = await getPublicProfile(db, String(req.params.handle));
+  const profile = await getProfilePage(db, viewerOf(req), String(req.params.handle));
   if (!profile) {
     res.status(404).json({ error: "Profile not found" });
     return;
   }
   res.json(GetPublicProfileResponse.parse(profile));
+}));
+
+router.get("/public/profiles/:handle/posts", scoped(async (req, res, db): Promise<void> => {
+  const query = GetProfilePostsQueryParams.safeParse(req.query);
+  const page = await getProfilePosts(db, viewerOf(req), String(req.params.handle), query.success ? query.data.cursor : undefined);
+  if (!page) {
+    res.status(404).json({ error: "Profile not found" });
+    return;
+  }
+  res.json(GetProfilePostsResponse.parse(page));
+}));
+
+router.get("/public/profiles/:handle/makes", scoped(async (req, res, db): Promise<void> => {
+  const makes = await getProfileMakes(db, viewerOf(req), String(req.params.handle));
+  if (!makes) {
+    res.status(404).json({ error: "Profile not found" });
+    return;
+  }
+  res.json(GetProfileMakesResponse.parse(makes));
+}));
+
+router.get("/public/profiles/:handle/used", scoped(async (req, res, db): Promise<void> => {
+  const used = await getProfileUsed(db, viewerOf(req), String(req.params.handle));
+  if (!used) {
+    res.status(404).json({ error: "Profile not found" });
+    return;
+  }
+  res.json(GetProfileUsedResponse.parse(used));
 }));
 
 router.get("/public/makes/:id", scoped(async (req, res, db): Promise<void> => {

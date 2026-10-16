@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { ProfileStats } from './profileStats';
 
 /**
  * Fields of a profile that anyone may see. Never includes units, experience or other private data.
@@ -16,4 +17,7 @@ export interface PublicProfile {
   /** @nullable */
   avatarUrl: string | null;
   joinedAt: Date;
+  /** True when this is the signed-in viewer's own profile */
+  isMe: boolean;
+  stats: ProfileStats;
 }

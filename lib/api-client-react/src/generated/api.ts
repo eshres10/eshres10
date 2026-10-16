@@ -38,6 +38,7 @@ import type {
   FeedPost,
   GetExploreFeedParams,
   GetHomeFeedParams,
+  GetProfilePostsParams,
   HealthStatus,
   ListFabricsParams,
   ListPatternsParams,
@@ -55,7 +56,9 @@ import type {
   PostInput,
   PostUpdate,
   Profile,
+  ProfileMakes,
   ProfileUpdate,
+  ProfileUsed,
   Project,
   ProjectDetail,
   ProjectInput,
@@ -196,6 +199,324 @@ export function useGetPublicProfile<TData = Awaited<ReturnType<typeof getPublicP
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetPublicProfileQueryOptions(handle,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetProfilePostsUrl = (handle: string,
+    params?: GetProfilePostsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/profiles/${handle}/posts?${stringifiedParams}` : `/api/public/profiles/${handle}/posts`
+}
+
+/**
+ * @summary A person's posts that the viewer may see, newest first. Works signed out.
+ */
+export const getProfilePosts = async (handle: string,
+    params?: GetProfilePostsParams, options?: Parameters<typeof customFetch>[1]): Promise<FeedPage> => {
+
+  return customFetch<FeedPage>(getGetProfilePostsUrl(handle,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProfilePostsQueryKey = (handle: string,
+    params?: GetProfilePostsParams,) => {
+    return [
+    `/api/public/profiles/${handle}/posts`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetProfilePostsQueryOptions = <TData = Awaited<ReturnType<typeof getProfilePosts>>, TError = ErrorType<void>>(handle: string,
+    params?: GetProfilePostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfilePosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProfilePostsQueryKey(handle,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProfilePosts>>> = ({ signal }) => getProfilePosts(handle,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: handle !== null && handle !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProfilePosts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetProfilePostsQueryResult = NonNullable<Awaited<ReturnType<typeof getProfilePosts>>>
+export type GetProfilePostsQueryError = ErrorType<void>
+
+
+export function useGetProfilePosts<TData = Awaited<ReturnType<typeof getProfilePosts>>, TError = ErrorType<void>>(
+ handle: string,
+    params: undefined |  GetProfilePostsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfilePosts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfilePosts>>,
+          TError,
+          Awaited<ReturnType<typeof getProfilePosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProfilePosts<TData = Awaited<ReturnType<typeof getProfilePosts>>, TError = ErrorType<void>>(
+ handle: string,
+    params?: GetProfilePostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfilePosts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfilePosts>>,
+          TError,
+          Awaited<ReturnType<typeof getProfilePosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProfilePosts<TData = Awaited<ReturnType<typeof getProfilePosts>>, TError = ErrorType<void>>(
+ handle: string,
+    params?: GetProfilePostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfilePosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary A person's posts that the viewer may see, newest first. Works signed out.
+ */
+
+export function useGetProfilePosts<TData = Awaited<ReturnType<typeof getProfilePosts>>, TError = ErrorType<void>>(
+ handle: string,
+    params?: GetProfilePostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfilePosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetProfilePostsQueryOptions(handle,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetProfileMakesUrl = (handle: string,) => {
+
+
+
+
+  return `/api/public/profiles/${handle}/makes`
+}
+
+/**
+ * @summary A person's makes that the viewer may see, finished first. Works signed out.
+ */
+export const getProfileMakes = async (handle: string, options?: Parameters<typeof customFetch>[1]): Promise<ProfileMakes> => {
+
+  return customFetch<ProfileMakes>(getGetProfileMakesUrl(handle),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProfileMakesQueryKey = (handle: string,) => {
+    return [
+    `/api/public/profiles/${handle}/makes`
+    ] as const;
+    }
+
+
+export const getGetProfileMakesQueryOptions = <TData = Awaited<ReturnType<typeof getProfileMakes>>, TError = ErrorType<void>>(handle: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileMakes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProfileMakesQueryKey(handle);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProfileMakes>>> = ({ signal }) => getProfileMakes(handle, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: handle !== null && handle !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProfileMakes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetProfileMakesQueryResult = NonNullable<Awaited<ReturnType<typeof getProfileMakes>>>
+export type GetProfileMakesQueryError = ErrorType<void>
+
+
+export function useGetProfileMakes<TData = Awaited<ReturnType<typeof getProfileMakes>>, TError = ErrorType<void>>(
+ handle: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileMakes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfileMakes>>,
+          TError,
+          Awaited<ReturnType<typeof getProfileMakes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProfileMakes<TData = Awaited<ReturnType<typeof getProfileMakes>>, TError = ErrorType<void>>(
+ handle: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileMakes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfileMakes>>,
+          TError,
+          Awaited<ReturnType<typeof getProfileMakes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProfileMakes<TData = Awaited<ReturnType<typeof getProfileMakes>>, TError = ErrorType<void>>(
+ handle: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileMakes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary A person's makes that the viewer may see, finished first. Works signed out.
+ */
+
+export function useGetProfileMakes<TData = Awaited<ReturnType<typeof getProfileMakes>>, TError = ErrorType<void>>(
+ handle: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileMakes>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetProfileMakesQueryOptions(handle,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetProfileUsedUrl = (handle: string,) => {
+
+
+
+
+  return `/api/public/profiles/${handle}/used`
+}
+
+/**
+ * @summary Patterns, fabrics and threads used in the person's makes, each with the makes it was used in. Only items and makes the viewer may see.
+ */
+export const getProfileUsed = async (handle: string, options?: Parameters<typeof customFetch>[1]): Promise<ProfileUsed> => {
+
+  return customFetch<ProfileUsed>(getGetProfileUsedUrl(handle),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetProfileUsedQueryKey = (handle: string,) => {
+    return [
+    `/api/public/profiles/${handle}/used`
+    ] as const;
+    }
+
+
+export const getGetProfileUsedQueryOptions = <TData = Awaited<ReturnType<typeof getProfileUsed>>, TError = ErrorType<void>>(handle: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileUsed>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetProfileUsedQueryKey(handle);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getProfileUsed>>> = ({ signal }) => getProfileUsed(handle, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: handle !== null && handle !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getProfileUsed>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetProfileUsedQueryResult = NonNullable<Awaited<ReturnType<typeof getProfileUsed>>>
+export type GetProfileUsedQueryError = ErrorType<void>
+
+
+export function useGetProfileUsed<TData = Awaited<ReturnType<typeof getProfileUsed>>, TError = ErrorType<void>>(
+ handle: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileUsed>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfileUsed>>,
+          TError,
+          Awaited<ReturnType<typeof getProfileUsed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProfileUsed<TData = Awaited<ReturnType<typeof getProfileUsed>>, TError = ErrorType<void>>(
+ handle: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileUsed>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getProfileUsed>>,
+          TError,
+          Awaited<ReturnType<typeof getProfileUsed>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetProfileUsed<TData = Awaited<ReturnType<typeof getProfileUsed>>, TError = ErrorType<void>>(
+ handle: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileUsed>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Patterns, fabrics and threads used in the person's makes, each with the makes it was used in. Only items and makes the viewer may see.
+ */
+
+export function useGetProfileUsed<TData = Awaited<ReturnType<typeof getProfileUsed>>, TError = ErrorType<void>>(
+ handle: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getProfileUsed>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetProfileUsedQueryOptions(handle,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

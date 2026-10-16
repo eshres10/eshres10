@@ -34,6 +34,18 @@ export interface Profile {
 }
 
 /**
+ * Posts and makes count only what this viewer may see. The followersOnly counts are the followers-only posts and makes the viewer can't see (0 for the owner and followers); private items are never counted.
+ */
+export interface ProfileStats {
+  posts: number;
+  makes: number;
+  followers: number;
+  following: number;
+  followersOnlyPosts: number;
+  followersOnlyMakes: number;
+}
+
+/**
  * Fields of a profile that anyone may see. Never includes units, experience or other private data.
  */
 export interface PublicProfile {
@@ -43,6 +55,9 @@ export interface PublicProfile {
   /** @nullable */
   avatarUrl: string | null;
   joinedAt: string;
+  /** True when this is the signed-in viewer's own profile */
+  isMe: boolean;
+  stats: ProfileStats;
 }
 
 /**
@@ -56,33 +71,6 @@ export const Visibility = {
   followers: 'followers',
   private: 'private',
 } as const;
-
-export interface VisibilityChange {
-  visibility: Visibility;
-}
-
-export type VisibilityResultKind = typeof VisibilityResultKind[keyof typeof VisibilityResultKind];
-
-
-export const VisibilityResultKind = {
-  project: 'project',
-  fabric: 'fabric',
-  thread: 'thread',
-  pattern: 'pattern',
-} as const;
-
-export interface VisibilityResult {
-  kind: VisibilityResultKind;
-  id: number;
-  visibility: Visibility;
-}
-
-export interface PublicPerson {
-  handle: string;
-  name: string;
-  /** @nullable */
-  avatarUrl: string | null;
-}
 
 export type PublicMaterialKind = typeof PublicMaterialKind[keyof typeof PublicMaterialKind];
 
@@ -109,6 +97,72 @@ export interface PublicMaterial {
   color: string | null;
   /** @nullable */
   imageUrl: string | null;
+}
+
+export interface MakeSummary {
+  id: number;
+  name: string;
+  status: string;
+  progress: number;
+  /** @nullable */
+  size: string | null;
+  /** @nullable */
+  alterations: string | null;
+  /** @nullable */
+  coverImageUrl: string | null;
+  /** @nullable */
+  completedAt: string | null;
+  /** @nullable */
+  publishedAt: string | null;
+  visibility: Visibility;
+  materials: PublicMaterial[];
+}
+
+export interface ProfileMakes {
+  finished: MakeSummary[];
+  inProgress: MakeSummary[];
+}
+
+export type UsedProductMakesItem = {
+  id: number;
+  name: string;
+  /** @nullable */
+  coverImageUrl: string | null;
+};
+
+export type UsedProduct = PublicMaterial & {
+  makes: UsedProductMakesItem[];
+};
+
+export interface ProfileUsed {
+  items: UsedProduct[];
+}
+
+export interface VisibilityChange {
+  visibility: Visibility;
+}
+
+export type VisibilityResultKind = typeof VisibilityResultKind[keyof typeof VisibilityResultKind];
+
+
+export const VisibilityResultKind = {
+  project: 'project',
+  fabric: 'fabric',
+  thread: 'thread',
+  pattern: 'pattern',
+} as const;
+
+export interface VisibilityResult {
+  kind: VisibilityResultKind;
+  id: number;
+  visibility: Visibility;
+}
+
+export interface PublicPerson {
+  handle: string;
+  name: string;
+  /** @nullable */
+  avatarUrl: string | null;
 }
 
 export type PublicMakeStepsItem = {
@@ -808,6 +862,10 @@ export interface UploadResponse {
 }
 
 export type SearchParameter = string;
+
+export type GetProfilePostsParams = {
+cursor?: string;
+};
 
 export type GetExploreFeedParams = {
 cursor?: string;

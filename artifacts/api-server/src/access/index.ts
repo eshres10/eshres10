@@ -9,3 +9,4 @@ export * from "./studio";
 export * from "./visibility";
 export * from "./makes";
 export * from "./posts";
+export * from "./profile-tabs";

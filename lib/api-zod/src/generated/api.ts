@@ -20,8 +20,136 @@ export const GetPublicProfileResponse = zod.object({
   "name": zod.string(),
   "bio": zod.string(),
   "avatarUrl": zod.string().nullable(),
-  "joinedAt": zod.coerce.date()
+  "joinedAt": zod.coerce.date(),
+  "isMe": zod.boolean().describe('True when this is the signed-in viewer\'s own profile'),
+  "stats": zod.object({
+  "posts": zod.number().int(),
+  "makes": zod.number().int(),
+  "followers": zod.number().int(),
+  "following": zod.number().int(),
+  "followersOnlyPosts": zod.number().int(),
+  "followersOnlyMakes": zod.number().int()
+}).describe('Posts and makes count only what this viewer may see. The followersOnly counts are the followers-only posts and makes the viewer can\'t see (0 for the owner and followers); private items are never counted.')
 }).describe('Fields of a profile that anyone may see. Never includes units, experience or other private data.')
+
+
+/**
+ * @summary A person's posts that the viewer may see, newest first. Works signed out.
+ */
+export const GetProfilePostsParams = zod.object({
+  "handle": zod.coerce.string()
+})
+
+export const GetProfilePostsQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional()
+})
+
+export const GetProfilePostsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.')
+})),
+  "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
+})
+
+
+/**
+ * @summary A person's makes that the viewer may see, finished first. Works signed out.
+ */
+export const GetProfileMakesParams = zod.object({
+  "handle": zod.coerce.string()
+})
+
+export const GetProfileMakesResponse = zod.object({
+  "finished": zod.array(zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "status": zod.string(),
+  "progress": zod.number().int(),
+  "size": zod.string().nullable(),
+  "alterations": zod.string().nullable(),
+  "coverImageUrl": zod.string().nullable(),
+  "completedAt": zod.coerce.date().nullable(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "materials": zod.array(zod.object({
+  "kind": zod.enum(['pattern', 'fabric', 'thread']),
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "detail": zod.string().nullable().describe('e.g. designer, or fibre and composition'),
+  "color": zod.string().nullable(),
+  "imageUrl": zod.string().nullable()
+}).describe('A pattern, fabric or thread used in a make, shown only when the viewer may see it.'))
+})),
+  "inProgress": zod.array(zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "status": zod.string(),
+  "progress": zod.number().int(),
+  "size": zod.string().nullable(),
+  "alterations": zod.string().nullable(),
+  "coverImageUrl": zod.string().nullable(),
+  "completedAt": zod.coerce.date().nullable(),
+  "publishedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "materials": zod.array(zod.object({
+  "kind": zod.enum(['pattern', 'fabric', 'thread']),
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "detail": zod.string().nullable().describe('e.g. designer, or fibre and composition'),
+  "color": zod.string().nullable(),
+  "imageUrl": zod.string().nullable()
+}).describe('A pattern, fabric or thread used in a make, shown only when the viewer may see it.'))
+}))
+})
+
+
+/**
+ * @summary Patterns, fabrics and threads used in the person's makes, each with the makes it was used in. Only items and makes the viewer may see.
+ */
+export const GetProfileUsedParams = zod.object({
+  "handle": zod.coerce.string()
+})
+
+export const GetProfileUsedResponse = zod.object({
+  "items": zod.array(zod.object({
+  "kind": zod.enum(['pattern', 'fabric', 'thread']),
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "detail": zod.string().nullable().describe('e.g. designer, or fibre and composition'),
+  "color": zod.string().nullable(),
+  "imageUrl": zod.string().nullable()
+}).describe('A pattern, fabric or thread used in a make, shown only when the viewer may see it.').and(zod.object({
+  "makes": zod.array(zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "coverImageUrl": zod.string().nullable()
+}))
+})))
+})
 
 
 /**
