@@ -56,3 +56,5 @@ docs/design/studio-mobile/screens/img/
 # Onboarding mockups: screenshots and screen snapshots contain mockup photos (keep locally).
 docs/design/onboarding/images/
 docs/design/onboarding/screens/img/
+# Public website mockups embed mockup photos: keep the screens local.
+docs/design/website/screens/

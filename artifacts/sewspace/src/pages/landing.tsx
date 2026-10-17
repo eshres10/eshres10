@@ -1,32 +1,293 @@
 import { useEffect } from 'react';
-import { getGetDashboardQueryKey, useGetDashboard } from '@workspace/api-client-react';
+import { useQuery } from '@tanstack/react-query';
+import { getExploreFeed, useListChallenges, type ChallengeSummary, type FeedPost } from '@workspace/api-client-react';
 import { useAuth } from '@clerk/react';
-import { ArrowRight, CircleHelp, Clapperboard, FolderKanban, Palette } from 'lucide-react';
-import { Link, useLocation } from 'wouter';
+import { Bookmark, Globe, Heart, Lock, MessageCircle, MoreHorizontal, Scissors, Send, Users } from 'lucide-react';
+import { Link, Redirect } from 'wouter';
+import { STATUS_LABEL } from '@/components/challenges/parts';
 import { Logo } from '@/components/brand/Logo';
-import { basePath } from '@/lib/clerk';
-import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
+import { MAKE_ART } from '@/components/onboarding/copy';
+import { Glyph } from '@/components/onboarding/Shell';
+import { PublicHeader } from '@/components/shell/PublicHeader';
+import { authHref } from '@/lib/navigation';
+
+// The public home page (docs/design/website: "Landing — signed out"). Signed-in
+// people go to Home. Live sections use public data only: Explore's public
+// photo posts and the challenge list, both through the public API (blocks and
+// visibility apply as everywhere else). The product showcase is an
+// illustration built from app pieces and garment drawings: no mockup photos.
+
+const join = () => authHref('sign-up', '/feed');
+
+function Garment({ name, tone, className = '' }: { name: string; tone: string; className?: string }) {
+  return (
+    <span className={`grid place-items-center ${tone} ${className}`} aria-hidden="true">
+      <svg viewBox="0 0 48 48" className="h-[45%] w-[45%]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={MAKE_ART[name]} /></svg>
+    </span>
+  );
+}
+
+function Label({ children }: { children: string }) {
+  return <span className="inline-flex rounded-full bg-red px-3 py-1 text-[13px] font-semibold text-white">{children}</span>;
+}
+
+function Eyebrow({ children, tone = 'text-red-ink' }: { children: string; tone?: string }) {
+  return <p className={`text-[12px] font-bold uppercase tracking-[.16em] ${tone}`}>{children}</p>;
+}
+
+/** The app in miniature: a post with its tags, a profile, a challenge and a pattern page. */
+function Showcase() {
+  return (
+    <div className="rounded-[36px] bg-peach p-4 sm:p-9" aria-hidden="true">
+      <div className="overflow-hidden rounded-[22px] bg-canvas">
+        <div className="flex gap-1.5 border-b border-line bg-white px-4 py-3.5"><span className="h-2.5 w-2.5 rounded-full bg-red" /><span className="h-2.5 w-2.5 rounded-full bg-yellow" /><span className="h-2.5 w-2.5 rounded-full bg-blue" /></div>
+        <div className="grid gap-6 p-4 sm:p-9 md:grid-cols-3">
+          <div className="space-y-3">
+            <Label>Tag the pattern & fabric</Label>
+            <div className="overflow-hidden rounded-[22px] border border-line bg-white">
+              <div className="flex items-center gap-2.5 px-3.5 py-3">
+                <span className="grid h-9 w-9 place-items-center rounded-full bg-blue text-sm font-bold text-white">M</span>
+                <span className="flex-1 leading-tight"><b className="block text-sm">mara.makes</b><span className="text-xs text-subtle">2h · Public</span></span>
+                <MoreHorizontal size={18} />
+              </div>
+              <div className="relative">
+                <Garment name="Dresses" tone="bg-blue-soft" className="aspect-[4/5] w-full" />
+                <span className="absolute right-3 top-3 rounded-full bg-ink/70 px-2 py-0.5 text-[11px] font-semibold text-white">1/4</span>
+              </div>
+              <div className="px-3.5 pb-4 pt-3">
+                <div className="flex items-center gap-4 text-sm font-semibold"><span className="inline-flex items-center gap-1"><Heart size={19} className="fill-red text-red" />312</span><span className="inline-flex items-center gap-1"><MessageCircle size={19} />28</span><Send size={18} /><Bookmark size={18} className="ml-auto" /></div>
+                <p className="mt-2.5 text-sm leading-snug"><b>mara.makes</b> Finally finished my drawstring dress. Lengthened the bodice 2cm and it sits perfectly now.</p>
+                <div className="mt-2.5 flex flex-wrap gap-1.5 text-xs"><span className="rounded-full bg-canvas px-2.5 py-1">Pattern · Willa Dress</span><span className="rounded-full bg-canvas px-2.5 py-1">Fabric · Cotton lawn</span></div>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <Label>Profiles with every make</Label>
+            <div className="rounded-[22px] border border-line bg-white p-4">
+              <div className="flex items-center gap-3">
+                <span className="grid h-14 w-14 place-items-center rounded-full bg-yellow font-display text-xl">J</span>
+                <span className="flex-1 leading-tight"><b className="block font-display text-[18px] tracking-[-.03em]">June Okafor</b><span className="text-xs text-subtle">@junesews · 2.4k followers</span></span>
+                <span className="rounded-full bg-yellow px-3 py-1.5 text-xs font-bold">Follow</span>
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-1 rounded-full bg-canvas p-1 text-center text-xs font-semibold"><span className="rounded-full bg-ink py-1.5 text-white">Posts</span><span className="py-1.5">Makes</span><span className="py-1.5">Used</span></div>
+              <div className="mt-3 grid grid-cols-3 gap-1.5">
+                {(['Tops', 'Skirts', 'Knits', 'Trousers', 'Dresses', 'Bags', 'Outerwear', 'Mending', 'Tops'] as const).map((g, i) => (
+                  <Garment key={i} name={g} tone={['bg-yellow', 'bg-blue-soft', 'bg-peach-soft', 'bg-mist'][i % 4]} className="aspect-square rounded-[10px]" />
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="space-y-3">
+            <Label>Challenges & pattern pages</Label>
+            <div className="overflow-hidden rounded-[22px] border border-line bg-white">
+              <div className="relative"><Garment name="Outerwear" tone="bg-blue-soft" className="aspect-[12/5] w-full" /><span className="absolute left-3 top-3 rounded-full bg-yellow px-2.5 py-0.5 text-xs font-bold">Active</span></div>
+              <div className="p-4">
+                <b className="block font-display text-[18px] tracking-[-.03em]">#OctoberDenimChallenge</b>
+                <span className="text-xs text-subtle">12 days left · 486 joined</span>
+                <span className="mt-3 flex min-h-[40px] items-center justify-center rounded-full bg-ink text-sm font-bold text-white">Join challenge</span>
+              </div>
+            </div>
+            <div className="rounded-[22px] border border-line bg-white p-4 text-xs">
+              <div className="flex items-baseline justify-between"><b className="text-[15px]">Willa Dress</b><span className="text-subtle">214 makes</span></div>
+              {[['Fit', 92, '4.6'], ['Difficulty', 56, '2.8'], ['Instructions', 86, '4.3']].map(([label, w, v]) => (
+                <div key={label} className="mt-2 flex items-center gap-3"><span className="w-20 text-subtle">{label}</span><span className="h-1.5 flex-1 rounded-full bg-line"><span className="block h-full rounded-full bg-blue" style={{ width: `${w}%` }} /></span><b className="w-6 text-right">{v}</b></div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function compact(n: number) {
+  return n >= 1000 ? `${(n / 1000).toFixed(n >= 10000 ? 0 : 1).replace(/\.0$/, '')}k` : String(n);
+}
+
+function CommunityTile({ post }: { post: FeedPost }) {
+  const cover = post.media[0];
+  return (
+    <Link href={`/posts/${post.id}`} aria-label={`Post by @${post.author.handle}${post.caption ? `: ${post.caption.slice(0, 80)}` : ''}`}
+      className="relative block aspect-square overflow-hidden rounded-[22px] bg-line">
+      {cover && <img src={cover.thumbUrl} alt={cover.altText || ''} loading="lazy" decoding="async" className="h-full w-full object-cover" style={{ backgroundColor: cover.color ?? undefined }} />}
+      <span className="absolute inset-x-2 bottom-2 flex items-center justify-between gap-2 text-xs font-semibold">
+        <span className="truncate rounded-full bg-white px-2.5 py-1 text-ink">@{post.author.handle}</span>
+        <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white px-2.5 py-1 text-ink"><Heart size={12} className="fill-red text-red" aria-hidden="true" />{compact(post.likeCount)}</span>
+      </span>
+    </Link>
+  );
+}
+
+function FreshFromTheCommunity() {
+  const feed = useQuery({ queryKey: ['landing', 'explore'], queryFn: () => getExploreFeed({ kind: 'photo' }) });
+  const posts = (feed.data?.items ?? []).filter(p => p.media.length > 0).slice(0, 10);
+  if (!posts.length) return null; // nothing public yet: leave the section out
+  return (
+    <section aria-labelledby="fresh" className="mx-auto max-w-[1200px] px-4 pt-20 sm:px-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div><Eyebrow>Explore</Eyebrow><h2 id="fresh" className="mt-2 font-display text-[34px] leading-[1.05] tracking-[-.05em] sm:text-[44px]">Fresh from the community</h2></div>
+        <Link href="/explore" className="btn btn-line min-h-[44px]">See everything on Explore</Link>
+      </div>
+      <div className="mt-7 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">{posts.map(p => <CommunityTile key={p.id} post={p} />)}</div>
+    </section>
+  );
+}
+
+function HowItWorks() {
+  return (
+    <section id="how-it-works" aria-labelledby="how" className="mx-auto max-w-[1200px] scroll-mt-24 px-4 pt-24 sm:px-6">
+      <div className="text-center"><Eyebrow>How it works</Eyebrow><h2 id="how" className="mt-2 font-display text-[34px] leading-[1.05] tracking-[-.05em] sm:text-[44px]">Sewing depth, social ease</h2></div>
+      <div className="mt-10 grid gap-4 md:grid-cols-3">
+        <article className="rounded-[34px] bg-white p-7 sm:p-9">
+          <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-yellow" aria-hidden="true"><Glyph name="book" /></span>
+          <h3 className="mt-7 font-display text-[26px] leading-tight tracking-[-.04em]">Log every make</h3>
+          <p className="mt-3 text-[15px] leading-relaxed text-subtle">Pattern, size, fabric and alterations live with the photos, so your notes help the next person too.</p>
+          <dl className="mt-6 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 rounded-[18px] bg-canvas p-4 text-sm">
+            {[['Pattern', 'Willa Dress'], ['Size', '14, graded to 16 at hip'], ['Fabric', 'Cotton lawn, 2.8 m'], ['Alterations', '+2 cm bodice, 1 cm swayback']].map(([k, v]) => <div key={k} className="contents"><dt className="text-subtle">{k}</dt><dd className="font-semibold">{v}</dd></div>)}
+          </dl>
+        </article>
+        <article className="rounded-[34px] bg-white p-7 sm:p-9">
+          <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-blue text-white" aria-hidden="true"><Glyph name="star" /></span>
+          <h3 className="mt-7 font-display text-[26px] leading-tight tracking-[-.04em]">Pattern pages that tell the truth</h3>
+          <p className="mt-3 text-[15px] leading-relaxed text-subtle">One page per pattern or fabric, gathering every public make and honest ratings for fit, difficulty and instructions.</p>
+          <div className="mt-6 space-y-2 rounded-[18px] bg-canvas p-4 text-sm">
+            {[['Fit', 92, '4.6'], ['Difficulty', 56, '2.8'], ['Instructions', 86, '4.3']].map(([label, w, v]) => (
+              <div key={label} className="flex items-center gap-3"><span className="w-24 text-subtle">{label}</span><span className="h-1.5 flex-1 rounded-full bg-white"><span className="block h-full rounded-full bg-ink" style={{ width: `${w}%` }} /></span><b className="w-7 text-right">{v}</b></div>
+            ))}
+          </div>
+        </article>
+        <article className="rounded-[34px] bg-white p-7 sm:p-9">
+          <span className="grid h-12 w-12 place-items-center rounded-[14px] bg-peach" aria-hidden="true"><Glyph name="trophy" /></span>
+          <h3 className="mt-7 font-display text-[26px] leading-tight tracking-[-.04em]">Challenges that get you sewing</h3>
+          <p className="mt-3 text-[15px] leading-relaxed text-subtle">Anyone can start one. Join, submit a make, and cheer on everyone else’s entries.</p>
+          <div className="mt-6 flex gap-2" aria-hidden="true">
+            {[['12', 'days', true], ['06', 'hours', true], ['486', 'joined', false], ['731', 'entries', false]].map(([n, l, dark]) => (
+              <span key={l as string} className={`grid min-w-[64px] flex-1 place-items-center rounded-[14px] px-2 py-2.5 ${dark ? 'bg-ink text-white' : 'bg-canvas'}`}><b className="font-display text-[24px] leading-none">{n}</b><span className="mt-1 text-[11px]">{l}</span></span>
+            ))}
+          </div>
+        </article>
+      </div>
+    </section>
+  );
+}
+
+const DAY = 86_400_000;
+function challengeMeta(c: ChallengeSummary) {
+  const now = Date.now();
+  if (c.status === 'upcoming') return [`Starts in ${Math.max(1, Math.ceil((new Date(c.startsAt).getTime() - now) / DAY))} days`, `${c.members} interested`];
+  if (c.status === 'ended') return [`Ended ${new Date(c.endsAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`, `${c.entries.toLocaleString()} entries`];
+  const left = Math.max(0, Math.ceil((new Date(c.endsAt).getTime() - now) / DAY));
+  return [`${left} ${left === 1 ? 'day' : 'days'} left`, `${c.members} sewists`];
+}
+const BADGE = { active: 'bg-yellow text-ink', upcoming: 'border-2 border-blue bg-white text-blue-ink', ended: 'bg-ink/75 text-white' } as const;
+const CHALLENGE_ART = ['Outerwear', 'Bags', 'Tops'];
+
+function SomethingToSew() {
+  const active = useListChallenges({ status: 'active' });
+  const upcoming = useListChallenges({ status: 'upcoming' });
+  const ended = useListChallenges({ status: 'ended' });
+  const shown = [...(active.data ?? []), ...(upcoming.data ?? []), ...(ended.data ?? [])].slice(0, 3);
+  if (!shown.length) return null;
+  return (
+    <section aria-labelledby="this-month" className="mx-auto max-w-[1200px] px-4 pt-24 sm:px-6">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div><Eyebrow>Challenges</Eyebrow><h2 id="this-month" className="mt-2 font-display text-[34px] leading-[1.05] tracking-[-.05em] sm:text-[44px]">Something to sew this month</h2></div>
+        <Link href="/challenges" className="btn btn-line min-h-[44px]">All challenges</Link>
+      </div>
+      <div className="mt-7 grid gap-4 md:grid-cols-3">
+        {shown.map((c, i) => {
+          const [when, count] = challengeMeta(c);
+          return (
+            <Link key={c.slug} href={`/challenges/${c.slug}`} className="overflow-hidden rounded-[30px] bg-white text-ink no-underline hover:outline hover:outline-2 hover:outline-ink">
+              <span className="relative block">
+                <Garment name={CHALLENGE_ART[i % CHALLENGE_ART.length]} tone={['bg-blue-soft', 'bg-peach-soft', 'bg-mist'][i % 3]} className="aspect-[16/9] w-full" />
+                <span className={`absolute left-4 top-4 rounded-full px-2.5 py-0.5 text-xs font-bold ${BADGE[c.status]}`}>{c.status === 'upcoming' ? 'Upcoming' : STATUS_LABEL[c.status]}</span>
+              </span>
+              <span className="block p-6">
+                <b className="block font-display text-[22px] leading-tight tracking-[-.04em]">#{c.tag}</b>
+                {c.description && <span className="mt-2 line-clamp-2 block text-sm text-subtle">{c.description}</span>}
+                <span className="mt-3 flex gap-4 text-[13px]"><b>{when}</b><span className="text-subtle">{count}</span></span>
+              </span>
+            </Link>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function YourRules() {
+  const rows = [
+    { icon: Globe, tone: 'bg-yellow text-ink', title: 'Public', sub: 'Anyone, even without an account' },
+    { icon: Users, tone: 'bg-blue text-white', title: 'Followers', sub: 'Only people who follow you' },
+    { icon: Lock, tone: 'bg-ink text-white', title: 'Private · default for stash & patterns', sub: 'Just you', on: true },
+  ];
+  return (
+    <section aria-labelledby="your-rules" className="mx-auto max-w-[1200px] px-4 pt-24 sm:px-6">
+      <div className="grid gap-8 rounded-[36px] bg-ink p-7 text-white sm:p-14 md:grid-cols-2 md:items-center">
+        <div>
+          <Eyebrow tone="text-yellow">Your studio, your rules</Eyebrow>
+          <h2 id="your-rules" className="mt-3 font-display text-[34px] leading-[1.02] tracking-[-.05em] sm:text-[48px]">Stash and patterns stay private until you say so.</h2>
+          <p className="mt-5 text-[15px] leading-relaxed text-white/85">Every post, make, stash item and pattern has its own setting. Measurements are never shared. The AI assistant is optional and only reads what you can already see.</p>
+        </div>
+        <ul className="space-y-3">
+          {rows.map(r => (
+            <li key={r.title} className={`flex items-center gap-4 rounded-[22px] bg-white px-5 py-4 text-ink ${r.on ? 'outline outline-[3px] outline-yellow' : ''}`}>
+              <span className={`grid h-11 w-11 shrink-0 place-items-center rounded-full ${r.tone}`} aria-hidden="true"><r.icon size={20} /></span>
+              <span><b className="block">{r.title}</b><span className="text-sm text-subtle">{r.sub}</span></span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
 
 export function Landing() {
-  const { isSignedIn } = useAuth();
-  const dashboard = useGetDashboard({ query: { queryKey: getGetDashboardQueryKey(), enabled: Boolean(isSignedIn) } });
-  const [, setLocation] = useLocation();
-  const headerHidden = useHideOnScroll(true);
-  useEffect(() => {
-    if (isSignedIn && dashboard.data) setLocation('/feed');
-  }, [dashboard.data, isSignedIn, setLocation]);
-  const tools = [
-    ['Stash', 'Fabrics, threads, patterns — catalogued your way.', Palette, '/stash/fabrics'],
-    ['Projects', 'A gentle record of what is on your machine.', FolderKanban, '/projects'],
-    ['AI studio', 'Visualize the almost-possible.', Clapperboard, '/ai-studio'],
-    ['Assistant', 'A second pair of knowledgeable hands.', CircleHelp, '/assistant'],
-  ] as const;
-  return <main className="min-h-[100dvh] overflow-hidden bg-white text-ink">
-     <header className={`fixed inset-x-0 top-0 z-40 flex items-center justify-between bg-white px-5 pb-3 pt-[calc(.75rem+env(safe-area-inset-top))] shadow-float transition-transform duration-200 ease-out ${headerHidden ? '-translate-y-full' : 'translate-y-0'} md:absolute md:z-20 md:bg-transparent md:px-10 md:py-5 md:shadow-none md:transition-none md:translate-y-0`}><Logo /><nav className="hidden gap-8 text-sm font-semibold md:flex"><a href="#why-sewspace" data-testid="link-why-sewspace">The studio</a><a href="#tools" data-testid="link-tools">Tools</a><a href="#ritual" data-testid="link-ritual">Our approach</a></nav><div className="flex gap-2"><a href={`${basePath || ''}/sign-in`} data-testid="link-sign-in" className="btn btn-line inline-flex whitespace-nowrap">Sign in</a><a href={`${basePath || ''}/join`} data-testid="link-sign-up" className="btn btn-primary whitespace-nowrap"><span className="sm:hidden">Join</span><span className="hidden sm:inline">Open your studio</span> <ArrowRight size={15} /></a></div></header>
-     <section className="mx-auto grid min-h-[720px] max-w-[1440px] items-center gap-8 px-5 pb-16 pt-32 md:grid-cols-[1.05fr_.95fr] md:px-14 md:pt-24"><div className="fade-up relative z-10 max-w-[650px]"><p className="eyebrow mb-7">A digital sewing room</p><h1 className="font-display text-[clamp(4.2rem,9vw,8.6rem)] leading-[.86] tracking-[-.075em]">Make room<br /><em className="text-red-ink">for making.</em></h1><p className="mt-8 max-w-[430px] text-[1.08rem] leading-7 text-ink">Seams Club keeps the beautiful mess of your practice in one calm, tactile place — from first sketch to final stitch.</p><div className="mt-9 flex flex-wrap gap-3"><Link href="/join" data-testid="link-landing-start" className="btn btn-primary px-5 py-3.5">Start with a blank canvas <ArrowRight size={16} /></Link><a href="#why-sewspace" data-testid="link-landing-explore" className="btn btn-line px-5 py-3.5">Take a look around</a></div><div className="mt-12 flex items-center gap-4 text-xs text-subtle"><span className="font-mono-custom uppercase tracking-[.16em]">For curious sewists</span><span className="h-px w-12 bg-peach" /><span>Built for the slow work</span></div></div><div className="relative mt-10 min-h-[420px] md:mt-0"><div className="absolute right-[8%] top-[8%] h-[320px] w-[260px] rotate-[7deg] rounded-[48%_52%_44%_56%] bg-yellow shadow-[18px_25px_0_rgba(73,47,37,.12)]" /><div className="absolute right-[17%] top-[18%] h-[320px] w-[260px] -rotate-[13deg] rounded-[46%_54%_51%_49%] border-[14px] border-line bg-peach shadow-[12px_18px_0_rgba(73,47,37,.08)]"><div className="absolute inset-4 rounded-[45%] border border-dashed border-line/40" /><span className="absolute bottom-16 left-8 font-mono-custom text-[.6rem] uppercase tracking-[.22em] text-ink">linen / 02</span></div><div className="absolute bottom-[2%] right-[28%] h-[190px] w-[140px] rotate-[24deg] rounded-[16px] bg-ink shadow-[10px_16px_0_rgba(73,47,37,.11)]"><div className="absolute inset-4 border border-line/50" /></div><div className="absolute bottom-[12%] right-[2%] grid h-24 w-24 rotate-[-8deg] place-items-center rounded-full border border-line bg-white font-display text-center text-sm italic text-ink">the<br />stash</div><span className="absolute left-[3%] top-[4%] font-mono-custom text-[.62rem] uppercase tracking-[.2em] text-subtle">01 / gather</span></div></section>
-    <section id="why-sewspace" className="border-y border-line bg-white px-5 py-24 md:px-14"><div className="mx-auto grid max-w-[1280px] gap-12 md:grid-cols-[.75fr_1.25fr]"><div><p className="eyebrow">A place for your practice</p><h2 className="mt-4 max-w-[370px] font-display text-5xl leading-[.95] tracking-[-.06em]">Your ideas deserve a home.</h2></div><div className="grid gap-8 border-l border-line pl-7 md:grid-cols-3 md:pl-10">{[['01', 'Remember everything', 'Log the small details you will thank yourself for later: yardage, alterations, the exact thread that worked.'], ['02', 'See what is possible', 'Pair patterns with the fabrics already waiting in your stash. A little serendipity goes a long way.'], ['03', 'Keep the thread going', 'Projects in progress, next steps, notes from last time. Pick up exactly where you left off.']].map(([n, title, copy]) => <div key={n}><span className="font-mono-custom text-xs text-red-ink">{n}</span><h3 className="mt-5 font-display text-2xl">{title}</h3><p className="mt-3 text-sm leading-6 text-ink">{copy}</p></div>)}</div></div></section>
-    <section id="tools" className="bg-ink px-5 py-24 text-white md:px-14"><div className="mx-auto max-w-[1280px]"><div className="flex flex-wrap items-end justify-between gap-8"><div><p className="eyebrow !text-yellow">The workbench</p><h2 className="mt-4 font-display text-5xl leading-none tracking-[-.06em]">Everything within reach.</h2></div><p className="max-w-[300px] text-sm leading-6 text-white">Thoughtful tools for the practical bits, so you have more attention for the good bits.</p></div><div className="mt-14 grid gap-px overflow-hidden rounded-xl border border-line/40 bg-canvas/30 md:grid-cols-4">{tools.map(([title, copy, Icon, href]) => <Link href={href} key={title} data-testid={`link-tool-${title}`} className="group bg-ink p-7 hover:bg-ink"><Icon size={20} strokeWidth={1.5} className="text-yellow" /><h3 className="mt-16 font-display text-2xl">{title}</h3><p className="mt-2 text-sm leading-6 text-white">{copy}</p><ArrowRight size={16} className="mt-6 transition-transform group-hover:translate-x-1" /></Link>)}</div></div></section>
-     <section id="ritual" className="bg-peach px-5 py-24 md:px-14"><div className="mx-auto grid max-w-[1180px] items-center gap-12 md:grid-cols-[.7fr_1.3fr]"><div className="relative h-72"><div className="absolute left-10 top-5 h-56 w-56 rounded-full border-[12px] border-ink bg-canvas" /><div className="absolute left-24 top-20 h-32 w-32 rounded-full border border-dashed border-ink rotate-12" /><span className="absolute bottom-4 left-0 font-mono-custom text-xs uppercase tracking-[.2em] text-ink">measure twice / make once</span></div><div><p className="eyebrow !text-blue-ink">A softer system</p><h2 className="mt-4 font-display text-5xl leading-[.92] tracking-[-.06em]">The ritual is the point.</h2><p className="mt-6 max-w-lg text-lg leading-8 text-ink">Seams Club is designed to feel like opening your favorite drawer: familiar, useful, and full of possibility.</p><Link href="/join" data-testid="link-ritual-cta" className="btn btn-primary mt-8">Make it yours <ArrowRight size={16} /></Link></div></div></section>
-     <footer className="flex flex-wrap items-center justify-between gap-5 bg-white px-5 py-7 text-xs text-subtle md:px-14"><Logo /><span>Made for the hands that make.</span><span className="font-mono-custom uppercase tracking-[.12em]">seams club / 2025</span></footer>
-  </main>;
+  const { isLoaded, isSignedIn } = useAuth();
+  useEffect(() => { document.title = 'Seams Club · Where sewists show every make'; }, []);
+  if (isLoaded && isSignedIn) return <Redirect to="/feed" replace />;
+  return (
+    <div className="min-h-[100dvh] pb-10">
+      <PublicHeader />
+      <main>
+        <section className="mx-auto max-w-[1000px] px-4 pt-14 text-center sm:px-6 md:pt-20">
+          <Label>The sewing community, all in one studio</Label>
+          <h1 className="mt-6 font-display text-[44px] leading-[1.02] tracking-[-.055em] sm:text-[72px] md:text-[92px]">
+            Where sewists{' '}
+            <span className="relative -top-1 inline-grid h-[.82em] w-[.82em] place-items-center rounded-full bg-yellow align-middle" aria-hidden="true"><Scissors className="h-[45%] w-[45%]" strokeWidth={2.4} /></span>{' '}
+            show every make{' '}
+            <span className="relative -top-1 inline-grid h-[.78em] w-[.78em] rotate-[-8deg] place-items-center rounded-[.18em] bg-blue align-middle text-white" aria-hidden="true"><Heart className="h-[45%] w-[45%] fill-white" /></span>
+          </h1>
+          <p className="mx-auto mt-6 max-w-[620px] text-[17px] leading-relaxed text-subtle sm:text-[19px]">Post your makes, log every alteration, join challenges, and find out how a pattern really fits from the people who have sewn it.</p>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href={join()} className="inline-flex min-h-[52px] items-center rounded-full bg-yellow px-7 text-[16px] font-bold text-ink no-underline">Start sharing — it’s free</Link>
+            <Link href="/explore" className="inline-flex min-h-[52px] items-center rounded-full bg-ink px-7 text-[16px] font-bold text-white no-underline">Browse makes</Link>
+          </div>
+          <p className="mt-4 text-sm text-subtle">No account needed to browse. Sign in to like, comment and join challenges.</p>
+        </section>
+        <div className="mx-auto mt-14 max-w-[1200px] px-4 sm:px-6"><Showcase /></div>
+        <FreshFromTheCommunity />
+        <HowItWorks />
+        <SomethingToSew />
+        <YourRules />
+        <section className="mx-auto max-w-[900px] px-4 pt-28 text-center sm:px-6">
+          <h2 className="font-display text-[40px] leading-[1.02] tracking-[-.055em] sm:text-[64px]">Your next make is someone’s inspiration.</h2>
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Link href={join()} className="inline-flex min-h-[52px] items-center rounded-full bg-yellow px-7 text-[16px] font-bold text-ink no-underline">Open your studio</Link>
+            <Link href="/explore" className="inline-flex min-h-[52px] items-center rounded-full bg-ink px-7 text-[16px] font-bold text-white no-underline">Look around first</Link>
+          </div>
+        </section>
+      </main>
+      <footer className="mx-auto mt-24 max-w-[1200px] px-4 sm:px-6">
+        <div className="flex flex-col items-center gap-4 rounded-[30px] bg-white px-6 py-5 text-sm md:flex-row md:justify-between">
+          <Logo />
+          <nav aria-label="Footer" className="flex flex-wrap justify-center gap-x-5 gap-y-1">
+            {[['Explore', '/explore'], ['Challenges', '/challenges'], ['Forum', '/forum'], ['Patterns', '/catalog']].map(([l, h]) => <Link key={h} href={h} className="min-h-[44px] content-center text-ink no-underline hover:underline">{l}</Link>)}
+          </nav>
+          <span className="text-subtle">Made for the hands that make.</span>
+        </div>
+      </footer>
+    </div>
+  );
 }
