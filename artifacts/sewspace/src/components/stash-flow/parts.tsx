@@ -42,17 +42,17 @@ export function KindCards({ value, onChange }: { value: StashKind | null; onChan
 
 const SOURCES: Record<StashKind, Array<{ id: Source; icon: typeof Camera; title: string; help: string }>> = {
   fabric: [
-    { id: 'camera', icon: Camera, title: 'Take a photo', help: 'We pick out the colours' },
+    { id: 'camera', icon: Camera, title: 'Take a photo', help: 'Then crop it to the fabric' },
     { id: 'photo', icon: ImageIcon, title: 'Choose a photo', help: 'From your camera roll' },
     { id: 'hand', icon: PenLine, title: 'Fill in by hand', help: 'No photo needed' },
   ],
   thread: [
-    { id: 'label', icon: Camera, title: 'Photo of the spool label', help: 'We pick out the colour' },
+    { id: 'label', icon: Camera, title: 'Photo of the spool', help: 'Then crop it; you type the colour' },
     { id: 'hand', icon: PenLine, title: 'Fill in by hand', help: 'Type it in yourself' },
   ],
   pattern: [
     { id: 'pdf', icon: FileDown, title: 'Upload the pattern PDF', help: 'We fill in name, sizes and fabric needed' },
-    { id: 'envelope', icon: Camera, title: 'Photo of the envelope', help: 'For paper patterns; used as the cover' },
+    { id: 'envelope', icon: Camera, title: 'Photo of the envelope', help: 'For paper patterns; becomes the cover' },
     { id: 'hand', icon: PenLine, title: 'Fill in by hand', help: 'Type it in yourself' },
   ],
 };
@@ -77,36 +77,28 @@ export function SourceList({ kind, onPick }: { kind: StashKind; onPick: (s: Sour
 }
 
 /**
- * Colour as swatches: from the photo when there is one, otherwise a common
- * palette, plus Custom (the browser's colour picker). No hex text field.
+ * The closest colour as a swatch: a common palette, plus Custom (the browser's
+ * colour picker). No hex text field; the colour's name is typed separately.
  */
-export function ColourField({ value, onChange, fromPhoto, labelledBy, highlight }: {
+export function ColourField({ value, onChange, labelledBy }: {
   value: string | null;
   onChange: (hex: string) => void;
-  fromPhoto: string[];
   labelledBy: string;
-  highlight?: boolean;
 }) {
   const custom = useId();
-  const swatches = fromPhoto.length ? fromPhoto : PALETTE.slice(0, 8).map(([, h]) => h);
+  const swatches = PALETTE.map(([, h]) => h);
   const isCustom = Boolean(value && !swatches.includes(value));
   return (
-    <div>
-      <div className="flex items-center gap-3">
-        <div role="radiogroup" aria-labelledby={labelledBy} className="flex flex-1 flex-wrap gap-2.5">
-          {swatches.map(h => (
-            <button key={h} type="button" role="radio" aria-checked={value === h} aria-label={colourName(h)} onClick={() => onChange(h)}
-              className={`h-11 w-11 rounded-full border-2 ${value === h ? 'border-ink ring-4 ring-yellow' : 'border-line'}`} style={{ backgroundColor: h }} />
-          ))}
-          <label htmlFor={custom} className={`relative grid h-11 min-w-[44px] cursor-pointer place-items-center rounded-full border-2 px-3 text-sm font-bold ${isCustom ? 'border-ink ring-4 ring-yellow' : 'border-dashed border-subtle/50'}`}
-            style={isCustom ? { backgroundColor: value! } : undefined}>
-            <span className={isCustom ? 'sr-only' : ''}>Custom</span>
-            <input id={custom} type="color" value={value ?? '#7f9cc4'} onChange={e => onChange(e.target.value.toLowerCase())} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" aria-label="Custom colour" />
-          </label>
-        </div>
-        <span className={`shrink-0 text-right text-[15px] font-bold ${highlight ? 'rounded-full bg-yellow/30 px-2' : ''}`}>{value ? colourName(value) : 'No colour yet'}</span>
-      </div>
-      <p className="mt-2 text-sm text-subtle">{fromPhoto.length ? 'Picked out of your photo.' : 'Common colours, or Custom for an exact match.'}</p>
+    <div role="radiogroup" aria-labelledby={labelledBy} className="flex flex-wrap gap-2">
+      {swatches.map(h => (
+        <button key={h} type="button" role="radio" aria-checked={value === h} aria-label={colourName(h)} onClick={() => onChange(h)}
+          className={`h-11 w-11 rounded-full border-2 ${value === h ? 'border-ink ring-4 ring-yellow' : 'border-line'}`} style={{ backgroundColor: h }} />
+      ))}
+      <label htmlFor={custom} className={`relative grid h-11 min-w-[44px] cursor-pointer place-items-center rounded-full border-2 px-3 text-sm font-bold ${isCustom ? 'border-ink ring-4 ring-yellow' : 'border-dashed border-subtle/50'}`}
+        style={isCustom ? { backgroundColor: value! } : undefined}>
+        <span className={isCustom ? 'sr-only' : ''}>Custom</span>
+        <input id={custom} type="color" value={value ?? '#7f9cc4'} onChange={e => onChange(e.target.value.toLowerCase())} className="absolute inset-0 h-full w-full cursor-pointer opacity-0" aria-label="Custom colour" />
+      </label>
     </div>
   );
 }
@@ -176,7 +168,7 @@ export function StashPreview({ kind, name, meta, image, colour, visibility }: {
           {meta && <p className="mt-0.5 truncate text-sm text-subtle">{meta}</p>}
         </div>
       </div>
-      <p className="mt-3 text-sm text-subtle">Drop a photo or a pattern PDF on the Start step to begin from it.</p>
+      <p className="mt-3 text-sm text-subtle">You can drop a photo or a pattern PDF on the Start step.</p>
     </div>
   );
 }

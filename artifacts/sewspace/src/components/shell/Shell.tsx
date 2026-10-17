@@ -9,6 +9,8 @@ import { UserAvatar } from '@/components/avatar';
 import { Logo } from '@/components/brand/Logo';
 import { currentAppPath } from '@/lib/navigation';
 import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
+import { inCommunity } from '@/components/shell/CommunityTabs';
+import { inStudio, StudioMobileHeader, studioSection } from '@/components/shell/StudioMobile';
 
 type NavItem = { href: string; label: string; icon: typeof Home };
 
@@ -84,24 +86,29 @@ function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: (
   );
 }
 
-function MobileTabBar({ location }: { location: string }) {
+/**
+ * Phone tab bar. Floating everywhere except the studio, which uses the
+ * full-width style from the studio mockups (Phase S; elsewhere stays floating
+ * until the owner decides).
+ */
+function MobileTabBar({ location, full = false }: { location: string; full?: boolean }) {
   const me = useMyProfile();
   const meHref = me?.handle ? `/@${me.handle}` : '/settings';
-  const tab = (href: string, label: string, Icon: typeof Home) => {
-    const active = isActive(location, href);
-    return (
-      <Link href={href} aria-label={label} aria-current={active ? 'page' : undefined}
-        className={`grid h-12 w-[52px] place-items-center rounded-[18px] ${active ? 'bg-ink text-white' : 'text-ink'}`}>
-        <Icon size={22} aria-hidden="true" />
-      </Link>
-    );
-  };
+  const tab = (href: string, label: string, Icon: typeof Home, active: boolean) => (
+    <Link href={href} aria-label={label} aria-current={active ? 'page' : undefined}
+      className={`grid h-12 w-[52px] place-items-center rounded-[18px] ${active ? 'bg-ink text-white' : 'text-ink'}`}>
+      <Icon size={22} aria-hidden="true" />
+    </Link>
+  );
   return (
-    <nav aria-label="App" className="fixed inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between rounded-[30px] bg-white px-3 py-2 shadow-float md:hidden">
-      {tab('/feed', 'Home', House)}
-      {tab('/explore', 'Explore', Compass)}
+    <nav aria-label="App" className={full
+      ? 'fixed inset-x-0 bottom-0 z-40 flex items-center justify-between border-t border-line bg-white px-4 pb-[calc(.5rem+env(safe-area-inset-bottom))] pt-2 md:hidden'
+      : 'fixed inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between rounded-[30px] bg-white px-3 py-2 shadow-float md:hidden'}>
+      {tab('/feed', 'Home', House, isActive(location, '/feed'))}
+      {/* Explore is the door to all community sections (forum, challenges, patterns). */}
+      {tab('/explore', 'Explore', Compass, inCommunity(location))}
       <Link href="/new" aria-label="New post" className="grid h-[52px] w-[58px] place-items-center rounded-[20px] bg-yellow text-ink"><Plus size={26} aria-hidden="true" /></Link>
-      {tab('/studio', 'Studio', Scissors)}
+      {tab('/studio', 'My studio', Scissors, inStudio(location))}
       <Link href={meHref} aria-label="My profile" aria-current={location === meHref ? 'page' : undefined} className="grid h-12 w-[52px] place-items-center rounded-[18px]">
         <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} size={28} />
       </Link>
@@ -122,6 +129,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
     return <Redirect to={`/welcome?next=${encodeURIComponent(currentAppPath())}`} replace />;
   }
 
+  const studio = studioSection(location);
   const title = allItems.find(item => isActive(location, item.href))?.label
     ?? ({ '/settings': 'Profile & settings', '/new': 'New post' } as Record<string, string>)[location]
     ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'Seams Club');
@@ -139,10 +147,13 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         </div>
       )}
       <div className="min-w-0 flex-1">
-        {!mobileFocus && <div aria-hidden="true" className="h-[calc(4rem+env(safe-area-inset-top))] md:hidden" />}
+        {studio && <StudioMobileHeader key={studio.href} section={studio} onMenuOpen={() => setMenuOpen(true)} />}
+        {!mobileFocus && !studio && <div aria-hidden="true" className="h-[calc(4rem+env(safe-area-inset-top))] md:hidden" />}
         <header className={mobileFocus
           ? 'relative z-30 hidden items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:flex md:static md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3'
-          : `fixed inset-x-0 top-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 bg-white px-4 pb-2 pt-[env(safe-area-inset-top)] shadow-float transition-transform duration-200 ease-out ${profileHeaderHidden ? '-translate-y-full' : 'translate-y-0'} md:static md:mx-0 md:mt-0 md:h-auto md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3 md:transition-none md:translate-y-0`}>
+          : studio
+            ? 'hidden items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:flex md:static md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3'
+            : `fixed inset-x-0 top-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 bg-white px-4 pb-2 pt-[env(safe-area-inset-top)] shadow-float transition-transform duration-200 ease-out ${profileHeaderHidden ? '-translate-y-full' : 'translate-y-0'} md:static md:mx-0 md:mt-0 md:h-auto md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3 md:transition-none md:translate-y-0`}>
           {location === '/feed'
             ? <div className="min-w-0 flex-1 md:hidden"><Logo href="/feed" /></div>
             : <h1 className={`min-w-0 flex-1 truncate font-display text-[20px] tracking-[-.04em] md:text-[22px] ${title === 'Home' ? 'font-bold' : ''}`}>{title}</h1>}
@@ -153,7 +164,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         </header>
         <main className={`${location === '/new' ? 'mx-auto w-full max-w-7xl px-0 py-0 md:px-2 md:py-8' : location.startsWith('/posts/') ? 'mx-auto flex h-[100dvh] min-h-0 w-full max-w-7xl flex-col overflow-hidden px-3 py-0 md:block md:h-auto md:overflow-visible md:px-2 md:py-8' : compactToolbarPages.has(location) ? 'mx-auto w-full max-w-7xl px-4 pb-6 pt-4 md:px-2 md:pb-8 md:pt-6' : 'mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8'}`}>{children}</main>
       </div>
-      {!mobileFocus && <MobileTabBar location={location} />}
+      {!mobileFocus && <MobileTabBar location={location} full={Boolean(studio)} />}
     </div>
   );
 }

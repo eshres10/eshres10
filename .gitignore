@@ -50,3 +50,6 @@ Thumbs.db
 
 # Flow design screenshots contain mockup photos: keep them local (docs/design/flows/images/), never commit.
 docs/design/flows/images/
+# Studio mobile mockups: screenshots and screen photos are mockup images, keep them local.
+docs/design/studio-mobile/images/
+docs/design/studio-mobile/screens/img/

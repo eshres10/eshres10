@@ -28,6 +28,10 @@ export interface Project {
   measurementProfileId: number | null;
   /** @nullable */
   coverImageUrl: string | null;
+  /** Steps on the project (project lists only) */
+  stepsTotal?: number;
+  /** Steps ticked off (project lists only) */
+  stepsDone?: number;
   /** @nullable */
   description?: string | null;
   /** @nullable */

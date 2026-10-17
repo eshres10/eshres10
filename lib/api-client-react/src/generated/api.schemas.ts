@@ -5,16 +5,6 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
-export interface ColourRequest {
-  /** /api/storage/objects/... of your own image upload */
-  imageUrl: string;
-}
-
-export interface ColourResult {
-  /** Most common first, as #rrggbb */
-  colours: string[];
-}
-
 export type DraftKind = typeof DraftKind[keyof typeof DraftKind];
 
 
@@ -312,6 +302,16 @@ export const FeedPostKind = {
   photo: 'photo',
 } as const;
 
+/**
+ * The forum thread this post was shared from (Show & tell)
+ * @nullable
+ */
+export type FeedPostForumTopic = {
+  id: number;
+  title: string;
+  replies: number;
+} | null;
+
 export interface ChallengeRef {
   slug: string;
   tag: string;
@@ -350,6 +350,11 @@ export interface FeedPost {
   /** Challenges this post is a (not removed) entry in */
   challenges: ChallengeRef[];
   aspect: PostAspect;
+  /**
+     * The forum thread this post was shared from (Show & tell)
+     * @nullable
+     */
+  forumTopic: FeedPostForumTopic;
 }
 
 export interface AltTextInput {
@@ -1176,6 +1181,35 @@ export type ForumReply = ForumReplyChild & {
   replies: ForumReplyChild[];
 };
 
+export interface IdeaItem {
+  id: number;
+  name: string;
+  /** @nullable */
+  imageUrl: string | null;
+}
+
+export interface Idea {
+  id: number;
+  note: string;
+  pattern: IdeaItem;
+  fabric: IdeaItem;
+  createdAt: string;
+}
+
+export interface IdeaInput {
+  patternId: number;
+  fabricId: number;
+  /** @maxLength 80 */
+  note?: string;
+}
+
+export interface IdeaUpdate {
+  patternId?: number;
+  fabricId?: number;
+  /** @maxLength 80 */
+  note?: string;
+}
+
 export type ForumTopicInputPollDays = typeof ForumTopicInputPollDays[keyof typeof ForumTopicInputPollDays];
 
 
@@ -1641,6 +1675,10 @@ export interface Project {
   measurementProfileId: number | null;
   /** @nullable */
   coverImageUrl: string | null;
+  /** Steps on the project (project lists only) */
+  stepsTotal?: number;
+  /** Steps ticked off (project lists only) */
+  stepsDone?: number;
   /** @nullable */
   description?: string | null;
   /** @nullable */

@@ -83,7 +83,12 @@ export const GetProfilePostsResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -295,7 +300,12 @@ export const GetPublicPostResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 })
 
 
@@ -349,7 +359,12 @@ export const GetTagPostsResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 })),
   "nextCursor": zod.string().nullable()
 })
@@ -422,7 +437,12 @@ export const GetExploreFeedResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -600,7 +620,12 @@ export const GetSavedPostsResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -1295,7 +1320,12 @@ export const GetChallengeEntriesResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 }),
   "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
   "isMine": zod.boolean()
@@ -1486,7 +1516,12 @@ export const EnterChallengeResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 }),
   "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
   "isMine": zod.boolean()
@@ -1848,7 +1883,12 @@ export const GetForumTopicResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2039,7 +2079,12 @@ export const CreateForumTopicResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2169,7 +2214,12 @@ export const UpdateForumTopicResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2296,7 +2346,12 @@ export const SetAcceptedAnswerResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2417,7 +2472,12 @@ export const ModerateForumTopicResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2577,7 +2637,12 @@ export const GetHomeFeedResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -2665,7 +2730,12 @@ export const CreatePostResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 })
 
 
@@ -2736,7 +2806,12 @@ export const UpdatePostResponse = zod.object({
   "tag": zod.string(),
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
-  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
 })
 
 
@@ -2854,6 +2929,8 @@ export const GetDashboardResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3041,6 +3118,101 @@ export const DeleteFabricParams = zod.object({
 })
 
 export const DeleteFabricResponse = zod.void()
+
+
+/**
+ * @summary Your ideas (pattern + fabric to make), newest first. Private to you.
+ */
+export const ListIdeasResponseItem = zod.object({
+  "id": zod.number().int(),
+  "note": zod.string(),
+  "pattern": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "fabric": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date()
+})
+export const ListIdeasResponse = zod.array(ListIdeasResponseItem)
+
+
+/**
+ * @summary Save an idea: one of your patterns with one of your fabrics.
+ */
+export const createIdeaBodyNoteMax = 80;
+
+
+
+export const CreateIdeaBody = zod.object({
+  "patternId": zod.number().int(),
+  "fabricId": zod.number().int(),
+  "note": zod.string().max(createIdeaBodyNoteMax).optional()
+})
+
+export const CreateIdeaResponse = zod.object({
+  "id": zod.number().int(),
+  "note": zod.string(),
+  "pattern": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "fabric": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Change an idea's pattern, fabric or note
+ */
+export const UpdateIdeaParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateIdeaBodyNoteMax = 80;
+
+
+
+export const UpdateIdeaBody = zod.object({
+  "patternId": zod.number().int().optional(),
+  "fabricId": zod.number().int().optional(),
+  "note": zod.string().max(updateIdeaBodyNoteMax).optional()
+})
+
+export const UpdateIdeaResponse = zod.object({
+  "id": zod.number().int(),
+  "note": zod.string(),
+  "pattern": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "fabric": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete an idea
+ */
+export const DeleteIdeaParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteIdeaResponse = zod.void()
 
 
 /**
@@ -3301,18 +3473,6 @@ export const DeletePatternResponse = zod.void()
 
 
 /**
- * @summary Four main colours of one of your photo uploads (no AI: resized and grouped on the server).
- */
-export const ExtractColoursBody = zod.object({
-  "imageUrl": zod.string().describe('/api/storage/objects/... of your own image upload')
-})
-
-export const ExtractColoursResponse = zod.object({
-  "colours": zod.array(zod.string()).describe('Most common first, as #rrggbb')
-})
-
-
-/**
  * @summary Extract sewing pattern details from an uploaded PDF
  */
 
@@ -3356,6 +3516,8 @@ export const ListProjectsResponseItem = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3421,6 +3583,8 @@ export const CreateProjectResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3462,6 +3626,8 @@ export const GetProjectResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3550,6 +3716,8 @@ export const UpdateProjectResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3637,6 +3805,8 @@ export const UpdateProjectFieldsResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),

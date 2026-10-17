@@ -477,6 +477,18 @@ export const draftsTable = pgTable("sewspace_drafts", {
 
 export type Draft = typeof draftsTable.$inferSelect;
 
+// Phase S2: "My ideas" on the studio overview. Private to the owner (RLS owner_all).
+export const ideasTable = pgTable("sewspace_ideas", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  patternId: integer("pattern_id").notNull().references(() => patternsTable.id, { onDelete: "cascade" }),
+  fabricId: integer("fabric_id").notNull().references(() => fabricsTable.id, { onDelete: "cascade" }),
+  note: text("note").notNull().default(""),
+  ...timestamps,
+});
+
+export type Idea = typeof ideasTable.$inferSelect;
+
 export type ForumTopic = typeof forumTopicsTable.$inferSelect;
 export type ForumReply = typeof forumRepliesTable.$inferSelect;
 

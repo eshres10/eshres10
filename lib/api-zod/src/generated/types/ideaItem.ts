@@ -6,7 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface ColourResult {
-  /** Most common first, as #rrggbb */
-  colours: string[];
+export interface IdeaItem {
+  id: number;
+  name: string;
+  /** @nullable */
+  imageUrl: string | null;
 }

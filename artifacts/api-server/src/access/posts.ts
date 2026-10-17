@@ -4,6 +4,7 @@ import {
   challengesTable,
   fabricsTable,
   followsTable,
+  forumTopicsTable,
   likesTable,
   mediaTable,
   patternsTable,
@@ -52,6 +53,7 @@ export interface FeedPostView {
   savedByMe: boolean;
   challenges: Array<{ slug: string; tag: string; entryId: number }>;
   aspect: Post["aspect"];
+  forumTopic: { id: number; title: string; replies: number } | null;
 }
 
 // Cursors are opaque to clients: "<created_at ISO>|<id>" in base64url.
@@ -117,6 +119,12 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
     .from(challengeEntriesTable)
     .innerJoin(challengesTable, eq(challengesTable.id, challengeEntriesTable.challengeId))
     .where(and(inArray(challengeEntriesTable.postId, ids), isNull(challengeEntriesTable.removedAt), viewer.userId ? sql`NOT sewspace_blocked_with(${challengesTable.createdBy})` : undefined));
+  // Show & tell shared from the forum: the thread it came from (by the same
+  // author; forum topics are public except across a block).
+  const topics = await db
+    .select({ id: forumTopicsTable.id, postId: forumTopicsTable.postId, userId: forumTopicsTable.userId, title: forumTopicsTable.title, replies: forumTopicsTable.replyCount })
+    .from(forumTopicsTable)
+    .where(and(inArray(forumTopicsTable.postId, ids), viewer.userId ? sql`NOT sewspace_blocked_with(${forumTopicsTable.userId})` : undefined));
   const countMap = new Map(counts.rows.map((r) => [Number(r.post_id), r]));
   const likedSet = new Set(liked.map((l) => l.postId)), savedSet = new Set(saved.map((x) => x.postId));
   const byId = <T extends { id: number }>(rows: T[]) => new Map(rows.map((r) => [r.id, r]));
@@ -150,6 +158,7 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
       savedByMe: savedSet.has(post.id),
       challenges: entries.filter((e) => e.postId === post.id).map(({ slug, tag, entryId }) => ({ slug, tag, entryId })),
       aspect: post.aspect,
+      forumTopic: ((t) => (t ? { id: t.id, title: t.title, replies: t.replies } : null))(topics.find((t) => t.postId === post.id && t.userId === post.userId)),
     }];
   });
 }

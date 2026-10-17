@@ -1,5 +1,5 @@
-// Colour swatches for the stash flow (Phase F3). Names come from the nearest
-// colour in a small palette; nobody types hex codes.
+// Colour swatches for the stash flow (Phase F3). People pick the closest
+// swatch (or Custom); nobody types hex codes. colourName labels swatches.
 
 export const PALETTE: ReadonlyArray<readonly [string, string]> = [
   ['Black', '#1b1b1b'], ['White', '#f5f3ee'], ['Cream', '#ece3cf'], ['Grey', '#8a8d91'],

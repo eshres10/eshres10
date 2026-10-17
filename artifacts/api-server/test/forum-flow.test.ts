@@ -45,6 +45,10 @@ test("photos follow the topic, shared to the feed or not", async () => {
   const shared = await ann("POST", "/api/forum/topics", { ...show, title: "Willa, shared", shareToFeed: true, mediaIds: [one.id] });
   assert.equal(shared.status, 201, shared.text);
   assert.equal(shared.json.post.media[0].id, one.id, "the feed post has the same photo");
+  const onFeed = (await anon("GET", `/api/public/posts/${shared.json.post.id}`)).json;
+  assert.deepEqual(onFeed.forumTopic, { id: shared.json.id, title: "Willa, shared", replies: 0 }, "the post links back to its thread");
+  const plain = await ann("POST", "/api/posts", { kind: "status", caption: "Just a post", visibility: "public" });
+  assert.equal(plain.json.forumTopic, null, "ordinary posts have no thread");
 
   const seen = (await anon("GET", `/api/public/forum/topics/${quiet.json.id}`)).json;
   assert.equal(seen.photos.length, 2, "signed out sees the photos");

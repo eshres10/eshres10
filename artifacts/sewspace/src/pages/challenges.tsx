@@ -6,6 +6,7 @@ import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ChallengeCard, NewChallengeForm } from '@/components/challenges/parts';
 import { ErrorState } from '@/components/common';
 import { Sheet } from '@/components/social/Sheet';
+import { CommunityTabs } from '@/components/shell/CommunityTabs';
 
 const TABS = [
   { id: 'active', label: 'Running now' },
@@ -25,6 +26,7 @@ export function ChallengesPage() {
   useEffect(() => { document.title = 'Sewing challenges · Seams Club'; }, []);
   return (
     <div className="mx-auto max-w-[1232px]">
+      <CommunityTabs />
       <div className="flex flex-wrap items-center gap-3">
         <div role="tablist" aria-label="Challenges" className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-white p-1">
           {TABS.map(t => (

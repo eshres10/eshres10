@@ -2,6 +2,14 @@ import { requestUploadUrl } from '@workspace/api-client-react';
 
 export type UploadPurpose = 'image' | 'avatar' | 'pattern_pdf';
 
+// Files already downscaled and re-encoded in the browser (the photo cropper),
+// so uploading doesn't decode and re-encode them a second time.
+const prepared = new WeakSet<File>();
+export function markPrepared(file: File): File {
+  prepared.add(file);
+  return file;
+}
+
 /**
  * Downscales an image in the browser before upload (longest side <= maxPx) and
  * re-encodes it as WebP. Re-encoding through a canvas drops EXIF metadata,
@@ -9,7 +17,7 @@ export type UploadPurpose = 'image' | 'avatar' | 'pattern_pdf';
  * returned unchanged; the server resizes again in a later phase.
  */
 export async function prepareImage(file: File, maxPx = 1600): Promise<File> {
-  if (!file.type.startsWith('image/') || file.type === 'image/gif') return file;
+  if (!file.type.startsWith('image/') || file.type === 'image/gif' || prepared.has(file)) return file;
   try {
     const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
     const scale = Math.min(1, maxPx / Math.max(bitmap.width, bitmap.height));

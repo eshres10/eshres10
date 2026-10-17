@@ -1301,6 +1301,63 @@ paths:
       responses:
         "204":
           description: Deleted
+  /ideas:
+    get:
+      operationId: listIdeas
+      tags: [studio]
+      summary: "Your ideas (pattern + fabric to make), newest first. Private to you."
+      responses:
+        "200":
+          description: Ideas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Idea" }
+    post:
+      operationId: createIdea
+      tags: [studio]
+      summary: "Save an idea: one of your patterns with one of your fabrics."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IdeaInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Idea" }
+        "400": { description: Not your pattern or fabric }
+        "429": { description: Too many ideas this hour }
+  /ideas/{id}:
+    patch:
+      operationId: updateIdea
+      tags: [studio]
+      summary: Change an idea's pattern, fabric or note
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IdeaUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Idea" }
+    delete:
+      operationId: deleteIdea
+      tags: [studio]
+      summary: Delete an idea
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
   /threads:
     get:
       operationId: listThreads
@@ -1425,24 +1482,6 @@ paths:
       responses:
         "204":
           description: Deleted
-  /stash/colours:
-    post:
-      operationId: extractColours
-      tags: [studio]
-      summary: "Four main colours of one of your photo uploads (no AI: resized and grouped on the server)."
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/ColourRequest" }
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/ColourResult" }
-        "400": { description: Not an image we can read }
-        "404": { description: Not one of your uploads }
   /patterns/analyze-pdf:
     post:
       operationId: analyzePatternPdf
@@ -1873,19 +1912,6 @@ components:
       schema:
         type: integer
   schemas:
-    ColourRequest:
-      type: object
-      properties:
-        imageUrl: { type: string, description: "/api/storage/objects/... of your own image upload" }
-      required: [imageUrl]
-    ColourResult:
-      type: object
-      properties:
-        colours:
-          type: array
-          description: "Most common first, as #rrggbb"
-          items: { type: string }
-      required: [colours]
     DraftKind:
       type: string
       enum: [post, project, stash, topic]
@@ -2135,7 +2161,16 @@ components:
           description: Challenges this post is a (not removed) entry in
           items: { $ref: "#/components/schemas/ChallengeRef" }
         aspect: { $ref: "#/components/schemas/PostAspect" }
-      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect]
+        forumTopic:
+          type: object
+          nullable: true
+          description: The forum thread this post was shared from (Show & tell)
+          properties:
+            id: { type: integer }
+            title: { type: string }
+            replies: { type: integer }
+          required: [id, title, replies]
+      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect, forumTopic]
     PostAspect:
       type: string
       description: "How photos are cropped for display: 4:5, 1:1 or the first photo's own shape"
@@ -2712,6 +2747,35 @@ components:
               type: array
               items: { $ref: "#/components/schemas/ForumReplyChild" }
           required: [accepted, replies]
+    IdeaItem:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        imageUrl: { type: string, nullable: true }
+      required: [id, name, imageUrl]
+    Idea:
+      type: object
+      properties:
+        id: { type: integer }
+        note: { type: string }
+        pattern: { $ref: "#/components/schemas/IdeaItem" }
+        fabric: { $ref: "#/components/schemas/IdeaItem" }
+        createdAt: { type: string, format: date-time }
+      required: [id, note, pattern, fabric, createdAt]
+    IdeaInput:
+      type: object
+      properties:
+        patternId: { type: integer }
+        fabricId: { type: integer }
+        note: { type: string, maxLength: 80 }
+      required: [patternId, fabricId]
+    IdeaUpdate:
+      type: object
+      properties:
+        patternId: { type: integer }
+        fabricId: { type: integer }
+        note: { type: string, maxLength: 80 }
     ForumTopicInput:
       type: object
       properties:
@@ -2958,6 +3022,8 @@ components:
         threadId: { type: integer, nullable: true }
         measurementProfileId: { type: integer, nullable: true }
         coverImageUrl: { type: string, nullable: true }
+        stepsTotal: { type: integer, description: "Steps on the project (project lists only)" }
+        stepsDone: { type: integer, description: "Steps ticked off (project lists only)" }
         description: { type: string, nullable: true }
         notes: { type: string, nullable: true }
         alterations: { type: string, nullable: true }

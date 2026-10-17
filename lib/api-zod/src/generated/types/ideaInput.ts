@@ -6,7 +6,9 @@
  * OpenAPI spec version: 0.1.0
  */
 
-export interface ColourRequest {
-  /** /api/storage/objects/... of your own image upload */
-  imageUrl: string;
+export interface IdeaInput {
+  patternId: number;
+  fabricId: number;
+  /** @maxLength 80 */
+  note?: string;
 }

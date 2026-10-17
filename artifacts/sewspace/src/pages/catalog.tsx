@@ -6,6 +6,7 @@ import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { capitalise, catalogPath, NewEntryForm, Stars } from '@/components/catalog/parts';
 import { ErrorState } from '@/components/common';
 import { Sheet } from '@/components/social/Sheet';
+import { CommunityTabs } from '@/components/shell/CommunityTabs';
 
 const KINDS = [
   { id: 'pattern', label: 'Patterns', icon: BookOpen },
@@ -45,7 +46,8 @@ export function CatalogPage() {
 
   return (
     <div className="mx-auto max-w-[1232px]">
-      <div className="flex flex-wrap items-center gap-2">
+      <CommunityTabs />
+      <div className="mt-4 flex flex-wrap items-center gap-2">
         <div role="tablist" aria-label="Kind" className="flex gap-1 rounded-full bg-white p-1">
           {KINDS.map(k => (
             <button key={k.id} type="button" role="tab" aria-selected={kind === k.id} onClick={() => setKind(k.id)}

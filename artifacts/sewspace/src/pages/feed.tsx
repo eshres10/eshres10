@@ -22,7 +22,7 @@ function CurrentProject() {
   );
 }
 
-/** Home: Following (people you follow + you) and Discover (everyone's public posts). */
+/** Home: posts from people you follow, and your own. Browsing everyone is Explore. */
 export function FeedPage() {
   const [tab, setTab] = useState<'following' | 'discover'>('following');
   return (
