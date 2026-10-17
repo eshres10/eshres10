@@ -302,6 +302,16 @@ export const FeedPostKind = {
   photo: 'photo',
 } as const;
 
+/**
+ * The forum thread this post was shared from (Show & tell)
+ * @nullable
+ */
+export type FeedPostForumTopic = {
+  id: number;
+  title: string;
+  replies: number;
+} | null;
+
 export interface ChallengeRef {
   slug: string;
   tag: string;
@@ -340,6 +350,11 @@ export interface FeedPost {
   /** Challenges this post is a (not removed) entry in */
   challenges: ChallengeRef[];
   aspect: PostAspect;
+  /**
+     * The forum thread this post was shared from (Show & tell)
+     * @nullable
+     */
+  forumTopic: FeedPostForumTopic;
 }
 
 export interface AltTextInput {

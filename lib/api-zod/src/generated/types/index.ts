@@ -59,6 +59,7 @@ export * from './fabricInput';
 export * from './fabricUpdate';
 export * from './feedPage';
 export * from './feedPost';
+export * from './feedPostForumTopic';
 export * from './feedPostKind';
 export * from './followState';
 export * from './forumBoard';

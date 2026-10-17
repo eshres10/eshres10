@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ChallengeRef } from './challengeRef';
+import type { FeedPostForumTopic } from './feedPostForumTopic';
 import type { FeedPostKind } from './feedPostKind';
 import type { Media } from './media';
 import type { PostAspect } from './postAspect';
@@ -32,4 +33,9 @@ export interface FeedPost {
   /** Challenges this post is a (not removed) entry in */
   challenges: ChallengeRef[];
   aspect: PostAspect;
+  /**
+     * The forum thread this post was shared from (Show & tell)
+     * @nullable
+     */
+  forumTopic: FeedPostForumTopic;
 }

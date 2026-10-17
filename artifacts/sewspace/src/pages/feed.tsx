@@ -1,5 +1,4 @@
-import { useState } from 'react';
-import { getExploreFeed, getHomeFeed, useGetDashboard, useGetProfile } from '@workspace/api-client-react';
+import { getHomeFeed, useGetDashboard, useGetProfile } from '@workspace/api-client-react';
 import { Camera, Compass, Scissors } from 'lucide-react';
 import { Link } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
@@ -37,31 +36,19 @@ function CurrentProject() {
   );
 }
 
-/** Home: Following (people you follow + you) and Discover (everyone's public posts). */
+/** Home: posts from people you follow, and your own. Browsing everyone is Explore. */
 export function FeedPage() {
-  const [tab, setTab] = useState<'following' | 'discover'>('following');
   return (
     <div className="mx-auto grid max-w-[920px] justify-center gap-5 lg:grid-cols-[minmax(0,600px)_300px]">
       <div className="flex min-w-0 flex-col gap-4">
         <Composer />
-        <div role="tablist" aria-label="Feed" className="flex w-fit gap-1 rounded-full bg-white p-1">
-          {(['following', 'discover'] as const).map(t => (
-            <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
-              className={`min-h-[44px] rounded-full px-[18px] text-sm font-semibold ${tab === t ? 'bg-ink text-white' : 'text-ink'}`}>{t === 'following' ? 'Following' : 'Discover'}</button>
-          ))}
-        </div>
-        <div role="tabpanel">
-          {tab === 'following'
-            ? <FeedList queryKey={FEED_KEYS.home} fetchPage={cursor => getHomeFeed(cursor ? { cursor } : undefined)} empty={
-                <div className="rounded-[30px] bg-white px-6 py-14 text-center">
-                  <Compass className="mx-auto" size={28} aria-hidden="true" />
-                  <p className="mt-3 font-display text-xl">Your feed starts here</p>
-                  <p className="mx-auto mt-1 max-w-sm text-sm text-subtle">Posts from people you follow and your own posts appear here. Following arrives soon; for now, see what everyone is making.</p>
-                  <button type="button" onClick={() => setTab('discover')} className="btn btn-primary mt-5">Discover makes</button>
-                </div>} />
-            : <FeedList queryKey={FEED_KEYS.explore('all')} fetchPage={cursor => getExploreFeed(cursor ? { cursor } : undefined)} empty={
-                <div className="rounded-[30px] bg-white px-6 py-14 text-center text-sm text-subtle">No public posts yet. Be the first to share something.</div>} />}
-        </div>
+        <FeedList queryKey={FEED_KEYS.home} fetchPage={cursor => getHomeFeed(cursor ? { cursor } : undefined)} empty={
+          <div className="rounded-[30px] bg-white px-6 py-14 text-center">
+            <Compass className="mx-auto" size={28} aria-hidden="true" />
+            <p className="mt-3 font-display text-xl">Your feed starts here</p>
+            <p className="mx-auto mt-1 max-w-sm text-sm text-subtle">Follow people to see their posts here, along with your own. Find makers you like on Explore.</p>
+            <Link href="/explore" className="btn btn-primary mt-5">Go to Explore</Link>
+          </div>} />
       </div>
       <aside className="hidden flex-col gap-4 lg:flex" aria-label="Your studio"><CurrentProject /></aside>
     </div>

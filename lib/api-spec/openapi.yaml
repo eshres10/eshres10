@@ -2104,7 +2104,16 @@ components:
           description: Challenges this post is a (not removed) entry in
           items: { $ref: "#/components/schemas/ChallengeRef" }
         aspect: { $ref: "#/components/schemas/PostAspect" }
-      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect]
+        forumTopic:
+          type: object
+          nullable: true
+          description: The forum thread this post was shared from (Show & tell)
+          properties:
+            id: { type: integer }
+            title: { type: string }
+            replies: { type: integer }
+          required: [id, title, replies]
+      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect, forumTopic]
     PostAspect:
       type: string
       description: "How photos are cropped for display: 4:5, 1:1 or the first photo's own shape"
