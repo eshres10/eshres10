@@ -48,6 +48,10 @@ import type {
   Comment,
   CommentInput,
   Dashboard,
+  Draft,
+  DraftEnvelope,
+  DraftInput,
+  DraftKind,
   EntryInput,
   ErrorResponse,
   Fabric,
@@ -9438,5 +9442,263 @@ export const useRequestUploadUrl = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getRequestUploadUrlMutationOptions(options), queryClient);
+    }
+
+export const getGetDraftUrl = (kind: DraftKind,) => {
+
+
+
+
+  return `/api/drafts/${kind}`
+}
+
+/**
+ * @summary Your draft for a flow, or null. Drafts are never readable by anyone else.
+ */
+export const getDraft = async (kind: DraftKind, options?: Parameters<typeof customFetch>[1]): Promise<DraftEnvelope> => {
+
+  return customFetch<DraftEnvelope>(getGetDraftUrl(kind),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDraftQueryKey = (kind: DraftKind,) => {
+    return [
+    `/api/drafts/${kind}`
+    ] as const;
+    }
+
+
+export const getGetDraftQueryOptions = <TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(kind: DraftKind, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDraftQueryKey(kind);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDraft>>> = ({ signal }) => getDraft(kind, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: kind !== null && kind !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetDraftQueryResult = NonNullable<Awaited<ReturnType<typeof getDraft>>>
+export type GetDraftQueryError = ErrorType<unknown>
+
+
+export function useGetDraft<TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(
+ kind: DraftKind, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDraft>>,
+          TError,
+          Awaited<ReturnType<typeof getDraft>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDraft<TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(
+ kind: DraftKind, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDraft>>,
+          TError,
+          Awaited<ReturnType<typeof getDraft>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDraft<TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(
+ kind: DraftKind, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Your draft for a flow, or null. Drafts are never readable by anyone else.
+ */
+
+export function useGetDraft<TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(
+ kind: DraftKind, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetDraftQueryOptions(kind,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSaveDraftUrl = (kind: DraftKind,) => {
+
+
+
+
+  return `/api/drafts/${kind}`
+}
+
+/**
+ * @summary Save (replace) your draft for a flow. At most 64 KB; files in it must be your own uploads.
+ */
+export const saveDraft = async (kind: DraftKind,
+    draftInput: DraftInput, options?: Parameters<typeof customFetch>[1]): Promise<Draft> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Draft>(getSaveDraftUrl(kind),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(draftInput)
+  }
+);}
+
+
+
+
+
+export const getSaveDraftMutationKey = () => ['saveDraft'] as const;
+
+export const getSaveDraftMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveDraft>>, TError,SaveDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveDraft>>, TError,SaveDraftMutationVariables, TContext> => {
+
+const mutationKey = getSaveDraftMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveDraft>>, SaveDraftMutationVariables> = (props) => {
+          const {kind,data} = props ?? {};
+
+          return  saveDraft(kind,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveDraftMutationResult = NonNullable<Awaited<ReturnType<typeof saveDraft>>>
+    export type SaveDraftMutationBody = BodyType<DraftInput>
+    export type SaveDraftMutationError = ErrorType<void>
+    export type SaveDraftMutationVariables = {kind: DraftKind;data: BodyType<DraftInput>}
+
+    /**
+ * @summary Save (replace) your draft for a flow. At most 64 KB; files in it must be your own uploads.
+ */
+export const useSaveDraft = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveDraft>>, TError,SaveDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof saveDraft>>,
+        TError,
+        SaveDraftMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveDraftMutationOptions(options), queryClient);
+    }
+
+export const getDeleteDraftUrl = (kind: DraftKind,) => {
+
+
+
+
+  return `/api/drafts/${kind}`
+}
+
+export const deleteDraft = async (kind: DraftKind, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteDraftUrl(kind),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteDraftMutationKey = () => ['deleteDraft'] as const;
+
+export const getDeleteDraftMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDraft>>, TError,DeleteDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDraft>>, TError,DeleteDraftMutationVariables, TContext> => {
+
+const mutationKey = getDeleteDraftMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDraft>>, DeleteDraftMutationVariables> = (props) => {
+          const {kind} = props ?? {};
+
+          return  deleteDraft(kind,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteDraftMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDraft>>>
+
+    export type DeleteDraftMutationError = ErrorType<unknown>
+    export type DeleteDraftMutationVariables = {kind: DraftKind}
+
+    export const useDeleteDraft = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDraft>>, TError,DeleteDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteDraft>>,
+        TError,
+        DeleteDraftMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteDraftMutationOptions(options), queryClient);
     }
 

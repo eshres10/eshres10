@@ -31,15 +31,39 @@ export async function prepareImage(file: File, maxPx = 1600): Promise<File> {
   }
 }
 
+export interface UploadOptions {
+  /** 0..1 as the bytes go up. */
+  onProgress?: (fraction: number) => void;
+  signal?: AbortSignal;
+}
+
+/** PUT to a presigned URL with XHR, which (unlike fetch) reports upload progress. */
+function putWithProgress(url: string, body: File, { onProgress, signal }: UploadOptions): Promise<void> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('PUT', url);
+    xhr.setRequestHeader('Content-Type', body.type);
+    xhr.upload.onprogress = e => { if (e.lengthComputable) onProgress?.(e.loaded / e.total); };
+    xhr.onload = () => (xhr.status >= 200 && xhr.status < 300 ? resolve() : reject(new Error('The upload did not complete. Check your connection and try again.')));
+    xhr.onerror = () => reject(new Error('The upload did not complete. Check your connection and try again.'));
+    xhr.onabort = () => reject(new DOMException('Upload cancelled', 'AbortError'));
+    if (signal) {
+      if (signal.aborted) return xhr.abort();
+      signal.addEventListener('abort', () => xhr.abort(), { once: true });
+    }
+    xhr.send(body);
+  });
+}
+
 /**
  * Uploads a file to private object storage and returns its /api/storage URL.
  * Images are downscaled first. The server records you as the owner, and only
  * serves the file to people the access rules allow.
  */
-export async function uploadFile(file: File, purpose: UploadPurpose = 'image'): Promise<{ url: string; file: File }> {
+export async function uploadFile(file: File, purpose: UploadPurpose = 'image', options: UploadOptions = {}): Promise<{ url: string; file: File }> {
   const prepared = purpose === 'pattern_pdf' ? file : await prepareImage(file, purpose === 'avatar' ? 512 : 1600);
-  const result = await requestUploadUrl({ name: prepared.name, size: prepared.size, contentType: prepared.type, purpose });
-  const uploaded = await fetch(result.uploadURL, { method: 'PUT', headers: { 'Content-Type': prepared.type }, body: prepared });
-  if (!uploaded.ok) throw new Error('The upload did not complete. Check your connection and try again.');
+  options.signal?.throwIfAborted();
+  const result = await requestUploadUrl({ name: prepared.name, size: prepared.size, contentType: prepared.type, purpose }, { signal: options.signal });
+  await putWithProgress(result.uploadURL, prepared, options);
   return { url: `/api/storage/objects/${result.objectPath.replace(/^\/objects\//, '')}`, file: prepared };
 }

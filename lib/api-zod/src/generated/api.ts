@@ -3615,3 +3615,44 @@ export const RequestUploadUrlResponse = zod.object({
 })
 
 
+/**
+ * @summary Your draft for a flow, or null. Drafts are never readable by anyone else.
+ */
+export const GetDraftParams = zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic'])
+})
+
+export const GetDraftResponse = zod.object({
+  "draft": zod.union([zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic']),
+  "payload": zod.record(zod.string(), zod.unknown()),
+  "updatedAt": zod.coerce.date()
+}),zod.null()])
+})
+
+
+/**
+ * @summary Save (replace) your draft for a flow. At most 64 KB; files in it must be your own uploads.
+ */
+export const SaveDraftParams = zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic'])
+})
+
+export const SaveDraftBody = zod.object({
+  "payload": zod.record(zod.string(), zod.unknown())
+})
+
+export const SaveDraftResponse = zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic']),
+  "payload": zod.record(zod.string(), zod.unknown()),
+  "updatedAt": zod.coerce.date()
+})
+
+
+export const DeleteDraftParams = zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic'])
+})
+
+export const DeleteDraftResponse = zod.void()
+
+

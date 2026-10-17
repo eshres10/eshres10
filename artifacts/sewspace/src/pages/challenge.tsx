@@ -21,7 +21,7 @@ import { ErrorState, Loading } from '@/components/common';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { shareLink } from '@/components/feed/PostActions';
 import { SafetyMenu } from '@/components/social/SafetyMenu';
-import { Sheet } from '@/components/social/Sheet';
+import { Sheet, useSheetDirty } from '@/components/social/Sheet';
 import NotFound from '@/pages/not-found';
 
 const SORTS = [
@@ -130,6 +130,7 @@ function EditChallenge({ challenge, onDone }: { challenge: Challenge; onDone: ()
   const client = useQueryClient();
   const update = useUpdateChallenge();
   const [form, setForm] = useState({ title: challenge.title, description: challenge.description, rules: challenge.rules });
+  useSheetDirty(form.title !== challenge.title || form.description !== challenge.description || form.rules !== challenge.rules);
   return (
     <form className="space-y-4" onSubmit={e => { e.preventDefault(); update.mutate({ slug: challenge.slug, data: form }, { onSuccess: () => { client.invalidateQueries(); onDone(); } }); }}>
       <h2 className="font-display text-2xl">Edit #{challenge.tag}</h2>

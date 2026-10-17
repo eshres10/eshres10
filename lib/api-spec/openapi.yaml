@@ -30,6 +30,8 @@ tags:
     description: Hashtag challenges with entries
   - name: forum
     description: Boards, topics, replies, votes and polls
+  - name: drafts
+    description: One private draft per flow (post, project, stash, topic)
 paths:
   /public/profiles/{handle}:
     get:
@@ -1695,6 +1697,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/UploadResponse"
+  /drafts/{kind}:
+    get:
+      operationId: getDraft
+      tags: [drafts]
+      summary: "Your draft for a flow, or null. Drafts are never readable by anyone else."
+      parameters:
+        - { name: kind, in: path, required: true, schema: { $ref: "#/components/schemas/DraftKind" } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DraftEnvelope" }
+    put:
+      operationId: saveDraft
+      tags: [drafts]
+      summary: "Save (replace) your draft for a flow. At most 64 KB; files in it must be your own uploads."
+      parameters:
+        - { name: kind, in: path, required: true, schema: { $ref: "#/components/schemas/DraftKind" } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DraftInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Draft" }
+        "400": { description: Invalid or a file that isn't yours }
+        "413": { description: Draft too large }
+    delete:
+      operationId: deleteDraft
+      tags: [drafts]
+      parameters:
+        - { name: kind, in: path, required: true, schema: { $ref: "#/components/schemas/DraftKind" } }
+      responses:
+        "204": { description: Done }
 components:
   parameters:
     Id:
@@ -1728,6 +1769,29 @@ components:
       schema:
         type: integer
   schemas:
+    DraftKind:
+      type: string
+      enum: [post, project, stash, topic]
+    Draft:
+      type: object
+      properties:
+        kind: { $ref: "#/components/schemas/DraftKind" }
+        payload: { type: object, additionalProperties: true }
+        updatedAt: { type: string, format: date-time }
+      required: [kind, payload, updatedAt]
+    DraftEnvelope:
+      type: object
+      properties:
+        draft:
+          oneOf:
+            - { $ref: "#/components/schemas/Draft" }
+            - { type: "null" }
+      required: [draft]
+    DraftInput:
+      type: object
+      properties:
+        payload: { type: object, additionalProperties: true }
+      required: [payload]
     HealthStatus:
       type: object
       properties:

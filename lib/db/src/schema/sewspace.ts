@@ -11,6 +11,7 @@ import {
   smallint,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -418,6 +419,20 @@ export const forumPollVotesTable = pgTable("sewspace_forum_poll_votes", {
   optionId: integer("option_id").notNull().references(() => forumPollOptionsTable.id, { onDelete: "cascade" }),
   votedAt: timestamp("voted_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.topicId, t.userId] })]);
+
+// Phase F0: one draft per person per flow (owner-only, migration 0009).
+export const DRAFT_KINDS = ["post", "project", "stash", "topic"] as const;
+export type DraftKind = (typeof DRAFT_KINDS)[number];
+
+export const draftsTable = pgTable("sewspace_drafts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  kind: text("kind").$type<DraftKind>().notNull(),
+  payload: jsonb("payload").$type<Record<string, unknown>>().notNull().default({}),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [uniqueIndex("sewspace_drafts_user_kind_idx").on(t.userId, t.kind)]);
+
+export type Draft = typeof draftsTable.$inferSelect;
 
 export type ForumTopic = typeof forumTopicsTable.$inferSelect;
 export type ForumReply = typeof forumRepliesTable.$inferSelect;

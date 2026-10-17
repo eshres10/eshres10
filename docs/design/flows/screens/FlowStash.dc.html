@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seams Club mobile — add to stash flow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+input:focus,textarea:focus{outline:2px solid #e6e51e;outline-offset:1px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #f2f2f2; font-family: 'Inter', system-ui, sans-serif; color: #000">
+
+  <header style="position: absolute; left: 12px; right: 12px; top: 12px; z-index: 3; display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 24px; padding: 6px; box-shadow: rgba(0,0,0,.2) 0 10px 10px -5px">
+    <sc-if value="{{atStart}}" hint-placeholder-val="{{true}}">
+      <a href="Stash.dc.html" aria-label="Close" style="width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></a>
+    </sc-if>
+    <sc-if value="{{notStart}}" hint-placeholder-val="{{false}}">
+      <button onClick="{{back}}" aria-label="Back" style="width: 44px; height: 44px; border: 0; background: transparent; display: grid; place-items: center; border-radius: 50%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+    </sc-if>
+    <span style="flex: 1; min-width: 0"><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.04em">{{title}}</span><span style="display: block; font-size: 11px; color: #555">{{sub}}</span></span>
+  </header>
+
+  <sc-if value="{{showSteps}}" hint-placeholder-val="{{false}}">
+    <ol aria-label="Steps" style="position: absolute; left: 24px; right: 24px; top: 78px; z-index: 2; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+      <sc-for list="{{steps}}" as="st" hint-placeholder-count="4">
+        <li aria-current="{{st.cur}}"><span style="display: block; height: 4px; border-radius: 3000px; {{st.bar}}"></span><span style="display: block; margin-top: 4px; font-size: 11px; font-weight: 700; {{st.text}}">{{st.label}}</span></li>
+      </sc-for>
+    </ol>
+  </sc-if>
+
+  <main style="position: absolute; left: 0; right: 0; top: {{mainTop}}; bottom: {{mainBottom}}; overflow-y: auto; padding: 0 12px 20px">
+
+    <!-- Start: what and how -->
+    <sc-if value="{{sKind}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <h1 style="margin: 6px 8px 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.05; letter-spacing: -0.05em">What are you adding?</h1>
+        <div role="radiogroup" aria-label="What are you adding" style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+          <sc-for list="{{kinds}}" as="k" hint-placeholder-count="3">
+            <button role="radio" aria-checked="{{k.on}}" onClick="{{k.pick}}" style="min-height: 112px; padding: 12px 10px; border-radius: 24px; font: inherit; text-align: left; display: flex; flex-direction: column; justify-content: space-between; {{k.style}}">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{k.icon}}"></path></svg>
+              <b style="font-family: 'Poppins', sans-serif; font-size: 17px; letter-spacing: -0.03em">{{k.label}}</b>
+            </button>
+          </sc-for>
+        </div>
+        <div style="background: #fff; border-radius: 24px; padding: 14px">
+          <div style="font-size: 12px; font-weight: 700; color: #555">Start from</div>
+          <div style="margin-top: 8px; display: flex; flex-direction: column; gap: 6px">
+            <sc-for list="{{sources}}" as="o" hint-placeholder-count="3">
+              <button onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 10px 12px; border-radius: 18px; font: inherit; text-align: left; {{o.style}}">
+                <span style="width: 40px; height: 40px; border-radius: 14px; display: grid; place-items: center; flex-shrink: 0; {{o.iconBg}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{o.icon}}"></path></svg></span>
+                <span style="flex: 1"><b style="display: block; font-size: 14px">{{o.label}}</b><span style="display: block; font-size: 12px; opacity: .8">{{o.note}}</span></span>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Start: reading the photo or PDF -->
+    <sc-if value="{{sRead}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div style="position: relative; border-radius: 24px; overflow: hidden; background: #111; height: 250px; display: grid; place-items: center">
+          <sc-if value="{{readImg}}" hint-placeholder-val="{{true}}"><img src="{{read.src}}" alt="{{read.alt}}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"></sc-if>
+          <sc-if value="{{readPdf}}" hint-placeholder-val="{{false}}">
+            <span style="display: flex; gap: 10px; align-items: center">
+              <img src="/_blob/e9b9124af50eb749d99a9f4a4477d928" alt="Cover found on page 1" style="width: 120px; height: 160px; border-radius: 12px; object-fit: cover; border: 3px solid #fff">
+              <span style="width: 120px; height: 160px; border-radius: 12px; background: #fff; padding: 12px; font-size: 11px; line-height: 1.4; color: #555"><b style="display: block; color: #000; font-size: 12px">Fabric requirements</b>Size 6–14: 2.0 m<br>Size 16–24: 2.2 m<br>140 cm wide</span>
+            </span>
+          </sc-if>
+          <sc-if value="{{readLabel}}" hint-placeholder-val="{{false}}">
+            <span style="display: grid; place-items: center; width: 150px; height: 150px; border-radius: 50%; background: #1f2a44; color: #fff; text-align: center; font-size: 12px; font-weight: 700; border: 6px solid #e9e1cf">ALL-PURPOSE<br>100 m · col. 620</span>
+          </sc-if>
+          <span style="position: absolute; left: 10px; right: 10px; bottom: 10px; background: rgba(0,0,0,.72); color: #fff; border-radius: 14px; padding: 8px 10px; font-size: 12px; font-weight: 700">{{read.file}}<span style="display: block; margin-top: 5px; height: 4px; border-radius: 3000px; background: #555"><span style="display: block; width: 100%; height: 100%; border-radius: 3000px; background: #e6e51e"></span></span></span>
+        </div>
+        <div style="background: #fff; border-radius: 24px; padding: 14px">
+          <div style="display: flex; align-items: center; gap: 8px"><span aria-hidden="true" style="width: 24px; height: 24px; border-radius: 50%; background: #e6e51e; display: grid; place-items: center"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span><b style="font-size: 15px">{{read.headline}}</b></div>
+          <ul style="margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+            <sc-for list="{{found}}" as="fd" hint-placeholder-count="4">
+              <li style="display: flex; gap: 10px; font-size: 13px; background: #fffde0; border-radius: 12px; padding: 8px 10px"><span style="width: 84px; flex-shrink: 0; color: #555">{{fd.k}}</span><b style="flex: 1">{{fd.v}}</b></li>
+            </sc-for>
+          </ul>
+          <p style="margin: 10px 0 0; font-size: 12px; color: #555">Suggestions are highlighted. You can change any of them next.</p>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Details: essentials -->
+    <sc-if value="{{sEss}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <sc-if value="{{hasPhoto}}" hint-placeholder-val="{{false}}">
+          <div style="display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 24px; padding: 8px"><img src="{{read.src}}" alt="" style="width: 56px; height: 56px; border-radius: 16px; object-fit: cover"><span style="flex: 1; font-size: 13px"><b style="display: block">{{read.thumbTitle}}</b><span style="color: #555">Yellow fields came from it</span></span></div>
+        </sc-if>
+        <label style="display: block; background: #fff; border-radius: 24px; padding: 12px 14px; {{nameRing}}">
+          <span style="display: block; font-size: 12px; font-weight: 700; color: #555">{{nameLabel}}</span>
+          <input value="{{name}}" onChange="{{onName}}" placeholder="{{namePh}}" aria-invalid="{{nameInvalid}}" style="margin-top: 4px; width: 100%; min-height: 40px; border: 0; border-radius: 10px; padding: 0 8px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 19px; letter-spacing: -0.03em; {{nameBg}}">
+          <sc-if value="{{nameErr}}" hint-placeholder-val="{{false}}"><span role="alert" style="display: block; margin-top: 4px; font-size: 13px; font-weight: 600; color: #c42a2a">{{nameErrText}}</span></sc-if>
+        </label>
+        <sc-if value="{{isPattern}}" hint-placeholder-val="{{false}}">
+          <label style="display: block; background: #fff; border-radius: 24px; padding: 12px 14px"><span style="display: block; font-size: 12px; font-weight: 700; color: #555">Designer</span><input value="{{designer}}" onChange="{{onDesigner}}" placeholder="Who made the pattern?" style="margin-top: 4px; width: 100%; min-height: 40px; border: 0; border-radius: 10px; padding: 0 8px; font: inherit; font-size: 15px; {{designerBg}}"></label>
+        </sc-if>
+        <fieldset style="margin: 0; border: 0; background: #fff; border-radius: 24px; padding: 12px 14px; {{chipRing}}">
+          <legend style="float: left; width: 100%; padding: 0; font-size: 12px; font-weight: 700; color: #555">{{chipLabel}}</legend>
+          <div style="clear: both; padding-top: 8px; display: flex; flex-wrap: wrap; gap: 6px">
+            <sc-for list="{{chips}}" as="c" hint-placeholder-count="6">
+              <button aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="position: relative; min-height: 40px; padding: 0 14px; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{c.style}}">{{c.label}}</button>
+            </sc-for>
+          </div>
+          <sc-if value="{{chipErr}}" hint-placeholder-val="{{false}}"><span role="alert" style="display: block; margin-top: 8px; font-size: 13px; font-weight: 600; color: #c42a2a">{{chipErrText}}</span></sc-if>
+        </fieldset>
+        <sc-if value="{{isPattern}}" hint-placeholder-val="{{false}}">
+          <fieldset style="margin: 0; border: 0; background: #fff; border-radius: 24px; padding: 12px 14px">
+            <legend style="float: left; width: 100%; padding: 0; font-size: 12px; font-weight: 700; color: #555">Difficulty</legend>
+            <div style="clear: both; padding-top: 8px; display: flex; gap: 6px">
+              <sc-for list="{{levels}}" as="l" hint-placeholder-count="3">
+                <button aria-pressed="{{l.on}}" onClick="{{l.pick}}" style="flex: 1; min-height: 40px; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{l.style}}">{{l.label}}</button>
+              </sc-for>
+            </div>
+          </fieldset>
+        </sc-if>
+        <sc-if value="{{hasColour}}" hint-placeholder-val="{{false}}">
+          <fieldset style="margin: 0; border: 0; background: #fff; border-radius: 24px; padding: 12px 14px">
+            <legend style="float: left; width: 100%; padding: 0; font-size: 12px; font-weight: 700; color: #555">Colour</legend>
+            <div style="clear: both; padding-top: 8px; display: flex; align-items: center; gap: 8px">
+              <sc-for list="{{swatches}}" as="w" hint-placeholder-count="5">
+                <button aria-pressed="{{w.on}}" aria-label="{{w.name}}" onClick="{{w.pick}}" style="width: 44px; height: 44px; border-radius: 50%; padding: 0; background: {{w.hex}}; {{w.ring}}"></button>
+              </sc-for>
+              <span style="flex: 1; font-size: 13px; font-weight: 700; text-align: right">{{colourName}}</span>
+            </div>
+            <p style="margin: 8px 0 0; font-size: 12px; color: #555">{{swatchNote}}</p>
+          </fieldset>
+        </sc-if>
+        <sc-if value="{{hasAmount}}" hint-placeholder-val="{{false}}">
+          <div style="background: #fff; border-radius: 24px; padding: 12px 14px; display: flex; align-items: center; gap: 10px">
+            <span style="flex: 1"><span style="display: block; font-size: 12px; font-weight: 700; color: #555">{{amountLabel}}</span><span style="display: block; margin-top: 2px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.04em">{{amountShown}}</span></span>
+            <button onClick="{{less}}" aria-label="Less" style="width: 44px; height: 44px; border: 1px solid #000; border-radius: 50%; background: #fff; font: inherit; font-size: 20px; font-weight: 700">−</button>
+            <button onClick="{{more}}" aria-label="More" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: #000; color: #fff; font: inherit; font-size: 20px; font-weight: 700">+</button>
+          </div>
+          <sc-if value="{{isFabric}}" hint-placeholder-val="{{true}}">
+            <div role="radiogroup" aria-label="Units" style="display: flex; gap: 4px; background: #fff; border-radius: 3000px; padding: 4px">
+              <sc-for list="{{units}}" as="u" hint-placeholder-count="2"><button role="radio" aria-checked="{{u.on}}" onClick="{{u.pick}}" style="flex: 1; min-height: 38px; border: 0; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{u.style}}">{{u.label}}</button></sc-for>
+            </div>
+          </sc-if>
+        </sc-if>
+        <sc-if value="{{isPattern}}" hint-placeholder-val="{{false}}">
+          <label style="display: block; background: #fff; border-radius: 24px; padding: 12px 14px"><span style="display: block; font-size: 12px; font-weight: 700; color: #555">Sizes included</span><input value="6–24" style="margin-top: 4px; width: 100%; min-height: 40px; border: 0; border-radius: 10px; padding: 0 8px; font: inherit; font-size: 15px; {{designerBg}}"></label>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <!-- More: optional extras -->
+    <sc-if value="{{sMore}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <p style="margin: 4px 8px 0; font-size: 14px; color: #555">All optional. Skip it and add them later.</p>
+        <sc-for list="{{extras}}" as="x" hint-placeholder-count="3">
+          <fieldset style="margin: 0; border: 0; background: #fff; border-radius: 24px; padding: 12px 14px">
+            <legend style="float: left; width: 100%; padding: 0; font-size: 12px; font-weight: 700; color: #555">{{x.label}}</legend>
+            <div style="clear: both; padding-top: 8px; display: flex; flex-wrap: wrap; gap: 6px">
+              <sc-for list="{{x.opts}}" as="xo" hint-placeholder-count="4">
+                <button aria-pressed="{{xo.on}}" onClick="{{xo.pick}}" style="min-height: 38px; padding: 0 13px; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{xo.style}}">{{xo.label}}</button>
+              </sc-for>
+            </div>
+          </fieldset>
+        </sc-for>
+        <sc-if value="{{isPattern}}" hint-placeholder-val="{{false}}">
+          <div style="background: #000; color: #fff; border-radius: 24px; padding: 14px; display: flex; gap: 12px; align-items: center">
+            <img src="/_blob/e9b9124af50eb749d99a9f4a4477d928" alt="" style="width: 52px; height: 52px; border-radius: 14px; object-fit: cover">
+            <span style="flex: 1"><b style="display: block; font-size: 14px">Bayside Sailor Top page</b><span style="font-size: 12px; color: #c9c9c9">214 makes · 4.6 stars · reviews and fit notes</span></span>
+            <button onClick="{{toggleLink}}" aria-pressed="{{linkOn}}" style="min-height: 38px; padding: 0 14px; border: 0; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{linkStyle}}">{{linkLabel}}</button>
+          </div>
+        </sc-if>
+        <label style="display: block; background: #fff; border-radius: 24px; padding: 12px 14px"><span style="display: block; font-size: 12px; font-weight: 700; color: #555">Notes</span><textarea rows="2" placeholder="{{notesPh}}" style="margin-top: 4px; width: 100%; border: 0; resize: none; font: inherit; font-size: 14px; line-height: 1.5"></textarea></label>
+      </div>
+    </sc-if>
+
+    <!-- Save: privacy -->
+    <sc-if value="{{sSave}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div style="display: flex; align-items: center; gap: 12px; background: #fff; border-radius: 24px; padding: 10px">
+          <span style="width: 64px; height: 64px; border-radius: 18px; overflow: hidden; flex-shrink: 0; display: grid; place-items: center; background: {{summaryHex}}"><sc-if value="{{hasPhoto}}" hint-placeholder-val="{{false}}"><img src="{{read.src}}" alt="" style="width: 64px; height: 64px; object-fit: cover"></sc-if></span>
+          <span style="flex: 1; min-width: 0"><b style="display: block; font-family: 'Poppins', sans-serif; font-size: 17px; letter-spacing: -0.03em">{{nameShown}}</b><span style="font-size: 12px; color: #555">{{summary}}</span></span>
+        </div>
+        <div style="background: #fff; border-radius: 24px; padding: 14px">
+          <div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px; letter-spacing: -0.03em">Who can see this?</div>
+          <div role="radiogroup" aria-label="Who can see this" style="margin-top: 10px; display: flex; flex-direction: column; gap: 6px">
+            <sc-for list="{{vis}}" as="v" hint-placeholder-count="3">
+              <button role="radio" aria-checked="{{v.on}}" onClick="{{v.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 56px; padding: 8px 12px; border-radius: 18px; font: inherit; text-align: left; {{v.style}}"><span style="flex: 1"><b style="display: block; font-size: 14px">{{v.label}}</b><span style="font-size: 12px; opacity: .8">{{v.note}}</span></span></button>
+            </sc-for>
+          </div>
+          <p style="margin: 10px 0 0; font-size: 12px; color: #555">{{visFoot}}</p>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- Done -->
+    <sc-if value="{{sDone}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px">
+        <div style="background: #e6e51e; border-radius: 34px; padding: 26px 22px; text-align: center">
+          <span style="display: inline-grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: #000"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e6e51e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>
+          <h1 style="margin: 12px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: -0.05em">{{doneTitle}}</h1>
+          <p style="margin: 6px 0 0; font-size: 14px">{{nameShown}} is in your {{place}}.</p>
+        </div>
+        <a href="FlowProject.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 3000px; background: #000; color: #fff; text-decoration: none; font-weight: 700">Use it in a new project</a>
+        <button onClick="{{restart}}" style="min-height: 52px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 15px; font-weight: 700">Add another</button>
+      </div>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{showFoot}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; left: 12px; right: 12px; bottom: 16px; z-index: 3; display: flex; gap: 8px">
+      <sc-if value="{{showSkip}}" hint-placeholder-val="{{false}}"><button onClick="{{skip}}" style="flex: 1; min-height: 54px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 15px; font-weight: 700">Skip</button></sc-if>
+      <button onClick="{{next}}" style="flex: 1.6; min-height: 54px; border: 0; border-radius: 3000px; font: inherit; font-size: 15px; font-weight: 700; {{nextStyle}}">{{nextLabel}}</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = this.fresh(); }
+  fresh() { return { kind: 'fabric', source: null, step: 0, reading: false, tried: false, name: '', designer: '', chip: -1, level: -1, swatch: -1, amount: 2.5, unit: 'm', extra: {}, link: false, vis: 'private', fromFile: false }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var i = {
+      fabric: "M4 4h16v16H4z M4 9h16 M4 14h16 M9 4v16 M14 4v16",
+      thread: "M7 3h10 M7 21h10 M8 3v18 M16 3v18 M8 8l8 3 M8 13l8 3",
+      pattern: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M8 13h8 M8 17h5",
+      camera: "M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z M12 10a3 3 0 1 0 0 6 3 3 0 0 0 0-6z",
+      image: "M3 5h18v14H3z M3 15l5-5 4 4 3-3 6 6 M15 9h.01",
+      pdf: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6 M12 18v-6 M9 15l3 3 3-3",
+      pen: "M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"
+    };
+    var K = {
+      fabric: { label: 'Fabric', style: 'background:#e6e51e;color:#000', place: 'fabric stash', title: 'Add fabric',
+        sources: [['photo', 'Take a photo', 'We pick out the colour and suggest the type', i.camera], ['library', 'Choose a photo', 'From your camera roll', i.image], ['manual', 'Fill in by hand', 'No photo needed', i.pen]] },
+      thread: { label: 'Thread', style: 'background:#466cf3;color:#fff', place: 'thread drawer', title: 'Add thread',
+        sources: [['photo', 'Photo of the spool label', 'We read the colour number', i.camera], ['manual', 'Fill in by hand', 'No photo needed', i.pen]] },
+      pattern: { label: 'Pattern', style: 'background:#ff8562;color:#000', place: 'pattern library', title: 'Add a pattern',
+        sources: [['pdf', 'Upload the pattern PDF', 'We fill in name, sizes and fabric needed', i.pdf], ['photo', 'Photo of the envelope', 'For paper patterns', i.camera], ['manual', 'Fill in by hand', 'Type it in yourself', i.pen]] }
+    };
+    var READ = {
+      fabric: { src: '/_blob/5fb545dfebc25a3ab288dabc4d4f34cc', alt: 'Your fabric photo', file: 'Photo uploaded · resized to 1600 px', headline: 'Here’s what we found', thumbTitle: 'Your photo',
+        found: [['Colour', 'Chambray blue (from the photo)'], ['Looks like', 'Linen (suggested)'], ['Name', 'Chambray linen']], name: 'Chambray linen', chip: 0, swatch: 0 },
+      thread: { src: '', alt: '', file: 'Label photo uploaded', headline: 'Read from the label', thumbTitle: 'Spool label',
+        found: [['Colour no.', '620'], ['Colour', 'Navy'], ['Type', 'All-purpose'], ['Length', '100 m']], name: 'Navy 620', chip: 0, swatch: 0 },
+      pattern: { src: '/_blob/e9b9124af50eb749d99a9f4a4477d928', alt: 'Pattern cover', file: 'Bayside_Sailor_Top.pdf · 38 pages · 4.2 MB', headline: 'Read from your PDF', thumbTitle: 'Bayside_Sailor_Top.pdf',
+        found: [['Name', 'Bayside Sailor Top'], ['Designer', 'Tidewater Patterns'], ['Garment', 'Top'], ['Difficulty', 'Intermediate'], ['Sizes', '6–24'], ['Fabric', '2.2 m, 140 cm wide']], name: 'Bayside Sailor Top', chip: 1, swatch: -1, designer: 'Tidewater Patterns', level: 1 }
+    };
+    var CHIPS = {
+      fabric: { label: 'Fabric type', opts: ['Linen', 'Cotton', 'Denim', 'Silk', 'Knit', 'Wool', 'Other'], err: 'Pick a fabric type.' },
+      thread: { label: 'Thread type', opts: ['All-purpose', 'Topstitch', 'Embroidery', 'Serger', 'Other'], err: 'Pick a thread type.' },
+      pattern: { label: 'Garment', opts: ['Dress', 'Top', 'Trousers', 'Skirt', 'Outerwear', 'Bag', 'Other'], err: 'Pick what it makes.' }
+    };
+    var SW = {
+      fabric: [['Chambray blue', '#7f97b5'], ['Denim blue', '#3e5878'], ['Off-white', '#e9e5dc'], ['Slate', '#55606e']],
+      thread: [['Navy', '#1f2a44'], ['Ink', '#26304a'], ['Midnight', '#191c2b'], ['Steel blue', '#4a5e82']]
+    };
+    var EXTRAS = {
+      fabric: [['width', 'Width', ['110 cm', '140 cm', '150 cm', 'Other']], ['weight', 'Weight', ['Light', 'Medium', 'Heavy']], ['stretch', 'Stretch', ['None', '2-way', '4-way']]],
+      thread: [['tw', 'Weight', ['30', '40', '50', '60']]],
+      pattern: [['status', 'Status', ['Want to make', 'Bought', 'Made it', 'Favourite']], ['format', 'Format', ['PDF', 'Paper', 'Traced copy']]]
+    };
+    var k = s.kind, isF = k === 'fabric', isT = k === 'thread', isP = k === 'pattern';
+    var read = READ[k];
+    var hasPhoto = s.fromFile && !!read.src;
+    var labels = ['Start', 'Details', 'More', 'Save'];
+    var nameOk = s.name.trim().length > 0, chipOk = s.chip >= 0;
+    var hi = function (on) { return on && s.fromFile ? 'background:#fffde0' : 'background:#f7f7f7'; };
+    var useRead = function () {
+      self.setState({ step: 1, reading: false, fromFile: true, name: read.name, chip: read.chip, swatch: read.swatch, designer: read.designer || '', level: read.level === undefined ? -1 : read.level, link: isP });
+    };
+    var amountShown = isF ? s.amount + ' ' + (s.unit === 'm' ? 'm' : 'yd') : (isT ? s.amount + (s.amount === 1 ? ' spool' : ' spools') : '');
+    var nextLabel = s.reading ? 'Use these details' : (s.step === 1 ? 'Next' : (s.step === 2 ? 'Next' : 'Save to ' + K[k].place.split(' ')[1]));
+    var validEss = nameOk && chipOk;
+    var sumBits = [];
+    if (s.chip >= 0) sumBits.push(CHIPS[k].opts[s.chip]);
+    if (isF || isT) sumBits.push(amountShown);
+    if (s.swatch >= 0 && SW[k]) sumBits.push(SW[k][s.swatch][0]);
+    if (isP && s.designer) sumBits.push(s.designer);
+    return {
+      title: K[k].title,
+      sub: s.step === 4 ? '' : (s.step === 0 && !s.reading ? 'Fabric, thread or a pattern' : 'Draft kept if you leave'),
+      atStart: s.step === 0 && !s.reading || s.step === 4, notStart: (s.step > 0 && s.step < 4) || s.reading,
+      showSteps: (s.step > 0 && s.step < 4) || s.reading,
+      mainTop: (s.step > 0 && s.step < 4) || s.reading ? '112px' : '80px',
+      mainBottom: s.reading || (s.step > 0 && s.step < 4) ? '86px' : '0',
+      steps: labels.map(function (l, n) { var cur = s.step === n, done = s.step > n; return { label: l, cur: cur ? 'step' : 'false', bar: cur ? 'background:#000' : (done ? 'background:#e6e51e' : 'background:#d4d4d4'), text: cur ? 'color:#000' : 'color:#555' }; }),
+      back: function () { if (s.reading) self.setState({ reading: false }); else if (s.step === 1) self.setState({ step: 0, reading: s.fromFile }); else self.setState({ step: s.step - 1 }); },
+      sKind: s.step === 0 && !s.reading, sRead: s.step === 0 && s.reading, sEss: s.step === 1, sMore: s.step === 2, sSave: s.step === 3, sDone: s.step === 4,
+      kinds: ['fabric', 'thread', 'pattern'].map(function (id) {
+        var on = k === id;
+        return { label: K[id].label, icon: i[id], on: on ? 'true' : 'false', style: on ? K[id].style + ';border:3px solid #000' : 'background:#fff;color:#000;border:3px solid transparent', pick: function () { var f = self.fresh(); f.kind = id; f.amount = id === 'thread' ? 1 : 2.5; self.setState(f); } };
+      }),
+      sources: K[k].sources.map(function (o, n) {
+        var primary = n === 0;
+        return { label: o[1], note: o[2], icon: o[3], style: primary ? 'border:0;background:#000;color:#fff' : 'border:2px solid #e6e6e6;background:#fff;color:#000',
+          iconBg: primary ? 'background:#e6e51e;color:#000' : 'background:#f2f2f2;color:#000',
+          pick: function () { if (o[0] === 'manual') self.setState({ source: 'manual', step: 1, fromFile: false, name: '', chip: -1, swatch: -1, designer: '', level: -1, link: false }); else self.setState({ source: o[0], reading: true }); } };
+      }),
+      readImg: !!read.src && !isP, readPdf: isP, readLabel: isT, read: read,
+      found: read.found.map(function (f) { return { k: f[0], v: f[1] }; }),
+      hasPhoto: hasPhoto,
+      isPattern: isP, isFabric: isF, hasColour: !isP, hasAmount: !isP,
+      nameLabel: isP ? 'Pattern name' : (isT ? 'Colour name or number' : 'Name'),
+      namePh: isP ? 'e.g. Willa Dress' : (isT ? 'e.g. Navy 620' : 'e.g. Chambray linen'),
+      name: s.name, onName: function (e) { self.setState({ name: e.target.value }); },
+      nameBg: hi(nameOk && s.name === read.name),
+      nameErr: s.tried && !nameOk, nameInvalid: s.tried && !nameOk ? 'true' : 'false',
+      nameErrText: isP ? 'Add the pattern name.' : (isT ? 'Add a colour name or number.' : 'Give it a name, like "Chambray linen".'),
+      nameRing: s.tried && !nameOk ? 'border: 2px solid #c42a2a' : 'border: 2px solid transparent',
+      designer: s.designer, onDesigner: function (e) { self.setState({ designer: e.target.value }); }, designerBg: hi(true),
+      chipLabel: CHIPS[k].label,
+      chips: CHIPS[k].opts.map(function (o, n) { var on = s.chip === n; return { label: o, on: on ? 'true' : 'false', style: on ? (s.fromFile && n === read.chip ? 'border:2px solid #000;background:#e6e51e;color:#000' : 'border:2px solid #000;background:#000;color:#fff') : 'border:2px solid #e6e6e6;background:#fff;color:#000', pick: function () { self.setState({ chip: n }); } }; }),
+      chipErr: s.tried && !chipOk, chipErrText: CHIPS[k].err,
+      chipRing: s.tried && !chipOk ? 'border: 2px solid #c42a2a' : 'border: 2px solid transparent',
+      levels: ['Beginner', 'Intermediate', 'Advanced'].map(function (l, n) { var on = s.level === n; return { label: l, on: on ? 'true' : 'false', style: on ? 'border:2px solid #000;background:#e6e51e;color:#000' : 'border:2px solid #e6e6e6;background:#fff;color:#000', pick: function () { self.setState({ level: on ? -1 : n }); } }; }),
+      swatches: (SW[k] || []).map(function (w, n) { var on = s.swatch === n; return { name: w[0], hex: w[1], on: on ? 'true' : 'false', ring: on ? 'border:3px solid #000;box-shadow:0 0 0 3px #e6e51e' : 'border:2px solid #ddd', pick: function () { self.setState({ swatch: n }); } }; }),
+      colourName: s.swatch >= 0 && SW[k] ? SW[k][s.swatch][0] : 'No colour yet',
+      swatchNote: s.fromFile ? 'Picked out of your photo. No hex codes to type.' : 'Common colours. Add a photo later for an exact match.',
+      amountLabel: isF ? 'How much do you have?' : 'How many spools?',
+      amountShown: amountShown,
+      less: function () { var st = isF ? (s.unit === 'm' ? 0.1 : 0.25) : 1; self.setState({ amount: Math.max(0, Math.round((s.amount - st) * 100) / 100) }); },
+      more: function () { var st = isF ? (s.unit === 'm' ? 0.1 : 0.25) : 1; self.setState({ amount: Math.round((s.amount + st) * 100) / 100 }); },
+      units: [['m', 'Metres'], ['yd', 'Yards']].map(function (u) { var on = s.unit === u[0]; return { label: u[1], on: on ? 'true' : 'false', style: on ? 'background:#000;color:#fff' : 'background:transparent;color:#000', pick: function () { if (s.unit !== u[0]) self.setState({ unit: u[0], amount: Math.round((u[0] === 'yd' ? s.amount * 1.094 : s.amount / 1.094) * 10) / 10 }); } }; }),
+      extras: EXTRAS[k].map(function (x) {
+        return { label: x[1], opts: x[2].map(function (o) { var on = s.extra[x[0]] === o; return { label: o, on: on ? 'true' : 'false', style: on ? 'border:2px solid #000;background:#000;color:#fff' : 'border:2px solid #e6e6e6;background:#fff;color:#000', pick: function () { var e = Object.assign({}, s.extra); e[x[0]] = on ? null : o; self.setState({ extra: e }); } }; }) };
+      }),
+      linkOn: s.link ? 'true' : 'false', linkLabel: s.link ? 'Linked' : 'Link it', linkStyle: s.link ? 'background:#e6e51e;color:#000' : 'background:#fff;color:#000',
+      toggleLink: function () { self.setState({ link: !s.link }); },
+      notesPh: isP ? 'e.g. Grade between 12 and 14 at the hip' : (isF ? 'e.g. Pre-washed, slight flaw at one end' : 'e.g. Good match for the chambray'),
+      nameShown: s.name || 'Untitled',
+      summary: sumBits.join(' · '),
+      summaryHex: s.swatch >= 0 && SW[k] ? SW[k][s.swatch][1] : '#f2f2f2',
+      vis: [
+        { id: 'private', label: 'Only me', note: 'The default for your stash.' },
+        { id: 'followers', label: 'Followers', note: 'Shows on makes you share with followers.' },
+        { id: 'public', label: 'Public', note: 'Shows in the Used tab on your profile.' }
+      ].map(function (o) { var on = s.vis === o.id; return { label: o.label, note: o.note, on: on ? 'true' : 'false', style: on ? 'border:2px solid #000;background:#e6e51e;color:#000' : 'border:2px solid #e6e6e6;background:#fff;color:#000', pick: function () { self.setState({ vis: o.id }); } }; }),
+      visFoot: isP ? 'The pattern PDF itself always stays private, whatever you pick.' : 'Nothing in your stash goes public unless you choose it.',
+      showFoot: s.reading || (s.step > 0 && s.step < 4),
+      showSkip: s.step === 2,
+      skip: function () { self.setState({ step: 3 }); },
+      nextLabel: nextLabel,
+      nextStyle: s.step === 1 && s.tried && !validEss ? 'background:#e6e6e6;color:#555' : (s.step === 3 ? 'background:#000;color:#fff' : 'background:#e6e51e;color:#000'),
+      next: function () {
+        if (s.reading) { useRead(); return; }
+        if (s.step === 1 && !validEss) { self.setState({ tried: true }); return; }
+        self.setState({ step: s.step + 1, tried: false });
+      },
+      doneTitle: isP ? 'Pattern saved' : (isT ? 'Thread saved' : 'Fabric saved'),
+      place: K[k].place,
+      restart: function () { var f = self.fresh(); f.kind = k; f.amount = isT ? 1 : 2.5; self.setState(f); }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -15,3 +15,4 @@ export * from "./catalog";
 export * from "./catalog-refs";
 export * from "./challenges";
 export * from "./forum";
+export * from "./drafts";

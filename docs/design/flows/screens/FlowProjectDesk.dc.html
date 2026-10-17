@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seams Club — new project flow (desktop)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+input:focus{outline:2px solid #e6e51e;outline-offset:1px}
+</style>
+</helmet>
+<div style="position: relative; min-height: 1000px; background-color: #f2f2f2; background-image: radial-gradient(#d4d4d4 1px, transparent 1px); background-size: 20px 20px; font-family: 'Inter', system-ui, sans-serif; color: #000; overflow: hidden">
+
+  <!-- Quick start dialog over the Projects page -->
+  <sc-if value="{{sQuick}}" hint-placeholder-val="{{true}}">
+    <div aria-hidden="true" style="position: absolute; inset: 0; display: flex; gap: 24px; padding: 24px">
+      <div style="flex: 0 0 264px; background: #e6e51e; border-radius: 36px"></div>
+      <div style="flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; align-content: start">
+        <div style="grid-column: 1 / -1; height: 120px; background: #fff; border-radius: 36px"></div>
+        <div style="height: 320px; background: #fff; border-radius: 36px"></div><div style="height: 320px; background: #fff; border-radius: 36px"></div><div style="height: 320px; background: #fff; border-radius: 36px"></div>
+      </div>
+    </div>
+    <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(0,0,0,.55)"></div>
+    <section role="dialog" aria-modal="true" aria-label="New project" style="position: relative; z-index: 2; max-width: 620px; margin: 90px auto 0; padding: 0 16px">
+      <div style="background: #fff; border-radius: 34px; padding: 28px; box-shadow: rgba(0,0,0,.35) 0 30px 60px -20px">
+        <div style="display: flex; align-items: flex-start; gap: 12px">
+          <div style="flex: 1">
+            <div style="font-size: 12px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: #c42a2a">New project</div>
+            <h1 style="margin: 6px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 34px; line-height: 1.05; letter-spacing: -0.05em">What are you making?</h1>
+            <p style="margin: 6px 0 0; font-size: 14px; color: #555">Just a name to start. Everything else can come later.</p>
+          </div>
+          <a href="Projects.dc.html" aria-label="Close" style="width: 44px; height: 44px; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></a>
+        </div>
+        <label style="display: block; margin-top: 20px">
+          <span style="display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700">Project name</span>
+          <input value="{{name}}" onChange="{{onName}}" placeholder="e.g. Sailor top in navy linen" aria-invalid="{{nameInvalid}}" style="width: 100%; min-height: 56px; border-radius: 16px; padding: 0 16px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 20px; letter-spacing: -0.03em; {{nameBorder}}">
+          <sc-if value="{{nameError}}" hint-placeholder-val="{{false}}"><span role="alert" style="display: block; margin-top: 6px; font-size: 13px; font-weight: 600; color: #c42a2a">Give it a name. You can change it any time.</span></sc-if>
+        </label>
+        <div style="margin-top: 18px">
+          <div style="display: flex; font-size: 12px; font-weight: 700"><span style="flex: 1">Start from one of your patterns</span><span style="font-weight: 500; color: #555">optional</span></div>
+          <div style="margin-top: 8px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px">
+            <sc-for list="{{patterns}}" as="p" hint-placeholder-count="4">
+              <button aria-pressed="{{p.on}}" onClick="{{p.pick}}" style="padding: 0; border-radius: 18px; overflow: hidden; background: #fff; text-align: left; font: inherit; {{p.ring}}"><img src="{{p.src}}" alt="" style="display: block; width: 100%; height: 96px; object-fit: cover"><span style="display: block; padding: 6px 8px; font-size: 12px; font-weight: 700; line-height: 1.25">{{p.name}}</span></button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="margin-top: 16px">
+          <div style="display: flex; font-size: 12px; font-weight: 700"><span style="flex: 1">Garment</span><span style="font-weight: 500; color: #555">optional</span></div>
+          <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px">
+            <sc-for list="{{garments}}" as="g" hint-placeholder-count="7">
+              <button aria-pressed="{{g.on}}" onClick="{{g.pick}}" style="min-height: 38px; padding: 0 14px; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{g.style}}">{{g.label}}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="margin-top: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px">
+          <button style="display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 0 16px; border: 2px dashed #bbb; border-radius: 3000px; background: #fafafa; font: inherit; font-size: 14px; font-weight: 700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z M12 10a3 3 0 1 0 0 6 3 3 0 0 0 0-6z"></path></svg>Cover photo</button>
+          <span style="flex: 1; font-size: 12px; color: #555">Only you can see it until you share.</span>
+          <button onClick="{{create}}" style="min-height: 52px; padding: 0 28px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 15px; font-weight: 700">Create project</button>
+        </div>
+      </div>
+    </section>
+  </sc-if>
+
+  <!-- Project page with setup panel -->
+  <sc-if value="{{sPage}}" hint-placeholder-val="{{false}}">
+    <div style="max-width: 1240px; margin: 0 auto; padding: 24px 16px 40px">
+      <nav aria-label="Breadcrumb" style="font-size: 13px; color: #555"><a href="Projects.dc.html" style="color: #555">Projects</a> › <b style="color: #000">{{nameShown}}</b></nav>
+      <div style="margin-top: 14px; display: flex; flex-wrap: wrap; gap: 18px; align-items: flex-start">
+        <div style="flex: 999 1 560px; min-width: 0; display: flex; flex-direction: column; gap: 16px">
+          <section style="background: #fff; border-radius: 36px; padding: 24px; display: flex; gap: 20px; align-items: center">
+            <sc-if value="{{hasPattern}}" hint-placeholder-val="{{false}}"><img src="{{pattern.src}}" alt="{{pattern.name}}" style="width: 140px; height: 175px; border-radius: 26px; object-fit: cover"></sc-if>
+            <sc-if value="{{noPattern}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="width: 140px; height: 175px; border-radius: 26px; border: 2px dashed #ccc; display: grid; place-items: center; color: #555; font-size: 12px; font-weight: 700">No cover yet</span></sc-if>
+            <div style="flex: 1">
+              <span style="display: inline-block; border-radius: 3000px; padding: 5px 12px; background: #f2f2f2; font-size: 12px; font-weight: 700">{{stage}}</span>
+              <h1 style="margin: 10px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 40px; line-height: 1; letter-spacing: -0.05em">{{nameShown}}</h1>
+              <p style="margin: 8px 0 0; font-size: 14px; color: #555">{{summary}}</p>
+            </div>
+          </section>
+          <section style="background: #fff; border-radius: 36px; padding: 24px">
+            <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.04em">Steps</h2>
+            <sc-if value="{{noSteps}}" hint-placeholder-val="{{true}}"><p style="margin: 8px 0 0; font-size: 14px; color: #555">No steps yet. Choose how to track them in the setup panel.</p></sc-if>
+            <sc-if value="{{hasSteps}}" hint-placeholder-val="{{false}}">
+              <ol style="margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+                <sc-for list="{{stepList}}" as="sl" hint-placeholder-count="4"><li style="display: flex; gap: 10px; align-items: center; font-size: 14px; background: #f2f2f2; border-radius: 16px; padding: 10px 12px"><span style="width: 22px; height: 22px; border-radius: 50%; border: 2px solid #000; flex-shrink: 0"></span>{{sl}}</li></sc-for>
+              </ol>
+            </sc-if>
+          </section>
+          <section style="background: #fff; border-radius: 36px; padding: 24px">
+            <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.04em">Journal</h2>
+            <p style="margin: 8px 0 0; font-size: 14px; color: #555">Notes, alterations, problems and fixes. Each one saves as you type and says "Saved".</p>
+          </section>
+        </div>
+
+        <aside style="flex: 1 1 380px; background: #fff; border-radius: 36px; padding: 20px">
+          <sc-if value="{{listMode}}" hint-placeholder-val="{{true}}">
+            <div style="display: flex; align-items: center; gap: 12px; background: #000; color: #fff; border-radius: 26px; padding: 14px">
+              <span role="img" aria-label="{{progressLabel}}" style="width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; {{ring}}"><span style="width: 40px; height: 40px; border-radius: 50%; background: #000; display: grid; place-items: center; font-size: 12px; font-weight: 700">{{doneCount}}/7</span></span>
+              <span><b style="display: block; font-family: 'Poppins', sans-serif; font-size: 18px; letter-spacing: -0.03em">{{setupTitle}}</b><span style="font-size: 12px; color: #c9c9c9">{{setupNote}}</span></span>
+            </div>
+            <ul aria-label="Finish setting up" style="margin: 10px 0 0; padding: 0; list-style: none">
+              <sc-for list="{{items}}" as="it" hint-placeholder-count="7">
+                <li style="border-bottom: 1px solid #f2f2f2">
+                  <button onClick="{{it.open}}" style="width: 100%; display: flex; align-items: center; gap: 12px; min-height: 58px; padding: 8px 4px; border: 0; background: transparent; font: inherit; text-align: left">
+                    <span aria-hidden="true" style="width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; flex-shrink: 0; {{it.dot}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="{{it.tick}}"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                    <span style="flex: 1; min-width: 0"><b style="display: block; font-size: 14px">{{it.label}}</b><span style="display: block; font-size: 12px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{it.value}}</span></span>
+                    <span style="font-size: 12px; font-weight: 700; {{it.actionStyle}}">{{it.action}}</span>
+                  </button>
+                </li>
+              </sc-for>
+            </ul>
+          </sc-if>
+
+          <sc-if value="{{qMode}}" hint-placeholder-val="{{false}}">
+            <div style="display: flex; align-items: center; gap: 8px">
+              <button onClick="{{closeSheet}}" style="display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px 0 8px; border: 0; border-radius: 3000px; background: #f2f2f2; font: inherit; font-size: 13px; font-weight: 700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>Checklist</button>
+              <span style="flex: 1; text-align: right; font-size: 12px; font-weight: 700; color: #555">{{q.pos}}</span>
+            </div>
+            <h2 style="margin: 14px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 26px; letter-spacing: -0.04em">{{q.title}}</h2>
+            <p style="margin: 4px 0 14px; font-size: 13px; color: #555">{{q.help}}</p>
+
+            <sc-if value="{{qPattern}}" hint-placeholder-val="{{false}}">
+              <div role="radiogroup" aria-label="Pattern" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+                <sc-for list="{{patterns}}" as="p" hint-placeholder-count="4">
+                  <button role="radio" aria-checked="{{p.on}}" onClick="{{p.pick}}" style="padding: 0; border-radius: 18px; overflow: hidden; background: #fff; text-align: left; font: inherit; {{p.ring}}"><img src="{{p.src}}" alt="" style="display: block; width: 100%; height: 110px; object-fit: cover"><span style="display: block; padding: 8px 10px"><b style="display: block; font-size: 13px">{{p.name}}</b><span style="font-size: 11px; color: #555">{{p.meta}}</span></span></button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{qFabric}}" hint-placeholder-val="{{false}}">
+              <div role="radiogroup" aria-label="Fabric" style="display: flex; flex-direction: column; gap: 6px">
+                <sc-for list="{{fabrics}}" as="f" hint-placeholder-count="4">
+                  <button role="radio" aria-checked="{{f.on}}" onClick="{{f.pick}}" style="display: flex; align-items: center; gap: 12px; padding: 8px; border-radius: 18px; background: #fff; font: inherit; text-align: left; {{f.ring}}"><img src="{{f.src}}" alt="" style="width: 52px; height: 52px; border-radius: 12px; object-fit: cover"><span style="flex: 1"><b style="display: block; font-size: 14px">{{f.name}}</b><span style="font-size: 12px; color: #555">{{f.have}}</span></span><span style="border-radius: 3000px; padding: 4px 9px; font-size: 11px; font-weight: 700; {{f.fitStyle}}">{{f.fit}}</span></button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{qThread}}" hint-placeholder-val="{{false}}">
+              <div role="radiogroup" aria-label="Thread" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px">
+                <sc-for list="{{threads}}" as="t" hint-placeholder-count="4">
+                  <button role="radio" aria-checked="{{t.on}}" onClick="{{t.pick}}" style="display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 18px; background: #fff; font: inherit; text-align: left; {{t.ring}}"><span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; border: 1px solid #ccc; flex-shrink: 0; background: {{t.hex}}"></span><span><b style="display: block; font-size: 13px">{{t.name}}</b><span style="font-size: 11px; color: #555">{{t.meta}}</span></span></button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{qMeasure}}" hint-placeholder-val="{{false}}">
+              <div role="radiogroup" aria-label="Measurement profile" style="display: flex; flex-direction: column; gap: 6px">
+                <sc-for list="{{measures}}" as="m" hint-placeholder-count="2">
+                  <button role="radio" aria-checked="{{m.on}}" onClick="{{m.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 12px; border-radius: 18px; background: #fff; font: inherit; text-align: left; {{m.ring}}"><span style="flex: 1"><b style="display: block; font-size: 14px">{{m.name}}</b><span style="font-size: 12px; color: #555">{{m.meta}}</span></span></button>
+                </sc-for>
+                <a href="Measurements.dc.html" style="align-self: flex-start; margin-top: 4px; font-size: 13px; font-weight: 700">Add new measurements</a>
+              </div>
+            </sc-if>
+            <sc-if value="{{qSize}}" hint-placeholder-val="{{false}}">
+              <div role="radiogroup" aria-label="Size" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+                <sc-for list="{{sizes}}" as="z" hint-placeholder-count="8">
+                  <button role="radio" aria-checked="{{z.on}}" onClick="{{z.pick}}" style="position: relative; min-height: 52px; border-radius: 16px; font: inherit; font-size: 16px; font-weight: 700; {{z.style}}">{{z.label}}<sc-if value="{{z.rec}}" hint-placeholder-val="{{false}}"><span style="position: absolute; left: 50%; bottom: -9px; transform: translateX(-50%); white-space: nowrap; background: #466cf3; color: #fff; border-radius: 3000px; padding: 1px 7px; font-size: 10px; font-weight: 700">fits you</span></sc-if></button>
+                </sc-for>
+              </div>
+              <p style="margin: 14px 0 0; font-size: 12px; color: #555">{{sizeNote}}</p>
+            </sc-if>
+            <sc-if value="{{qSteps}}" hint-placeholder-val="{{false}}">
+              <div role="radiogroup" aria-label="Steps" style="display: flex; flex-direction: column; gap: 6px">
+                <sc-for list="{{stepOpts}}" as="o" hint-placeholder-count="3">
+                  <button role="radio" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 12px; border-radius: 18px; background: #fff; font: inherit; text-align: left; {{o.ring}}"><span style="flex: 1"><b style="display: block; font-size: 14px">{{o.label}}</b><span style="font-size: 12px; color: #555">{{o.meta}}</span></span></button>
+                </sc-for>
+              </div>
+            </sc-if>
+            <sc-if value="{{qVis}}" hint-placeholder-val="{{false}}">
+              <div role="radiogroup" aria-label="Who can see this make" style="display: flex; flex-direction: column; gap: 6px">
+                <sc-for list="{{visOpts}}" as="v" hint-placeholder-count="3">
+                  <button role="radio" aria-checked="{{v.on}}" onClick="{{v.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 12px; border-radius: 18px; font: inherit; text-align: left; {{v.style}}"><span style="flex: 1"><b style="display: block; font-size: 14px">{{v.label}}</b><span style="font-size: 12px; opacity: .8">{{v.note}}</span></span></button>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <div style="margin-top: 18px; display: flex; gap: 8px">
+              <button onClick="{{skip}}" style="flex: 1; min-height: 50px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-weight: 700">Skip</button>
+              <button onClick="{{save}}" disabled="{{q.empty}}" style="flex: 1.4; min-height: 50px; border: 0; border-radius: 3000px; font: inherit; font-weight: 700; {{q.saveStyle}}">{{q.saveLabel}}</button>
+            </div>
+          </sc-if>
+        </aside>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+    <div role="status" style="position: absolute; left: 50%; bottom: 40px; z-index: 4; transform: translateX(-50%); background: #000; color: #fff; border-radius: 18px; padding: 12px 18px; font-size: 14px; font-weight: 600">{{toast}}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    this.state = { screen: 'quick', name: '', tried: false, pattern: -1, garment: -1, fabric: -1, thread: -1, measure: -1, size: '', steps: -1, vis: '', open: null, draft: null, toast: '' };
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var P = [
+      { name: 'Bayside Sailor Top', meta: 'Intermediate · needs 2.2 m', need: 2.2, src: '/_blob/e9b9124af50eb749d99a9f4a4477d928', garment: 1, steps: 9 },
+      { name: 'Willa Dress', meta: 'Beginner · needs 3.0 m', need: 3.0, src: '/_blob/188ffd136f4c0ada8a70caa52d09ec3b', garment: 0, steps: 7 },
+      { name: 'Harbour Pinafore', meta: 'Beginner · needs 2.4 m', need: 2.4, src: '/_blob/1192463bd0067b49a26194ff1b40ec1c', garment: 0, steps: 8 },
+      { name: 'Wrap Vest', meta: 'Advanced · needs 1.2 m', need: 1.2, src: '/_blob/a93207f7db6c002a302477269ae8ce59', garment: 1, steps: 11 }
+    ];
+    var F = [
+      { name: 'Chambray linen', have: 2.5, src: '/_blob/5fb545dfebc25a3ab288dabc4d4f34cc' },
+      { name: 'Polka dot cotton', have: 3.0, src: '/_blob/f6078638415aa9a1943ae3aab1bedae6' },
+      { name: 'Green gingham', have: 1.8, src: '/_blob/e551a46b8280f8ecc8ee3ab17952c2bf' },
+      { name: 'Sunset stripe linen', have: 1.2, src: '/_blob/544eca3d47a401399c1e405afd3fada4' }
+    ];
+    var T = [
+      { name: 'Navy', meta: 'All-purpose · 2 spools', hex: '#1f2a44' }, { name: 'Ecru', meta: 'All-purpose · 1 spool', hex: '#e9e1cf' },
+      { name: 'Slate blue', meta: 'Topstitch · 1 spool', hex: '#5b6f8f' }, { name: 'Black', meta: 'Serger · 4 cones', hex: '#111111' }
+    ];
+    var M = [{ name: 'Me · March 2026', meta: 'Bust 92 · Waist 76 · Hip 100 cm' }, { name: 'Me · last summer', meta: 'Bust 94 · Waist 78 · Hip 101 cm' }];
+    var SIZES = ['6', '8', '10', '12', '14', '16', '18', '20'];
+    var GARMENTS = ['Dress', 'Top', 'Trousers', 'Skirt', 'Outerwear', 'Bag', 'Other'];
+    var keys = ['pattern', 'fabric', 'thread', 'measure', 'size', 'steps', 'vis'];
+    var pat = s.pattern >= 0 ? P[s.pattern] : null;
+    var setIn = function (o, k) { var v = o[k]; return k === 'size' || k === 'vis' ? !!v : v >= 0; };
+    var isSet = function (k) { return setIn(s, k); };
+    var doneCount = keys.filter(isSet).length;
+    var cur = s.open ? (s.draft !== null ? s.draft : s[s.open]) : null;
+    var pick = function (v) { return function () { self.setState({ draft: v }); }; };
+    var ringOn = 'border:2px solid #000;background:#fffde0', ringOff = 'border:2px solid #e6e6e6';
+    var nextFrom = function (o, after) { for (var n = 1; n <= keys.length; n++) { var k = keys[(keys.indexOf(after) + n) % keys.length]; if (k !== after && !setIn(o, k)) return k; } return null; };
+    var fitOf = function (f) {
+      if (!pat) return { fit: f.have + ' m', style: 'background:#f2f2f2;color:#000' };
+      var diff = Math.round((f.have - pat.need) * 10) / 10;
+      return diff >= 0 ? { fit: 'Enough', style: 'background:#e6e51e;color:#000' } : { fit: 'Short ' + (-diff) + ' m', style: 'background:#c42a2a;color:#fff' };
+    };
+    var valueOf = {
+      pattern: pat ? pat.name : 'Not chosen',
+      fabric: s.fabric >= 0 ? F[s.fabric].name + ' · ' + F[s.fabric].have + ' m in your stash' : 'Not chosen',
+      thread: s.thread >= 0 ? T[s.thread].name + ' · ' + T[s.thread].meta : 'Not chosen',
+      measure: s.measure >= 0 ? M[s.measure].name : 'Not chosen',
+      size: s.size ? 'Size ' + s.size : 'Not chosen',
+      steps: s.steps === 0 ? (pat ? pat.steps : 8) + ' steps from the pattern' : (s.steps === 1 ? 'Your own steps' : (s.steps === 2 ? 'No steps' : 'Not set')),
+      vis: s.vis === 'public' ? 'Public' : (s.vis === 'followers' ? 'Followers' : (s.vis === 'private' ? 'Only me' : 'Only me (default)'))
+    };
+    var labelOf = { pattern: 'Pattern', fabric: 'Fabric', thread: 'Thread', measure: 'Measurements', size: 'Size you’re making', steps: 'Steps', vis: 'Who can see it' };
+    var Q = {
+      pattern: { title: 'Which pattern?', help: 'From your pattern library.' },
+      fabric: { title: 'Which fabric?', help: pat ? pat.name + ' needs ' + pat.need + ' m. We checked your stash.' : 'From your stash.' },
+      thread: { title: 'Which thread?', help: 'From your thread drawer.' },
+      measure: { title: 'Whose measurements?', help: 'Used to suggest a size. Always private.' },
+      size: { title: 'What size are you making?', help: 'You can change it after a muslin.' },
+      steps: { title: 'How do you want to track steps?', help: 'Steps drive the progress bar, so there’s no percentage to type.' },
+      vis: { title: 'Who can see this make?', help: 'Measurements and pattern PDFs never go public.' }
+    };
+    var q = { title: '', help: '', pos: '', empty: true, saveLabel: 'Save', saveStyle: '' };
+    if (s.open) {
+      var empty = s.open === 'size' || s.open === 'vis' ? !cur : !(cur >= 0);
+      var probe = Object.assign({}, s); probe[s.open] = cur;
+      q = { title: Q[s.open].title, help: Q[s.open].help, pos: (keys.indexOf(s.open) + 1) + ' of 7', empty: empty,
+        saveLabel: nextFrom(probe, s.open) ? 'Save and next' : 'Save', saveStyle: empty ? 'background:#e6e6e6;color:#555' : 'background:#e6e51e;color:#000' };
+    }
+    var deg = Math.round(doneCount / 7 * 360), allDone = doneCount === 7;
+    var bits = [];
+    if (s.garment >= 0) bits.push(GARMENTS[s.garment]);
+    if (pat) bits.push(pat.name);
+    if (s.fabric >= 0) bits.push(F[s.fabric].name);
+    if (s.size) bits.push('size ' + s.size);
+    return {
+      sQuick: s.screen === 'quick', sPage: s.screen === 'page',
+      name: s.name, onName: function (e) { self.setState({ name: e.target.value }); },
+      nameError: s.tried && !s.name.trim(), nameInvalid: s.tried && !s.name.trim() ? 'true' : 'false',
+      nameBorder: s.tried && !s.name.trim() ? 'border: 2px solid #c42a2a' : 'border: 1px solid #000',
+      patterns: P.map(function (p, n) {
+        var on = s.open === 'pattern' ? cur === n : s.pattern === n;
+        return { name: p.name, meta: p.meta, src: p.src, on: on ? 'true' : 'false', ring: on ? ringOn : ringOff,
+          pick: s.open === 'pattern' ? pick(n) : function () { var off = s.pattern === n; self.setState({ pattern: off ? -1 : n, garment: off ? s.garment : p.garment, name: s.name || (off ? '' : p.name) }); } };
+      }),
+      garments: GARMENTS.map(function (g, n) { var on = s.garment === n; return { label: g, on: on ? 'true' : 'false', style: on ? 'border:2px solid #000;background:#000;color:#fff' : 'border:2px solid #e6e6e6;background:#fff;color:#000', pick: function () { self.setState({ garment: on ? -1 : n }); } }; }),
+      create: function () { if (!s.name.trim()) { self.setState({ tried: true }); return; } self.setState({ screen: 'page', toast: 'Project created. Finish setting up whenever you like.' }); },
+      nameShown: s.name || 'Untitled project',
+      stage: 'Planning',
+      summary: bits.length ? bits.join(' · ') : 'Add a pattern and fabric from the setup panel.',
+      hasPattern: !!pat, noPattern: !pat, pattern: pat || P[0],
+      doneCount: doneCount, progressLabel: doneCount + ' of 7 set up',
+      ring: 'background: conic-gradient(#e6e51e ' + deg + 'deg, #444 0)',
+      setupTitle: allDone ? 'All set up' : 'Finish setting up',
+      setupNote: allDone ? 'Tick off steps to move your progress.' : 'Pick any row. Skip what you don’t know yet.',
+      listMode: !s.open, qMode: !!s.open,
+      items: keys.map(function (k) {
+        var done = isSet(k);
+        return { label: labelOf[k], value: valueOf[k], open: function () { self.setState({ open: k, draft: null, toast: '' }); }, action: done ? 'Change' : 'Add',
+          actionStyle: done ? 'color:#555' : 'color:#2f55d4', dot: done ? 'background:#e6e51e' : 'border:2px solid #ccc', tick: done ? '' : 'visibility:hidden' };
+      }),
+      noSteps: s.steps !== 0, hasSteps: s.steps === 0,
+      stepList: ['Cut fabric and interfacing', 'Staystitch the neckline', 'Sew shoulder seams', 'Attach the collar'],
+      q: q,
+      qPattern: s.open === 'pattern', qFabric: s.open === 'fabric', qThread: s.open === 'thread', qMeasure: s.open === 'measure', qSize: s.open === 'size', qSteps: s.open === 'steps', qVis: s.open === 'vis',
+      fabrics: F.map(function (f, n) { var on = cur === n, ft = fitOf(f); return { name: f.name, src: f.src, have: f.have + ' m in your stash', fit: ft.fit, fitStyle: ft.style, on: on ? 'true' : 'false', ring: on ? ringOn : ringOff, pick: pick(n) }; }),
+      threads: T.map(function (t, n) { var on = cur === n; return { name: t.name, meta: t.meta, hex: t.hex, on: on ? 'true' : 'false', ring: on ? ringOn : ringOff, pick: pick(n) }; }),
+      measures: M.map(function (m, n) { var on = cur === n; return { name: m.name, meta: m.meta, on: on ? 'true' : 'false', ring: on ? ringOn : ringOff, pick: pick(n) }; }),
+      sizes: SIZES.map(function (z) { var on = cur === z; return { label: z, rec: s.measure >= 0 && z === '12', on: on ? 'true' : 'false', style: on ? 'border:2px solid #000;background:#000;color:#fff' : 'border:2px solid #e6e6e6;background:#fff;color:#000', pick: pick(z) }; }),
+      sizeNote: s.measure >= 0 ? 'Size 12 matches your bust and hip on the ' + (pat ? pat.name : 'pattern') + ' size chart.' : 'Add measurements and we’ll suggest a size.',
+      stepOpts: [
+        { label: 'Use the pattern’s steps', meta: pat ? pat.steps + ' steps from ' + pat.name : 'Pick a pattern first to get its steps' },
+        { label: 'Add my own', meta: 'Start with an empty list' },
+        { label: 'No steps', meta: 'Just a journal and photos' }
+      ].map(function (o, n) { var on = cur === n; return { label: o.label, meta: o.meta, on: on ? 'true' : 'false', ring: on ? ringOn : ringOff, pick: pick(n) }; }),
+      visOpts: [
+        { id: 'private', label: 'Only me', note: 'The default. A private log.' },
+        { id: 'followers', label: 'Followers', note: 'People who follow you see it on your profile.' },
+        { id: 'public', label: 'Public', note: 'Anyone can see it, and it shows on the pattern page.' }
+      ].map(function (o) { var on = cur === o.id; return { label: o.label, note: o.note, on: on ? 'true' : 'false', style: on ? 'border:2px solid #000;background:#e6e51e;color:#000' : 'border:2px solid #e6e6e6;background:#fff;color:#000', pick: pick(o.id) }; }),
+      closeSheet: function () { self.setState({ open: null, draft: null }); },
+      skip: function () { self.setState({ open: nextFrom(s, s.open), draft: null }); },
+      save: function () {
+        var patch = {}; patch[s.open] = cur;
+        var merged = Object.assign({}, s, patch);
+        var nx = nextFrom(merged, s.open);
+        patch.open = nx; patch.draft = null; patch.toast = nx ? '' : 'Saved.';
+        self.setState(patch);
+      },
+      hasToast: !!s.toast, toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

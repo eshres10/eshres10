@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seams Club — new post flow (desktop)</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+textarea:focus,input:focus{outline:2px solid #e6e51e;outline-offset:1px}
+</style>
+</helmet>
+<div style="position: relative; min-height: 1000px; background-color: #f2f2f2; background-image: radial-gradient(#d4d4d4 1px, transparent 1px); background-size: 20px 20px; font-family: 'Inter', system-ui, sans-serif; color: #000; overflow: hidden">
+
+  <div aria-hidden="true" style="position: absolute; inset: 0; display: flex; gap: 24px; padding: 24px">
+    <div style="flex: 0 0 264px; background: #e6e51e; border-radius: 36px"></div>
+    <div style="flex: 1; display: flex; flex-direction: column; gap: 18px; max-width: 640px; margin: 0 auto">
+      <div style="height: 64px; background: #fff; border-radius: 30px"></div>
+      <div style="height: 520px; background: #fff; border-radius: 36px"></div>
+      <div style="height: 300px; background: #fff; border-radius: 36px"></div>
+    </div>
+  </div>
+  <div aria-hidden="true" style="position: absolute; inset: 0; background: rgba(0,0,0,.55)"></div>
+
+  <section role="dialog" aria-modal="true" aria-label="{{title}}" style="position: relative; z-index: 2; max-width: 1080px; margin: 56px auto 0; padding: 0 16px">
+    <div style="background: #fff; border-radius: 34px; overflow: hidden; box-shadow: rgba(0,0,0,.35) 0 30px 60px -20px">
+
+      <header style="display: flex; flex-wrap: wrap; align-items: center; gap: 12px; padding: 12px 14px; border-bottom: 1px solid #e6e6e6">
+        <sc-if value="{{atStart}}" hint-placeholder-val="{{true}}">
+          <button onClick="{{askClose}}" aria-label="Close" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button>
+        </sc-if>
+        <sc-if value="{{notStart}}" hint-placeholder-val="{{false}}">
+          <button onClick="{{back}}" aria-label="Back" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+        </sc-if>
+        <span style="min-width: 150px"><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">{{title}}</span><span style="display: block; font-size: 12px; color: #555">{{sub}}</span></span>
+        <ol aria-label="Steps" style="flex: 1; margin: 0; padding: 0; list-style: none; display: flex; justify-content: center; gap: 6px">
+          <sc-for list="{{steps}}" as="st" hint-placeholder-count="4">
+            <li><button onClick="{{st.go}}" disabled="{{st.locked}}" aria-current="{{st.cur}}" style="min-height: 36px; padding: 0 14px; border: 0; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{st.style}}">{{st.n}}. {{st.label}}</button></li>
+          </sc-for>
+        </ol>
+        <sc-if value="{{showNext}}" hint-placeholder-val="{{true}}">
+          <button onClick="{{next}}" disabled="{{nextDisabled}}" style="min-height: 44px; padding: 0 24px; border: 0; border-radius: 3000px; font: inherit; font-size: 15px; font-weight: 700; {{nextStyle}}">Next</button>
+        </sc-if>
+        <sc-if value="{{showShare}}" hint-placeholder-val="{{false}}">
+          <button onClick="{{share}}" disabled="{{visError}}" style="min-height: 44px; padding: 0 24px; border: 0; border-radius: 3000px; font: inherit; font-size: 15px; font-weight: 700; {{shareStyle}}">{{shareLabel}}</button>
+        </sc-if>
+      </header>
+
+      <!-- Step 1: empty drop zone -->
+      <sc-if value="{{sDrop}}" hint-placeholder-val="{{true}}">
+        <div style="height: 640px; display: grid; place-items: center; padding: 24px">
+          <div style="width: 100%; height: 100%; border: 2px dashed #bbb; border-radius: 28px; display: grid; place-items: center; text-align: center; background: #fafafa">
+            <div>
+              <span style="display: inline-grid; place-items: center; width: 84px; height: 84px; border-radius: 26px; background: #e6e51e"><svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 5h18v14H3z M3 15l5-5 4 4 3-3 6 6 M15 9h.01"></path></svg></span>
+              <h2 style="margin: 16px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: -0.05em">Drag photos here</h2>
+              <p style="margin: 6px 0 0; font-size: 14px; color: #555">Up to 10 · JPG, PNG, WebP or GIF · we resize them and strip location data</p>
+              <div style="margin-top: 18px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px">
+                <button onClick="{{choose}}" style="min-height: 50px; padding: 0 24px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 15px; font-weight: 700">Choose from computer</button>
+                <button onClick="{{toStatus}}" style="min-height: 50px; padding: 0 24px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 15px; font-weight: 700">Write a status instead</button>
+              </div>
+              <p style="margin: 18px 0 0; font-size: 13px; color: #555"><b style="color: #000">1 draft</b> waiting · Lavender sundress, saved yesterday · <button onClick="{{choose}}" style="border: 0; padding: 0; background: transparent; font: inherit; font-weight: 700; text-decoration: underline">Open draft</button></p>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Step 1 (status) -->
+      <sc-if value="{{sStatus}}" hint-placeholder-val="{{false}}">
+        <div style="height: 640px; display: flex; flex-wrap: wrap; gap: 24px; padding: 24px; align-items: stretch">
+          <label style="flex: 1 1 480px; display: flex; flex-direction: column; background: #e6e51e; border-radius: 30px; padding: 28px">
+            <span style="font-size: 13px; font-weight: 700">What's on your table?</span>
+            <textarea value="{{caption}}" onChange="{{onCaption}}" placeholder="Cutting out the sailor collar tonight…" style="flex: 1; margin-top: 10px; width: 100%; border: 0; resize: none; background: transparent; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 30px; line-height: 1.25; letter-spacing: -0.03em"></textarea>
+            <span style="text-align: right; font-size: 13px; font-weight: 600">{{charCount}} / 2,200</span>
+          </label>
+          <div style="flex: 0 1 300px; display: flex; flex-direction: column; gap: 12px">
+            <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #3a3a3a">A status is words only. Hashtags, tags and challenges work the same as photo posts. You'll add them next.</p>
+            <button onClick="{{toPhotos}}" style="align-self: flex-start; min-height: 44px; padding: 0 18px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 14px; font-weight: 700">Add photos instead</button>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Steps 2–4: media left, panel right -->
+      <sc-if value="{{sSplit}}" hint-placeholder-val="{{false}}">
+        <div style="display: flex; flex-wrap: wrap; min-height: 640px">
+          <div style="flex: 1 1 520px; min-width: 0; background: #111; display: grid; place-items: center; position: relative">
+            <sc-if value="{{hasPhotos}}" hint-placeholder-val="{{true}}">
+              <span style="position: relative; display: block; height: 600px; max-width: 100%; {{aspectStyle}}">
+                <img src="{{view.src}}" alt="{{view.alt}}" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 8px">
+              </span>
+              <button onClick="{{prevPhoto}}" aria-label="Previous photo" style="position: absolute; left: 16px; top: 50%; width: 44px; height: 44px; margin-top: -22px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+              <button onClick="{{nextPhoto}}" aria-label="Next photo" style="position: absolute; right: 16px; top: 50%; width: 44px; height: 44px; margin-top: -22px; border: 0; border-radius: 50%; background: rgba(255,255,255,.9); display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></button>
+              <span style="position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); background: rgba(0,0,0,.72); color: #fff; border-radius: 3000px; padding: 4px 12px; font-size: 12px; font-weight: 700">{{viewPos}}</span>
+            </sc-if>
+            <sc-if value="{{noPhotos}}" hint-placeholder-val="{{false}}">
+              <div style="max-width: 420px; margin: 40px; background: #e6e51e; border-radius: 30px; padding: 30px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 24px; line-height: 1.3; letter-spacing: -0.03em; white-space: pre-wrap">{{caption}}</div>
+            </sc-if>
+          </div>
+
+          <div style="flex: 1 1 380px; max-width: 100%; display: flex; flex-direction: column; gap: 14px; padding: 20px; max-height: 640px; overflow-y: auto">
+
+            <sc-if value="{{sEdit}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-direction: column; gap: 14px">
+                <div>
+                  <div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">Order, cover and alt text</div>
+                  <p style="margin: 4px 0 0; font-size: 13px; color: #555">The first photo is the cover. Photos keep uploading while you work.</p>
+                </div>
+                <ol style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+                  <sc-for list="{{chosen}}" as="c" hint-placeholder-count="3">
+                    <li style="display: flex; gap: 10px; align-items: flex-start; border-radius: 20px; padding: 8px; {{c.ring}}">
+                      <button onClick="{{c.view}}" aria-label="{{c.viewLabel}}" style="position: relative; flex-shrink: 0; width: 64px; height: 80px; padding: 0; border: 0; border-radius: 12px; overflow: hidden; background: #ddd"><img src="{{c.src}}" alt="" style="width: 100%; height: 100%; object-fit: cover"><sc-if value="{{c.cover}}" hint-placeholder-val="{{false}}"><span style="position: absolute; left: 4px; top: 4px; background: #e6e51e; border-radius: 3000px; padding: 1px 6px; font-size: 10px; font-weight: 700">Cover</span></sc-if></button>
+                      <span style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px">
+                        <label><span style="display: block; font-size: 11px; font-weight: 700; color: #555">Alt text for photo {{c.n}}</span><input value="{{c.altValue}}" onChange="{{c.onAlt}}" placeholder="Describe what's in the photo" style="margin-top: 3px; width: 100%; min-height: 38px; border: 1px solid #000; border-radius: 12px; padding: 0 10px; font: inherit; font-size: 13px"></label>
+                        <sc-if value="{{c.uploading}}" hint-placeholder-val="{{false}}"><span style="font-size: 11px; font-weight: 700">Uploading 64%<span style="display: block; margin-top: 3px; height: 4px; border-radius: 3000px; background: #e6e6e6"><span style="display: block; width: 64%; height: 100%; border-radius: 3000px; background: #000"></span></span></span></sc-if>
+                      </span>
+                      <span style="display: flex; flex-direction: column; gap: 4px">
+                        <button onClick="{{c.earlier}}" disabled="{{c.first}}" aria-label="Move earlier" style="width: 32px; height: 32px; border: 1px solid #000; border-radius: 50%; background: #fff; display: grid; place-items: center; {{c.earlierDim}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 15l-6-6-6 6"></path></svg></button>
+                        <button onClick="{{c.later}}" disabled="{{c.last}}" aria-label="Move later" style="width: 32px; height: 32px; border: 1px solid #000; border-radius: 50%; background: #fff; display: grid; place-items: center; {{c.laterDim}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"></path></svg></button>
+                        <button onClick="{{c.remove}}" aria-label="{{c.removeLabel}}" style="width: 32px; height: 32px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button>
+                      </span>
+                    </li>
+                  </sc-for>
+                </ol>
+                <button onClick="{{addMore}}" disabled="{{full}}" style="min-height: 44px; border: 2px dashed #bbb; border-radius: 3000px; background: #fafafa; font: inherit; font-size: 13px; font-weight: 700">+ Add more photos ({{orderCount}} of 10)</button>
+                <div>
+                  <div style="font-size: 12px; font-weight: 700; color: #555">Shape</div>
+                  <div role="radiogroup" aria-label="Photo shape" style="margin-top: 6px; display: flex; gap: 4px; background: #f2f2f2; border-radius: 3000px; padding: 4px">
+                    <sc-for list="{{aspects}}" as="a" hint-placeholder-count="3">
+                      <button role="radio" aria-checked="{{a.on}}" onClick="{{a.pick}}" style="flex: 1; min-height: 36px; border: 0; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{a.style}}">{{a.label}}</button>
+                    </sc-for>
+                  </div>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{sDetails}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-direction: column; gap: 14px">
+                <div style="display: flex; align-items: center; gap: 10px"><span style="width: 36px; height: 36px; border-radius: 50%; background: #000; color: #e6e51e; display: grid; place-items: center; font-weight: 700">E</span><b style="font-size: 14px">ena.sews</b></div>
+                <label style="display: block">
+                  <span style="display: flex; font-size: 12px; font-weight: 700; color: #555"><span style="flex: 1">Caption</span><span>{{charCount}} / 2,200</span></span>
+                  <textarea rows="5" value="{{caption}}" onChange="{{onCaption}}" placeholder="Write a caption… type # to add hashtags" style="margin-top: 6px; width: 100%; border: 1px solid #000; border-radius: 16px; padding: 10px 12px; resize: vertical; font: inherit; font-size: 15px; line-height: 1.5"></textarea>
+                </label>
+                <sc-if value="{{typing}}" hint-placeholder-val="{{true}}">
+                  <div role="listbox" aria-label="Matching hashtags" style="margin-top: -8px; border: 1px solid #000; border-radius: 16px; overflow: hidden">
+                    <sc-for list="{{sugs}}" as="s" hint-placeholder-count="4">
+                      <button onClick="{{s.use}}" style="width: 100%; display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 0 12px; border: 0; border-bottom: 1px solid #e6e6e6; background: #fff; font: inherit; text-align: left"><span style="width: 28px; height: 28px; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center; font-weight: 700">#</span><b style="flex: 1; font-size: 14px">{{s.tag}}</b><span style="font-size: 12px; color: #555">{{s.count}} posts</span></button>
+                    </sc-for>
+                  </div>
+                </sc-if>
+                <sc-if value="{{notTyping}}" hint-placeholder-val="{{false}}">
+                  <div>
+                    <div style="display: flex; font-size: 12px; font-weight: 700; color: #555"><span style="flex: 1">Suggested hashtags</span><span style="{{tagCountStyle}}">{{tagCount}} / 30</span></div>
+                    <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px">
+                      <sc-for list="{{sugs}}" as="s" hint-placeholder-count="4">
+                        <button onClick="{{s.use}}" aria-label="{{s.aria}}" style="min-height: 34px; border: 0; border-radius: 3000px; padding: 0 12px; background: #f2f2f2; font: inherit; font-size: 13px; font-weight: 700">+ #{{s.tag}} <span style="font-weight: 500; color: #555">{{s.count}}</span></button>
+                      </sc-for>
+                    </div>
+                  </div>
+                </sc-if>
+                <div style="border: 1px solid #e6e6e6; border-radius: 20px; padding: 2px 14px">
+                  <div style="display: flex; align-items: center; gap: 10px; min-height: 52px; border-bottom: 1px solid #e6e6e6">
+                    <span style="flex: 1; font-size: 14px; font-weight: 600">Make</span>
+                    <label style="font-size: 13px"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Tag a make</span><select onChange="{{pickMake}}" value="{{makeValue}}" style="min-height: 38px; border: 1px solid #000; border-radius: 3000px; padding: 0 12px; background: #fff; font: inherit; font-size: 13px; font-weight: 600"><option value="-1">None</option><option value="0">Sailor collar set</option><option value="1">Lavender sundress</option><option value="2">Denim pinafore</option></select></label>
+                  </div>
+                  <div style="display: flex; align-items: center; gap: 10px; min-height: 48px; border-bottom: 1px solid #e6e6e6"><span style="flex: 1; font-size: 14px; font-weight: 600">Pattern</span><span style="font-size: 13px; color: #555">{{make.pattern}}</span></div>
+                  <div style="display: flex; align-items: center; gap: 10px; min-height: 48px"><span style="flex: 1; font-size: 14px; font-weight: 600">Fabric</span><span style="font-size: 13px; color: #555">{{make.fabric}}</span></div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px; border: 1px solid #e6e6e6; border-radius: 20px; padding: 12px 14px">
+                  <span style="flex: 1"><span style="display: block; font-size: 14px; font-weight: 600">Enter in a challenge</span><span style="display: block; font-size: 12px; color: #555">#sewfromyourstash · ends in 12 days</span></span>
+                  <button role="switch" aria-checked="{{chOn}}" onClick="{{toggleCh}}" aria-label="Enter in Sew From Your Stash" style="width: 52px; height: 32px; border: 0; padding: 0; border-radius: 3000px; position: relative; {{chTrack}}"><span style="position: absolute; top: 4px; width: 24px; height: 24px; border-radius: 50%; background: #fff; {{chKnob}}"></span></button>
+                </div>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{sShare}}" hint-placeholder-val="{{false}}">
+              <div style="display: flex; flex-direction: column; gap: 12px">
+                <div style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">Who can see this?</div>
+                <div role="radiogroup" aria-label="Who can see this post" style="display: flex; flex-direction: column; gap: 6px">
+                  <sc-for list="{{vis}}" as="v" hint-placeholder-count="3">
+                    <button role="radio" aria-checked="{{v.on}}" onClick="{{v.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 14px; border-radius: 18px; font: inherit; text-align: left; {{v.style}}">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{v.icon}}"></path></svg>
+                      <span style="flex: 1"><span style="display: block; font-size: 14px; font-weight: 700">{{v.label}}</span><span style="display: block; font-size: 12px; opacity: .8">{{v.note}}</span></span>
+                    </button>
+                  </sc-for>
+                </div>
+                <sc-if value="{{visError}}" hint-placeholder-val="{{false}}">
+                  <div role="alert" style="display: flex; align-items: center; gap: 10px; border: 2px solid #c42a2a; border-radius: 16px; padding: 10px 12px">
+                    <span style="flex: 1; font-size: 13px; font-weight: 600; color: #c42a2a">Challenge entries have to be public.</span>
+                    <button onClick="{{makePublic}}" style="min-height: 36px; padding: 0 12px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 12px; font-weight: 700">Make it public</button>
+                  </div>
+                </sc-if>
+                <div style="border: 1px solid #e6e6e6; border-radius: 20px; padding: 12px 14px">
+                  <div style="font-size: 12px; font-weight: 700; color: #555">Caption</div>
+                  <p style="margin: 6px 0 0; font-size: 14px; line-height: 1.5"><sc-for list="{{capParts}}" as="p" hint-placeholder-count="3"><span style="{{p.style}}">{{p.text}}</span></sc-for></p>
+                  <div style="margin-top: 8px; font-size: 12px; color: #555">{{tagSummary}}</div>
+                </div>
+                <sc-if value="{{uploadNote}}" hint-placeholder-val="{{false}}"><p style="margin: 0; font-size: 12px; color: #555">The last photo finishes uploading while you share.</p></sc-if>
+              </div>
+            </sc-if>
+          </div>
+        </div>
+      </sc-if>
+
+      <!-- Done -->
+      <sc-if value="{{sDone}}" hint-placeholder-val="{{false}}">
+        <div style="height: 640px; display: grid; place-items: center; padding: 24px; text-align: center">
+          <div style="max-width: 460px">
+            <span style="display: inline-grid; place-items: center; width: 72px; height: 72px; border-radius: 50%; background: #e6e51e"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>
+            <h2 style="margin: 16px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 34px; letter-spacing: -0.05em">{{doneTitle}}</h2>
+            <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.6; color: #3a3a3a">{{doneNote}}</p>
+            <div style="margin-top: 18px; display: flex; justify-content: center; gap: 10px">
+              <a href="MakeDetail.dc.html" style="display: inline-flex; align-items: center; min-height: 50px; padding: 0 24px; border-radius: 3000px; background: #000; color: #fff; text-decoration: none; font-weight: 700">View post</a>
+              <button onClick="{{restart}}" style="min-height: 50px; padding: 0 24px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 15px; font-weight: 700">Start another</button>
+            </div>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </section>
+
+  <sc-if value="{{sheetClose}}" hint-placeholder-val="{{false}}">
+    <div aria-hidden="true" style="position: absolute; inset: 0; z-index: 3; background: rgba(0,0,0,.4)"></div>
+    <section role="alertdialog" aria-modal="true" aria-label="Keep this post as a draft?" style="position: absolute; left: 50%; top: 300px; z-index: 4; width: 400px; margin-left: -200px; background: #fff; border-radius: 30px; padding: 26px; text-align: center">
+      <b style="display: block; font-family: 'Poppins', sans-serif; font-size: 22px; letter-spacing: -0.04em">Keep this as a draft?</b>
+      <p style="margin: 6px 0 0; font-size: 14px; color: #555">You'll find it the next time you start a post. Uploaded photos stay with it.</p>
+      <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px">
+        <button onClick="{{saveDraft}}" style="min-height: 48px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-weight: 700">Save draft</button>
+        <button onClick="{{discard}}" style="min-height: 48px; border: 1px solid #c42a2a; border-radius: 3000px; background: #fff; color: #c42a2a; font: inherit; font-weight: 700">Discard</button>
+        <button onClick="{{closeSheet}}" style="min-height: 48px; border: 0; border-radius: 3000px; background: #f2f2f2; font: inherit; font-weight: 700">Keep editing</button>
+      </div>
+    </section>
+  </sc-if>
+
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+    <div role="status" style="position: absolute; left: 50%; bottom: 40px; z-index: 4; transform: translateX(-50%); background: #000; color: #fff; border-radius: 18px; padding: 12px 18px; font-size: 14px; font-weight: 600">{{toast}}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"mode":{"editor":"enum","options":["new","edit"],"default":"new"},"$preview":{"width":1440,"height":1000}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = this.fresh((props.mode || 'new') === 'edit'); }
+  fresh(edit) {
+    return {
+      edit: edit, step: edit ? 2 : 0, kind: 'photo', order: edit ? [0, 1, 2] : [], view: 0, aspect: '4:5',
+      caption: edit ? 'Sailor collar set is done! Plus a knot bag from the offcuts #sailorcollar #linen ' : 'Sailor collar set is done! Plus a knot bag from the offcuts #sailorcollar #lin',
+      make: edit ? 0 : -1, ch: edit, vis: 'public', alts: edit ? { 0: 'Navy sailor collar top on a hanger', 1: 'Knot bag in navy linen', 2: 'Folded linen before cutting' } : { 0: 'Navy sailor collar top on a hanger' },
+      sheet: null, toast: ''
+    };
+  }
+  componentDidUpdate(prev) { if ((prev.mode || 'new') !== (this.props.mode || 'new')) this.setState(this.fresh((this.props.mode || 'new') === 'edit')); }
+  renderVals() {
+    var self = this, s = this.state;
+    var i = {
+      globe: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z",
+      users: "M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
+      lock: "M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4"
+    };
+    var G = [
+      { src: '/_blob/e9b9124af50eb749d99a9f4a4477d928', alt: 'Sailor collar top' },
+      { src: '/_blob/5bf905114ac1edcca363e2d2dc675860', alt: 'Knot bag from the offcuts' },
+      { src: '/_blob/973249613519f24b590d1a29562f5378', alt: 'Linen before cutting' },
+      { src: '/_blob/623f53848a0fba7bb103667b6cd6d996', alt: 'Stack of linen' }
+    ];
+    var MAKES = [
+      { name: 'Sailor collar set', pattern: 'Bayside Sailor Top', fabric: 'Navy linen', tags: ['baysidesailortop', 'sailorcollar', 'linen'] },
+      { name: 'Lavender sundress', pattern: 'Willa Dress', fabric: 'Lavender cotton lawn', tags: ['willadress', 'cottonlawn', 'sundress'] },
+      { name: 'Denim pinafore', pattern: 'Harbour Pinafore', fabric: 'Mid-weight denim', tags: ['harbourpinafore', 'denim', 'pinafore'] }
+    ];
+    var TAGS = [
+      ['linen', '12.4k'], ['linenlove', '3.1k'], ['linenskirt', '840'], ['linenset', '210'], ['sailorcollar', '1.2k'], ['sewfromyourstash', '5.6k'],
+      ['baysidesailortop', '96'], ['memade', '48k'], ['offcuts', '2.3k'], ['knotbag', '410'], ['zerowastesewing', '7.8k'], ['handmadewardrobe', '22k'],
+      ['willadress', '310'], ['cottonlawn', '1.9k'], ['sundress', '6.2k'], ['harbourpinafore', '74'], ['denim', '15k'], ['pinafore', '2.7k'], ['sewing', '120k']
+    ];
+    var count = function (t) { for (var k = 0; k < TAGS.length; k++) if (TAGS[k][0] === t) return TAGS[k][1]; return 'new'; };
+    var edit = s.edit, photo = s.kind === 'photo', order = s.order;
+    var labels = ['Photos', 'Edit', 'Details', 'Share'];
+    var go = function (n) { return function () { self.setState({ step: n }); }; };
+    var cap = s.caption || '';
+    var tagsIn = (cap.match(/#[a-z0-9_]+/gi) || []).map(function (t) { return t.slice(1).toLowerCase(); });
+    var words = cap.split(/\s/), last = words[words.length - 1] || '';
+    var typing = last.charAt(0) === '#' && last.length >= 2;
+    var make = s.make >= 0 ? MAKES[s.make] : null;
+    var sugs;
+    if (typing) {
+      var pre = last.slice(1).toLowerCase();
+      sugs = TAGS.filter(function (t) { return t[0].indexOf(pre) === 0 && t[0] !== pre; }).slice(0, 5).map(function (t) {
+        return { tag: t[0], count: t[1], aria: 'Use #' + t[0], use: function () { self.setState({ caption: cap.slice(0, cap.length - last.length) + '#' + t[0] + ' ' }); } };
+      });
+    } else {
+      var base = (make ? make.tags : ['memade', 'sailorcollar', 'offcuts']).concat(['sewfromyourstash', 'memade', 'zerowastesewing']);
+      var seen = {};
+      sugs = base.filter(function (t) { if (seen[t] || tagsIn.indexOf(t) >= 0) return false; seen[t] = 1; return true; }).slice(0, 6).map(function (t) {
+        return { tag: t, count: count(t), aria: 'Add #' + t, use: function () { var c = cap.replace(/\s*$/, ''); self.setState({ caption: c + (c ? ' ' : '') + '#' + t + ' ' }); } };
+      });
+    }
+    var vIdx = Math.min(s.view, Math.max(0, order.length - 1));
+    var chosen = order.map(function (gi, n) {
+      var swap = function (a, b) { return function () { var o = order.slice(); var t = o[a]; o[a] = o[b]; o[b] = t; self.setState({ order: o, view: b }); }; };
+      return {
+        n: n + 1, src: G[gi].src, cover: n === 0, uploading: gi === 2 && !edit,
+        ring: n === vIdx ? 'background:#fffde0;border:2px solid #000' : 'background:#fff;border:2px solid #e6e6e6',
+        view: function () { self.setState({ view: n }); }, viewLabel: 'Show photo ' + (n + 1),
+        altValue: s.alts[gi] || '',
+        onAlt: function (e) { var a = Object.assign({}, s.alts); a[gi] = e.target.value; self.setState({ alts: a }); },
+        first: n === 0, last: n === order.length - 1,
+        earlierDim: n === 0 ? 'opacity:.3' : '', laterDim: n === order.length - 1 ? 'opacity:.3' : '',
+        earlier: swap(n, n - 1), later: swap(n, n + 1),
+        removeLabel: 'Remove photo ' + (n + 1),
+        remove: function () { var o = order.filter(function (x) { return x !== gi; }); self.setState({ order: o, view: 0, step: o.length ? s.step : 0 }); }
+      };
+    });
+    var visError = s.ch && s.vis !== 'public';
+    var nextOk = s.step === 0 ? (photo ? order.length > 0 : cap.trim().length > 0) : true;
+    var steps = labels.map(function (l, n) {
+      var skip = !photo && n === 1, cur = s.step === n, done = s.step > n;
+      var reach = (edit || n < s.step) && !skip && (photo ? order.length > 0 || n === 0 : true);
+      return { n: n + 1, label: l, cur: cur ? 'step' : 'false', locked: !reach, go: go(n),
+        style: skip ? 'background:#fff;color:#8a8a8a;text-decoration:line-through' : (cur ? 'background:#000;color:#fff' : (done || edit ? 'background:#e6e51e;color:#000' : 'background:#f2f2f2;color:#555')) };
+    });
+    var parts = [];
+    cap.split(/(#[a-z0-9_]+)/gi).forEach(function (p) { if (p) parts.push({ text: p, style: p.charAt(0) === '#' ? 'color:#2f55d4;font-weight:600' : '' }); });
+    var visOpts = [
+      { id: 'public', label: 'Public', note: 'Anyone, even without an account. Shows on hashtag pages.', icon: i.globe },
+      { id: 'followers', label: 'Followers', note: 'Only people who follow you.', icon: i.users },
+      { id: 'private', label: 'Only me', note: 'A private log. You can share it later.', icon: i.lock }
+    ];
+    return {
+      title: edit ? 'Edit post' : 'Create a post',
+      sub: s.step === 4 ? 'Done' : (edit ? 'Nothing changes until you save' : (s.step === 0 ? 'Photos or a status' : 'Draft saved just now')),
+      atStart: s.step === 0 || s.step === 4, notStart: s.step > 0 && s.step < 4,
+      steps: steps,
+      showNext: s.step < 3 && !(s.step === 0 && photo && order.length === 0), nextDisabled: !nextOk,
+      nextStyle: nextOk ? 'background:#e6e51e;color:#000' : 'background:#e6e6e6;color:#555',
+      showShare: s.step === 3,
+      next: function () { var n = s.step + 1; if (!photo && n === 1) n = 2; self.setState({ step: n }); },
+      back: function () { var n = s.step - 1; if (!photo && n === 1) n = 0; self.setState({ step: n }); },
+      askClose: function () { if (s.step === 4) self.setState(self.fresh(edit)); else self.setState({ sheet: 'close' }); },
+      sDrop: s.step === 0 && photo, sStatus: s.step === 0 && !photo,
+      sSplit: s.step >= 1 && s.step <= 3, sEdit: s.step === 1, sDetails: s.step === 2, sShare: s.step === 3, sDone: s.step === 4,
+      choose: function () { self.setState({ order: [0, 1, 2], step: 1, view: 0 }); },
+      toStatus: function () { self.setState({ kind: 'status', order: [] }); }, toPhotos: function () { self.setState({ kind: 'photo' }); },
+      hasPhotos: photo && order.length > 0, noPhotos: !(photo && order.length > 0),
+      view: order.length ? G[order[vIdx]] : G[0],
+      viewPos: (vIdx + 1) + ' / ' + order.length,
+      prevPhoto: function () { self.setState({ view: (vIdx - 1 + order.length) % order.length }); },
+      nextPhoto: function () { self.setState({ view: (vIdx + 1) % order.length }); },
+      aspectStyle: s.aspect === '1:1' ? 'aspect-ratio: 1 / 1' : (s.aspect === 'Original' ? 'aspect-ratio: 3 / 4' : 'aspect-ratio: 4 / 5'),
+      aspects: ['4:5', '1:1', 'Original'].map(function (a) { var on = s.aspect === a; return { label: a, on: on ? 'true' : 'false', style: on ? 'background:#000;color:#fff' : 'background:transparent;color:#000', pick: function () { self.setState({ aspect: a }); } }; }),
+      chosen: chosen, orderCount: order.length, full: order.length >= 4,
+      addMore: function () { if (order.indexOf(3) < 0) self.setState({ order: order.concat([3]) }); },
+      caption: cap, charCount: cap.length,
+      onCaption: function (e) { self.setState({ caption: e.target.value.slice(0, 2200) }); },
+      typing: typing && sugs.length > 0, notTyping: !(typing && sugs.length > 0),
+      sugs: sugs, tagCount: tagsIn.length, tagCountStyle: tagsIn.length > 30 ? 'color:#c42a2a' : '',
+      make: make || { pattern: 'Tag a make to fill this', fabric: 'Tag a make to fill this' },
+      makeValue: String(s.make),
+      pickMake: function (e) { self.setState({ make: Number(e.target.value) }); },
+      chOn: s.ch ? 'true' : 'false', chTrack: s.ch ? 'background:#000' : 'background:#8a8a8a', chKnob: s.ch ? 'left:24px;background:#e6e51e' : 'left:4px',
+      toggleCh: function () { self.setState({ ch: !s.ch }); },
+      vis: visOpts.map(function (o) { var on = s.vis === o.id; return { label: o.label, note: o.note, icon: o.icon, on: on ? 'true' : 'false', style: on ? 'border:2px solid #000;background:#e6e51e;color:#000' : 'border:2px solid #e6e6e6;background:#fff;color:#000', pick: function () { self.setState({ vis: o.id }); } }; }),
+      visError: visError, makePublic: function () { self.setState({ vis: 'public' }); },
+      capParts: parts,
+      tagSummary: tagsIn.length + ' hashtags' + (make ? ' · tagged ' + make.name : '') + (s.ch ? ' · entering #sewfromyourstash' : ''),
+      uploadNote: photo && !edit && order.indexOf(2) >= 0,
+      shareLabel: edit ? 'Save changes' : 'Share',
+      shareStyle: visError ? 'background:#e6e6e6;color:#555' : 'background:#e6e51e;color:#000',
+      share: function () { if (!visError) self.setState({ step: 4 }); },
+      doneTitle: edit ? 'Changes saved' : 'Your post is live',
+      doneNote: s.ch ? 'It’s also entered in #sewfromyourstash. Hashtags in your caption now link to their pages.' : 'Hashtags in your caption now link to their pages.',
+      restart: function () { self.setState(self.fresh(false)); },
+      sheetClose: s.sheet === 'close', closeSheet: function () { self.setState({ sheet: null }); },
+      saveDraft: function () { var f = self.fresh(false); f.toast = 'Draft saved.'; self.setState(f); },
+      discard: function () { var f = self.fresh(false); f.toast = 'Post discarded.'; self.setState(f); },
+      hasToast: !!s.toast && s.step === 0 && !s.sheet, toast: s.toast
+    };
+  }
+}
+</script>
+</body>
+</html>

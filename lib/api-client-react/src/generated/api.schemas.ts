@@ -5,6 +5,34 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+export type DraftKind = typeof DraftKind[keyof typeof DraftKind];
+
+
+export const DraftKind = {
+  post: 'post',
+  project: 'project',
+  stash: 'stash',
+  topic: 'topic',
+} as const;
+
+export type DraftPayload = { [key: string]: unknown };
+
+export interface Draft {
+  kind: DraftKind;
+  payload: DraftPayload;
+  updatedAt: string;
+}
+
+export interface DraftEnvelope {
+  draft: Draft | null;
+}
+
+export type DraftInputPayload = { [key: string]: unknown };
+
+export interface DraftInput {
+  payload: DraftInputPayload;
+}
+
 export interface HealthStatus {
   status: string;
 }

@@ -4,6 +4,7 @@ import { useCreateForumTopic, useListCatalog, useListProjects, type ForumBoard, 
 import { ImagePlus, Loader2, Plus, X } from 'lucide-react';
 import { BOARDS, errorText, KINDS } from '@/components/forum/parts';
 import { processPhoto } from '@/lib/photos';
+import { useSheetDirty } from '@/components/social/Sheet';
 
 type Photo = { key: string; preview: string; media?: Media; failed?: boolean };
 
@@ -62,6 +63,7 @@ export function Composer({ initialKind = 'question', initialBoard, onCreated, on
   const [shareToFeed, setShareToFeed] = useState(true);
   const [photos, setPhotos] = useState<Photo[]>([]);
   const uploading = photos.some(p => !p.media && !p.failed);
+  useSheetDirty(Boolean(title.trim() || body.trim() || tags.trim() || photos.length || options.some(o => o.trim())));
 
   const addPhotos = (files: FileList | null) => {
     if (!files) return;
