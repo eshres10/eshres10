@@ -11,7 +11,18 @@ The screen files embed mockup photos, so they live in `screens/`, which is git-i
 | Public profile | `screens/profile.html` | `pages/public-profile.tsx` |
 | Shared pattern page | `screens/pattern.html` | `pages/catalog-entry.tsx` |
 | Challenge page | `screens/challenge.html` | `pages/challenge.tsx` |
-| Forum (all discussions) and forum thread | `screens/forum.html` | `pages/forum.tsx`, `pages/forum-topic.tsx` |
+| Forum (all discussions) | `screens/forum.html` | `pages/forum.tsx` |
+| Forum thread | `screens/forum-thread.html` | `pages/forum-topic.tsx` |
 | Hashtag page | `screens/hashtag.html` | `pages/tag.tsx` |
 
-Only the landing page has been rebuilt to match so far.
+All eight are rebuilt to match. The design's phone renders are the desktop pages squeezed, so the profile keeps its compact phone card, and the other pages stack their desktop parts.
+
+Left out because nothing behind them exists yet (the owner's call):
+- Explore: category chips (Dresses, Tops…) and "Sewists to follow". The kind chips (All, Photos, Makes, Words) stay.
+- Profile: "Sewing since" and experience. Experience is private.
+- Pattern page: Common alterations, the assistant card, and the Near my size sort.
+- Challenge: nothing.
+- Forum: "people online", Top this month, Latest activity sort, and numbered pages. Load more stays.
+- Thread: views, Save, and helper titles ("Tailor · 48 accepted answers").
+- Hashtag: Follow hashtag, Shop, Top/Recent, and makes or forum-topic counts.
+- Header: the search field in the header and the "Shop" link. The search icon stays.

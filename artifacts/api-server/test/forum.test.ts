@@ -70,6 +70,8 @@ test("lists, filters, search and counts", async () => {
   assert.deepEqual(await list(anon, "?board=beginners"), [ids.info]);
   assert.deepEqual(await list(anon, "?q=pre-wash"), [ids.info]);
   assert.deepEqual(await list(anon, "?q=100%25_"), [], "wildcards are literal");
+  assert.deepEqual(await list(anon, "?tag=%23Linen"), [ids.question], "by tag");
+  assert.deepEqual(await list(anon, "?tag=lin"), [], "whole tags only");
   assert.ok(!(await list(ask)).includes(ids.blocked), "blocked people's topics are hidden");
   assert.ok(!(await list(blk)).some((id: number) => [ids.question, ids.poll].includes(id)), "both ways");
   const overview = (await anon("GET", "/api/public/forum/overview")).json;

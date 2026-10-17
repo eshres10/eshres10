@@ -203,7 +203,7 @@ function escapeLike(q: string): string {
 }
 
 /** A page of topics. Offset cursor ("o:<n>"): hot scores move between pages. */
-export async function listTopics(db: Tx, viewer: Viewer, options: { filter?: TopicFilter; board?: ForumBoard; sort?: TopicSort; q?: string; cursor?: string }) {
+export async function listTopics(db: Tx, viewer: Viewer, options: { filter?: TopicFilter; board?: ForumBoard; sort?: TopicSort; q?: string; tag?: string; cursor?: string }) {
   const { filter = "all", board, sort = "hot" } = options;
   const q = options.q?.trim().slice(0, 80);
   const offset = Math.min(Number(/^o:(\d+)$/.exec(Buffer.from(options.cursor ?? "", "base64url").toString("utf8"))?.[1] ?? 0), 2000);
@@ -212,6 +212,9 @@ export async function listTopics(db: Tx, viewer: Viewer, options: { filter?: Top
   else if (filter !== "all") where.push(eq(forumTopicsTable.kind, filter));
   if (board) where.push(eq(forumTopicsTable.board, board));
   if (sort === "unanswered") where.push(eq(forumTopicsTable.replyCount, 0));
+  // Tags are stored lower case; "#Linen" finds "linen".
+  const tag = options.tag?.trim().replace(/^#/, "").toLowerCase().slice(0, 40);
+  if (tag) where.push(sql`${forumTopicsTable.tags} @> ARRAY[${tag}]::text[]`);
   if (q) where.push(or(ilike(forumTopicsTable.title, `%${escapeLike(q)}%`), ilike(forumTopicsTable.body, `%${escapeLike(q)}%`)));
   // Hot: upvotes and replies, decaying with age; pinned topics first.
   const hot = sql`(${forumTopicsTable.voteCount} + 2 * ${forumTopicsTable.replyCount} + 1)::float

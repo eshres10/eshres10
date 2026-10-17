@@ -1642,6 +1642,8 @@ export const listForumTopicsQueryFilterDefault = `all`;
 export const listForumTopicsQuerySortDefault = `hot`;
 export const listForumTopicsQueryQMax = 80;
 
+export const listForumTopicsQueryTagMax = 41;
+
 
 
 export const ListForumTopicsQueryParams = zod.object({
@@ -1649,6 +1651,7 @@ export const ListForumTopicsQueryParams = zod.object({
   "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']).optional(),
   "sort": zod.enum(['hot', 'new', 'unanswered']).default(listForumTopicsQuerySortDefault),
   "q": zod.coerce.string().max(listForumTopicsQueryQMax).optional(),
+  "tag": zod.coerce.string().max(listForumTopicsQueryTagMax).optional().describe('Only topics with this tag (a leading hash sign is ignored)'),
   "cursor": zod.coerce.string().optional()
 })
 

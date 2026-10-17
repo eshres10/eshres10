@@ -237,7 +237,7 @@ export function ForumTopicPage({ id }: { id: number }) {
             <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
               {t.catalog && <Link href={`/catalog/${t.catalog.kind}/${t.catalog.slug}`} className="rounded-full bg-canvas px-3.5 py-2 font-semibold text-ink no-underline">{t.catalog.kind === 'pattern' ? 'Pattern' : 'Product'} · {t.catalog.name}</Link>}
               {t.make && <Link href={`/makes/${t.make.id}`} className="inline-flex items-center gap-1 rounded-full bg-canvas px-3.5 py-2 font-semibold text-ink no-underline"><Scissors size={13} aria-hidden="true" />Make · {t.make.name}</Link>}
-              {t.tags.map(tag => <Link key={tag} href={`/forum?q=${encodeURIComponent(tag)}`} className="px-1 py-1.5 font-semibold text-blue-ink no-underline hover:underline">#{tag}</Link>)}
+              {t.tags.map(tag => <Link key={tag} href={`/forum?tag=${encodeURIComponent(tag)}`} className="px-1 py-1.5 font-semibold text-blue-ink no-underline hover:underline">#{tag}</Link>)}
             </div>
           )}
           <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-line pt-5">

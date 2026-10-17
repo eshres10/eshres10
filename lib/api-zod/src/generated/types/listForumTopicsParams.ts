@@ -17,5 +17,10 @@ sort?: ListForumTopicsSort;
  * @maxLength 80
  */
 q?: string;
+/**
+ * Only topics with this tag (a leading hash sign is ignored)
+ * @maxLength 41
+ */
+tag?: string;
 cursor?: string;
 };

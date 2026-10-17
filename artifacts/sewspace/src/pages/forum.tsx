@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { listForumTopics, useGetForumOverview, type ForumBoard, type ForumTopicSummary, type ListForumTopicsFilter, type ListForumTopicsSort } from '@workspace/api-client-react';
-import { Loader2, MessagesSquare, Plus, Search } from 'lucide-react';
+import { Loader2, MessagesSquare, Plus, Search, X } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState } from '@/components/common';
@@ -57,6 +57,7 @@ export function ForumPage() {
   const filter = (params.get('filter') ?? 'all') as ListForumTopicsFilter;
   const board = (params.get('board') || undefined) as ForumBoard | undefined;
   const sort = (params.get('sort') ?? 'hot') as ListForumTopicsSort;
+  const tag = params.get('tag') || undefined;
   const [q, setQ] = useState(params.get('q') ?? '');
   const [debounced, setDebounced] = useState(q);
   const ask = useRequireSignIn();
@@ -73,8 +74,8 @@ export function ForumPage() {
 
   const overview = useGetForumOverview();
   const topics = useInfiniteQuery({
-    queryKey: ['/api/public/forum/topics', { filter, board, sort, q: debounced }],
-    queryFn: ({ pageParam }) => listForumTopics({ filter, sort, ...(board ? { board } : {}), ...(debounced.trim() ? { q: debounced.trim() } : {}), ...(pageParam ? { cursor: pageParam } : {}) }),
+    queryKey: ['/api/public/forum/topics', { filter, board, sort, tag, q: debounced }],
+    queryFn: ({ pageParam }) => listForumTopics({ filter, sort, ...(board ? { board } : {}), ...(tag ? { tag } : {}), ...(debounced.trim() ? { q: debounced.trim() } : {}), ...(pageParam ? { cursor: pageParam } : {}) }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: last => last.nextCursor ?? undefined,
   });
@@ -148,6 +149,10 @@ export function ForumPage() {
           </div>
         </div>
         <div className="-mx-3 mt-3 flex gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden" role="group" aria-label="Filter">
+          {tag && (
+            <button type="button" onClick={() => go({ tag: undefined })} aria-label={`Remove the #${tag} filter`}
+              className="inline-flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-full bg-blue px-4 text-sm font-semibold text-white">#{tag}<X size={14} aria-hidden="true" /></button>
+          )}
           {chips.map(c => (
             <button key={c.id} type="button" aria-pressed={filter === c.id} onClick={() => go({ filter: c.id })}
               className={`inline-flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${filter === c.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>

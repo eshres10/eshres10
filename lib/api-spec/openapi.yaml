@@ -847,6 +847,7 @@ paths:
           required: false
           schema: { type: string, enum: [hot, new, unanswered], default: hot }
         - { name: q, in: query, required: false, schema: { type: string, maxLength: 80 } }
+        - { name: tag, in: query, required: false, description: "Only topics with this tag (a leading hash sign is ignored)", schema: { type: string, maxLength: 41 } }
         - { name: cursor, in: query, required: false, schema: { type: string } }
       responses:
         "200":
