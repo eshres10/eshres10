@@ -16,7 +16,7 @@ import {
   type ProfileStats,
   type UsedProduct,
 } from '@workspace/api-client-react';
-import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Share2, ShoppingBag, Spool, UserCheck, UserPlus } from 'lucide-react';
+import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Send, Share2, ShoppingBag, Spool, Trophy, UserCheck, UserPlus } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState, Loading } from '@/components/common';
@@ -31,7 +31,7 @@ import { CaptionText } from '@/components/feed/CaptionText';
 const TABS = [
   { id: 'posts', label: 'Posts', icon: Grid3x3 },
   { id: 'makes', label: 'Makes', icon: Scissors },
-  { id: 'used', label: 'Used', icon: ShoppingBag },
+  { id: 'used', label: 'Used products', icon: ShoppingBag },
 ] as const;
 type TabId = (typeof TABS)[number]['id'];
 
@@ -49,7 +49,7 @@ function plural(n: number, one: string, many = `${one}s`) {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-function ShareButton({ name }: { name: string }) {
+function ShareButton({ name, labelled = false }: { name: string; labelled?: boolean }) {
   const [copied, setCopied] = useState(false);
   const share = async () => {
     const url = window.location.href.split('?')[0];
@@ -64,6 +64,13 @@ function ShareButton({ name }: { name: string }) {
       // Share sheet dismissed: nothing to do.
     }
   };
+  if (labelled) {
+    return (
+      <button type="button" onClick={share} className="inline-flex min-h-[44px] items-center gap-2 rounded-[14px] bg-white px-4 text-[15px] font-semibold text-ink hover:bg-canvas">
+        {copied ? <Check size={17} aria-hidden="true" /> : <Send size={17} aria-hidden="true" />}{copied ? 'Link copied' : 'Share'}
+      </button>
+    );
+  }
   return (
     <button
       type="button"
@@ -78,7 +85,7 @@ function ShareButton({ name }: { name: string }) {
 }
 
 /** Follow / Following. Signed-out visitors are asked to sign in and come back here. */
-function FollowButton({ handle, name, following }: { handle: string; name: string; following: boolean }) {
+function FollowButton({ handle, name, following, compact = false }: { handle: string; name: string; following: boolean; compact?: boolean }) {
   const ask = useRequireSignIn();
   const client = useQueryClient();
   const [busy, setBusy] = useState(false);
@@ -98,8 +105,8 @@ function FollowButton({ handle, name, following }: { handle: string; name: strin
   };
   return (
     <button type="button" onClick={toggle} disabled={busy} aria-pressed={following}
-      className={`inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full px-4 text-[15px] font-bold disabled:opacity-60 ${following ? 'border border-ink bg-white text-ink' : 'bg-yellow text-ink'}`}>
-      {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : following ? <UserCheck size={16} aria-hidden="true" /> : <UserPlus size={16} aria-hidden="true" />}
+      className={`inline-flex items-center justify-center gap-2 px-4 text-[15px] font-bold disabled:opacity-60 ${compact ? 'min-h-[44px] rounded-[14px] px-5' : 'min-h-[48px] w-full rounded-full'} ${following ? 'border border-ink bg-white text-ink' : 'bg-yellow text-ink'}`}>
+      {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : compact ? null : following ? <UserCheck size={16} aria-hidden="true" /> : <UserPlus size={16} aria-hidden="true" />}
       {following ? 'Following' : 'Follow'}
     </button>
   );
@@ -348,7 +355,38 @@ export function PublicProfilePage({ handle }: { handle: string }) {
 
   return (
     <AdaptiveLayout>
-      <section className="rounded-[30px] bg-white p-5 sm:p-7">
+      <h1 className="sr-only hidden md:block">{p.name} (@{p.handle})</h1>
+      {/* From 768 px: the website layout, avatar left and everything else beside it, on the page background. */}
+      <section className="hidden gap-10 px-2 pb-2 pt-2 md:flex xl:gap-12 xl:px-[120px]">
+        <span className="shrink-0 self-start rounded-full border-2 border-ink p-1.5">
+          {p.avatarUrl
+            ? <img src={p.avatarUrl} alt="" className="h-[136px] w-[136px] rounded-full object-cover" />
+            : <span aria-hidden="true" className="grid h-[136px] w-[136px] place-items-center rounded-full bg-yellow font-display text-[60px] tracking-[-.04em] text-ink">{p.name.charAt(0).toUpperCase()}</span>}
+        </span>
+        <div className="min-w-0 flex-1 pt-1">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <p className="mr-2 text-[22px] font-semibold">{p.handle}</p>
+            {p.isMe
+              ? <Link href="/settings" className="inline-flex min-h-[44px] items-center gap-2 rounded-[14px] bg-white px-4 text-[15px] font-semibold text-ink no-underline hover:bg-canvas"><Pencil size={16} aria-hidden="true" />Edit profile</Link>
+              : <FollowButton handle={p.handle} name={p.name} following={p.followedByMe} compact />}
+            <ShareButton name={p.name} labelled />
+            {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
+          </div>
+          <p className="mt-4 flex flex-wrap gap-x-8 gap-y-1 text-[17px]">
+            {[[p.stats.posts, 'post'], [p.stats.makes, 'make'], [p.stats.followers, 'follower']].map(([n, one]) => (
+              <span key={one}><b>{compact(n as number)}</b> {n === 1 ? one : `${one}s`}</span>
+            ))}
+            <span><b>{compact(p.stats.following)}</b> following</span>
+          </p>
+          <p className="mt-4 font-semibold">{p.name}</p>
+          <p className="text-[15px] text-subtle">Joined {monthYear(p.joinedAt)}</p>
+          {p.bio && <p className="mt-1.5 max-w-[620px] whitespace-pre-line text-[15px] leading-6">{p.bio}</p>}
+          {p.stats.challengesEntered > 0 && (
+            <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-yellow px-3 py-1 text-[13px] font-bold"><Trophy size={14} aria-hidden="true" />{plural(p.stats.challengesEntered, 'challenge')} entered</span>
+          )}
+        </div>
+      </section>
+      <section className="rounded-[30px] bg-white p-5 sm:p-7 md:hidden">
         <div className="flex items-center gap-4 sm:gap-6">
           {p.avatarUrl
             ? <img src={p.avatarUrl} alt="" className="h-24 w-24 shrink-0 rounded-full object-cover sm:h-32 sm:w-32" />
@@ -356,7 +394,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
           <Stats stats={p.stats} />
         </div>
         <div className="mt-4 flex items-center gap-3">
-          <h1 className="min-w-0 flex-1 font-sans text-lg font-bold leading-tight">{p.name}</h1>
+          <h1 className="min-w-0 flex-1 font-sans text-lg font-bold leading-tight md:hidden">{p.name}</h1>
           <div className="flex shrink-0 items-center gap-1">
             {p.isMe && (
               <Link
@@ -379,7 +417,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
       <div role="tablist" aria-label="Profile sections" className="mt-3 flex w-full max-w-[520px] gap-1 rounded-full bg-white p-[5px] sm:mt-[22px]">
         {TABS.map(t => (
           <button key={t.id} type="button" role="tab" id={`tab-${t.id}`} aria-selected={tab === t.id} aria-controls="profile-panel" onClick={() => setTab(t.id)}
-            className={`min-h-[44px] flex-1 rounded-full text-[15px] font-bold ${tab === t.id ? 'bg-ink text-white' : 'text-ink'}`}>{t.label}</button>
+            className={`min-h-[44px] flex-1 rounded-full text-[15px] font-bold ${tab === t.id ? 'bg-ink text-white' : 'text-ink'}`}>{t.id === 'used' ? <><span className="sm:hidden">Used</span><span className="hidden sm:inline">{t.label}</span></> : t.label}</button>
         ))}
       </div>
       <section id="profile-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="mt-5">
