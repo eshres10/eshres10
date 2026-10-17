@@ -1,26 +1,123 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
-import { useGetProfile, type Profile } from '@workspace/api-client-react';
-import { ChevronDown, X } from 'lucide-react';
+import { useClerk } from '@clerk/react';
+import { useQueryClient } from '@tanstack/react-query';
+import { getGetProfileQueryKey, useGetProfile, useUpdateProfile, type Profile } from '@workspace/api-client-react';
+import { Bookmark, ChevronDown, ChevronRight, Loader2, LogOut as LogOutIcon, Ruler, Settings, SquareKanban, Trophy, Users, X, type LucideIcon } from 'lucide-react';
 import { Link } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { useModal } from '@/components/flow/modal';
+import { VISIBILITY_OPTIONS } from '@/components/visibility';
+import { basePath } from '@/lib/clerk';
 
+
+const ROW = 'flex min-h-[44px] w-full items-center gap-3 rounded-[12px] px-2.5 text-left text-[14px] font-semibold text-ink no-underline hover:bg-canvas focus-visible:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink';
+
+function Row({ href, icon: Icon, label, onClick, children }: { href: string; icon: LucideIcon; label: string; onClick: () => void; children?: ReactNode }) {
+  return (
+    <Link href={href} onClick={onClick} className={ROW}>
+      <Icon size={19} aria-hidden="true" className="shrink-0" /><span className="flex-1 truncate">{label}</span>{children}
+    </Link>
+  );
+}
+
+/** cm / in, bound to the profile's units. Saves at once; the change shows straight away and is undone if the save fails. */
+function MeasureIn({ me }: { me: Profile | undefined }) {
+  const client = useQueryClient();
+  const update = useUpdateProfile();
+  const [failed, setFailed] = useState(false);
+  const labelId = useId();
+  const name = useId();
+  const set = (units: Profile['units']) => {
+    if (!me || me.units === units) return;
+    const key = getGetProfileQueryKey();
+    const previous = client.getQueryData<Profile>(key);
+    setFailed(false);
+    client.setQueryData<Profile>(key, old => (old ? { ...old, units } : old));
+    update.mutate({ data: { units } }, {
+      onSuccess: data => client.setQueryData(key, data),
+      onError: () => { client.setQueryData(key, previous); setFailed(true); },
+    });
+  };
+  return (
+    <div className="flex min-h-[44px] flex-wrap items-center gap-3 px-2.5">
+      <Ruler size={19} aria-hidden="true" className="shrink-0" />
+      <span id={labelId} className="flex-1 text-[14px] font-semibold">Measure in</span>
+      <div role="radiogroup" aria-labelledby={labelId} className="flex rounded-full bg-canvas p-1">
+        {([['metric', 'cm'], ['imperial', 'in']] as const).map(([value, label]) => {
+          const on = me?.units === value;
+          return (
+            <label key={value} className={`grid h-8 min-w-[44px] cursor-pointer place-items-center rounded-full px-3 text-[13px] font-bold has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ink ${on ? 'bg-ink text-white' : 'text-ink'}`}>
+              <input type="radio" name={name} value={value} checked={on} onChange={() => set(value)} className="sr-only" />{label}
+            </label>
+          );
+        })}
+      </div>
+      {failed && <p role="alert" className="w-full pl-8 text-xs font-semibold text-red-ink">That didn't save. Try again.</p>}
+    </div>
+  );
+}
+
+/** Log out, with "Log out of Seams Club?" in place before it happens. */
+function LogOut({ close }: { close: () => void }) {
+  const { signOut } = useClerk();
+  const [asking, setAsking] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const cancel = useRef<HTMLButtonElement>(null);
+  useEffect(() => { if (asking) cancel.current?.focus(); }, [asking]);
+  const confirmId = useId();
+  return (
+    <>
+      <button type="button" onClick={() => setAsking(a => !a)} aria-expanded={asking} aria-controls={confirmId} className={ROW}>
+        <LogOutIcon size={19} aria-hidden="true" className="shrink-0" /><span className="flex-1">Log out</span>
+      </button>
+      {asking && (
+        <div id={confirmId} role="group" aria-label="Log out of Seams Club?" className="mt-1 flex items-center gap-2 rounded-[16px] bg-canvas p-2.5 pl-3">
+          <p className="flex-1 text-[13px] font-semibold leading-snug">Log out of Seams Club?</p>
+          <button ref={cancel} type="button" onClick={() => setAsking(false)} className="min-h-[40px] rounded-full bg-white px-3.5 text-[13px] font-bold">Cancel</button>
+          <button type="button" disabled={busy} onClick={async () => { setBusy(true); try { await signOut({ redirectUrl: `${basePath}/` }); } finally { setBusy(false); close(); } }}
+            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-bold text-white disabled:opacity-60">
+            {busy && <Loader2 size={13} className="animate-spin" aria-hidden="true" />}Log out
+          </button>
+        </div>
+      )}
+    </>
+  );
+}
 
 /** What's inside the menu, the same on both sizes. `close` runs when a link is chosen. */
 function MenuBody({ me, close, closeButton }: { me: Profile | undefined; close: () => void; closeButton?: ReactNode }) {
   const profileHref = me?.handle ? `/@${me.handle}` : '/settings';
+  const audience = VISIBILITY_OPTIONS.find(o => o.value === me?.defaultPostVisibility)?.label;
   return (
-    <div className="flex items-center gap-3 border-b border-line px-1 pb-3">
-      <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} size={46} />
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-[15px] font-bold">{me?.name ?? 'Your account'}</p>
-        <Link href={profileHref} onClick={close} className="block truncate text-[13px] text-subtle underline underline-offset-2">
-          View profile{me?.handle ? ` · @${me.handle}` : ''}
-        </Link>
+    <>
+      <div className="flex items-center gap-3 border-b border-line px-1 pb-3">
+        <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} size={46} />
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-[15px] font-bold">{me?.name ?? 'Your account'}</p>
+          <Link href={profileHref} onClick={close} className="block truncate text-[13px] text-subtle underline underline-offset-2">
+            View profile{me?.handle ? ` · @${me.handle}` : ''}
+          </Link>
+        </div>
+        {closeButton}
       </div>
-      {closeButton}
-    </div>
+      <nav aria-label="Your account" className="border-b border-line py-1.5">
+        <Row href="/studio" icon={SquareKanban} label="My studio" onClick={close} />
+        <Row href="/saved" icon={Bookmark} label="Saved posts" onClick={close} />
+        <Row href="/challenges" icon={Trophy} label="My challenges" onClick={close} />
+      </nav>
+      <div role="group" aria-label="Quick settings" className="border-b border-line py-1.5">
+        <MeasureIn me={me} />
+        <Row href="/settings#privacy" icon={Users} label="Posts visible to" onClick={close}>
+          {audience && <span className="text-[13px] text-subtle">{audience}</span>}<ChevronRight size={16} aria-hidden="true" className="text-subtle" />
+        </Row>
+      </div>
+      <nav aria-label="More" className="border-b border-line py-1.5">
+        <Row href="/settings" icon={Settings} label="Settings & privacy" onClick={close} />
+        <LogOut close={close} />
+      </nav>
+      <p className="px-2.5 pt-2.5 text-[11px] text-subtle">© {new Date().getFullYear()} Seams Club</p>
+    </>
   );
 }
 

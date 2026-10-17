@@ -8,6 +8,7 @@ import { ErrorState, Loading } from '@/components/common';
 import { HandleField } from '@/components/profile/HandleField';
 import { BlockedAccounts } from '@/components/social/BlockedAccounts';
 import { uploadFile } from '@/lib/upload';
+import { VisibilityPicker, type Visibility } from '@/components/visibility';
 
 const BIO_MAX = 500;
 
@@ -21,7 +22,7 @@ export function SettingsPage() {
   const update = useUpdateProfile();
   const client = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [form, setForm] = useState({ name: '', handle: '', bio: '', avatarUrl: null as string | null, units: 'metric' as 'metric' | 'imperial', experience: '', favoriteGarments: '' });
+  const [form, setForm] = useState({ name: '', handle: '', bio: '', avatarUrl: null as string | null, units: 'metric' as 'metric' | 'imperial', experience: '', favoriteGarments: '', defaultPostVisibility: 'public' as Visibility });
   const [handleValid, setHandleValid] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -31,8 +32,11 @@ export function SettingsPage() {
   useEffect(() => {
     const p = profile.data;
     if (!p) return;
-    setForm({ name: p.name, handle: p.handle ?? '', bio: p.bio, avatarUrl: p.avatarUrl, units: p.units, experience: p.experience, favoriteGarments: p.favoriteGarments.join(', ') });
+    setForm({ name: p.name, handle: p.handle ?? '', bio: p.bio, avatarUrl: p.avatarUrl, units: p.units, experience: p.experience, favoriteGarments: p.favoriteGarments.join(', '), defaultPostVisibility: p.defaultPostVisibility });
   }, [profile.data]);
+  // The account menu's "Posts visible to" opens /settings#privacy.
+  const loaded = Boolean(profile.data);
+  useEffect(() => { if (loaded && window.location.hash === '#privacy') document.getElementById('privacy')?.scrollIntoView(); }, [loaded]);
 
   if (profile.isLoading) return <Loading />;
   if (profile.isError || !profile.data) return <ErrorState retry={() => profile.refetch()} />;
@@ -67,6 +71,7 @@ export function SettingsPage() {
         units: form.units,
         experience: form.experience.trim(),
         favoriteGarments: form.favoriteGarments.split(',').map(item => item.trim()).filter(Boolean),
+        defaultPostVisibility: form.defaultPostVisibility,
       },
     }, {
       onSuccess: data => {
@@ -132,6 +137,14 @@ export function SettingsPage() {
           <label className="block text-xs font-semibold sm:col-span-2">Favourite garments
             <input value={form.favoriteGarments} onChange={e => set('favoriteGarments', e.target.value)} className="field mt-1.5" placeholder="Dresses, shirts, trousers" data-testid="input-profile-garments" />
           </label>
+        </div>
+      </section>
+
+      <section id="privacy" aria-labelledby="privacy-title" className="studio-card scroll-mt-28 p-6 sm:p-8">
+        <h2 id="privacy-title" className="eyebrow">Privacy</h2>
+        <p className="mt-1 text-sm text-subtle">Who new posts are for when you start one. You can still change it on each post.</p>
+        <div className="mt-5 max-w-md">
+          <VisibilityPicker legend="New posts are visible to" value={form.defaultPostVisibility} onChange={value => set('defaultPostVisibility', value)} />
         </div>
       </section>
 
