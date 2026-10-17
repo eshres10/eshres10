@@ -72,7 +72,6 @@ export function Studio() {
   return (
     <>
       <div className="md:hidden">
-        {shortcuts}
         <MobileOverview />
       </div>
 
