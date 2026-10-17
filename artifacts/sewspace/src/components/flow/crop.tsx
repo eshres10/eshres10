@@ -187,7 +187,7 @@ export function PhotoCropper({ file, initialAspect = '1:1', onDone, onCancel }: 
             <input type="range" min={1} max={MAX_ZOOM} step={0.01} value={zoom} onChange={e => zoomTo(Number(e.target.value))} aria-label="Zoom" className="flex-1 accent-yellow" />
             <button type="button" onClick={() => zoomTo(zoom + 0.25)} aria-label="Zoom in" className="grid h-11 w-11 place-items-center rounded-full bg-white/15"><Plus size={18} /></button>
           </div>
-          <Segmented<CropAspect> aria-label="Shape" options={ASPECTS} value={aspect} onChange={setAspect} />
+          <Segmented aria-label="Shape" options={ASPECTS} value={aspect} onChange={setAspect} />
         </div>
       </div>
     </div>

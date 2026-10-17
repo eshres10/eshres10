@@ -56,7 +56,7 @@ export function MobileFabricStash() {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[15px]" aria-live="polite"><b>{shown.length} fabric{shown.length === 1 ? '' : 's'}</b> <span className="text-subtle">· {total} {unit} in total</span></p>
-        <Toggle<'m' | 'yd'> label="Units" value={unit} onChange={setUnit} options={[{ value: 'm', label: 'm', name: 'Metres' }, { value: 'yd', label: 'yd', name: 'Yards' }]} />
+        <Toggle label="Units" value={unit} onChange={setUnit} options={[{ value: 'm', label: 'm', name: 'Metres' }, { value: 'yd', label: 'yd', name: 'Yards' }]} />
       </div>
       {types.length > 0 && <FilterChips label="Filter by type" value={type} onChange={setType} options={[{ value: 'all', label: 'All' }, ...types.map(t => ({ value: t, label: cap(t) }))]} />}
       {fabrics.length === 0
@@ -143,7 +143,7 @@ export function MobileThreadDrawer() {
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-3">
         <p className="text-[15px]" aria-live="polite"><b>{shown.length} thread{shown.length === 1 ? '' : 's'}</b> <span className="text-subtle">· {total} spools and cones</span></p>
-        <Toggle<'wall' | 'list'> label="View" value={view} onChange={setView} options={[
+        <Toggle label="View" value={view} onChange={setView} options={[
           { value: 'wall', label: <Grid2x2 size={17} aria-hidden="true" />, name: 'Colour wall' },
           { value: 'list', label: <List size={17} aria-hidden="true" />, name: 'List' },
         ]} />

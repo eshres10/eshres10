@@ -412,7 +412,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
   const shape = (
     <div className="rounded-[26px] bg-white p-4 lg:p-0">
       <p id="shape-label" className="mb-2 text-sm font-semibold text-subtle">Shape</p>
-      <Segmented<Aspect> aria-labelledby="shape-label" className="bg-canvas" value={aspect} onChange={setAspect}
+      <Segmented aria-labelledby="shape-label" className="bg-canvas" value={aspect} onChange={setAspect}
         options={[{ value: '4:5', label: '4:5' }, { value: '1:1', label: '1:1' }, { value: 'original', label: 'Original' }]} />
     </div>
   );

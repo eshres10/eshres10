@@ -65,7 +65,7 @@ export function MobileMeasurements({ sets, storedUnit, onNew, onEdit, onDelete }
       ) : <>
         <div className="flex items-center justify-between gap-3">
           <p className="text-sm text-subtle">{other ? `Compared with ${other.name} (${monthYear(other.recordedAt)})` : 'Your only set so far'}</p>
-          <Toggle<Unit> label="Units" value={unit} onChange={setUnit} options={[{ value: 'cm', label: 'cm', name: 'Centimetres' }, { value: 'in', label: 'in', name: 'Inches' }]} />
+          <Toggle label="Units" value={unit} onChange={setUnit} options={[{ value: 'cm', label: 'cm', name: 'Centimetres' }, { value: 'in', label: 'in', name: 'Inches' }]} />
         </div>
         {GROUPS.map(([group, rows]) => (
           <section key={group} aria-label={group} className="rounded-[26px] bg-white px-4 pb-1 pt-4">

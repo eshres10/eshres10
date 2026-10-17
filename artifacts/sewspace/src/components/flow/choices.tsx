@@ -87,9 +87,11 @@ export function ToggleChips<T extends string>({ options, value, onChange, max, c
 
 /** Two to four options in a pill track (Metres / Yards). Also a radiogroup. */
 export function Segmented<T extends string>({ options, value, onChange, className = '', ...aria }: {
-  options: readonly Choice<T>[];
+  // T comes from `value` alone, so callers never write <Segmented<T>>
+  // (Replit's dev-only JSX tagger can't parse type arguments on JSX).
+  options: readonly Choice<NoInfer<T>>[];
   value: T | null;
-  onChange: (v: T) => void;
+  onChange: (v: NoInfer<T>) => void;
   className?: string;
   'aria-label'?: string;
   'aria-labelledby'?: string;

@@ -45,7 +45,7 @@ export function MobilePatternLibrary() {
         <input type="file" accept="application/pdf,.pdf" className="sr-only"
           onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) { handOverFile(f); setLocation('/stash/new?kind=pattern'); } }} />
       </label>
-      <FilterChips<Filter> label="Filter by status" value={filter} onChange={setFilter}
+      <FilterChips label="Filter by status" value={filter} onChange={setFilter}
         options={filters.map(f => ({ value: f, label: `${f === 'all' ? 'All' : LABEL[f]} ${count(f)}` }))} />
       {patterns.length === 0
         ? <div className="rounded-[26px] bg-white px-5 py-10 text-center"><p className="text-[15px] text-subtle">{q ? `No pattern matches "${q}".` : 'Your pattern library is empty.'}</p><Link href="/stash/new?kind=pattern" className="btn btn-primary mt-4 inline-flex min-h-[44px]">Add a pattern</Link></div>

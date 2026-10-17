@@ -80,7 +80,7 @@ function PageLink({ value, onChange, title }: { value: Page | null; onChange: (v
   return (
     <div className="space-y-2">
       {suggested && card(suggested, false)}
-      <Segmented<'pattern' | 'product'> aria-label="Page kind" className="bg-canvas" options={[{ value: 'pattern', label: 'Patterns' }, { value: 'product', label: 'Products' }]} value={kind} onChange={setKind} />
+      <Segmented aria-label="Page kind" className="bg-canvas" options={[{ value: 'pattern', label: 'Patterns' }, { value: 'product', label: 'Products' }]} value={kind} onChange={setKind} />
       <input value={q} onChange={e => setQ(e.target.value)} className="field" placeholder={kind === 'pattern' ? 'Search pattern pages' : 'Search fabric, tools and shops'} aria-label="Search pages to link" />
       {search.data && debounced.trim().length > 1 && (
         <ul className="max-h-48 overflow-y-auto rounded-[16px] border border-line">

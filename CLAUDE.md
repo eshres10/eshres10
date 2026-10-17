@@ -134,6 +134,7 @@ Replit routes by path prefix. The web artifact serves `/` statically; the API ar
 - Page HTML for followers-only content is sent `Cache-Control: private, no-store` and `noindex`; only public pages for signed-out visitors are cacheable.
 - When adding a SELECT policy that lets others read a table, re-check every WITH CHECK that used `EXISTS (SELECT … FROM that_table)` to mean "is mine": it now also matches visible rows (migration 0002 had to tighten these).
 - In tests, import app code with `await import()` after `./harness`, so `DATABASE_URL` is set first.
+- **No type arguments on JSX tags** (`<Toggle<Unit> …>`): Replit's dev-only `@replit/vite-plugin-cartographer` injects attributes after the tag name and the Replit preview fails with "Unexpected token" (production builds are fine). Generic components take `T` from `value` and use `NoInfer<T>` on options/onChange (`Segmented`, `Toggle`, `FilterChips`). Check: run Vite with `REPL_ID=x` and fetch the module.
 - Modals: use `useModal` (or `Sheet`/`FlowShell`, which do). It keeps a stack so only the top dialog answers Escape and traps Tab; a hand-rolled `keydown` listener on `window` would also close the dialog underneath.
 - Drafts: never autosave until the loaded draft has been applied (`useDraft(..., { active })`), or an empty form overwrites it. Drafts are kept for new items only; edit mode passes `enabled: false`.
 - Body parser refusals keep their status (413 too large, 400 bad JSON) instead of becoming 500s (`app.ts` error handler).

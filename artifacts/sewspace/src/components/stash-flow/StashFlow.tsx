@@ -452,7 +452,7 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
         <FieldCard name="quantity" label="How much do you have?" group>
           <Stepper label="Amount" value={form.quantity} onChange={q => set('quantity', q)} step={0.5} unit={form.unit} />
         </FieldCard>
-        <Segmented<'m' | 'yd'> aria-label="Unit" value={form.unit} options={[{ value: 'm', label: 'Metres' }, { value: 'yd', label: 'Yards' }]}
+        <Segmented aria-label="Unit" value={form.unit} options={[{ value: 'm', label: 'Metres' }, { value: 'yd', label: 'Yards' }]}
           onChange={u => setForm(f => (u === f.unit ? f : { ...f, unit: u, quantity: f.quantity === null ? null : Math.round((u === 'yd' ? f.quantity / 0.9144 : f.quantity * 0.9144) * 10) / 10 }))} />
       </>}
       {kind === 'thread' && <>

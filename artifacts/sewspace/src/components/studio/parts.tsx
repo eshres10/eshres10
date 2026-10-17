@@ -4,7 +4,8 @@ import { Link } from 'wouter';
 import { Sheet } from '@/components/social/Sheet';
 import type { AnyRecord } from '@/lib/types';
 
-// Shared pieces for the studio lists on phones (Phase S3/S4).
+// Shared pieces for the studio lists on phones (Phase S3/S4). Generic props take
+// their type from `value` (NoInfer elsewhere), so JSX never needs <Comp<T>>.
 
 /** "Only me" / "Followers" / "Public" over a photo, as in the mockups. */
 export function PrivacyBadge({ value }: { value: string | null | undefined }) {
@@ -62,7 +63,7 @@ export function ItemActions({ title, editHref, imageUrl, pdf, item, fallbackName
 
 /** A horizontal row of filter chips (aria-pressed). */
 export function FilterChips<T extends string>({ label, options, value, onChange }: {
-  label: string; options: Array<{ value: T; label: string }>; value: T; onChange: (v: T) => void;
+  label: string; options: Array<{ value: NoInfer<T>; label: string }>; value: T; onChange: (v: NoInfer<T>) => void;
 }) {
   return (
     <div role="group" aria-label={label} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
@@ -78,7 +79,7 @@ export function FilterChips<T extends string>({ label, options, value, onChange 
 
 /** A two-option pill toggle (m / yd, cm / in, wall / list). */
 export function Toggle<T extends string>({ label, options, value, onChange }: {
-  label: string; options: Array<{ value: T; label: ReactNode; name?: string }>; value: T; onChange: (v: T) => void;
+  label: string; options: Array<{ value: NoInfer<T>; label: ReactNode; name?: string }>; value: T; onChange: (v: NoInfer<T>) => void;
 }) {
   return (
     <div role="radiogroup" aria-label={label} className="flex shrink-0 gap-1 rounded-full bg-white p-1">
