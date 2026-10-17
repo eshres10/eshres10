@@ -16,7 +16,7 @@ import {
   type ProfileStats,
   type UsedProduct,
 } from '@workspace/api-client-react';
-import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Share2, ShoppingBag, Spool, Trophy, UserCheck, UserPlus } from 'lucide-react';
+import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, ShoppingBag, Spool, UserCheck, UserPlus } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState, Loading } from '@/components/common';
@@ -65,8 +65,8 @@ function ShareButton({ name }: { name: string }) {
     }
   };
   return (
-    <button type="button" onClick={share} className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-ink px-[22px] text-[15px] font-semibold text-white">
-      {copied ? <Check size={16} aria-hidden="true" /> : <Share2 size={16} aria-hidden="true" />}{copied ? 'Link copied' : 'Share'}
+    <button type="button" onClick={share} className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-ink px-4 text-[15px] font-semibold text-white">
+      {copied && <Check size={16} aria-hidden="true" />}{copied ? 'Link copied' : 'Share profile'}
     </button>
   );
 }
@@ -92,7 +92,7 @@ function FollowButton({ handle, name, following }: { handle: string; name: strin
   };
   return (
     <button type="button" onClick={toggle} disabled={busy} aria-pressed={following}
-      className={`inline-flex min-h-[48px] items-center gap-2 rounded-full px-[26px] text-[15px] font-bold disabled:opacity-60 ${following ? 'border border-ink bg-white text-ink' : 'bg-yellow text-ink'}`}>
+      className={`inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full px-4 text-[15px] font-bold disabled:opacity-60 ${following ? 'border border-ink bg-white text-ink' : 'bg-yellow text-ink'}`}>
       {busy ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : following ? <UserCheck size={16} aria-hidden="true" /> : <UserPlus size={16} aria-hidden="true" />}
       {following ? 'Following' : 'Follow'}
     </button>
@@ -100,20 +100,19 @@ function FollowButton({ handle, name, following }: { handle: string; name: strin
 }
 
 function Stats({ stats }: { stats: ProfileStats }) {
-  const chip = (n: number, label: string) => (
-    <span className="rounded-[20px] bg-canvas px-[18px] py-3"><b className="font-display text-xl">{compact(n)}</b> <span className="text-sm text-subtle">{label}</span></span>
-  );
+  const items = [
+    { count: stats.posts, label: stats.posts === 1 ? 'post' : 'posts' },
+    { count: stats.followers, label: stats.followers === 1 ? 'follower' : 'followers' },
+    { count: stats.following, label: 'following' },
+  ];
   return (
-    <div className="grid w-full grid-cols-2 gap-2.5 sm:flex sm:flex-[1_1_100%] sm:flex-wrap">
-      {chip(stats.posts, stats.posts === 1 ? 'post' : 'posts')}
-      {chip(stats.makes, stats.makes === 1 ? 'make' : 'makes')}
-      {chip(stats.followers, stats.followers === 1 ? 'follower' : 'followers')}
-      {chip(stats.following, 'following')}
-      {stats.challengesEntered > 0 && (
-        <span className="inline-flex items-center gap-2 rounded-[20px] bg-yellow px-[18px] py-3">
-          <Trophy size={18} aria-hidden="true" /><span className="text-sm font-semibold">{stats.challengesEntered} challenge{stats.challengesEntered === 1 ? '' : 's'} entered</span>
-        </span>
-      )}
+    <div className="grid min-w-0 flex-1 grid-cols-3 gap-1 text-center">
+      {items.map(item => (
+        <div key={item.label} className="min-w-0">
+          <div className="font-display text-[22px] font-bold leading-tight sm:text-2xl">{compact(item.count)}</div>
+          <div className="truncate text-xs text-subtle sm:text-sm">{item.label}</div>
+        </div>
+      ))}
     </div>
   );
 }
@@ -343,28 +342,23 @@ export function PublicProfilePage({ handle }: { handle: string }) {
 
   return (
     <AdaptiveLayout>
-      <section className="overflow-hidden rounded-[28px] bg-white md:rounded-[40px]">
-        <div className="flex flex-wrap items-end gap-x-8 gap-y-4 px-4 pb-5 pt-5 sm:px-11 sm:pb-9 sm:pt-10">
+      <section className="rounded-[30px] bg-white p-5 sm:p-7">
+        <div className="flex items-center gap-4 sm:gap-6">
           {p.avatarUrl
-            ? <img src={p.avatarUrl} alt="" className="h-[76px] w-[76px] rounded-full object-cover sm:h-32 sm:w-32" />
-            : <span aria-hidden="true" className="grid h-[76px] w-[76px] place-items-center rounded-full bg-ink font-display text-[34px] tracking-[-.04em] text-yellow sm:h-32 sm:w-32 sm:bg-yellow sm:text-[52px] sm:text-ink">{p.name.charAt(0).toUpperCase()}</span>}
-          <div className="min-w-0 flex-[1_1_180px]">
-            <h1 className="font-display text-[clamp(30px,3.6vw,44px)] leading-[1.05] tracking-[-.05em]">{p.name}</h1>
-            <p className="mt-1 text-[15px] text-subtle">@{p.handle} · Joined {monthYear(p.joinedAt)}</p>
-          </div>
-          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
-            {p.isMe
-              ? <Link href="/settings" className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-yellow px-[26px] text-[15px] font-bold text-ink no-underline"><Pencil size={16} aria-hidden="true" />Edit profile</Link>
-              : <FollowButton handle={p.handle} name={p.name} following={p.followedByMe} />}
-            <ShareButton name={p.name} />
-            {!p.isMe && (
-              <span className="grid h-12 w-12 place-items-center rounded-full border border-ink">
-                <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />
-              </span>
-            )}
-          </div>
-          {p.bio && <p className="max-w-[680px] flex-[1_1_100%] whitespace-pre-line text-[14px] leading-relaxed sm:text-base">{p.bio}</p>}
+            ? <img src={p.avatarUrl} alt="" className="h-24 w-24 shrink-0 rounded-full object-cover sm:h-32 sm:w-32" />
+            : <span aria-hidden="true" className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-ink font-display text-[34px] tracking-[-.04em] text-yellow sm:h-32 sm:w-32 sm:text-[52px]">{p.name.charAt(0).toUpperCase()}</span>}
           <Stats stats={p.stats} />
+        </div>
+        <div className="mt-4 flex items-start justify-between gap-3">
+          <h1 className="font-sans text-lg font-bold leading-tight">{p.name}</h1>
+          {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
+        </div>
+        {p.bio && <p className="mt-1 whitespace-pre-line text-[15px] leading-6">{p.bio}</p>}
+        <div className="mt-4 grid grid-cols-2 gap-2.5">
+          {p.isMe
+            ? <Link href="/settings" className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-yellow px-4 text-[15px] font-bold text-ink no-underline"><Pencil size={16} aria-hidden="true" />Edit profile</Link>
+            : <FollowButton handle={p.handle} name={p.name} following={p.followedByMe} />}
+          <ShareButton name={p.name} />
         </div>
       </section>
 
