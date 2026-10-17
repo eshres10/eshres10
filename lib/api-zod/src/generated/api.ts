@@ -3228,6 +3228,18 @@ export const DeleteFabricResponse = zod.void()
 
 
 /**
+ * @summary The account menu's numbers: your saves, running challenges you joined, pattern sales and membership. Only ever the caller's own.
+ */
+export const GetMenuSummaryResponse = zod.object({
+  "savedCount": zod.number().int().describe('Saved posts you may still see'),
+  "activeChallengeCount": zod.number().int().describe('Running challenges you joined'),
+  "salesLast24h": zod.number().nullable().describe('Pattern sales earnings in the last 24 hours. Null when you\'re not a seller (selling isn\'t open yet)'),
+  "isSupporter": zod.boolean(),
+  "membershipAvailable": zod.boolean().describe('Whether membership (Support Seams Club) exists yet')
+})
+
+
+/**
  * @summary Your answers to Pip's questions and the step you got to. Private to you; defaults before you start.
  */
 export const getOnboardingResponseCurrentStepMin = 0;

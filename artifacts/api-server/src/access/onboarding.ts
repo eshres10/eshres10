@@ -4,6 +4,7 @@ import { entryViews } from "./catalog";
 import { listChallenges } from "./challenges";
 import { own } from "./studio";
 import type { Viewer } from "./viewer";
+import { SELLING_OPEN } from "./menu";
 
 // Pip's onboarding (Phase O). The answers are private to their owner: every
 // query filters to the caller's own row, and RLS (owner_all, migration 0015)
@@ -125,7 +126,7 @@ const STEP_COPY: Record<Goal | "follow", { label: string; href: string }> = {
   sell: { label: "Set up your pattern shop", href: "/marketplace" },
   follow: { label: "Follow 3 sewists you like", href: "/explore" },
 };
-const SELLING_OPEN = false;
+
 // When there are fewer than three, these fill the gaps (same order as the mockup).
 const FILLERS = ["follow", "share", "stash"] as const;
 

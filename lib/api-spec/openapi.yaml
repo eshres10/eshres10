@@ -1348,6 +1348,19 @@ paths:
       responses:
         "204":
           description: Deleted
+  /me/menu-summary:
+    get:
+      operationId: getMenuSummary
+      tags: [studio]
+      summary: "The account menu's numbers: your saves, running challenges you joined, pattern sales and membership. Only ever the caller's own."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MenuSummary" }
+        "401": { description: Sign in first }
+        "429": { description: Asked too often this hour }
   /onboarding:
     get:
       operationId: getOnboarding
@@ -3033,6 +3046,15 @@ components:
       properties:
         error: { type: string }
       required: [error]
+    MenuSummary:
+      type: object
+      properties:
+        savedCount: { type: integer, description: Saved posts you may still see }
+        activeChallengeCount: { type: integer, description: Running challenges you joined }
+        salesLast24h: { type: number, nullable: true, description: "Pattern sales earnings in the last 24 hours. Null when you're not a seller (selling isn't open yet)" }
+        isSupporter: { type: boolean }
+        membershipAvailable: { type: boolean, description: Whether membership (Support Seams Club) exists yet }
+      required: [savedCount, activeChallengeCount, salesLast24h, isSupporter, membershipAvailable]
     ProfileUpdate:
       type: object
       properties:

@@ -2,14 +2,20 @@ import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { useClerk } from '@clerk/react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getGetProfileQueryKey, useGetProfile, useUpdateProfile, type Profile } from '@workspace/api-client-react';
-import { Bookmark, ChevronDown, ChevronRight, Loader2, LogOut as LogOutIcon, Ruler, Settings, SquareKanban, Trophy, Users, X, type LucideIcon } from 'lucide-react';
+import { getGetProfileQueryKey, useGetMenuSummary, useGetProfile, useUpdateProfile, type Profile } from '@workspace/api-client-react';
+import { Bookmark, ChevronDown, ChevronRight, Heart, Loader2, LogOut as LogOutIcon, Ruler, Settings, SquareKanban, TrendingUp, Trophy, Users, X, type LucideIcon } from 'lucide-react';
 import { Link } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { useModal } from '@/components/flow/modal';
 import { VISIBILITY_OPTIONS } from '@/components/visibility';
 import { basePath } from '@/lib/clerk';
 
+
+const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
+
+function Badge({ className, children }: { className: string; children: ReactNode }) {
+  return <span className={`shrink-0 rounded-full px-2 py-0.5 text-[12px] font-bold ${className}`}>{children}</span>;
+}
 
 const ROW = 'flex min-h-[44px] w-full items-center gap-3 rounded-[12px] px-2.5 text-left text-[14px] font-semibold text-ink no-underline hover:bg-canvas focus-visible:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink';
 
@@ -89,6 +95,8 @@ function LogOut({ close }: { close: () => void }) {
 function MenuBody({ me, close, closeButton }: { me: Profile | undefined; close: () => void; closeButton?: ReactNode }) {
   const profileHref = me?.handle ? `/@${me.handle}` : '/settings';
   const audience = VISIBILITY_OPTIONS.find(o => o.value === me?.defaultPostVisibility)?.label;
+  // Fresh numbers each time the menu opens (this body mounts on open).
+  const summary = useGetMenuSummary({ query: { staleTime: 0, refetchOnMount: 'always', retry: false } }).data;
   return (
     <>
       <div className="flex items-center gap-3 border-b border-line px-1 pb-3">
@@ -103,8 +111,18 @@ function MenuBody({ me, close, closeButton }: { me: Profile | undefined; close: 
       </div>
       <nav aria-label="Your account" className="border-b border-line py-1.5">
         <Row href="/studio" icon={SquareKanban} label="My studio" onClick={close} />
-        <Row href="/saved" icon={Bookmark} label="Saved posts" onClick={close} />
-        <Row href="/challenges" icon={Trophy} label="My challenges" onClick={close} />
+        <Row href="/saved" icon={Bookmark} label="Saved posts" onClick={close}>
+          {!!summary?.savedCount && <Badge className="bg-canvas">{summary.savedCount}<span className="sr-only"> saved</span></Badge>}
+        </Row>
+        <Row href="/challenges" icon={Trophy} label="My challenges" onClick={close}>
+          {!!summary?.activeChallengeCount && <Badge className="bg-yellow">{summary.activeChallengeCount} active</Badge>}
+        </Row>
+        {/* Only for sellers, once pattern selling exists (null until then). */}
+        {summary && summary.salesLast24h !== null && (
+          <Row href="/marketplace" icon={TrendingUp} label="Pattern sales" onClick={close}>
+            {summary.salesLast24h > 0 && <Badge className="bg-ink text-white">+{money.format(summary.salesLast24h)}<span className="sr-only"> in the last 24 hours</span></Badge>}
+          </Row>
+        )}
       </nav>
       <div role="group" aria-label="Quick settings" className="border-b border-line py-1.5">
         <MeasureIn me={me} />
@@ -113,6 +131,13 @@ function MenuBody({ me, close, closeButton }: { me: Profile | undefined; close: 
         </Row>
       </div>
       <nav aria-label="More" className="border-b border-line py-1.5">
+        {/* Once membership exists. */}
+        {summary?.membershipAvailable && (
+          <Link href="/membership" onClick={close} className={`${ROW} bg-yellow hover:bg-yellow`}>
+            <Heart size={19} aria-hidden="true" className="shrink-0" /><span className="flex-1">Support Seams Club</span>
+            <span className="text-[13px] font-bold">{summary.isSupporter ? 'Supporter ♥' : '$5/mo'}</span>
+          </Link>
+        )}
         <Row href="/settings" icon={Settings} label="Settings & privacy" onClick={close} />
         <LogOut close={close} />
       </nav>

@@ -1426,6 +1426,21 @@ export interface ErrorResponse {
   error: string;
 }
 
+export interface MenuSummary {
+  /** Saved posts you may still see */
+  savedCount: number;
+  /** Running challenges you joined */
+  activeChallengeCount: number;
+  /**
+     * Pattern sales earnings in the last 24 hours. Null when you're not a seller (selling isn't open yet)
+     * @nullable
+     */
+  salesLast24h: number | null;
+  isSupporter: boolean;
+  /** Whether membership (Support Seams Club) exists yet */
+  membershipAvailable: boolean;
+}
+
 export type ProfileUpdateUnits = typeof ProfileUpdateUnits[keyof typeof ProfileUpdateUnits];
 
 

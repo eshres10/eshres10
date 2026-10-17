@@ -100,6 +100,7 @@ import type {
   Media,
   MediaInput,
   MembershipState,
+  MenuSummary,
   ModerateInput,
   Onboarding,
   OnboardingRecommendations,
@@ -7627,6 +7628,107 @@ export const useDeleteFabric = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeleteFabricMutationOptions(options), queryClient);
     }
+
+export const getGetMenuSummaryUrl = () => {
+
+
+
+
+  return `/api/me/menu-summary`
+}
+
+/**
+ * @summary The account menu's numbers: your saves, running challenges you joined, pattern sales and membership. Only ever the caller's own.
+ */
+export const getMenuSummary = async ( options?: Parameters<typeof customFetch>[1]): Promise<MenuSummary> => {
+
+  return customFetch<MenuSummary>(getGetMenuSummaryUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetMenuSummaryQueryKey = () => {
+    return [
+    `/api/me/menu-summary`
+    ] as const;
+    }
+
+
+export const getGetMenuSummaryQueryOptions = <TData = Awaited<ReturnType<typeof getMenuSummary>>, TError = ErrorType<void>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMenuSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetMenuSummaryQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMenuSummary>>> = ({ signal }) => getMenuSummary({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMenuSummary>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetMenuSummaryQueryResult = NonNullable<Awaited<ReturnType<typeof getMenuSummary>>>
+export type GetMenuSummaryQueryError = ErrorType<void>
+
+
+export function useGetMenuSummary<TData = Awaited<ReturnType<typeof getMenuSummary>>, TError = ErrorType<void>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMenuSummary>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMenuSummary>>,
+          TError,
+          Awaited<ReturnType<typeof getMenuSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMenuSummary<TData = Awaited<ReturnType<typeof getMenuSummary>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMenuSummary>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getMenuSummary>>,
+          TError,
+          Awaited<ReturnType<typeof getMenuSummary>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetMenuSummary<TData = Awaited<ReturnType<typeof getMenuSummary>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMenuSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The account menu's numbers: your saves, running challenges you joined, pattern sales and membership. Only ever the caller's own.
+ */
+
+export function useGetMenuSummary<TData = Awaited<ReturnType<typeof getMenuSummary>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getMenuSummary>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetMenuSummaryQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetOnboardingUrl = () => {
 

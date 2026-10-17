@@ -35,7 +35,7 @@ export function challengeStatus(c: Pick<Challenge, "startsAt" | "endsAt">, now =
 }
 
 /** Challenges whose host and viewer haven't blocked each other (RLS checks the same). */
-function notBlockedHost(viewer: Viewer): SQL | undefined {
+export function notBlockedHost(viewer: Viewer): SQL | undefined {
   return viewer.userId ? sql`NOT sewspace_blocked_with(${challengesTable.createdBy})` : undefined;
 }
 

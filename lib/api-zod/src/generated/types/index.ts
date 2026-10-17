@@ -125,6 +125,7 @@ export * from './measurementValues';
 export * from './media';
 export * from './mediaInput';
 export * from './membershipState';
+export * from './menuSummary';
 export * from './moderateInput';
 export * from './onboarding';
 export * from './onboardingExperience';

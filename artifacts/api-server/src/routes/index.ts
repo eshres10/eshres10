@@ -13,6 +13,7 @@ import forumRouter, { forumPublicRouter } from "./forum";
 import draftsRouter from "./drafts";
 import ideasRouter from "./ideas";
 import onboardingRouter from "./onboarding";
+import menuRouter from "./menu";
 import storageRouter, { objectReadRouter } from "./storage";
 import { requireAuth } from "../middlewares/auth";
 
@@ -40,6 +41,7 @@ router.use(forumRouter);
 router.use(draftsRouter);
 router.use(ideasRouter);
 router.use(onboardingRouter);
+router.use(menuRouter);
 router.use(storageRouter);
 
 export default router;
