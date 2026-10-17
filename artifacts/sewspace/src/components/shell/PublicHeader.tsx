@@ -3,6 +3,7 @@ import { Search } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { Logo } from '@/components/brand/Logo';
 import { authHref } from '@/lib/navigation';
+import { COMMUNITY_TABS } from '@/components/shell/CommunityTabs';
 import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
 
 /** Public header, fixed edge-to-edge on mobile and floating on larger screens. */
@@ -17,10 +18,11 @@ export function PublicHeader() {
       <nav aria-label="Main" className="flex w-full items-center justify-between gap-3 rounded-none bg-white py-2 pl-4 pr-2 shadow-float sm:py-3 sm:pl-[22px] sm:pr-3.5 md:rounded-[30px]">
         <Logo />
         <span className="hidden flex-1 items-center gap-1 pl-4 md:flex">
-          <Link href="/explore" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Explore</Link>
-          <Link href="/forum" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Forum</Link>
-          <Link href="/challenges" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Challenges</Link>
-          <Link href="/catalog" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Patterns</Link>
+          {COMMUNITY_TABS.map(t => {
+            const active = location === t.href || location.startsWith(`${t.href}/`);
+            return <Link key={t.href} href={t.href} aria-current={active ? 'page' : undefined}
+              className={`rounded-full px-3.5 py-2 text-[15px] text-ink no-underline hover:bg-canvas ${active ? 'font-bold underline decoration-2 underline-offset-[6px]' : 'font-semibold'}`}>{t.label}</Link>;
+          })}
         </span>
         <span className="flex items-center gap-1 sm:gap-2">
         {location !== '/search' && <Link href="/search" aria-label="Search" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink hover:bg-canvas"><Search size={20} aria-hidden="true" /></Link>}

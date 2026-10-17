@@ -22,6 +22,15 @@ export function dateRange(start: string | Date, end: string | Date): string {
 
 export const STATUS_LABEL = { active: 'Active', upcoming: 'Starting soon', ended: 'Ended' } as const;
 
+/** Two short facts for a challenge card: when ("12 days left", "Starts in 3 days", "Ended 3 Sep") and how many. */
+export function challengeMeta(c: ChallengeSummary) {
+  const now = Date.now();
+  if (c.status === 'upcoming') return [`Starts in ${Math.max(1, Math.ceil((new Date(c.startsAt).getTime() - now) / 86400000))} days`, `${c.members} interested`];
+  if (c.status === 'ended') return [`Ended ${new Date(c.endsAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`, `${c.entries.toLocaleString()} entries`];
+  const left = Math.max(0, Math.ceil((new Date(c.endsAt).getTime() - now) / 86400000));
+  return [`${left} ${left === 1 ? 'day' : 'days'} left`, `${c.members} sewists`];
+}
+
 export function StatusPill({ status }: { status: ChallengeSummary['status'] }) {
   const tone = status === 'active' ? 'bg-yellow text-ink' : status === 'upcoming' ? 'bg-blue text-white' : 'bg-line text-ink';
   return <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${tone}`}>{STATUS_LABEL[status]}</span>;

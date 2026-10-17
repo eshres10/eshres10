@@ -4,7 +4,7 @@ import { getExploreFeed, useListChallenges, type ChallengeSummary, type FeedPost
 import { useAuth } from '@clerk/react';
 import { Bookmark, Globe, Heart, Lock, MessageCircle, MoreHorizontal, Scissors, Send, Users } from 'lucide-react';
 import { Link, Redirect } from 'wouter';
-import { STATUS_LABEL } from '@/components/challenges/parts';
+import { STATUS_LABEL, challengeMeta } from '@/components/challenges/parts';
 import { Logo } from '@/components/brand/Logo';
 import { MAKE_ART } from '@/components/onboarding/copy';
 import { Glyph } from '@/components/onboarding/Shell';
@@ -171,14 +171,6 @@ function HowItWorks() {
   );
 }
 
-const DAY = 86_400_000;
-function challengeMeta(c: ChallengeSummary) {
-  const now = Date.now();
-  if (c.status === 'upcoming') return [`Starts in ${Math.max(1, Math.ceil((new Date(c.startsAt).getTime() - now) / DAY))} days`, `${c.members} interested`];
-  if (c.status === 'ended') return [`Ended ${new Date(c.endsAt).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}`, `${c.entries.toLocaleString()} entries`];
-  const left = Math.max(0, Math.ceil((new Date(c.endsAt).getTime() - now) / DAY));
-  return [`${left} ${left === 1 ? 'day' : 'days'} left`, `${c.members} sewists`];
-}
 const BADGE = { active: 'bg-yellow text-ink', upcoming: 'border-2 border-blue bg-white text-blue-ink', ended: 'bg-ink/75 text-white' } as const;
 const CHALLENGE_ART = ['Outerwear', 'Bags', 'Tops'];
 
