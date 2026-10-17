@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { listForumTopics, useGetForumHelpers, useGetForumOverview, type ForumBoard, type ListForumTopicsFilter, type ListForumTopicsSort } from '@workspace/api-client-react';
+import { listForumTopics, useGetForumOverview, type ForumBoard, type ForumTopicSummary, type ListForumTopicsFilter, type ListForumTopicsSort } from '@workspace/api-client-react';
 import { Loader2, MessagesSquare, Plus, Search } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
-import { UserAvatar } from '@/components/avatar';
 import { ErrorState } from '@/components/common';
-import { BOARDS, KINDS, TopicCard } from '@/components/forum/parts';
+import { BOARDS, KINDS, KindBadge, StateBadges } from '@/components/forum/parts';
+import { timeAgo } from '@/lib/time';
 import { CommunityTabs } from '@/components/shell/CommunityTabs';
 
 const SORTS: Array<{ id: ListForumTopicsSort; label: string }> = [
@@ -15,7 +15,42 @@ const SORTS: Array<{ id: ListForumTopicsSort; label: string }> = [
   { id: 'unanswered', label: 'Unanswered' },
 ];
 
-/** The forum: filters with counts, Hot/New/Unanswered, search, boards. Works signed out. */
+/** One line about each board and its colour dot (the website design). */
+const BOARD_INFO: Record<ForumBoard, { desc: string; dot: string }> = {
+  fitting: { desc: 'FBAs, swaybacks, gaping, pooling, all of it.', dot: 'bg-blue' },
+  fabric: { desc: 'Fibres, pre-washing, layouts, where to buy.', dot: 'bg-peach' },
+  machines: { desc: 'Tension woes, feet, overlockers, needles.', dot: 'bg-ink' },
+  patterns: { desc: 'Mods, mash-ups and self-drafting.', dot: 'bg-yellow ring-1 ring-ink' },
+  beginners: { desc: 'No question too small. Really.', dot: 'bg-red' },
+  mending: { desc: 'Visible mending, refashions, scrap projects.', dot: 'bg-blue-ink' },
+  meetups: { desc: 'Sew-ins, swaps and fabric fairs near you.', dot: 'bg-mark' },
+};
+
+const compact = new Intl.NumberFormat(undefined, { notation: 'compact', maximumFractionDigits: 1 });
+
+/** A topic as a table row: badges, title, board · author · tags, then votes, replies and last activity. */
+function TopicRow({ topic: t }: { topic: ForumTopicSummary }) {
+  return (
+    <li className={`grid items-center gap-x-4 gap-y-1 rounded-[18px] px-4 py-3.5 md:grid-cols-[minmax(0,1fr)_90px_90px_80px] ${t.pinned ? 'bg-yellow/20' : 'border-t border-line first:border-0'}`}>
+      <div className="min-w-0">
+        <p className="flex flex-wrap items-center gap-1.5">
+          <KindBadge kind={t.kind} /><StateBadges topic={t} />
+          <Link href={`/forum/topics/${t.id}`} className="ml-0.5 text-[16px] font-semibold text-ink no-underline hover:underline">{t.title}</Link>
+        </p>
+        <p className="mt-1 truncate text-[13px] text-subtle">
+          {BOARDS[t.board]} · @{t.author.handle}
+          {t.tags.length > 0 && <> {t.tags.map(tag => <span key={tag} className="font-semibold text-blue-ink"> #{tag}</span>)}</>}
+        </p>
+        <p className="mt-1 text-[13px] text-subtle md:hidden">{t.votes} {t.votes === 1 ? 'vote' : 'votes'} · {t.replies} {t.replies === 1 ? 'reply' : 'replies'} · {timeAgo(t.lastActivityAt)}</p>
+      </div>
+      <p className="hidden text-center text-[17px] font-bold md:block"><span className="sr-only">Votes: </span>{compact.format(t.votes)}</p>
+      <p className="hidden text-center text-[17px] font-bold md:block"><span className="sr-only">Replies: </span>{compact.format(t.replies)}</p>
+      <p className="hidden text-right text-[13px] text-subtle md:block"><span className="sr-only">Last activity: </span>{timeAgo(t.lastActivityAt)}</p>
+    </li>
+  );
+}
+
+/** The forum: boards, filters with counts, Hot/New/Unanswered, search. Works signed out. */
 export function ForumPage() {
   const [, setLocation] = useLocation();
   const params = new URLSearchParams(useSearch());
@@ -37,7 +72,6 @@ export function ForumPage() {
   };
 
   const overview = useGetForumOverview();
-  const helpers = useGetForumHelpers();
   const topics = useInfiniteQuery({
     queryKey: ['/api/public/forum/topics', { filter, board, sort, q: debounced }],
     queryFn: ({ pageParam }) => listForumTopics({ filter, sort, ...(board ? { board } : {}), ...(debounced.trim() ? { q: debounced.trim() } : {}), ...(pageParam ? { cursor: pageParam } : {}) }),
@@ -51,97 +85,98 @@ export function ForumPage() {
     ...o?.kinds.map(k => ({ id: k.kind as ListForumTopicsFilter, label: KINDS[k.kind].plural, count: k.count })) ?? [],
     { id: 'solved', label: 'Solved', count: o?.solved },
   ];
+  const start = () => {
+    if (!ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) return;
+    const p = new URLSearchParams();
+    if (board) p.set('board', board);
+    if (filter !== 'all' && filter !== 'solved') p.set('kind', filter);
+    setLocation(`/forum/new${p.size ? `?${p}` : ''}`);
+  };
 
   return (
     <div className="mx-auto max-w-[1232px]">
       <CommunityTabs />
-      <div className="flex items-center justify-between gap-3">
-        <label className="relative block min-w-0 w-full max-w-xl flex-1">
-          <span className="sr-only">Search the forum</span>
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden="true" />
-          <input type="search" value={q} onChange={e => { setQ(e.target.value); go({ q: e.target.value || undefined }); }} className="field min-h-[48px] w-full pl-9" placeholder="Search the forum" />
-        </label>
-        <button type="button" className="btn btn-primary min-h-[48px] shrink-0 whitespace-nowrap px-4" onClick={() => { if (!ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) return;
-          const p = new URLSearchParams();
-          if (board) p.set('board', board);
-          if (filter !== 'all' && filter !== 'solved') p.set('kind', filter);
-          setLocation(`/forum/new${p.size ? `?${p}` : ''}`);
-        }}>
-          <Plus size={16} aria-hidden="true" />Start a discussion
-        </button>
-      </div>
-
-      <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mt-4" role="group" aria-label="Filter">
-        {chips.map(c => (
-          <button key={c.id} type="button" aria-pressed={filter === c.id} onClick={() => go({ filter: c.id })}
-            className={`inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold ${filter === c.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>
-            {c.label}{c.count !== undefined && <span className={filter === c.id ? 'text-white/70' : 'text-subtle'}>{c.count}</span>}
+      <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,570px)] lg:items-end">
+        <div>
+          <p className="eyebrow eyebrow-red">The forum</p>
+          <h1 className="mt-2 font-display text-[clamp(40px,5.4vw,68px)] leading-[.95] tracking-[-.06em]">Ask anything.<br />Someone's sewn it.</h1>
+          {o && <p className="mt-3 text-[17px] text-subtle">{o.total.toLocaleString()} {o.total === 1 ? 'discussion' : 'discussions'} · {o.solved.toLocaleString()} solved {o.solved === 1 ? 'question' : 'questions'}</p>}
+        </div>
+        <div className="space-y-3 lg:pb-1">
+          <label className="relative block">
+            <span className="sr-only">Search the forum</span>
+            <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-ink" aria-hidden="true" />
+            <input type="search" value={q} onChange={e => { setQ(e.target.value); go({ q: e.target.value || undefined }); }}
+              className="min-h-[54px] w-full rounded-full border-2 border-ink bg-white pl-12 pr-5 text-[16px] outline-none focus:ring-4 focus:ring-yellow" placeholder={'Search before you ask: “gaping neckline”'} />
+          </label>
+          <button type="button" onClick={start} className="inline-flex min-h-[50px] items-center gap-2 rounded-full bg-yellow px-6 text-[16px] font-bold text-ink">
+            <Plus size={17} aria-hidden="true" />Start a discussion
           </button>
-        ))}
-      </div>
+        </div>
+      </section>
 
-      <div className="mt-3 grid gap-5 lg:mt-4 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
-        <section aria-label="Topics">
-          <div role="tablist" aria-label="Sort" className="mb-3 flex w-full gap-1 rounded-full bg-white p-1 sm:w-fit">
+      <section aria-label="Boards" className="-mx-3 mt-6 flex snap-x gap-3 overflow-x-auto px-3 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+        {(Object.keys(BOARDS) as ForumBoard[]).map(b => {
+          const info = o?.boards.find(x => x.board === b);
+          const on = board === b;
+          return (
+            <div key={b} className={`flex w-[260px] shrink-0 snap-start flex-col rounded-[24px] bg-white p-5 sm:w-auto ${on ? 'outline outline-2 outline-ink' : ''}`}>
+              <button type="button" onClick={() => go({ board: on ? undefined : b })} aria-pressed={on} className="flex items-center gap-2.5 text-left">
+                <span aria-hidden="true" className={`h-3.5 w-3.5 shrink-0 rounded-full ${BOARD_INFO[b].dot}`} />
+                <span className="flex-1 text-[17px] font-semibold">{BOARDS[b]}</span>
+                <span className="text-xs text-subtle">{info ? compact.format(info.count) : ''}</span>
+              </button>
+              <p className="mt-1.5 text-sm text-subtle">{BOARD_INFO[b].desc}</p>
+              {info?.latest && (
+                <p className="mt-auto border-t border-line pt-3 text-sm [margin-top:max(.75rem,auto)]">
+                  <span className="text-subtle">Latest: </span><Link href={`/forum/topics/${info.latest.id}`} className="font-semibold text-ink no-underline hover:underline">{info.latest.title}</Link>
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </section>
+
+      <section aria-labelledby="all-title" className="mt-10">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 id="all-title" className="font-display text-[30px] tracking-[-.05em] sm:text-[34px]">{board ? BOARDS[board] : 'All discussions'}</h2>
+          <div role="tablist" aria-label="Sort" className="flex gap-1 rounded-full bg-white p-1">
             {SORTS.map(s => (
               <button key={s.id} type="button" role="tab" aria-selected={sort === s.id} onClick={() => go({ sort: s.id })}
-                className={`min-h-[40px] flex-1 rounded-full px-2 text-sm font-bold sm:flex-none sm:px-4 ${sort === s.id ? 'bg-ink text-white' : 'text-ink'}`}>{s.label}</button>
+                className={`min-h-[40px] rounded-full px-4 text-sm font-bold ${sort === s.id ? 'bg-ink text-white' : 'text-ink'}`}>{s.label}</button>
             ))}
           </div>
+        </div>
+        <div className="-mx-3 mt-3 flex gap-1.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:flex-wrap sm:px-0 [&::-webkit-scrollbar]:hidden" role="group" aria-label="Filter">
+          {chips.map(c => (
+            <button key={c.id} type="button" aria-pressed={filter === c.id} onClick={() => go({ filter: c.id })}
+              className={`inline-flex min-h-[42px] shrink-0 items-center gap-1.5 rounded-full px-4 text-sm font-semibold ${filter === c.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>
+              {c.label}{c.count !== undefined && <span className={filter === c.id ? 'text-white/70' : 'text-subtle'}>{c.count}</span>}
+            </button>
+          ))}
+        </div>
+        <div className="mt-4 rounded-[30px] bg-white p-2 sm:p-3">
           {topics.isLoading ? <div className="grid place-items-center py-16" role="status" aria-label="Loading"><Loader2 className="animate-spin" /></div>
             : topics.isError ? <ErrorState retry={() => topics.refetch()} />
             : !items.length
               ? (
-                <div className="grid place-items-center rounded-[30px] bg-white px-6 py-14 text-center">
+                <div className="grid place-items-center px-6 py-14 text-center">
                   <MessagesSquare size={28} aria-hidden="true" />
                   <p className="mt-3 font-display text-xl">{debounced ? 'Nothing matches that search' : 'Nothing here yet'}</p>
                   <p className="mt-1 text-sm text-subtle">Be the first to start one.</p>
                 </div>
               )
-              : <div className="space-y-3">{items.map(t => <TopicCard key={t.id} topic={t} />)}</div>}
-          {topics.hasNextPage && (
-            <div className="mt-4 flex justify-center">
-              <button type="button" onClick={() => topics.fetchNextPage()} disabled={topics.isFetchingNextPage} className="btn btn-line">{topics.isFetchingNextPage && <Loader2 size={15} className="animate-spin" />}Load more</button>
-            </div>
-          )}
-        </section>
-
-        <aside className="space-y-4">
-          <section className="rounded-[30px] bg-white p-5" aria-labelledby="boards-title">
-            <h2 id="boards-title" className="eyebrow">Boards</h2>
-            <ul className="mt-2">
-              <li><button type="button" onClick={() => go({ board: undefined })} aria-pressed={!board} className={`flex min-h-[44px] w-full items-center justify-between rounded-[14px] px-2 text-left text-sm font-semibold ${!board ? 'bg-canvas' : ''}`}>All boards<span className="text-subtle">{o?.total ?? ''}</span></button></li>
-              {(Object.keys(BOARDS) as ForumBoard[]).map(b => (
-                <li key={b}><button type="button" onClick={() => go({ board: b })} aria-pressed={board === b} className={`flex min-h-[44px] w-full items-center justify-between rounded-[14px] px-2 text-left text-sm font-semibold ${board === b ? 'bg-canvas' : ''}`}>
-                  {BOARDS[b]}<span className="text-subtle">{o?.boards.find(x => x.board === b)?.count ?? ''}</span>
-                </button></li>
-              ))}
-            </ul>
-          </section>
-          <section className="rounded-[30px] bg-white p-5" aria-labelledby="tips-title">
-            <h2 id="tips-title" className="eyebrow">Asking a good question</h2>
-            <ul className="mt-3 space-y-2 text-sm">
-              <li>Say the fabric, pattern and size.</li>
-              <li>Add a photo of the problem area (share it as Show &amp; tell, or link your make).</li>
-              <li>Mark the answer that worked so others find it.</li>
-            </ul>
-          </section>
-          {helpers.data && helpers.data.length > 0 && (
-            <section className="rounded-[30px] bg-white p-5" aria-labelledby="helpers-title">
-              <h2 id="helpers-title" className="eyebrow">Top helpers this month</h2>
-              <ul className="mt-3 space-y-2.5">
-                {helpers.data.map(h => (
-                  <li key={h.person.handle} className="flex items-center gap-3 text-sm">
-                    <UserAvatar name={h.person.name} avatarUrl={h.person.avatarUrl} size={34} />
-                    <span className="min-w-0 flex-1"><Link href={`/@${h.person.handle}`} className="block truncate font-bold text-ink">{h.person.handle}</Link><span className="text-xs text-subtle">{h.accepted} accepted answer{h.accepted === 1 ? '' : 's'}</span></span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )}
-        </aside>
-      </div>
-
+              : <>
+                  <p aria-hidden="true" className="hidden grid-cols-[minmax(0,1fr)_90px_90px_80px] gap-x-4 px-4 pb-2 pt-1 text-[13px] font-semibold text-subtle md:grid"><span>Topic</span><span className="text-center">Votes</span><span className="text-center">Replies</span><span className="text-right">Activity</span></p>
+                  <ul className="space-y-0.5">{items.map(t => <TopicRow key={t.id} topic={t} />)}</ul>
+                </>}
+        </div>
+        {topics.hasNextPage && (
+          <div className="mt-4 flex justify-center">
+            <button type="button" onClick={() => topics.fetchNextPage()} disabled={topics.isFetchingNextPage} className="btn btn-line">{topics.isFetchingNextPage && <Loader2 size={15} className="animate-spin" />}Load more</button>
+          </div>
+        )}
+      </section>
     </div>
   );
 }

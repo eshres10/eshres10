@@ -67,6 +67,7 @@ export * from './forumHelper';
 export * from './forumKind';
 export * from './forumOverview';
 export * from './forumOverviewBoardsItem';
+export * from './forumOverviewBoardsItemLatest';
 export * from './forumOverviewKindsItem';
 export * from './forumPoll';
 export * from './forumPollOptionsItem';

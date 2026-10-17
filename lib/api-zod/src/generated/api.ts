@@ -1791,7 +1791,11 @@ export const GetForumOverviewResponse = zod.object({
 })),
   "boards": zod.array(zod.object({
   "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
-  "count": zod.number().int()
+  "count": zod.number().int(),
+  "latest": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string()
+}).nullable().describe('The most recently active topic on the board that the viewer may see')
 }))
 })
 

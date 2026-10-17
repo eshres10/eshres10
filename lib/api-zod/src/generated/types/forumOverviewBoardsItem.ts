@@ -6,8 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ForumBoard } from './forumBoard';
+import type { ForumOverviewBoardsItemLatest } from './forumOverviewBoardsItemLatest';
 
 export type ForumOverviewBoardsItem = {
   board: ForumBoard;
   count: number;
+  /**
+     * The most recently active topic on the board that the viewer may see
+     * @nullable
+     */
+  latest: ForumOverviewBoardsItemLatest;
 };

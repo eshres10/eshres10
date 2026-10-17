@@ -2825,7 +2825,15 @@ components:
             properties:
               board: { $ref: "#/components/schemas/ForumBoard" }
               count: { type: integer }
-            required: [board, count]
+              latest:
+                type: object
+                nullable: true
+                description: The most recently active topic on the board that the viewer may see
+                properties:
+                  id: { type: integer }
+                  title: { type: string }
+                required: [id, title]
+            required: [board, count, latest]
       required: [total, solved, kinds, boards]
     ForumHelper:
       type: object

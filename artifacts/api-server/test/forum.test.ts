@@ -77,6 +77,10 @@ test("lists, filters, search and counts", async () => {
   assert.equal(overview.kinds.find((k: { kind: string }) => k.kind === "question").count, 2);
   assert.equal(overview.boards.find((b: { board: string }) => b.board === "machines").count, 2);
   assert.equal((await ask("GET", "/api/public/forum/overview")).json.total, 5);
+  const fabric = (o: { boards: Array<{ board: string; latest: { id: number } | null }> }) => o.boards.find((b) => b.board === "fabric")!.latest?.id;
+  assert.equal(fabric(overview), ids.blocked, "latest topic on the board");
+  assert.equal(fabric((await ask("GET", "/api/public/forum/overview")).json), ids.question, "latest skips blocked people");
+  assert.equal(overview.boards.find((b: { board: string }) => b.board === "meetups").latest, null);
   assert.equal((await blk("GET", `/api/public/forum/topics/${ids.question}`)).status, 404);
 });
 

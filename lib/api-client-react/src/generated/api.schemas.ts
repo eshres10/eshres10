@@ -1149,9 +1149,23 @@ export type ForumOverviewKindsItem = {
   count: number;
 };
 
+/**
+ * The most recently active topic on the board that the viewer may see
+ * @nullable
+ */
+export type ForumOverviewBoardsItemLatest = {
+  id: number;
+  title: string;
+} | null;
+
 export type ForumOverviewBoardsItem = {
   board: ForumBoard;
   count: number;
+  /**
+     * The most recently active topic on the board that the viewer may see
+     * @nullable
+     */
+  latest: ForumOverviewBoardsItemLatest;
 };
 
 export interface ForumOverview {

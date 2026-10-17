@@ -246,13 +246,18 @@ export async function forumOverview(db: Tx, viewer: Viewer) {
   const boards = await db.select({ board: forumTopicsTable.board, n: count() }).from(forumTopicsTable).where(notBlockedTopic(viewer)).groupBy(forumTopicsTable.board);
   const [solved] = await db.select({ n: count() }).from(forumTopicsTable)
     .where(and(notBlockedTopic(viewer), eq(forumTopicsTable.kind, "question"), isNotNull(forumTopicsTable.acceptedReplyId)));
+  // The most recently active topic on each board, blocks applied like the lists.
+  const latest = await db.selectDistinctOn([forumTopicsTable.board], { board: forumTopicsTable.board, id: forumTopicsTable.id, title: forumTopicsTable.title })
+    .from(forumTopicsTable).where(notBlockedTopic(viewer))
+    .orderBy(forumTopicsTable.board, desc(forumTopicsTable.lastActivityAt), desc(forumTopicsTable.id));
   const kindMap = new Map(kinds.map((k) => [k.kind, k.n]));
   const boardMap = new Map(boards.map((b) => [b.board, b.n]));
+  const latestMap = new Map(latest.map((t) => [t.board, { id: t.id, title: t.title }]));
   return {
     total: kinds.reduce((s, k) => s + k.n, 0),
     solved: solved?.n ?? 0,
     kinds: FORUM_KINDS.map((kind) => ({ kind, count: kindMap.get(kind) ?? 0 })),
-    boards: FORUM_BOARDS.map((board) => ({ board, count: boardMap.get(board) ?? 0 })),
+    boards: FORUM_BOARDS.map((board) => ({ board, count: boardMap.get(board) ?? 0, latest: latestMap.get(board) ?? null })),
   };
 }
 
