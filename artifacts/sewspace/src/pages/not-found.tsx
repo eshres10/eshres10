@@ -8,7 +8,7 @@ export default function NotFound({ embedded = false }: { embedded?: boolean }) {
           <p className="eyebrow">404</p>
           <h1 className="mt-2 font-display text-[32px] leading-tight">This page isn't here</h1>
           <p className="mt-3 text-[15px] text-subtle">It may have moved, or it isn't shared publicly.</p>
-          <Link href="/" className="btn btn-primary mt-6 no-underline">Go to SewSpace</Link>
+          <Link href="/" className="btn btn-primary mt-6 no-underline">Go to Seams Club</Link>
         </section>
   );
   if (embedded) return <div className="grid place-items-center py-10">{card}</div>;

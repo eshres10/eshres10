@@ -8,7 +8,7 @@ import { as, ownerSql, startApp, storedObjects } from "./harness";
 
 const dir = mkdtempSync(path.join(tmpdir(), "sewspace-posts-"));
 const indexHtmlPath = path.join(dir, "index.html");
-writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Sewspace</title></head><body></body></html>`);
+writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Seams Club</title></head><body></body></html>`);
 const origin = await startApp({ indexHtmlPath });
 
 const pia = as(origin, "p_pia"); // author
@@ -183,7 +183,7 @@ test("posting is rate limited", async () => {
 test("post pages get meta tags and public posts are in the sitemap", async () => {
   const page = await anon("GET", `/posts/${publicPost.id}`);
   assert.equal(page.status, 200);
-  assert.match(page.text, /<title>pia on SewSpace: “Finished my shirt!”<\/title>/);
+  assert.match(page.text, /<title>pia on Seams Club: “Finished my shirt!”<\/title>/);
   assert.match(page.text, /og:image" content="http:\/\/127\.0\.0\.1:\d+\/api\/storage\/objects\/media\//);
   assert.equal((await anon("GET", `/posts/${followersPost.id}`)).status, 404);
   const sitemap = (await anon("GET", "/sitemap.xml")).text;

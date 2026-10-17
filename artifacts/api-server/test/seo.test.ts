@@ -7,8 +7,8 @@ import { as, startApp } from "./harness";
 
 const dir = mkdtempSync(path.join(tmpdir(), "sewspace-seo-"));
 const indexHtmlPath = path.join(dir, "index.html");
-writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><meta charset="UTF-8" /><title>Sewspace</title>
-<meta name="description" content="default" /><meta property="og:title" content="Sewspace" /></head>
+writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><meta charset="UTF-8" /><title>Seams Club</title>
+<meta name="description" content="default" /><meta property="og:title" content="Seams Club" /></head>
 <body><div id="root"></div><script type="module" src="/assets/index.js"></script></body></html>`);
 
 const origin = await startApp({ indexHtmlPath });
@@ -20,7 +20,7 @@ test("/@handle returns the SPA with profile meta tags, escaped", async () => {
   const res = await anon("GET", "/@ann.sews");
   assert.equal(res.status, 200);
   assert.match(res.headers.get("content-type") ?? "", /text\/html/);
-  assert.match(res.text, /<title>Ann &lt;script&gt; \(@ann\.sews\) · SewSpace<\/title>/);
+  assert.match(res.text, /<title>Ann &lt;script&gt; \(@ann\.sews\) · Seams Club<\/title>/);
   assert.match(res.text, /<meta name="description" content="Sews &quot;linen&quot; &amp; wool" \/>/);
   assert.match(res.text, /<link rel="canonical" href="http:\/\/127\.0\.0\.1:\d+\/@ann\.sews" \/>/);
   assert.doesNotMatch(res.text, /<script>/);

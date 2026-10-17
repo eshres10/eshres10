@@ -158,7 +158,7 @@ export function NewEntryForm({ kind, initial, onCreated, onCancel }: {
       }, { onSuccess: onCreated });
     }}>
       <h2 className="font-display text-2xl">Add a {kind === 'pattern' ? 'pattern' : 'product'} page</h2>
-      <p className="text-sm text-subtle">Pages are shared by everyone on SewSpace. Only add patterns and products you can name; never upload pattern files.</p>
+      <p className="text-sm text-subtle">Pages are shared by everyone on Seams Club. Only add patterns and products you can name; never upload pattern files.</p>
       <label className="block text-xs font-semibold">Name
         <input value={form.name} onChange={e => set('name', e.target.value)} required maxLength={120} className="field mt-1.5" placeholder={kind === 'pattern' ? 'Willa Dress' : 'Mara 100'} />
       </label>

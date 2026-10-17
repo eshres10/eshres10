@@ -172,7 +172,7 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
   const reviews = useGetCatalogReviews(kind as 'pattern', slug, { query: { retry: false, enabled: valid } });
   useEffect(() => {
     const e = page.data?.entry;
-    if (e) document.title = `${e.name}${e.maker ? ` by ${e.maker}` : ''} · SewSpace`;
+    if (e) document.title = `${e.name}${e.maker ? ` by ${e.maker}` : ''} · Seams Club`;
   }, [page.data]);
   useEffect(() => {
     if (reviews.data && window.location.hash.startsWith('#review-')) document.getElementById(window.location.hash.slice(1))?.scrollIntoView();
@@ -187,14 +187,14 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
   const facts = [capitalise(e.category), e.difficulty && capitalise(e.difficulty), e.sizes && `Sizes ${e.sizes}`, e.fabricTypes, e.yardage].filter(Boolean) as string[];
 
   return (
-    <div className="mx-auto max-w-[1232px] space-y-4">
-      <nav aria-label="Breadcrumb" className="text-sm text-subtle">
+    <div className="mx-auto max-w-[1232px] space-y-3 sm:space-y-4">
+      <nav aria-label="Breadcrumb" className="hidden text-sm text-subtle sm:block">
         <Link href={e.kind === 'pattern' ? '/catalog' : '/catalog?kind=product'} className="text-subtle">{e.kind === 'pattern' ? 'Patterns' : 'Fabrics & supplies'}</Link>
         <span aria-hidden="true"> / </span>{capitalise(e.category)}<span aria-hidden="true"> / </span><span className="font-semibold text-ink">{e.name}</span>
       </nav>
 
-      <section className="grid overflow-hidden rounded-[40px] bg-white md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
-        <div className="relative min-h-[240px] bg-peach-soft">
+      <section className="grid overflow-hidden rounded-[28px] bg-white md:rounded-[40px] md:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div className="relative min-h-[255px] bg-peach-soft sm:min-h-[320px] md:min-h-[480px]">
           {cover?.coverImageUrl
             ? <>
                 <img src={cover.coverImageUrl} alt={`${cover.name} by @${cover.owner.handle}`} className="absolute inset-0 h-full w-full object-cover" />
@@ -202,20 +202,20 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
               </>
             : <span className="absolute inset-0 grid place-items-center" aria-hidden="true"><Scissors size={48} /></span>}
         </div>
-        <div className="p-6 sm:p-10">
+        <div className="p-4 pb-5 sm:p-7 md:p-10">
           <p className="eyebrow">{e.kind === 'pattern' ? 'Sewing pattern' : capitalise(e.category)}</p>
           <h1 className="mt-2 font-display text-[clamp(32px,4vw,52px)] leading-[1.02] tracking-[-.05em]">{e.name}</h1>
           {e.maker && <p className="mt-1 text-[17px]">by <b>{e.maker}</b></p>}
           <div className="mt-4 flex flex-wrap gap-1.5">{facts.map(f => <span key={f} className="rounded-full bg-canvas px-3 py-1.5 text-xs font-semibold">{f}</span>)}</div>
-          <div className="mt-5 flex flex-wrap gap-2.5">
+          <div className="mt-4 flex flex-wrap gap-2 sm:mt-5 sm:gap-2.5">
             <span className="rounded-[20px] bg-yellow px-[18px] py-3"><b className="font-display text-xl">{s.rating !== null ? s.rating.toFixed(1) : '–'}</b> <span className="text-sm">overall rating</span></span>
             <span className="rounded-[20px] bg-canvas px-[18px] py-3"><b className="font-display text-xl">{s.makes}</b> <span className="text-sm text-subtle">make{s.makes === 1 ? '' : 's'} shared</span></span>
             <span className="rounded-[20px] bg-canvas px-[18px] py-3"><b className="font-display text-xl">{s.reviews}</b> <span className="text-sm text-subtle">review{s.reviews === 1 ? '' : 's'}</span></span>
           </div>
           {e.description && <p className="mt-5 max-w-xl whitespace-pre-line text-[15px] leading-relaxed">{e.description}</p>}
-          <div className="mt-6"><Actions page={page.data} /></div>
+          <div className="mt-5"><Actions page={page.data} /></div>
           <p className="mt-4 text-sm text-subtle">
-            {e.kind === 'pattern' && 'Pattern files are never shared on SewSpace. '}
+            {e.kind === 'pattern' && 'Pattern files are never shared on Seams Club. '}
             {e.url && <a href={e.url} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex items-center gap-1 font-semibold text-blue-ink">Buy it from the {e.kind === 'pattern' ? 'designer' : 'shop'}<ExternalLink size={13} aria-hidden="true" /></a>}
           </p>
         </div>
@@ -250,7 +250,7 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
 
       <Discussions catalogId={e.id} />
 
-      <section aria-labelledby="reviews-title" className="rounded-[30px] bg-white p-6">
+      <section aria-labelledby="reviews-title" className="rounded-[24px] bg-white p-4 sm:rounded-[30px] sm:p-6">
         <h2 id="reviews-title" className="font-display text-[26px] tracking-[-.04em]">Reviews</h2>
         <div className="mt-4">
           {reviews.isLoading ? <Loader2 className="animate-spin" aria-label="Loading reviews" />

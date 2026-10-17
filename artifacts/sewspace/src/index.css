@@ -133,3 +133,10 @@ label:has(.field[required]) > span:first-child::after { content: " *"; color: va
 .delay-2 { animation-delay: .16s; }
 .delay-3 { animation-delay: .24s; }
 @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 767px) {
+  body { background-size: 18px 18px; }
+  .studio-card { border-radius: 25px !important; }
+  .field { border-radius: 15px; }
+  :where(button, a, input, select, textarea) { touch-action: manipulation; }
+}

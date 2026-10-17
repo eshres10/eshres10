@@ -1,4 +1,4 @@
-// Handle rules. SewSpace owns handles (not Clerk usernames): 3-30 characters of
+// Handle rules. Seams Club owns handles (not Clerk usernames): 3-30 characters of
 // lowercase letters, digits, "_" and "."; unique ignoring case; route words and
 // a few system names are reserved.
 
@@ -11,7 +11,7 @@ export const RESERVED_HANDLES: ReadonlySet<string> = new Set([
   "patterns", "products", "makes", "sign-in", "sign-up", "help",
   // Other app paths and system names.
   "welcome", "me", "saved", "notifications", "about", "privacy", "terms", "support",
-  "sewspace", "assets", "sitemap.xml", "robots.txt",
+  "sewspace", "seamsclub", "seams_club", "assets", "sitemap.xml", "robots.txt",
   // Vite dev-server paths under /@ (/@vite/client, /@fs/..., /@id/...).
   "vite", "fs", "id",
 ]);

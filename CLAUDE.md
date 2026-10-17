@@ -1,4 +1,6 @@
-# SewSpace (product name: Seams Club)
+# Seams Club
+
+The product is called **Seams Club**; internal names (tables, packages, `sewspace_*`) keep the `sewspace` prefix. Don't rename them.
 
 A social space for the sewing community (feed, profiles, challenges, forum) built on top of a private sewing studio (projects, stash, patterns, measurements). Mobile-first. Public content is readable signed out, like Reddit; interacting needs an account.
 
@@ -27,7 +29,7 @@ Development happens in this repo; Replit runs and deploys it. Work is done in ph
 - **Access control:** one server-side module (`artifacts/api-server/src/access/`) decides who can see what; every read goes through it. Postgres row-level security is a second layer: each request runs in a transaction as role `sewspace_app` with `app.user_id` set (`withUser` in `lib/db/src/index.ts`, `scoped()` in `artifacts/api-server/src/lib/scoped.ts`).
 - **Migrations are additive only:** no renames, drops or data deletion. New visibility columns default to `private`. Hand-written SQL in `lib/db/migrations/NNNN_name.sql`; keep the Drizzle schema in sync by hand. `drizzle-kit push` is disabled (it would drop policies and views).
 - **Never public, whatever the visibility setting:** measurements, pattern PDFs, AI visualisation images. Enforced by upload `purpose` (`pattern_pdf`, `visualization` can never be served to anyone but the owner, and can't be put in image fields).
-- **Handles** are owned by SewSpace (not Clerk usernames): 3–30 chars of `a-z 0-9 _ .`, unique ignoring case (`lower(handle)` index), reserved words in `access/handles.ts`. Chosen on first visit at `/welcome`.
+- **Handles** are owned by Seams Club (not Clerk usernames): 3–30 chars of `a-z 0-9 _ .`, unique ignoring case (`lower(handle)` index), reserved words in `access/handles.ts`. Chosen on first visit at `/welcome`.
 - **Admin:** Clerk user ids in `ADMIN_USER_IDS` (comma-separated) → `viewer.isAdmin`.
 - **Images:** client downscales with canvas before upload (`src/lib/upload.ts`, 1600 px; avatars 512 px; re-encoding strips EXIF/GPS). Post photos are then processed on the server with `sharp` (`api-server/src/lib/images.ts`): EXIF orientation applied, at most 1600 px WebP + 400 px thumbnail, no metadata written (so no EXIF/GPS), dominant colour as a placeholder. `sharp` is externalised in `build.mjs` and resolved from `node_modules` at runtime.
 - **AI:** keep OpenAI `gpt-5-mini` via the existing integration. Assistant never available signed out.

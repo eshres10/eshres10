@@ -23,25 +23,20 @@ export function ChallengesPage() {
   const list = useListChallenges({ status: tab });
   const ask = useRequireSignIn();
   const [starting, setStarting] = useState(false);
-  useEffect(() => { document.title = 'Sewing challenges · SewSpace'; }, []);
+  useEffect(() => { document.title = 'Sewing challenges · Seams Club'; }, []);
   return (
     <div className="mx-auto max-w-[1232px]">
       <CommunityTabs />
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">Challenges</p>
-          <h1 className="mt-1 font-display text-[34px] leading-tight tracking-[-.05em]">Sew along with everyone</h1>
-          <p className="mt-1 max-w-xl text-sm text-subtle">Join a challenge, share your make with the tag, and cheer on everyone else's.</p>
+      <div className="flex flex-wrap items-center gap-3">
+        <div role="tablist" aria-label="Challenges" className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-white p-1">
+          {TABS.map(t => (
+            <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setLocation(t.id === 'active' ? '/challenges' : `/challenges?status=${t.id}`, { replace: true })}
+              className={`min-h-[44px] shrink-0 rounded-full px-4 text-sm font-bold ${tab === t.id ? 'bg-ink text-white' : 'text-ink'}`}>{t.label}</button>
+          ))}
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => { if (ask({ title: 'Sign in to start a challenge', body: "You'll come straight back here." })) setStarting(true); }}>
+        <button type="button" className="btn btn-primary ml-auto shrink-0" onClick={() => { if (ask({ title: 'Sign in to start a challenge', body: "You'll come straight back here." })) setStarting(true); }}>
           <Plus size={16} aria-hidden="true" />Start a challenge
         </button>
-      </div>
-      <div role="tablist" aria-label="Challenges" className="mt-5 flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-white p-1">
-        {TABS.map(t => (
-          <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setLocation(t.id === 'active' ? '/challenges' : `/challenges?status=${t.id}`, { replace: true })}
-            className={`min-h-[44px] shrink-0 rounded-full px-4 text-sm font-bold ${tab === t.id ? 'bg-ink text-white' : 'text-ink'}`}>{t.label}</button>
-        ))}
       </div>
       <div className="mt-5">
         {list.isLoading ? <div className="grid place-items-center py-16" role="status" aria-label="Loading"><Loader2 className="animate-spin" /></div>

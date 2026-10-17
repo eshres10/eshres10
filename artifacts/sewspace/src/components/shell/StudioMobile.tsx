@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useListFabrics, useListPatterns, useListProjects, useListThreads } from '@workspace/api-client-react';
-import { Plus, Search, X } from 'lucide-react';
+import { Menu, Plus, Search, X } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
+import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
 
 // "My studio" on phones (Phase S): a full-width top bar with the section's
 // title, search and +, the section pills, and (in Shell) a full-width tab bar.
@@ -69,19 +70,19 @@ function OverviewResults({ q }: { q: string }) {
 }
 
 /** Phones only: the studio's top bar, search field and section pills. */
-export function StudioMobileHeader({ section }: { section: StudioSection }) {
+export function StudioMobileHeader({ section, onMenuOpen }: { section: StudioSection; onMenuOpen: () => void }) {
   const [q, setQ] = useStudioQuery();
   const [searching, setSearching] = useState(Boolean(q));
   const input = useRef<HTMLInputElement>(null);
+  const hidden = useHideOnScroll(true, section.href);
   useEffect(() => { if (searching) input.current?.focus(); }, [searching]);
   const add = 'add' in section ? section : null;
   return (
-    // `contents`: the sticky bar needs the page column, not this wrapper, as its container.
     <div className="contents md:hidden">
-      <header className="sticky top-0 z-30 md:hidden border-b border-line bg-white pt-[env(safe-area-inset-top)]">
+      <div aria-hidden="true" className="h-[calc(4rem+env(safe-area-inset-top))]" />
+      <header className={`fixed inset-x-0 top-0 z-40 border-b border-line bg-white pt-[env(safe-area-inset-top)] shadow-float transition-transform duration-200 ease-out ${hidden ? '-translate-y-full' : 'translate-y-0'}`}>
         <div className="flex h-16 items-center gap-2 px-4">
           <div className="min-w-0 flex-1">
-            <p className="eyebrow text-[10px] text-subtle">My studio</p>
             <h1 className="truncate font-display text-[20px] leading-tight tracking-[-.04em]">{section.title}</h1>
           </div>
           <button type="button" onClick={() => { if (searching) setQ(''); setSearching(s => !s); }} aria-expanded={searching} aria-controls="studio-search"
@@ -93,6 +94,9 @@ export function StudioMobileHeader({ section }: { section: StudioSection }) {
               <Plus size={22} aria-hidden="true" />
             </Link>
           )}
+          <button type="button" onClick={onMenuOpen} aria-label="Open menu" className="grid h-11 w-11 shrink-0 place-items-center text-ink">
+            <Menu size={20} aria-hidden="true" />
+          </button>
         </div>
         {searching && (
           <div id="studio-search" className="px-4 pb-3">

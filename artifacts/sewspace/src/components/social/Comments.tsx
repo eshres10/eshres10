@@ -11,7 +11,7 @@ import {
   type Comment,
   type CommentReply,
 } from '@workspace/api-client-react';
-import { Loader2, Trash2, X } from 'lucide-react';
+import { Loader2, Send, Trash2, X } from 'lucide-react';
 import { Link } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
@@ -118,16 +118,16 @@ export const Comments = forwardRef<CommentsHandle, { postId: number }>(function 
 
   const list = comments.data ?? [];
   return (
-    <section id="comments" aria-label="Comments" className="mt-4 scroll-mt-28 rounded-[30px] bg-white p-[18px]">
-      <h2 className="eyebrow">Comments{list.length ? ` · ${list.reduce((n, c) => n + 1 + c.replies.length, 0)}` : ''}</h2>
+    <section id="comments" aria-label="Comments" className="mt-2 flex min-h-0 flex-1 flex-col scroll-mt-24 rounded-[22px] bg-white px-3.5 py-2 pb-24 md:mt-4 md:block md:flex-none md:rounded-[30px] md:bg-white md:p-[18px] md:pb-[18px]">
+      <h2 className="eyebrow hidden md:block">Comments{list.length ? ` · ${list.reduce((n, c) => n + 1 + c.replies.length, 0)}` : ''}</h2>
       {comments.isLoading
-        ? <div className="grid place-items-center py-8" role="status" aria-label="Loading comments"><Loader2 className="animate-spin" /></div>
+        ? <div className="grid flex-1 place-items-center py-8" role="status" aria-label="Loading comments"><Loader2 className="animate-spin" /></div>
         : list.length === 0
-          ? <p className="py-4 text-sm text-subtle">No comments yet. Say something kind or ask a question.</p>
+          ? <p className="flex-1 py-4 text-sm text-subtle md:flex-none">No comments yet. Say something kind or ask a question.</p>
           : (
-            <ul className="mt-3 space-y-4">
+            <ul className="mt-1 min-h-0 flex-1 space-y-0 overflow-y-auto overscroll-contain md:mt-3 md:flex-none md:space-y-4 md:overflow-visible">
               {list.map(c => (
-                <li key={c.id}>
+                <li key={c.id} className="border-b border-line py-3 first:pt-2 last:border-0 md:border-0 md:py-0">
                   <CommentRow comment={c} myHandle={myHandle}
                     onReply={() => { setReplyTo({ id: c.id, handle: c.author.handle }); focus(); }} />
                   {c.replies.length > 0 && (
@@ -140,22 +140,24 @@ export const Comments = forwardRef<CommentsHandle, { postId: number }>(function 
             </ul>
           )}
 
-      <form onSubmit={submit} className="mt-4 border-t border-line pt-4">
+      <form onSubmit={submit} className="fixed inset-x-3 bottom-[calc(.6rem+env(safe-area-inset-bottom))] z-40 mx-auto max-w-[620px] rounded-full bg-white p-1.5 shadow-float md:static md:mt-4 md:rounded-none md:border-t md:border-line md:bg-transparent md:p-0 md:pt-4 md:shadow-none">
         {replyTo && (
           <p className="mb-2 flex items-center gap-2 text-xs font-semibold text-subtle">
             Replying to @{replyTo.handle}
             <button type="button" onClick={() => setReplyTo(null)} aria-label="Cancel reply" className="grid h-8 w-8 place-items-center rounded-full hover:bg-canvas"><X size={14} /></button>
           </p>
         )}
-        <div className="flex items-end gap-2">
+        <div className="flex items-center gap-2">
+          <span className="hidden shrink-0 md:block"><UserAvatar name={me.data?.name} avatarUrl={me.data?.avatarUrl} size={34} /></span>
+          <span className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-ink text-sm font-bold text-white md:hidden">{me.data?.name?.charAt(0).toUpperCase() ?? 'S'}</span>
           <label className="sr-only" htmlFor={`comment-input-${postId}`}>Add a comment</label>
           <textarea id={`comment-input-${postId}`} ref={input} value={body} rows={1}
             onFocus={() => { if (!isSignedIn) { input.current?.blur(); focus(); } }}
             onChange={e => setBody(e.target.value.slice(0, MAX))}
             placeholder={replyTo ? `Reply to @${replyTo.handle}` : 'Add a comment…'}
-            className="field min-h-[48px] flex-1 resize-none py-3" />
-          <button type="submit" disabled={!body.trim() || create.isPending} className="btn btn-primary min-h-[48px] disabled:opacity-50">
-            {create.isPending && <Loader2 size={15} className="animate-spin" />}Post
+            className="field min-h-[44px] flex-1 resize-none rounded-full border-0 bg-canvas py-2.5 md:min-h-[48px] md:rounded-[16px] md:border md:bg-white md:py-3" />
+          <button type="submit" aria-label="Post comment" disabled={!body.trim() || create.isPending} className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-yellow text-ink disabled:opacity-50 md:flex md:h-12 md:w-auto md:gap-2 md:rounded-full md:px-5">
+            {create.isPending ? <Loader2 size={16} className="animate-spin" /> : <><Send size={17} aria-hidden="true" /><span className="hidden md:inline">Post</span></>}
           </button>
         </div>
         {create.isError && <p role="alert" className="mt-2 text-sm font-semibold text-red-ink">{errorText(create.error, "That didn't post. Try again.")}</p>}

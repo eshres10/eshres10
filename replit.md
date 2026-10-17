@@ -1,4 +1,4 @@
-# SewSpace (Seams Club)
+# Seams Club
 
 A social space for the sewing community built on a private sewing studio. The product name is **Seams Club**; internal names keep the `sewspace` prefix. **Read `CLAUDE.md` first**: it has the stack, the agreed decisions, access rules and gotchas.
 

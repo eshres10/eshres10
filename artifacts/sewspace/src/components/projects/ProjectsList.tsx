@@ -53,37 +53,25 @@ export function ProjectsList() {
 
   return (
     <>
-      <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between md:gap-5">
-        <div>
-          <p className="eyebrow text-red-ink">The notebook</p>
-          <h1 className="mt-2 font-display text-4xl leading-[1.1] tracking-[-.06em] text-ink md:text-5xl md:leading-none">Projects</h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-subtle">
-            A gentle record of what is on your machine.
-          </p>
-        </div>
-        <div className="mt-2 md:mt-0">
-          <Link
-            href="/projects/new"
-            data-testid="button-create-project"
-            className="btn btn-primary min-h-[44px] w-full no-underline md:w-auto"
-          >
-            <Plus size={16} /> Start a project
-          </Link>
-        </div>
-      </div>
-
-      <div className="mb-6 flex items-center gap-3">
-        <div className="relative max-w-sm flex-1">
+      <div className="mb-6 flex flex-wrap items-center gap-3">
+        <div className="relative min-w-[180px] max-w-sm flex-1">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
             data-testid="input-search-projects"
             placeholder="Search notebook…"
-            className="field pl-9"
+            className="field min-h-[48px] w-full pl-9"
           />
         </div>
-        <span className="font-mono-custom text-xs text-subtle">{filtered.length} found</span>
+        <span className="hidden font-mono-custom text-xs text-subtle sm:inline">{filtered.length} found</span>
+        <Link
+          href="/projects/new"
+          data-testid="button-create-project"
+          className="btn btn-primary ml-auto min-h-[48px] shrink-0 whitespace-nowrap no-underline"
+        >
+          <Plus size={16} /> Start a project
+        </Link>
       </div>
 
       {isLoading ? (

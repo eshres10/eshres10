@@ -29,6 +29,8 @@ SELECT t.rejects($$INSERT INTO sewspace_forum_topics (user_id, board, kind, titl
 SELECT t.rejects($$INSERT INTO sewspace_forum_topics (user_id, board, kind, title, vote_count) VALUES ('fa', 'fabric', 'info', 'Free votes', 99)$$, 'cannot start with votes');
 SELECT t.rejects($$INSERT INTO sewspace_forum_topics (user_id, board, kind, title, project_id) VALUES ('fa', 'fabric', 'info', 'Not my make', 1102)$$, 'cannot link someone else''s make');
 SELECT t.rejects($$INSERT INTO sewspace_forum_topics (user_id, board, kind, title, tags) VALUES ('fa', 'fabric', 'info', 'Bad tags', '{"Has Space"}')$$, 'tag format');
+SELECT t.rejects($$INSERT INTO sewspace_forum_topics (user_id, board, kind, title, tags) VALUES ('fa', 'fabric', 'info', 'Bad comma tag', ARRAY['linen,cotton'])$$, 'comma is not a tag character');
+SELECT t.rejects($$INSERT INTO sewspace_forum_topics (user_id, board, kind, title, tags) VALUES ('fa', 'fabric', 'info', 'Bad tilde tag', ARRAY['linen~cotton'])$$, 'tilde is not a tag character');
 SELECT t.rejects($$UPDATE sewspace_forum_topics SET pinned = true WHERE id = 1$$, 'authors cannot pin');
 SELECT t.rejects($$UPDATE sewspace_forum_topics SET vote_count = 500 WHERE id = 1$$, 'authors cannot set counters');
 SELECT t.eq(t.affected($$UPDATE sewspace_forum_topics SET body = 'Midweight washed linen' WHERE id = 1$$), 1, 'author edits');

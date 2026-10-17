@@ -13,7 +13,7 @@ const { getChallengePage, listEntries, viewerFor } = await import("../src/access
 // people see.
 const dir = mkdtempSync(path.join(tmpdir(), "sewspace-challenges-"));
 const indexHtmlPath = path.join(dir, "index.html");
-writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Sewspace</title></head><body></body></html>`);
+writeFileSync(indexHtmlPath, `<!DOCTYPE html><html><head><title>Seams Club</title></head><body></body></html>`);
 const origin = await startApp({ indexHtmlPath });
 
 const host = as(origin, "g_host");
@@ -138,7 +138,7 @@ test("challenges can be reported and removed by an admin", async () => {
 test("page HTML and sitemap", async () => {
   const page = await fetch(`${origin}/challenges/octoberdenim`);
   assert.equal(page.status, 200);
-  assert.match(await page.text(), /<title>#OctoberDenim: October Denim 2026 · SewSpace challenge<\/title>/);
+  assert.match(await page.text(), /<title>#OctoberDenim: October Denim 2026 · Seams Club challenge<\/title>/);
   assert.equal((await fetch(`${origin}/challenges`)).status, 200);
   assert.equal((await fetch(`${origin}/challenges/nope`)).status, 404);
   assert.equal((await fetch(`${origin}/challenges/octoberdenim`, { headers: { "x-test-user": "g_blk" } })).status, 404);

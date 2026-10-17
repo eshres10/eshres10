@@ -63,7 +63,7 @@ export function injectMeta(html: string, meta: PageMeta, origin: string): string
     `<meta property="og:description" content="${escapeHtml(meta.description)}" />`,
     `<meta property="og:type" content="${meta.type ?? "website"}" />`,
     `<meta property="og:url" content="${escapeHtml(canonical)}" />`,
-    `<meta property="og:site_name" content="SewSpace" />`,
+    `<meta property="og:site_name" content="Seams Club" />`,
     `<meta name="twitter:card" content="${image ? "summary_large_image" : "summary"}" />`,
     `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`,
     `<meta name="twitter:description" content="${escapeHtml(meta.description)}" />`,
@@ -124,7 +124,7 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
   }
 
   const notFound: PageMeta = {
-    title: "Page not found · SewSpace",
+    title: "Page not found · Seams Club",
     description: "This page doesn't exist or isn't public.",
     canonicalPath: "/",
     noindex: true,
@@ -145,8 +145,8 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
       const profile = await withUser(req.viewer?.userId ?? null, (db) => getPublicProfile(db, match[1]));
       if (!profile) return sendPage(req, res, notFound, 404);
       await sendPage(req, res, {
-        title: `${profile.name} (@${profile.handle}) · SewSpace`,
-        description: truncate(profile.bio || `See ${profile.name}'s makes, patterns and projects on SewSpace.`, MAX_DESCRIPTION),
+        title: `${profile.name} (@${profile.handle}) · Seams Club`,
+        description: truncate(profile.bio || `See ${profile.name}'s makes, patterns and projects on Seams Club.`, MAX_DESCRIPTION),
         canonicalPath: `/@${profile.handle}`,
         imageUrl: profile.avatarUrl,
         type: "profile",
@@ -173,9 +173,9 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
       const make = await withUser(req.viewer?.userId ?? null, (db) => getMakeForViewer(db, req.viewer ?? { userId: null, isAdmin: false }, id));
       if (!make) return sendPage(req, res, notFound, 404);
       const by = make.owner ? ` by @${make.owner.handle}` : "";
-      const summary = make.description || make.alterations || make.notes || `A ${make.status === "finished" ? "finished make" : "make in progress"} on SewSpace.`;
+      const summary = make.description || make.alterations || make.notes || `A ${make.status === "finished" ? "finished make" : "make in progress"} on Seams Club.`;
       await sendPage(req, res, {
-        title: `${make.name}${by} · SewSpace`,
+        title: `${make.name}${by} · Seams Club`,
         description: truncate(summary, MAX_DESCRIPTION),
         canonicalPath: `/makes/${make.id}`,
         imageUrl: make.coverImageUrl ?? make.photos[0]?.url ?? null,
@@ -196,8 +196,8 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
       if (!post) return sendPage(req, res, notFound, 404);
       const caption = post.caption.trim();
       await sendPage(req, res, {
-        title: caption ? `${post.author.name} on SewSpace: “${truncate(caption, 60)}”` : `${post.author.name} (@${post.author.handle}) on SewSpace`,
-        description: truncate(caption || `A post by @${post.author.handle} on SewSpace.`, MAX_DESCRIPTION),
+        title: caption ? `${post.author.name} on Seams Club: “${truncate(caption, 60)}”` : `${post.author.name} (@${post.author.handle}) on Seams Club`,
+        description: truncate(caption || `A post by @${post.author.handle} on Seams Club.`, MAX_DESCRIPTION),
         canonicalPath: `/posts/${post.id}`,
         imageUrl: post.media[0]?.url ?? post.author.avatarUrl,
         type: "article",
@@ -245,8 +245,8 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
       if (!topic) return sendPage(req, res, notFound, 404);
       const kind = { show_tell: "Show & tell", question: "Question", recommendation: "Recommendation", info: "Info & guides", poll: "Poll" }[topic.kind];
       await sendPage(req, res, {
-        title: `${topic.title} · ${kind} · SewSpace forum`,
-        description: truncate(topic.body || `${kind} by @${topic.author.handle} on the SewSpace forum.`, MAX_DESCRIPTION),
+        title: `${topic.title} · ${kind} · Seams Club forum`,
+        description: truncate(topic.body || `${kind} by @${topic.author.handle} on the Seams Club forum.`, MAX_DESCRIPTION),
         canonicalPath: `/forum/topics/${topic.id}`,
         imageUrl: topic.post?.media[0]?.url ?? null,
         type: "article",
@@ -259,7 +259,7 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
   router.get(/^\/forum(\/.*)?$/, (req, res, next) => {
     const index = /^\/forum\/?$/.test(req.path);
     sendPage(req, res, index
-      ? { title: "Sewing forum · SewSpace", description: "Ask sewing questions, share what you made, get recommendations and guides from the SewSpace community.", canonicalPath: "/forum" }
+      ? { title: "Sewing forum · Seams Club", description: "Ask sewing questions, share what you made, get recommendations and guides from the Seams Club community.", canonicalPath: "/forum" }
       : notFound, index ? 200 : 404).catch(next);
   });
 
@@ -273,7 +273,7 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
       const c = page.challenge;
       const when = `${c.startsAt.toISOString().slice(0, 10)} to ${c.endsAt.toISOString().slice(0, 10)}`;
       await sendPage(req, res, {
-        title: `#${c.tag}: ${c.title} · SewSpace challenge`,
+        title: `#${c.tag}: ${c.title} · Seams Club challenge`,
         description: truncate(`${c.description || `A sewing challenge hosted by @${c.host.handle}.`} ${when}. ${c.entries} entries.`, MAX_DESCRIPTION),
         canonicalPath: `/challenges/${c.slug}`,
         type: "article",
@@ -286,7 +286,7 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
   router.get(/^\/challenges(\/.*)?$/, (req, res, next) => {
     const index = /^\/challenges\/?$/.test(req.path);
     sendPage(req, res, index
-      ? { title: "Sewing challenges · SewSpace", description: "Join a sewing challenge, share your make with the tag, and cheer on everyone else's.", canonicalPath: "/challenges" }
+      ? { title: "Sewing challenges · Seams Club", description: "Join a sewing challenge, share your make with the tag, and cheer on everyone else's.", canonicalPath: "/challenges" }
       : notFound, index ? 200 : 404).catch(next);
   });
 
@@ -302,7 +302,7 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
       const rating = e.stats.rating !== null ? ` Rated ${e.stats.rating}/5 from ${e.stats.reviews} review${e.stats.reviews === 1 ? "" : "s"}.` : "";
       const fallback = kind === "pattern" ? `Makes, reviews and fit notes for the ${e.name} sewing pattern${by}.` : `Reviews and makes using ${e.name}${by}.`;
       await sendPage(req, res, {
-        title: `${e.name}${by} · ${kind === "pattern" ? "Sewing pattern" : "Sewing supplies"} · SewSpace`,
+        title: `${e.name}${by} · ${kind === "pattern" ? "Sewing pattern" : "Sewing supplies"} · Seams Club`,
         description: truncate(`${e.description || fallback}${rating}`, MAX_DESCRIPTION),
         canonicalPath: `/catalog/${kind}/${e.slug}`,
         imageUrl: page.makes.find((m) => m.coverImageUrl)?.coverImageUrl ?? null,
@@ -316,7 +316,7 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
   router.get(/^\/catalog(\/.*)?$/, (req, res, next) => {
     const browse = /^\/catalog\/?$/.test(req.path);
     sendPage(req, res, browse
-      ? { title: "Sewing patterns and supplies · SewSpace", description: "Reviews, fit notes and real makes for sewing patterns, fabrics and supplies, from the SewSpace community.", canonicalPath: "/catalog" }
+      ? { title: "Sewing patterns and supplies · Seams Club", description: "Reviews, fit notes and real makes for sewing patterns, fabrics and supplies, from the Seams Club community.", canonicalPath: "/catalog" }
       : notFound, browse ? 200 : 404).catch(next);
   });
 

@@ -48,7 +48,7 @@ export function PostTile({ post }: { post: FeedPost }) {
 export function ExplorePage() {
   const [kind, setKind] = useState<Kind>('all');
   const [sort, setSort] = useState<Sort>('recent');
-  useEffect(() => { document.title = 'Explore · SewSpace'; }, []);
+  useEffect(() => { document.title = 'Explore · Seams Club'; }, []);
   const feed = useInfiniteQuery({
     queryKey: FEED_KEYS.explore(kind, sort),
     queryFn: ({ pageParam }) => getExploreFeed({ kind, sort, ...(pageParam ? { cursor: pageParam } : {}) }),
@@ -59,12 +59,6 @@ export function ExplorePage() {
   return (
     <div className="mx-auto max-w-[1232px]">
       <CommunityTabs />
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">Explore</p>
-          <h1 className="mt-1 font-display text-[34px] leading-tight tracking-[-.05em]">Fresh from sewing tables</h1>
-        </div>
-      </div>
       <div className="-mx-3 mt-4 flex items-center gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:px-0">
         <div className="flex shrink-0 gap-1.5" role="group" aria-label="Order">
           {SORTS.map(o => (
