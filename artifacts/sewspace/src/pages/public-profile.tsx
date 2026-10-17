@@ -133,7 +133,7 @@ function Stats({ stats }: { stats: ProfileStats }) {
     <div className="grid min-w-0 flex-1 grid-cols-3 gap-1 text-center">
       {items.map(item => (
         <div key={item.label} className="min-w-0">
-          <div className="font-display text-[22px] font-bold leading-tight sm:text-2xl">{compact(item.count)}</div>
+          <div className="font-display text-lg font-bold leading-tight sm:text-2xl">{compact(item.count)}</div>
           <div className="truncate text-xs text-subtle sm:text-sm">{item.label}</div>
         </div>
       ))}
@@ -398,15 +398,16 @@ export function PublicProfilePage({ handle }: { handle: string }) {
           )}
         </div>
       </section>
-      <section className="rounded-[30px] bg-white p-5 sm:p-7 md:hidden">
-        <div className="flex items-center gap-4 sm:gap-6">
+      {/* Phones: a compact card (owner: the old one was too big). */}
+      <section className="rounded-[24px] bg-white px-4 pb-3 pt-4 sm:p-7 md:hidden">
+        <div className="flex items-center gap-3 sm:gap-6">
           {p.avatarUrl
-            ? <img src={p.avatarUrl} alt="" className="h-24 w-24 shrink-0 rounded-full object-cover sm:h-32 sm:w-32" />
-            : <span aria-hidden="true" className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-ink font-display text-[34px] tracking-[-.04em] text-yellow sm:h-32 sm:w-32 sm:text-[52px]">{p.name.charAt(0).toUpperCase()}</span>}
+            ? <img src={p.avatarUrl} alt="" className="h-16 w-16 shrink-0 rounded-full object-cover sm:h-24 sm:w-24" />
+            : <span aria-hidden="true" className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-ink font-display text-[26px] tracking-[-.04em] text-yellow sm:h-24 sm:w-24 sm:text-[40px]">{p.name.charAt(0).toUpperCase()}</span>}
           <Stats stats={p.stats} />
         </div>
-        <div className="mt-4 flex items-center gap-3">
-          <h1 className="min-w-0 flex-1 font-sans text-lg font-bold leading-tight md:hidden">{p.name}</h1>
+        <div className="mt-2 flex items-center gap-2">
+          <h1 className="min-w-0 flex-1 truncate font-sans text-base font-bold leading-tight md:hidden">{p.name}</h1>
           <div className="flex shrink-0 items-center gap-1">
             {p.isMe && (
               <Link
@@ -422,9 +423,9 @@ export function PublicProfilePage({ handle }: { handle: string }) {
             {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
           </div>
         </div>
-        {p.bio && <p className="mt-1 whitespace-pre-line text-[15px] leading-6">{p.bio}</p>}
+        {p.bio && <p className="whitespace-pre-line text-sm leading-5">{p.bio}</p>}
         <ProfileLinks shopUrl={p.shopUrl} instagram={p.instagram} />
-        {!p.isMe && <div className="mt-4"><FollowButton handle={p.handle} name={p.name} following={p.followedByMe} /></div>}
+        {!p.isMe && <div className="mt-3"><FollowButton handle={p.handle} name={p.name} following={p.followedByMe} /></div>}
       </section>
 
       <div role="tablist" aria-label="Profile sections" className="mt-3 flex w-full max-w-[520px] gap-1 rounded-full bg-white p-[5px] sm:mt-[22px]">
