@@ -58,3 +58,6 @@ docs/design/onboarding/images/
 docs/design/onboarding/screens/img/
 # Public website mockups embed mockup photos: keep the screens local.
 docs/design/website/screens/
+# Account menu mockups: screenshots and screen snapshots contain mockup photos (keep locally).
+docs/design/account-menu/images/
+docs/design/account-menu/screens/img/

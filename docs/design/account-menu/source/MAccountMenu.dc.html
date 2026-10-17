@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seams Club mobile — Account menu</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+input:focus,textarea:focus{outline:2px solid #466cf3;outline-offset:1px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background-color: #f2f2f2; font-family: 'Inter', system-ui, sans-serif; color: #000">
+
+  <header style="position: absolute; left: 0; right: 0; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; min-height: 64px; background: #fff; padding: 8px 12px 8px 16px; border-bottom: 1px solid #e6e6e6">
+    <span style="flex: 1; display: flex; align-items: center; gap: 8px"><svg viewBox="0 0 100 100" width="32" height="32" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#000000"/><g transform="translate(50 50) scale(0.92) translate(-49 -50)"><path d="M66.89 23.06 L66.65 22.58 L66.39 22.08 L66.12 21.59 L65.86 21.10 L65.59 20.62 L65.31 20.15 L65.03 19.67 L64.75 19.21 L64.47 18.75 L64.18 18.29 L63.89 17.84 L63.59 17.40 L63.30 16.96 L63.00 16.53 L62.70 16.11 L62.40 15.70 L62.10 15.29 L61.79 14.89 L61.48 14.50 L61.09 14.01 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.27 9.43 L53.54 8.64 L51.74 7.99 L49.89 7.49 L47.99 7.14 L46.07 6.93 L44.14 6.87 L42.20 6.96 L40.27 7.20 L38.37 7.60 L36.50 8.17 L34.70 8.91 L32.96 9.82 L31.32 10.92 L29.79 12.20 L28.41 13.68 L27.19 15.35 L26.16 17.19 L25.34 19.21 L24.76 21.39 L24.41 23.72 L24.37 25.69 L24.53 27.56 L24.90 29.35 L25.46 31.06 L26.18 32.68 L27.06 34.20 L28.06 35.62 L29.18 36.96 L30.39 38.22 L31.68 39.39 L33.05 40.50 L34.47 41.54 L35.95 42.53 L37.47 43.46 L39.01 44.35 L40.58 45.19 L42.16 46.00 L43.74 46.77 L45.32 47.50 L46.87 48.21 L48.40 48.90 L49.89 49.56 L51.33 50.20 L52.70 50.81 L54.12 51.48 L55.47 52.17 L56.77 52.87 L58.00 53.58 L59.18 54.32 L60.29 55.07 L61.34 55.84 L62.32 56.63 L63.23 57.43 L64.07 58.26 L64.84 59.10 L65.54 59.95 L66.17 60.83 L66.73 61.72 L67.22 62.64 L67.65 63.58 L68.00 64.54 L68.29 65.54 L68.50 66.58 L68.65 67.66 L68.72 68.79 L68.71 69.97 L68.62 71.20 L68.45 72.45 L68.17 73.70 L67.76 74.80 L67.20 75.86 L66.50 76.86 L65.64 77.83 L64.65 78.75 L63.51 79.61 L62.24 80.41 L60.86 81.14 L59.37 81.80 L57.79 82.38 L56.13 82.88 L54.42 83.29 L52.65 83.61 L50.86 83.84 L49.05 83.98 L47.24 84.02 L45.45 83.97 L43.68 83.82 L41.96 83.58 L40.31 83.24 L38.72 82.82 L37.23 82.30 L35.77 81.67 L35.08 81.34 L34.39 80.98 L33.72 80.61 L33.08 80.21 L32.46 79.81 L31.86 79.39 L31.30 78.96 L30.75 78.51 L30.24 78.06 L29.76 77.59 L29.30 77.11 L28.87 76.63 L28.47 76.13 L28.11 75.63 L27.77 75.12 L27.46 74.61 L27.18 74.09 L26.93 73.56 L26.72 73.02 L26.53 72.48 L26.37 71.93 L26.25 71.38 L26.15 70.81 L26.08 70.16 L19.92 70.84 L20.01 71.67 L20.17 72.58 L20.37 73.47 L20.62 74.34 L20.91 75.20 L21.25 76.04 L21.64 76.85 L22.06 77.65 L22.52 78.43 L23.02 79.18 L23.56 79.91 L24.13 80.62 L24.73 81.31 L25.37 81.97 L26.03 82.61 L26.73 83.23 L27.45 83.82 L28.20 84.39 L28.97 84.94 L29.77 85.46 L30.60 85.96 L31.44 86.44 L32.31 86.89 L33.23 87.33 L34.99 88.09 L36.91 88.75 L38.89 89.28 L40.92 89.69 L42.99 89.98 L45.10 90.16 L47.22 90.22 L49.36 90.17 L51.49 90.01 L53.60 89.74 L55.69 89.36 L57.74 88.87 L59.75 88.27 L61.69 87.55 L63.56 86.72 L65.35 85.77 L67.04 84.70 L68.62 83.50 L70.07 82.17 L71.37 80.70 L72.49 79.09 L73.42 77.34 L74.12 75.46 L74.55 73.55 L74.78 71.85 L74.90 70.22 L74.91 68.62 L74.82 67.06 L74.61 65.54 L74.31 64.06 L73.90 62.63 L73.39 61.24 L72.79 59.90 L72.09 58.61 L71.32 57.36 L70.46 56.17 L69.52 55.03 L68.52 53.94 L67.45 52.89 L66.31 51.89 L65.12 50.93 L63.87 50.01 L62.56 49.12 L61.20 48.27 L59.79 47.46 L58.34 46.67 L56.84 45.91 L55.30 45.19 L53.86 44.54 L52.41 43.89 L50.92 43.23 L49.42 42.56 L47.92 41.88 L46.41 41.17 L44.92 40.45 L43.46 39.70 L42.02 38.93 L40.63 38.13 L39.30 37.31 L38.03 36.46 L36.83 35.58 L35.72 34.68 L34.70 33.76 L33.79 32.82 L32.98 31.85 L32.29 30.86 L31.71 29.86 L31.24 28.83 L30.90 27.77 L30.67 26.66 L30.56 25.49 L30.59 24.28 L30.83 22.64 L31.22 21.18 L31.75 19.86 L32.41 18.69 L33.18 17.64 L34.06 16.70 L35.05 15.87 L36.13 15.15 L37.31 14.53 L38.58 14.01 L39.91 13.61 L41.30 13.32 L42.73 13.14 L44.18 13.07 L45.64 13.11 L47.09 13.27 L48.51 13.54 L49.89 13.91 L51.21 14.38 L52.45 14.95 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.45 18.13 L56.62 18.35 L56.88 18.68 L57.14 19.02 L57.40 19.37 L57.67 19.73 L57.93 20.10 L58.19 20.47 L58.44 20.85 L58.70 21.24 L58.96 21.63 L59.21 22.03 L59.46 22.44 L59.71 22.85 L59.95 23.27 L60.20 23.69 L60.44 24.12 L60.67 24.55 L60.91 24.98 L61.13 25.42 L61.36 25.87 Z" fill="#f34646"/><circle cx="64.13" cy="24.47" r="3.10" fill="#f34646"/><circle cx="23.00" cy="70.50" r="3.10" fill="#f34646"/><path d="M37.50 93.00 L47.65 65.61 L62.88 11.32 Q63.71 8.33 61.11 7.61 Q58.51 6.89 57.68 9.88 L42.86 64.29 Z M58.41 21.29 L61.15 11.40 A1.05 1.05 0 0 0 59.12 10.84 L56.39 20.73 A1.05 1.05 0 0 0 58.41 21.29 Z" fill="#ffffff" fill-rule="evenodd" stroke="#000000" stroke-width="2" paint-order="stroke"/><path d="M61.06 13.98 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.40 9.49 L52.32 14.88 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.48 18.16 Z" fill="#f34646"/></g></svg><b style="font-family: 'Poppins', sans-serif; font-size: 19px; letter-spacing: -0.04em">seams club</b></span>
+    <button aria-label="Notifications" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.bell}}"></path></svg></button>
+    <button onClick="{{toggle}}" aria-haspopup="dialog" aria-expanded="{{openStr}}" aria-controls="account-drawer" aria-label="Account menu" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; display: grid; place-items: center"><span style="width: 34px; height: 34px; border-radius: 50%; background: #000; color: #e6e51e; display: grid; place-items: center; font-weight: 700">E</span></button>
+  </header>
+
+  <main style="position: absolute; left: 0; right: 0; top: 64px; bottom: 0; overflow: hidden; padding: 12px 12px 100px">
+    <article style="background: #fff; border-radius: 26px; overflow: hidden">
+      <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px"><span style="width: 34px; height: 34px; border-radius: 50%; background: #466cf3; color: #fff; display: grid; place-items: center; font-weight: 700; font-size: 14px">M</span><span><b style="display: block; font-size: 14px">mara.makes</b><span style="font-size: 12px; color: #555">2h · Public</span></span></div>
+      <img src="/_blob/188ffd136f4c0ada8a70caa52d09ec3b" alt="Lavender sprig drawstring dress" style="display: block; width: 100%; height: 560px; object-fit: cover">
+    </article>
+  </main>
+
+  <nav aria-label="App" style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; align-items: center; justify-content: space-between; background: #fff; padding: 8px 20px 24px; border-top: 1px solid #e6e6e6"><a href="MFeed.dc.html" aria-current="page" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px; background: #000"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Home" role="img"><path d="{{i.home}}"></path></svg></a><a href="MPatternShop.dc.html" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Explore" role="img"><path d="{{i.compass}}"></path></svg></a><a href="FlowPost.dc.html" style="width: 58px; height: 52px; display: grid; place-items: center; border-radius: 20px; background: #e6e51e"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" aria-label="New post" role="img"><path d="{{i.plus}}"></path></svg></a><a href="MStudio.dc.html" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="My studio" role="img"><path d="{{i.kanban}}"></path></svg></a><a href="MProfile.dc.html" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px"><span style="width: 28px; height: 28px; border-radius: 50%; background: #000; color: #fff; display: grid; place-items: center; font-size: 12px; font-weight: 700" aria-label="My profile" role="img">E</span></a></nav>
+
+  <sc-if value="{{open}}" hint-placeholder-val="{{true}}">
+    <div onClick="{{close}}" aria-hidden="true" style="position: absolute; inset: 0; z-index: 5; background: rgba(0,0,0,.45)"></div>
+    <section id="account-drawer" role="dialog" aria-modal="true" aria-label="Account menu" style="position: absolute; right: 0; top: 0; bottom: 0; z-index: 6; width: 328px; background: #fff; border-radius: 28px 0 0 28px; padding: 46px 12px 18px; display: flex; flex-direction: column">
+        <div style="display: flex; align-items: center; gap: 12px; padding: 4px 6px 12px">
+          <span style="width: 46px; height: 46px; flex-shrink: 0; border-radius: 50%; background: #000; color: #e6e51e; display: grid; place-items: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 19px">E</span>
+          <span style="flex: 1; min-width: 0"><b style="display: block; font-size: 15px">Ena</b><a href="MProfile.dc.html" style="font-size: 13px; color: #555">View profile · @ena.sews</a></span>
+          <button onClick="{{close}}" aria-label="Close menu" style="width: 40px; height: 40px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button>
+        </div>
+        <nav aria-label="Your account" style="border-top: 1px solid #ececec; padding: 6px 0">
+          <sc-for list="{{rowsA}}" as="r" hint-placeholder-count="4"><a href="{{r.href}}" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 10px; border-radius: 12px; text-decoration: none; font-size: 14px; font-weight: 600"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg><span style="flex: 1">{{r.label}}</span><sc-if value="{{r.hasNote}}" hint-placeholder-val="{{false}}"><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; {{r.noteStyle}}">{{r.note}}</span></sc-if></a></sc-for>
+        </nav>
+        <div style="border-top: 1px solid #ececec; padding: 8px 10px 6px; display: flex; flex-direction: column; gap: 6px">
+          <div style="display: flex; align-items: center; gap: 12px; min-height: 40px">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.ruler}}"></path></svg>
+            <span id="units-label" style="flex: 1; font-size: 14px; font-weight: 600">Measure in</span>
+            <div role="radiogroup" aria-labelledby="units-label" style="display: flex; gap: 2px; background: #f2f2f2; border-radius: 3000px; padding: 3px">
+              <sc-for list="{{units}}" as="u" hint-placeholder-count="2"><button role="radio" aria-checked="{{u.on}}" onClick="{{u.pick}}" style="min-width: 44px; min-height: 32px; border: 0; border-radius: 3000px; font: inherit; font-size: 12px; font-weight: 700; {{u.style}}">{{u.label}}</button></sc-for>
+            </div>
+          </div>
+          <a href="Settings.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 40px; text-decoration: none; font-size: 14px; font-weight: 600"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.users}}"></path></svg><span style="flex: 1">Posts visible to</span><span style="font-size: 13px; color: #555">Followers</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg></a>
+        </div>
+        <nav aria-label="More" style="border-top: 1px solid #ececec; padding: 6px 0">
+          <a href="MSupport.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 44px; margin-bottom: 2px; padding: 0 10px; border-radius: 12px; background: #e6e51e; text-decoration: none; font-size: 14px; font-weight: 700"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.heart}}"></path></svg><span style="flex: 1">Support Seams Club</span><span style="font-size: 12px">$5/mo</span></a>
+          <sc-for list="{{rowsB}}" as="r" hint-placeholder-count="2"><a href="{{r.href}}" style="display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 10px; border-radius: 12px; text-decoration: none; font-size: 14px; font-weight: 600"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{r.icon}}"></path></svg><span style="flex: 1">{{r.label}}</span></a></sc-for>
+          <button onClick="{{askLogout}}" style="width: 100%; display: flex; align-items: center; gap: 12px; min-height: 44px; padding: 0 10px; border: 0; border-radius: 12px; background: transparent; font: inherit; font-size: 14px; font-weight: 600; text-align: left"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.logout}}"></path></svg>Log out</button>
+          <sc-if value="{{confirmOut}}" hint-placeholder-val="{{false}}">
+            <div role="alertdialog" aria-label="Log out?" style="margin: 4px 4px 0; border-radius: 14px; background: #f2f2f2; padding: 10px 12px; display: flex; align-items: center; gap: 8px">
+              <span style="flex: 1; font-size: 13px; font-weight: 600">Log out of Seams Club?</span>
+              <button onClick="{{cancelLogout}}" style="min-height: 36px; padding: 0 12px; border: 0; border-radius: 3000px; background: #fff; font: inherit; font-size: 12px; font-weight: 700">Cancel</button>
+              <a href="Main.dc.html" style="display: inline-flex; align-items: center; min-height: 36px; padding: 0 12px; border-radius: 3000px; background: #000; color: #fff; text-decoration: none; font-size: 12px; font-weight: 700">Log out</a>
+            </div>
+          </sc-if>
+        </nav>
+        <p style="margin: 0; border-top: 1px solid #ececec; padding: 10px 10px 2px; font-size: 11px; line-height: 1.6; color: #555"><a href="#" style="color: #555">Terms</a> · <a href="#" style="color: #555">Privacy</a> · <a href="#" style="color: #555">Community guidelines</a><br>© 2026 Seams Club</p>
+
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { open: true, unit: 'cm', out: false }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var i = {"search": "M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z m10 18-4.3-4.3", "home": "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10", "compass": "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z m4.24 5.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z", "plus": "M12 5v14 M5 12h14", "kanban": "M3 3h18v18H3z M8 7v7 M12 7v4 M16 7v9", "lock": "M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4", "pdf": "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6", "back": "M15 18l-6-6 6-6", "close": "M18 6 6 18 M6 6l12 12", "check": "M20 6 9 17l-5-5", "heart": "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z", "download": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3", "upload": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12", "share": "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M16 6l-4-4-4 4 M12 2v13", "image": "M3 3h18v18H3z M8.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z M21 15l-5-5L5 21", "star": "M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z", "sparkle": "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z", "vote": "M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11", "palette": "M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A5.6 5.6 0 0 0 22 9.8C22 5.5 17.5 2 12 2z M6.5 11.5h.01 M9.5 7.5h.01 M14.5 7.5h.01 M17.5 11.5h.01", "card": "M2 5h20v14H2z M2 10h20", "receipt": "M4 2v20l3-2 3 2 3-2 3 2 3-2 3 2V2l-3 2-3-2-3 2-3-2-3 2z M8 8h8 M8 12h8 M8 16h5", "store": "M3 9l1.5-5h15L21 9 M3 9v11h18V9 M3 9h18 M9 20v-6h6v6", "trend": "M3 17l6-6 4 4 8-8 M15 7h6v6", "pen": "M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z", "info": "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 16v-4 M12 8h.01"};
+    i.ruler = 'M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4z M7.5 10.5l2 2 M10.5 7.5l2 2 M13.5 4.5l2 2 M4.5 13.5l2 2';
+    i.logout = 'M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4 M16 17l5-5-5-5 M21 12H9';
+    i.bell = 'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9 M13.7 21a2 2 0 0 1-3.4 0';
+    i.bookmark = 'm19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z';
+    i.trophy = 'M8 21h8 M12 17v4 M7 4h10v5a5 5 0 0 1-10 0z M17 5h3v2a3 3 0 0 1-3 3 M7 5H4v2a3 3 0 0 0 3 3';
+    i.gear = 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z';
+    i.help = 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3 M12 17h.01';
+    i.users = 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75';
+    var DESK = false;
+    return {
+      i: i,
+      open: s.open, openStr: s.open ? 'true' : 'false',
+      avatarBtn: s.open ? 'background:#e6e51e' : 'background:#f2f2f2',
+      toggle: function () { self.setState({ open: !s.open, out: false }); },
+      close: function () { self.setState({ open: false, out: false }); },
+      rowsA: [
+        { label: 'My studio', href: DESK ? 'Studio.dc.html' : 'MStudio.dc.html', icon: i.kanban },
+        { label: 'Saved posts', href: '#', icon: i.bookmark, note: '18', noteStyle: 'background:#f2f2f2' },
+        { label: 'My challenges', href: 'Challenge.dc.html', icon: i.trophy, note: '1 active', noteStyle: 'background:#e6e51e' },
+        { label: 'Pattern sales', href: 'MDesignerSales.dc.html', icon: i.trend, note: '+$13.78', noteStyle: 'background:#000;color:#fff' }
+      ].map(function (r) { r.hasNote = !!r.note; r.note = r.note || ''; r.noteStyle = r.noteStyle || ''; return r; }),
+      units: [['cm', 'cm'], ['in', 'in']].map(function (u) { var on = s.unit === u[0]; return { label: u[1], on: on ? 'true' : 'false', style: on ? 'background:#000;color:#fff' : 'background:transparent;color:#000', pick: function () { self.setState({ unit: u[0] }); } }; }),
+      rowsB: [
+        { label: 'Settings & privacy', href: DESK ? 'Settings.dc.html' : 'Settings.dc.html', icon: i.gear },
+        { label: 'Help & feedback', href: '#', icon: i.help }
+      ],
+      confirmOut: s.out,
+      askLogout: function () { self.setState({ out: true }); },
+      cancelLogout: function () { self.setState({ out: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

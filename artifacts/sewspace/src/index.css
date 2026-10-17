@@ -149,3 +149,12 @@ label:has(.field[required]) > span:first-child::after { content: " *"; color: va
   .field { border-radius: 15px; }
   :where(button, a, input, select, textarea) { touch-action: manipulation; }
 }
+
+/* Account menu (Phase M): desktop popover fades and scales in, the phone drawer slides in. */
+@keyframes account-pop { from { opacity: 0; transform: translateY(-4px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes account-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes account-drawer { from { transform: translateX(100%); } to { transform: none; } }
+.account-pop { transform-origin: top right; animation: account-pop .15s ease-out both; }
+.account-fade { animation: account-fade .2s ease-out both; }
+.account-drawer { animation: account-drawer .2s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .account-pop, .account-fade, .account-drawer { animation: none; } }

@@ -15,9 +15,10 @@ function focusables(root: HTMLElement): HTMLElement[] {
  * first, else the first control, or the dialog itself with `focusContainer`
  * so screen readers start at its title), Tab and Shift+Tab stay inside, Escape calls
  * onEscape, and focus goes back to where it was on close. The page behind
- * doesn't scroll while it's open.
+ * doesn't scroll while it's open. With `modal: false` Tab isn't kept inside and
+ * the page still scrolls (a popover that's a dialog, not a modal).
  */
-export function useModal(ref: RefObject<HTMLElement | null>, onEscape: () => void, { focusContainer = false }: { focusContainer?: boolean } = {}) {
+export function useModal(ref: RefObject<HTMLElement | null>, onEscape: () => void, { focusContainer = false, modal = true }: { focusContainer?: boolean; modal?: boolean } = {}) {
   const escape = useRef(onEscape);
   escape.current = onEscape;
   useEffect(() => {
@@ -27,8 +28,9 @@ export function useModal(ref: RefObject<HTMLElement | null>, onEscape: () => voi
     if (root && !root.contains(document.activeElement)) {
       (root.querySelector<HTMLElement>('[data-autofocus]') ?? (focusContainer ? root : focusables(root)[0]) ?? root).focus({ preventScroll: true });
     }
+    // A non-modal dialog (the desktop account menu) leaves the page usable: no scroll lock, Tab may leave it.
     const overflow = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    if (modal) document.body.style.overflow = 'hidden';
     const onKey = (e: KeyboardEvent) => {
       if (stack[stack.length - 1] !== ref || !ref.current) return;
       if (e.key === 'Escape') {
@@ -36,7 +38,7 @@ export function useModal(ref: RefObject<HTMLElement | null>, onEscape: () => voi
         escape.current();
         return;
       }
-      if (e.key !== 'Tab') return;
+      if (e.key !== 'Tab' || !modal) return;
       const items = focusables(ref.current);
       if (!items.length) {
         e.preventDefault();
@@ -56,8 +58,8 @@ export function useModal(ref: RefObject<HTMLElement | null>, onEscape: () => voi
     return () => {
       window.removeEventListener('keydown', onKey);
       stack.splice(stack.indexOf(ref), 1);
-      if (!stack.length) document.body.style.overflow = overflow;
+      if (modal && !stack.length) document.body.style.overflow = overflow;
       previous?.focus?.({ preventScroll: true });
     };
-  }, [ref]);
+  }, [ref, modal]);
 }
