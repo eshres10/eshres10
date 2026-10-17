@@ -16,7 +16,7 @@ import {
   type ProfileStats,
   type UsedProduct,
 } from '@workspace/api-client-react';
-import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Share2, ShoppingBag, Spool, UserCheck, UserPlus } from 'lucide-react';
+import { BookOpen, Bookmark, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Share2, ShoppingBag, Spool, UserCheck, UserPlus } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState, Loading } from '@/components/common';
@@ -369,6 +369,16 @@ export function PublicProfilePage({ handle }: { handle: string }) {
               </Link>
             )}
             <ShareButton name={p.name} />
+            {p.isMe && (
+              <Link
+                href="/saved"
+                aria-label="View saved posts"
+                title="Saved posts"
+                className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink no-underline hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              >
+                <Bookmark size={19} aria-hidden="true" />
+              </Link>
+            )}
             {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
           </div>
         </div>
