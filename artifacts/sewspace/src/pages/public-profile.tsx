@@ -16,7 +16,7 @@ import {
   type ProfileStats,
   type UsedProduct,
 } from '@workspace/api-client-react';
-import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Send, Share2, ShoppingBag, Spool, Trophy, UserCheck, UserPlus } from 'lucide-react';
+import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Send, Share2, ShoppingBag, Spool, Store, Trophy, UserCheck, UserPlus, AtSign } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState, Loading } from '@/components/common';
@@ -47,6 +47,17 @@ function compact(n: number) {
 
 function plural(n: number, one: string, many = `${one}s`) {
   return `${n} ${n === 1 ? one : many}`;
+}
+
+/** Shop and Instagram links someone added in Settings (public). */
+function ProfileLinks({ shopUrl, instagram }: { shopUrl: string | null; instagram: string | null }) {
+  if (!shopUrl && !instagram) return null;
+  return (
+    <p className="mt-2 flex flex-wrap gap-2 text-[13px]">
+      {shopUrl && <a href={shopUrl} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-canvas px-3 font-semibold text-ink no-underline md:bg-white"><Store size={14} aria-hidden="true" />{shopUrl.replace(/^https:\/\/(www\.)?/, '').replace(/\/$/, '')}</a>}
+      {instagram && <a href={`https://www.instagram.com/${instagram}/`} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-canvas px-3 md:bg-white font-semibold text-ink no-underline"><AtSign size={14} aria-hidden="true" />{instagram}<span className="sr-only"> on Instagram</span></a>}
+    </p>
+  );
 }
 
 function ShareButton({ name, labelled = false }: { name: string; labelled?: boolean }) {
@@ -381,6 +392,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
           <p className="mt-4 font-semibold">{p.name}</p>
           <p className="text-[15px] text-subtle">Joined {monthYear(p.joinedAt)}</p>
           {p.bio && <p className="mt-1.5 max-w-[620px] whitespace-pre-line text-[15px] leading-6">{p.bio}</p>}
+          <ProfileLinks shopUrl={p.shopUrl} instagram={p.instagram} />
           {p.stats.challengesEntered > 0 && (
             <span className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-yellow px-3 py-1 text-[13px] font-bold"><Trophy size={14} aria-hidden="true" />{plural(p.stats.challengesEntered, 'challenge')} entered</span>
           )}
@@ -411,6 +423,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
           </div>
         </div>
         {p.bio && <p className="mt-1 whitespace-pre-line text-[15px] leading-6">{p.bio}</p>}
+        <ProfileLinks shopUrl={p.shopUrl} instagram={p.instagram} />
         {!p.isMe && <div className="mt-4"><FollowButton handle={p.handle} name={p.name} following={p.followedByMe} /></div>}
       </section>
 

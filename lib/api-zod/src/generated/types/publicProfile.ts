@@ -22,4 +22,8 @@ export interface PublicProfile {
   stats: ProfileStats;
   /** True when the signed-in viewer follows this person */
   followedByMe: boolean;
+  /** @nullable */
+  shopUrl: string | null;
+  /** @nullable */
+  instagram: string | null;
 }

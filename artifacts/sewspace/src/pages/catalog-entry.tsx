@@ -12,11 +12,12 @@ import {
   type CatalogPage,
   type Review,
 } from '@workspace/api-client-react';
-import { Bookmark, Check, ExternalLink, Loader2, Scissors, ThumbsUp } from 'lucide-react';
+import { Bookmark, Check, ExternalLink, Loader2, Pencil, Scissors, ThumbsUp } from 'lucide-react';
 import { Link } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
-import { capitalise, ReviewForm, Stars } from '@/components/catalog/parts';
+import { capitalise, EditEntryForm, ReviewForm, Stars } from '@/components/catalog/parts';
+import { Alterations, DesignerRow, FabricsUsed, Gallery, GetIt, SizeChart, StarSummary, StatTiles } from '@/components/catalog/PatternPage';
 import { Loading } from '@/components/common';
 import { Discussions } from '@/components/forum/Discussions';
 import { SafetyMenu } from '@/components/social/SafetyMenu';
@@ -144,25 +145,35 @@ function Actions({ page }: { page: CatalogPage }) {
   const client = useQueryClient();
   const save = useAddCatalogPatternToLibrary();
   const e = page.entry;
-  const big = 'inline-flex min-h-[48px] items-center gap-2 rounded-full px-6 text-[15px] font-bold no-underline disabled:opacity-60';
+  const [editing, setEditing] = useState(false);
+  const big = 'inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-[15px] font-bold no-underline disabled:opacity-60';
   return (
-    <div className="flex flex-wrap gap-2.5">
-      <WriteReview page={page} className={`${big} bg-yellow text-ink`}
+    <div className="flex flex-wrap gap-2">
+      <WriteReview page={page} className={`${big} border-2 border-ink bg-white text-ink`}
         label={page.myReview ? 'Edit your review' : e.kind === 'pattern' ? "I've made this" : 'Write a review'} />
       {e.kind === 'pattern' && (
         page.inMyLibrary || save.isSuccess
           ? <Link href="/patterns" className={`${big} border border-ink bg-white text-ink`}><Check size={16} aria-hidden="true" />In your library</Link>
-          : <button type="button" disabled={save.isPending} className={`${big} bg-ink text-white`}
+          : <button type="button" disabled={save.isPending} className={`${big} bg-canvas text-ink`}
               onClick={() => { if (ask({ title: 'Sign in to save patterns', body: 'Saved patterns go in your private pattern library.' })) save.mutate({ id: e.id }, { onSuccess: () => client.invalidateQueries() }); }}>
-              {save.isPending ? <Loader2 size={16} className="animate-spin" /> : <Bookmark size={16} aria-hidden="true" />}Save to my library
+              {save.isPending ? <Loader2 size={16} className="animate-spin" /> : <Bookmark size={16} aria-hidden="true" />}Add to my library
             </button>
+      )}
+      {e.canEdit && <button type="button" onClick={() => setEditing(true)} className={`${big} text-ink underline underline-offset-4`}><Pencil size={15} aria-hidden="true" />Edit page</button>}
+      {editing && (
+        <Sheet label={`Edit ${e.name}`} onClose={() => setEditing(false)}>
+          <EditEntryForm entry={e} sizes={page.sizes} onDone={() => setEditing(false)} />
+        </Sheet>
       )}
     </div>
   );
 }
 
+const SOURCE_EYEBROW = { free: 'Free pattern', designer: "Indie pattern · designer's site", seams_club: 'Indie PDF pattern · sold on Seams Club' } as const;
+
 /** A shared pattern or product page at /catalog/:kind/:slug. Works signed out. */
 export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string }) {
+  const { isSignedIn } = useAuth();
   const valid = kind === 'pattern' || kind === 'product';
   const page = useGetCatalogPage(kind as 'pattern', slug, { query: { retry: false, enabled: valid } });
   const reviews = useGetCatalogReviews(kind as 'pattern', slug, { query: { retry: false, enabled: valid } });
@@ -177,72 +188,62 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
   if (!valid) return <NotFound embedded />;
   if (page.isLoading) return <Loading />;
   if (!page.data) return <NotFound embedded />;
-  const { entry: e, makes, fabricsUsed } = page.data;
-  const s = e.stats;
-  const cover = makes.find(m => m.coverImageUrl);
+  const { entry: e, makes } = page.data;
+  const pattern = e.kind === 'pattern';
   const facts = [capitalise(e.category), e.difficulty && capitalise(e.difficulty), e.sizes && `Sizes ${e.sizes}`, e.fabricTypes, e.yardage].filter(Boolean) as string[];
 
   return (
-    <div className="mx-auto max-w-[1232px] space-y-4">
+    <div className={`mx-auto max-w-[1232px] space-y-4 ${pattern ? (isSignedIn ? 'pb-24 md:pb-0' : 'pb-28 md:pb-0') : ''}`}>
       <nav aria-label="Breadcrumb" className="hidden text-sm sm:block">
-        <Link href={e.kind === 'pattern' ? '/catalog' : '/catalog?kind=product'} className="text-ink underline underline-offset-4">{e.kind === 'pattern' ? 'Patterns' : 'Fabrics & supplies'}</Link>
-        <span aria-hidden="true" className="text-subtle"> / </span>{capitalise(e.category)}<span aria-hidden="true" className="text-subtle"> / </span><span className="font-semibold">{e.name}</span>
+        <Link href={pattern ? '/catalog' : '/catalog?kind=product'} className="text-ink underline underline-offset-4">{pattern ? 'Patterns' : 'Fabrics & supplies'}</Link>
+        <span aria-hidden="true" className="text-subtle"> / </span>
+        <Link href={pattern ? `/catalog?category=${e.category}` : '/catalog?kind=product'} className="text-ink underline underline-offset-4">{capitalise(e.category)}</Link>
+        <span aria-hidden="true" className="text-subtle"> / </span><span className="font-semibold">{e.name}</span>
       </nav>
 
-      <section className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
-        <div className="relative min-h-[280px] overflow-hidden rounded-[30px] bg-peach-soft sm:min-h-[340px] md:min-h-[460px] md:rounded-[40px]">
-          {cover?.coverImageUrl
-            ? <>
-                <img src={cover.coverImageUrl} alt={`${cover.name} by @${cover.owner.handle}`} className="absolute inset-0 h-full w-full object-cover" />
-                <span className="absolute bottom-4 left-4 rounded-full bg-white px-3 py-1.5 text-xs font-semibold">Cover from @{cover.owner.handle}'s make</span>
-              </>
-            : <span className="absolute inset-0 grid place-items-center" aria-hidden="true"><Scissors size={48} /></span>}
-        </div>
-        <div className="rounded-[30px] bg-white p-6 sm:p-8 md:rounded-[40px] md:p-10">
-          <p className="eyebrow eyebrow-red">{e.kind === 'pattern' ? 'Sewing pattern' : capitalise(e.category)}</p>
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,7fr)_minmax(0,6fr)] md:items-start">
+        <Gallery page={page.data} />
+        <div className="min-w-0 rounded-[30px] bg-white p-6 sm:p-8 md:rounded-[40px] md:p-10">
+          <p className="eyebrow eyebrow-red">{pattern ? SOURCE_EYEBROW[e.source] : capitalise(e.category)}</p>
           <h1 className="mt-2 font-display text-[clamp(34px,4.2vw,56px)] leading-[1.02] tracking-[-.05em]">{e.name}</h1>
-          {e.maker && <p className="mt-2 text-[17px]">by <b className="underline underline-offset-4">{e.maker}</b></p>}
-          <div className="mt-4 flex flex-wrap gap-1.5">{facts.map(f => <span key={f} className="rounded-full bg-canvas px-3 py-1.5 text-[13px] font-semibold">{f}</span>)}</div>
-          <dl className="mt-6 grid grid-cols-3 gap-2">
-            <div className="rounded-[20px] bg-ink p-4 text-white"><dd className="font-display text-[30px] leading-none">{s.rating !== null ? s.rating.toFixed(1) : '–'}</dd><dt className="mt-2 text-[13px]">overall rating</dt></div>
-            <div className="rounded-[20px] bg-canvas p-4"><dd className="font-display text-[30px] leading-none">{s.makes}</dd><dt className="mt-2 text-[13px] text-subtle">public make{s.makes === 1 ? '' : 's'}</dt></div>
-            <div className="rounded-[20px] bg-canvas p-4"><dd className="font-display text-[30px] leading-none">{s.reviews}</dd><dt className="mt-2 text-[13px] text-subtle">review{s.reviews === 1 ? '' : 's'}</dt></div>
-          </dl>
-          {e.description && <p className="mt-5 max-w-xl whitespace-pre-line text-[15px] leading-relaxed">{e.description}</p>}
-          <div className="mt-6"><Actions page={page.data} /></div>
-          <p className="mt-4 text-sm text-subtle">
-            {e.kind === 'pattern' && 'Pattern files are never shared on Seams Club. '}
-            {e.url && <a href={e.url} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex items-center gap-1 text-ink underline underline-offset-4">Buy it from the {e.kind === 'pattern' ? 'designer' : 'shop'}<ExternalLink size={13} aria-hidden="true" /></a>}
-          </p>
+          <DesignerRow page={page.data} />
+          {e.description && <p className="mt-4 whitespace-pre-line text-[15px] leading-relaxed">{e.description}</p>}
+          <ul className="mt-4 flex flex-wrap gap-1.5">{facts.map(f => <li key={f} className="rounded-full bg-canvas px-3 py-1.5 text-[13px] font-semibold">{f}</li>)}</ul>
+          <StatTiles entry={e} />
+          {pattern
+            ? <GetIt entry={e} />
+            : e.url && <p className="mt-5"><a href={e.url} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex items-center gap-1 text-ink underline underline-offset-4">Buy it from the shop<ExternalLink size={13} aria-hidden="true" /></a></p>}
+          <div className="mt-4"><Actions page={page.data} /></div>
+          {pattern && <p className="mt-3 text-[13px] text-subtle">Pattern files are never shared on Seams Club.</p>}
         </div>
       </section>
 
-      {(e.kind === 'pattern' || fabricsUsed.length > 0) && (
-        <div className="grid items-start gap-4 md:grid-cols-2">
-          {e.kind === 'pattern' && <HowItSews entry={e} />}
-          {fabricsUsed.length > 0 && (
-            <section aria-labelledby="fabrics-title" className="rounded-[30px] bg-white p-6 sm:p-7">
-              <h2 id="fabrics-title" className="font-display text-[22px] tracking-[-.04em]">Fabrics people used</h2>
-              <ul className="mt-4 flex flex-wrap gap-2">{fabricsUsed.map(f => <li key={f.name} className="rounded-full border border-line px-3.5 py-2 text-sm font-semibold">{capitalise(f.name)} <span className="font-normal text-subtle">{f.count}</span></li>)}</ul>
-            </section>
-          )}
+      {pattern && (
+        <div className="grid items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
+          <HowItSews entry={e} />
+          <Alterations page={page.data} />
+          <FabricsUsed page={page.data} />
         </div>
       )}
+      {!pattern && <FabricsUsed page={page.data} />}
+      {pattern && <SizeChart page={page.data} />}
 
       <section aria-labelledby="makes-title">
-        <h2 id="makes-title" className="mb-4 mt-8 font-display text-[32px] tracking-[-.05em] sm:text-[40px]">{makes.length ? `${s.makes} make${s.makes === 1 ? '' : 's'}` : 'Makes'}</h2>
+        <h2 id="makes-title" className="mb-4 mt-8 font-display text-[32px] tracking-[-.05em] sm:text-[40px]">{e.stats.makes ? `${e.stats.makes} ${e.stats.makes === 1 ? 'make' : 'makes'}` : 'Makes'}</h2>
         {makes.length
-          ? <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+          ? <ul className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6">
               {makes.map(m => (
-                <Link key={m.id} href={`/makes/${m.id}`} className="relative block aspect-[3/4] overflow-hidden rounded-[22px] bg-line text-ink no-underline">
-                  {m.coverImageUrl ? <img src={m.coverImageUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" /> : <span className="absolute inset-0 grid place-items-center bg-peach-soft" aria-hidden="true"><Scissors size={28} /></span>}
-                  <span className="absolute inset-x-2 bottom-2 rounded-[14px] bg-white px-3 py-2">
-                    <span className="block truncate text-[13px] font-bold">@{m.owner.handle}</span>
-                    <span className="block truncate text-xs text-subtle">{[m.size && `Size ${m.size}`, m.usedWith].filter(Boolean).join(' · ') || m.name}</span>
-                  </span>
-                </Link>
+                <li key={m.id} className="w-[58vw] max-w-[240px] shrink-0 snap-start sm:w-auto sm:max-w-none">
+                  <Link href={`/makes/${m.id}`} className="relative block aspect-[3/4] overflow-hidden rounded-[22px] bg-line text-ink no-underline">
+                    {m.coverImageUrl ? <img src={m.coverImageUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" /> : <span className="absolute inset-0 grid place-items-center bg-peach-soft" aria-hidden="true"><Scissors size={28} /></span>}
+                    <span className="absolute inset-x-2 bottom-2 rounded-[14px] bg-white px-3 py-2">
+                      <span className="block truncate text-[13px] font-bold">@{m.owner.handle}</span>
+                      <span className="block truncate text-xs text-subtle">{[m.size && `Size ${m.size}`, m.usedWith].filter(Boolean).join(' · ') || m.name}</span>
+                    </span>
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           : <p className="rounded-[30px] bg-white px-6 py-8 text-sm text-subtle">No shared makes yet. Link this {e.kind} to one of yours from your studio, and share the make.</p>}
       </section>
 
@@ -253,10 +254,21 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
           <h2 id="reviews-title" className="font-display text-[32px] tracking-[-.05em] sm:text-[40px]">Reviews</h2>
           <WriteReview page={page.data} label={page.data.myReview ? 'Edit your review' : 'Write a review'} className="inline-flex min-h-[48px] items-center rounded-full bg-yellow px-6 text-[15px] font-bold text-ink" />
         </div>
-        {reviews.isLoading ? <Loader2 className="animate-spin" aria-label="Loading reviews" />
-          : !reviews.data?.length ? <p className="rounded-[30px] bg-white px-6 py-8 text-sm text-subtle">No reviews yet. Made it? Tell people how it went.</p>
-          : <div className="grid items-start gap-4 md:grid-cols-2 lg:grid-cols-3">{reviews.data.map(r => <ReviewCard key={r.id} review={r} entry={e} />)}</div>}
+        <div className="grid items-start gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
+          <StarSummary page={page.data} />
+          {reviews.isLoading ? <Loader2 className="animate-spin" aria-label="Loading reviews" />
+            : !reviews.data?.length ? <p className="rounded-[30px] bg-white px-6 py-8 text-sm text-subtle">No reviews yet. Made it? Tell people how it went.</p>
+            : <div className="grid items-start gap-4 md:grid-cols-2 xl:grid-cols-3">{reviews.data.map(r => <ReviewCard key={r.id} review={r} entry={e} />)}</div>}
+        </div>
       </section>
+
+      {pattern && (
+        <div className={`fixed z-40 bg-white md:hidden ${isSignedIn
+          ? 'inset-x-3 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] rounded-[24px] border border-line px-4 py-3'
+          : 'inset-x-0 bottom-0 border-t border-line px-4 pb-[calc(.75rem+env(safe-area-inset-bottom))] pt-3'}`}>
+          <GetIt entry={e} compact />
+        </div>
+      )}
     </div>
   );
 }

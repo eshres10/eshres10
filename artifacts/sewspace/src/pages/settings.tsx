@@ -22,7 +22,7 @@ export function SettingsPage() {
   const update = useUpdateProfile();
   const client = useQueryClient();
   const fileInput = useRef<HTMLInputElement>(null);
-  const [form, setForm] = useState({ name: '', handle: '', bio: '', avatarUrl: null as string | null, units: 'metric' as 'metric' | 'imperial', experience: '', favoriteGarments: '', defaultPostVisibility: 'public' as Visibility });
+  const [form, setForm] = useState({ name: '', handle: '', bio: '', avatarUrl: null as string | null, units: 'metric' as 'metric' | 'imperial', experience: '', favoriteGarments: '', defaultPostVisibility: 'public' as Visibility, shopUrl: '', instagram: '' });
   const [handleValid, setHandleValid] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState('');
@@ -32,7 +32,7 @@ export function SettingsPage() {
   useEffect(() => {
     const p = profile.data;
     if (!p) return;
-    setForm({ name: p.name, handle: p.handle ?? '', bio: p.bio, avatarUrl: p.avatarUrl, units: p.units, experience: p.experience, favoriteGarments: p.favoriteGarments.join(', '), defaultPostVisibility: p.defaultPostVisibility });
+    setForm({ name: p.name, handle: p.handle ?? '', bio: p.bio, avatarUrl: p.avatarUrl, units: p.units, experience: p.experience, favoriteGarments: p.favoriteGarments.join(', '), defaultPostVisibility: p.defaultPostVisibility, shopUrl: p.shopUrl ?? '', instagram: p.instagram ?? '' });
   }, [profile.data]);
   // The account menu's "Posts visible to" opens /settings#privacy.
   const loaded = Boolean(profile.data);
@@ -72,6 +72,8 @@ export function SettingsPage() {
         experience: form.experience.trim(),
         favoriteGarments: form.favoriteGarments.split(',').map(item => item.trim()).filter(Boolean),
         defaultPostVisibility: form.defaultPostVisibility,
+        shopUrl: form.shopUrl.trim() || null,
+        instagram: form.instagram.trim().replace(/^@/, '') || null,
       },
     }, {
       onSuccess: data => {
@@ -87,7 +89,7 @@ export function SettingsPage() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="eyebrow">Public profile</p>
-            <p className="mt-1 text-sm text-subtle">Anyone can see your name, handle, bio and photo, even without an account.</p>
+            <p className="mt-1 text-sm text-subtle">Anyone can see your name, handle, bio, photo and links, even without an account.</p>
           </div>
           {profile.data.handle && <Link href={`/@${profile.data.handle}`} className="btn btn-line"><ExternalLink size={15} aria-hidden="true" />View profile</Link>}
         </div>
@@ -107,6 +109,12 @@ export function SettingsPage() {
             <input value={form.name} onChange={e => set('name', e.target.value)} required maxLength={100} autoComplete="name" className="field mt-1.5" data-testid="input-profile-name" />
           </label>
           <HandleField value={form.handle} onChange={value => set('handle', value)} onValidityChange={onValidity} />
+          <label className="block text-xs font-semibold">Shop link <span className="font-normal text-subtle">(optional)</span>
+            <input value={form.shopUrl} onChange={e => set('shopUrl', e.target.value)} type="url" inputMode="url" maxLength={300} className="field mt-1.5" placeholder="https://" data-testid="input-profile-shop" />
+          </label>
+          <label className="block text-xs font-semibold">Instagram <span className="font-normal text-subtle">(optional)</span>
+            <input value={form.instagram} onChange={e => set('instagram', e.target.value)} maxLength={60} autoCapitalize="none" className="field mt-1.5" placeholder="@yourname" data-testid="input-profile-instagram" />
+          </label>
           <label className="block text-xs font-semibold sm:col-span-2">Bio
             <textarea value={form.bio} onChange={e => set('bio', e.target.value.slice(0, BIO_MAX))} rows={4} className="field mt-1.5 resize-y" placeholder="What do you love to sew?" data-testid="input-profile-bio" />
             <span className="mt-1 block text-right font-normal text-subtle">{form.bio.length}/{BIO_MAX}</span>

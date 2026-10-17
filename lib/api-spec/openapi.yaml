@@ -587,6 +587,35 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/CatalogEntry" }
         "404": { description: Not found or not yours to edit }
+  /catalog/{id}/sizes:
+    put:
+      operationId: setCatalogSizes
+      tags: [catalog]
+      summary: "Replace a pattern page's size chart (the page's creator or an admin). Body measurements in cm."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sizes:
+                  type: array
+                  maxItems: 60
+                  items: { $ref: "#/components/schemas/CatalogSize" }
+              required: [sizes]
+      responses:
+        "200":
+          description: The size chart
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/CatalogSize" }
+        "400": { description: "Invalid, or two sizes with the same label" }
+        "404": { description: Not found or not yours to edit }
   /catalog/{id}/save:
     put:
       operationId: saveCatalogEntry
@@ -2118,7 +2147,9 @@ components:
         needsHandle: { type: boolean, description: True until the user has chosen a handle }
         isAdmin: { type: boolean, description: True for ADMIN_USER_IDS (shows report review) }
         defaultPostVisibility: { $ref: "#/components/schemas/Visibility" }
-      required: [id, name, handle, bio, avatarUrl, joinedAt, experience, favoriteGarments, units, needsHandle, isAdmin, defaultPostVisibility]
+        shopUrl: { type: string, nullable: true, description: Public link to your shop (https) }
+        instagram: { type: string, nullable: true, description: "Public Instagram handle, without the at sign" }
+      required: [id, name, handle, bio, avatarUrl, joinedAt, experience, favoriteGarments, units, needsHandle, isAdmin, defaultPostVisibility, shopUrl, instagram]
     PublicProfile:
       type: object
       description: Fields of a profile that anyone may see. Never includes units, experience or other private data.
@@ -2131,7 +2162,9 @@ components:
         isMe: { type: boolean, description: True when this is the signed-in viewer's own profile }
         stats: { $ref: "#/components/schemas/ProfileStats" }
         followedByMe: { type: boolean, description: True when the signed-in viewer follows this person }
-      required: [handle, name, bio, avatarUrl, joinedAt, isMe, stats, followedByMe]
+        shopUrl: { type: string, nullable: true }
+        instagram: { type: string, nullable: true }
+      required: [handle, name, bio, avatarUrl, joinedAt, isMe, stats, followedByMe, shopUrl, instagram]
     ProfileStats:
       type: object
       description: Posts and makes count only what this viewer may see. The followersOnly counts are the followers-only posts and makes the viewer can't see (0 for the owner and followers); private items are never counted.
@@ -2655,7 +2688,58 @@ components:
           allOf: [{ $ref: "#/components/schemas/Review" }]
           nullable: true
         inMyLibrary: { type: boolean, description: You have a pattern, fabric or thread linked to this page }
-      required: [entry, makes, fabricsUsed, myReview, inMyLibrary]
+        gallery:
+          type: array
+          description: "Up to 6 photos from public makes of this pattern (make and linked pattern both public)"
+          items:
+            type: object
+            properties:
+              url: { type: string }
+              makeId: { type: integer }
+              handle: { type: string }
+            required: [url, makeId, handle]
+        sizes:
+          type: array
+          description: "Size chart: body measurements in cm, in order"
+          items: { $ref: "#/components/schemas/CatalogSize" }
+        stars:
+          type: array
+          description: "How many reviews gave 5, 4, 3, 2 and 1 stars (every review counts)"
+          items:
+            type: object
+            properties:
+              stars: { type: integer }
+              count: { type: integer }
+            required: [stars, count]
+        alterations:
+          type: array
+          description: "Alterations reviewers made, most common first, with how many reviews mention each"
+          items:
+            type: object
+            properties:
+              id: { $ref: "#/components/schemas/Alteration" }
+              count: { type: integer }
+            required: [id, count]
+        designerInfo:
+          type: object
+          nullable: true
+          description: "The designer's links and follow state, when the designer has an account"
+          properties:
+            shopUrl: { type: string, nullable: true }
+            instagram: { type: string, nullable: true }
+            patterns: { type: integer, description: Pattern pages naming them as designer }
+            followedByMe: { type: boolean }
+            isMe: { type: boolean }
+          required: [shopUrl, instagram, patterns, followedByMe, isMe]
+      required: [entry, makes, fabricsUsed, myReview, inMyLibrary, gallery, sizes, stars, alterations, designerInfo]
+    CatalogSize:
+      type: object
+      properties:
+        label: { type: string, minLength: 1, maxLength: 20 }
+        bustCm: { type: number, nullable: true, minimum: 20, maximum: 300 }
+        waistCm: { type: number, nullable: true, minimum: 20, maximum: 300 }
+        hipCm: { type: number, nullable: true, minimum: 20, maximum: 300 }
+      required: [label, bustCm, waistCm, hipCm]
     Review:
       type: object
       properties:
@@ -2682,7 +2766,10 @@ components:
         helpfulCount: { type: integer }
         helpedByMe: { type: boolean }
         isMine: { type: boolean }
-      required: [id, rating, fit, difficulty, instructions, sizing, sizeMade, body, createdAt, updatedAt, author, make, helpfulCount, helpedByMe, isMine]
+        alterations:
+          type: array
+          items: { $ref: "#/components/schemas/Alteration" }
+      required: [id, rating, fit, difficulty, instructions, sizing, sizeMade, body, createdAt, updatedAt, author, make, helpfulCount, helpedByMe, isMine, alterations]
     ReviewInput:
       type: object
       properties:
@@ -2694,7 +2781,15 @@ components:
         sizeMade: { type: string, nullable: true, maxLength: 40 }
         body: { type: string, maxLength: 4000 }
         makeId: { type: integer, nullable: true }
+        alterations:
+          type: array
+          maxItems: 8
+          items: { $ref: "#/components/schemas/Alteration" }
       required: [rating]
+    Alteration:
+      type: string
+      description: Common alterations people choose when reviewing a pattern
+      enum: [lengthen_bodice, shorten_bodice, fba, sba, swayback, lengthen_skirt, shorten_skirt, grade_sizes, take_in_waist, let_out_hips, narrow_shoulder, lengthen_sleeves, shorten_sleeves, raise_neckline]
     HelpfulState:
       type: object
       properties:
@@ -3153,6 +3248,8 @@ components:
           items: { type: string }
         units: { type: string, enum: [metric, imperial] }
         defaultPostVisibility: { $ref: "#/components/schemas/Visibility" }
+        shopUrl: { type: string, nullable: true, maxLength: 300, pattern: "^https://[^\\s]+$" }
+        instagram: { type: string, nullable: true, pattern: "^[A-Za-z0-9._]{1,30}$" }
     Fabric:
       type: object
       properties:

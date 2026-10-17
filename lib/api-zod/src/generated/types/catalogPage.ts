@@ -7,7 +7,12 @@
  */
 import type { CatalogEntry } from './catalogEntry';
 import type { CatalogMake } from './catalogMake';
+import type { CatalogPageAlterationsItem } from './catalogPageAlterationsItem';
+import type { CatalogPageDesignerInfo } from './catalogPageDesignerInfo';
 import type { CatalogPageFabricsUsedItem } from './catalogPageFabricsUsedItem';
+import type { CatalogPageGalleryItem } from './catalogPageGalleryItem';
+import type { CatalogPageStarsItem } from './catalogPageStarsItem';
+import type { CatalogSize } from './catalogSize';
 import type { Review } from './review';
 
 export interface CatalogPage {
@@ -18,4 +23,17 @@ export interface CatalogPage {
   myReview: Review | null;
   /** You have a pattern */
   inMyLibrary: boolean;
+  /** Up to 6 photos from public makes of this pattern (make and linked pattern both public) */
+  gallery: CatalogPageGalleryItem[];
+  /** Size chart: body measurements in cm, in order */
+  sizes: CatalogSize[];
+  /** How many reviews gave 5, 4, 3, 2 and 1 stars (every review counts) */
+  stars: CatalogPageStarsItem[];
+  /** Alterations reviewers made, most common first, with how many reviews mention each */
+  alterations: CatalogPageAlterationsItem[];
+  /**
+     * The designer's links and follow state, when the designer has an account
+     * @nullable
+     */
+  designerInfo: CatalogPageDesignerInfo;
 }

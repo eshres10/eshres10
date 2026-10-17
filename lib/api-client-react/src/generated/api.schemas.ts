@@ -74,6 +74,16 @@ export interface Profile {
   /** True for ADMIN_USER_IDS (shows report review) */
   isAdmin: boolean;
   defaultPostVisibility: Visibility;
+  /**
+     * Public link to your shop (https)
+     * @nullable
+     */
+  shopUrl: string | null;
+  /**
+     * Public Instagram handle, without the at sign
+     * @nullable
+     */
+  instagram: string | null;
 }
 
 /**
@@ -105,6 +115,10 @@ export interface PublicProfile {
   stats: ProfileStats;
   /** True when the signed-in viewer follows this person */
   followedByMe: boolean;
+  /** @nullable */
+  shopUrl: string | null;
+  /** @nullable */
+  instagram: string | null;
 }
 
 export type PublicMaterialKind = typeof PublicMaterialKind[keyof typeof PublicMaterialKind];
@@ -914,6 +928,60 @@ export type CatalogPageFabricsUsedItem = {
   count: number;
 };
 
+export type CatalogPageGalleryItem = {
+  url: string;
+  makeId: number;
+  handle: string;
+};
+
+export type CatalogPageStarsItem = {
+  stars: number;
+  count: number;
+};
+
+/**
+ * Common alterations people choose when reviewing a pattern
+ */
+export type Alteration = typeof Alteration[keyof typeof Alteration];
+
+
+export const Alteration = {
+  lengthen_bodice: 'lengthen_bodice',
+  shorten_bodice: 'shorten_bodice',
+  fba: 'fba',
+  sba: 'sba',
+  swayback: 'swayback',
+  lengthen_skirt: 'lengthen_skirt',
+  shorten_skirt: 'shorten_skirt',
+  grade_sizes: 'grade_sizes',
+  take_in_waist: 'take_in_waist',
+  let_out_hips: 'let_out_hips',
+  narrow_shoulder: 'narrow_shoulder',
+  lengthen_sleeves: 'lengthen_sleeves',
+  shorten_sleeves: 'shorten_sleeves',
+  raise_neckline: 'raise_neckline',
+} as const;
+
+export type CatalogPageAlterationsItem = {
+  id: Alteration;
+  count: number;
+};
+
+/**
+ * The designer's links and follow state, when the designer has an account
+ * @nullable
+ */
+export type CatalogPageDesignerInfo = {
+  /** @nullable */
+  shopUrl: string | null;
+  /** @nullable */
+  instagram: string | null;
+  /** Pattern pages naming them as designer */
+  patterns: number;
+  followedByMe: boolean;
+  isMe: boolean;
+} | null;
+
 /**
  * @nullable
  */
@@ -962,6 +1030,33 @@ export interface Review {
   helpfulCount: number;
   helpedByMe: boolean;
   isMine: boolean;
+  alterations: Alteration[];
+}
+
+export interface CatalogSize {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     */
+  label: string;
+  /**
+     * @minimum 20
+     * @maximum 300
+     * @nullable
+     */
+  bustCm: number | null;
+  /**
+     * @minimum 20
+     * @maximum 300
+     * @nullable
+     */
+  waistCm: number | null;
+  /**
+     * @minimum 20
+     * @maximum 300
+     * @nullable
+     */
+  hipCm: number | null;
 }
 
 export interface CatalogPage {
@@ -972,6 +1067,19 @@ export interface CatalogPage {
   myReview: Review | null;
   /** You have a pattern */
   inMyLibrary: boolean;
+  /** Up to 6 photos from public makes of this pattern (make and linked pattern both public) */
+  gallery: CatalogPageGalleryItem[];
+  /** Size chart: body measurements in cm, in order */
+  sizes: CatalogSize[];
+  /** How many reviews gave 5, 4, 3, 2 and 1 stars (every review counts) */
+  stars: CatalogPageStarsItem[];
+  /** Alterations reviewers made, most common first, with how many reviews mention each */
+  alterations: CatalogPageAlterationsItem[];
+  /**
+     * The designer's links and follow state, when the designer has an account
+     * @nullable
+     */
+  designerInfo: CatalogPageDesignerInfo;
 }
 
 /**
@@ -1021,6 +1129,8 @@ export interface ReviewInput {
   body?: string;
   /** @nullable */
   makeId?: number | null;
+  /** @maxItems 8 */
+  alterations?: Alteration[];
 }
 
 export interface HelpfulState {
@@ -1587,6 +1697,17 @@ export interface ProfileUpdate {
   favoriteGarments?: string[];
   units?: ProfileUpdateUnits;
   defaultPostVisibility?: Visibility;
+  /**
+     * @maxLength 300
+     * @nullable
+     * @pattern ^https://[^\s]+$
+     */
+  shopUrl?: string | null;
+  /**
+     * @nullable
+     * @pattern ^[A-Za-z0-9._]{1,30}$
+     */
+  instagram?: string | null;
 }
 
 export interface Fabric {
@@ -2403,6 +2524,11 @@ export const ListCatalogSort = {
   rating: 'rating',
   new: 'new',
 } as const;
+
+export type SetCatalogSizesBody = {
+  /** @maxItems 60 */
+  sizes: CatalogSize[];
+};
 
 export type ListChallengesParams = {
 status?: ListChallengesStatus;

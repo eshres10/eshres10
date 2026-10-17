@@ -26,6 +26,9 @@ import {
   UpdateCatalogEntryResponse,
   SaveCatalogEntryParams,
   SaveCatalogEntryResponse,
+  SetCatalogSizesBody,
+  SetCatalogSizesParams,
+  SetCatalogSizesResponse,
 } from "@workspace/api-zod";
 import {
   addToLibrary,
@@ -40,6 +43,7 @@ import {
   saveReview,
   setCatalogLink,
   setCatalogSave,
+  setCatalogSizes,
   setHelpful,
   updateCatalogEntry,
 } from "../access";
@@ -165,6 +169,18 @@ for (const on of [true, false]) {
     res.json(MarkReviewHelpfulResponse.parse(result.value));
   }));
 }
+
+router.put("/catalog/:id/sizes", scoped(async (req, res, db): Promise<void> => {
+  const params = SetCatalogSizesParams.safeParse(req.params);
+  const body = SetCatalogSizesBody.safeParse(req.body);
+  if (!params.success || !body.success) return void res.status(400).json({ error: "Each size needs a label; measurements are in cm, between 20 and 300." });
+  const result = await setCatalogSizes(db, viewerOf(req), params.data.id, body.data.sizes);
+  if (!result.ok) {
+    res.status(result.error === "invalid" ? 400 : 404).json({ error: result.error === "invalid" ? "Each size label can only appear once." : "Page not found" });
+    return;
+  }
+  res.json(SetCatalogSizesResponse.parse(result.value));
+}));
 
 for (const on of [true, false]) {
   router[on ? "put" : "delete"]("/catalog/:id/save", scoped(async (req, res, db): Promise<void> => {

@@ -8,6 +8,8 @@ export interface PublicProfile {
   name: string;
   bio: string;
   avatarUrl: string | null;
+  shopUrl: string | null;
+  instagram: string | null;
   joinedAt: Date;
 }
 
@@ -23,7 +25,7 @@ export async function getPublicProfile(db: Tx, rawHandle: string): Promise<Publi
     .where(sql`lower(${publicProfilesView.handle}) = ${handle}`)
     .limit(1);
   if (!row) return null;
-  return { handle: row.handle, name: row.name, bio: row.bio, avatarUrl: row.avatarUrl, joinedAt: row.createdAt };
+  return { handle: row.handle, name: row.name, bio: row.bio, avatarUrl: row.avatarUrl, joinedAt: row.createdAt, shopUrl: row.shopUrl, instagram: row.instagram };
 }
 
 /** Handles for the sitemap. */

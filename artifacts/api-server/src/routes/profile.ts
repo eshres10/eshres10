@@ -36,6 +36,8 @@ function profileResponse(row: typeof profilesTable.$inferSelect, isAdmin: boolea
     needsHandle: row.handle === null,
     isAdmin,
     defaultPostVisibility: row.defaultPostVisibility as "public" | "followers" | "private",
+    shopUrl: row.shopUrl,
+    instagram: row.instagram,
   };
 }
 
@@ -67,10 +69,20 @@ router.patch("/profile", scoped(async (req, res, db): Promise<void> => {
   const raw = { ...(req.body ?? {}) };
   if (typeof raw.handle === "string") raw.handle = normaliseHandle(raw.handle);
   if (typeof raw.bio === "string") raw.bio = raw.bio.trim();
+  // Links: empty clears; Instagram takes "@name" or a profile link and keeps the name.
+  if (typeof raw.shopUrl === "string") raw.shopUrl = raw.shopUrl.trim() || null;
+  if (typeof raw.instagram === "string") {
+    raw.instagram = raw.instagram.trim().replace(/^https?:\/\/(www\.)?instagram\.com\//i, "").replace(/^@/, "").replace(/\/.*$/, "") || null;
+  }
   const parsed = UpdateProfileBody.safeParse(raw);
   if (!parsed.success) {
     const field = parsed.error.issues[0]?.path[0];
-    res.status(400).json({ error: field === "handle" ? HANDLE_MESSAGES.invalid_characters : parsed.error.message });
+    res.status(400).json({
+      error: field === "handle" ? HANDLE_MESSAGES.invalid_characters
+        : field === "shopUrl" ? "Shop links start with https://."
+        : field === "instagram" ? "That doesn't look like an Instagram handle."
+        : parsed.error.message,
+    });
     return;
   }
   const viewer = viewerOf(req);

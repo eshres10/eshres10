@@ -62,6 +62,8 @@ export async function getProfilePage(db: Tx, viewer: Viewer, handle: string): Pr
     handle: row.handle,
     name: row.name,
     bio: row.bio,
+    shopUrl: row.shopUrl,
+    instagram: row.instagram,
     avatarUrl: row.avatarUrl,
     joinedAt: row.createdAt,
     isMe: viewer.userId === uid,

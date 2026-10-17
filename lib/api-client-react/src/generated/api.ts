@@ -36,6 +36,7 @@ import type {
   CatalogList,
   CatalogPage,
   CatalogSaveState,
+  CatalogSize,
   CatalogUpdate,
   Challenge,
   ChallengeEntry,
@@ -143,6 +144,7 @@ import type {
   SearchPeopleParams,
   SearchPostsParams,
   SearchTagsParams,
+  SetCatalogSizesBody,
   SuggestHashtagsParams,
   TagPage,
   Thread,
@@ -3450,6 +3452,95 @@ export const useUpdateCatalogEntry = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateCatalogEntryMutationOptions(options), queryClient);
+    }
+
+export const getSetCatalogSizesUrl = (id: number,) => {
+
+
+
+
+  return `/api/catalog/${id}/sizes`
+}
+
+/**
+ * @summary Replace a pattern page's size chart (the page's creator or an admin). Body measurements in cm.
+ */
+export const setCatalogSizes = async (id: number,
+    setCatalogSizesBody: SetCatalogSizesBody, options?: Parameters<typeof customFetch>[1]): Promise<CatalogSize[]> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<CatalogSize[]>(getSetCatalogSizesUrl(id),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(setCatalogSizesBody)
+  }
+);}
+
+
+
+
+
+export const getSetCatalogSizesMutationKey = () => ['setCatalogSizes'] as const;
+
+export const getSetCatalogSizesMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setCatalogSizes>>, TError,SetCatalogSizesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof setCatalogSizes>>, TError,SetCatalogSizesMutationVariables, TContext> => {
+
+const mutationKey = getSetCatalogSizesMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof setCatalogSizes>>, SetCatalogSizesMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  setCatalogSizes(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SetCatalogSizesMutationResult = NonNullable<Awaited<ReturnType<typeof setCatalogSizes>>>
+    export type SetCatalogSizesMutationBody = BodyType<SetCatalogSizesBody>
+    export type SetCatalogSizesMutationError = ErrorType<void>
+    export type SetCatalogSizesMutationVariables = {id: number;data: BodyType<SetCatalogSizesBody>}
+
+    /**
+ * @summary Replace a pattern page's size chart (the page's creator or an admin). Body measurements in cm.
+ */
+export const useSetCatalogSizes = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof setCatalogSizes>>, TError,SetCatalogSizesMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof setCatalogSizes>>,
+        TError,
+        SetCatalogSizesMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSetCatalogSizesMutationOptions(options), queryClient);
     }
 
 export const getSaveCatalogEntryUrl = (id: number,) => {

@@ -1,6 +1,8 @@
 import { and, count, desc, eq, gt, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import {
   catalogSavesTable,
+  catalogSizesTable,
+  followsTable,
   catalogTable,
   fabricsTable,
   patternsTable,
@@ -336,16 +338,23 @@ export async function getCatalogPage(db: Tx, viewer: Viewer, kind: CatalogKind, 
       size: make.size,
       owner: { handle: owner.handle, name: owner.name, avatarUrl: owner.avatarUrl },
       usedWith: other && other.userId === make.userId ? other.name : null,
-      fabricType: kind === "pattern" && other && other.userId === make.userId ? other.type : null,
+      fabricType: null,
     }];
   });
-  const typeCounts = new Map<string, number>();
-  for (const m of makes) {
-    const t = m.fabricType?.trim().toLowerCase();
-    if (t) typeCounts.set(t, (typeCounts.get(t) ?? 0) + 1);
-  }
-  const fabricsUsed = [...typeCounts.entries()].map(([name, n]) => ({ name, count: n })).sort((a, b) => b.count - a.count).slice(0, 8);
-
+  // Public numbers from public data only: fabric types of public makes made
+  // with a public pattern and a public fabric.
+  const fabricRows = kind === "pattern"
+    ? (await db.execute<{ name: string; n: number }>(sql`
+        SELECT lower(trim(f.type)) AS name, count(DISTINCT p.id)::int AS n
+        FROM sewspace_projects p
+        JOIN sewspace_patterns l ON l.id = p.pattern_id AND l.user_id = p.user_id
+        JOIN sewspace_fabrics f ON f.id = p.fabric_id AND f.user_id = p.user_id
+        WHERE p.visibility = 'public' AND l.visibility = 'public' AND f.visibility = 'public'
+          AND l.catalog_id = ${entry.id} AND trim(f.type) <> ''
+        GROUP BY 1 ORDER BY 2 DESC, 1 LIMIT 8`)).rows
+    : [];
+  const fabricsUsed = fabricRows.map((r) => ({ name: r.name, count: Number(r.n) }));
+  const extras = await pageExtras(db, viewer, entry, view);
   let myReview = null;
   let inMyLibrary = false;
   if (viewer.userId) {
@@ -357,7 +366,62 @@ export async function getCatalogPage(db: Tx, viewer: Viewer, kind: CatalogKind, 
       if ((hit?.n ?? 0) > 0) inMyLibrary = true;
     }
   }
-  return { entry: view, makes: makes.map(({ fabricType: _t, ...m }) => m), fabricsUsed, myReview, inMyLibrary };
+  return { entry: view, makes: makes.map(({ fabricType: _t, ...m }) => m), fabricsUsed, myReview, inMyLibrary, ...extras };
+}
+
+export interface CatalogSizeView { label: string; bustCm: number | null; waistCm: number | null; hipCm: number | null }
+
+async function sizeChart(db: Tx, catalogId: number): Promise<CatalogSizeView[]> {
+  const rows = await db.select().from(catalogSizesTable).where(eq(catalogSizesTable.catalogId, catalogId)).orderBy(catalogSizesTable.position);
+  return rows.map((r) => ({ label: r.label, bustCm: r.bustCm, waistCm: r.waistCm, hipCm: r.hipCm }));
+}
+
+/** The pattern page's gallery, size chart, review numbers and designer, all public data. */
+async function pageExtras(db: Tx, viewer: Viewer, entry: CatalogEntry, view: CatalogEntryView) {
+  // Photos from public makes of public library patterns, newest first.
+  const photos = entry.kind === "pattern"
+    ? (await db.execute<{ id: number; url: string; user_id: string }>(sql`
+        SELECT p.id, p.cover_image_url AS url, p.user_id FROM sewspace_projects p
+        JOIN sewspace_patterns l ON l.id = p.pattern_id AND l.user_id = p.user_id
+        WHERE p.visibility = 'public' AND l.visibility = 'public' AND p.cover_image_url IS NOT NULL AND l.catalog_id = ${entry.id}
+        ORDER BY p.published_at DESC NULLS LAST, p.id DESC LIMIT 6`)).rows
+    : [];
+  const owners = photos.length
+    ? await db.select({ userId: publicProfilesView.userId, handle: publicProfilesView.handle }).from(publicProfilesView)
+        .where(inArray(publicProfilesView.userId, [...new Set(photos.map((p) => p.user_id))]))
+    : [];
+  const handleOf = new Map(owners.map((o) => [o.userId, o.handle]));
+  const gallery = photos.flatMap((p) => (handleOf.has(p.user_id) ? [{ url: p.url, makeId: Number(p.id), handle: handleOf.get(p.user_id)! }] : []));
+
+  const numbers = (await db.execute<{ what: string; key: string; n: string }>(sql`SELECT * FROM sewspace_catalog_review_numbers(${entry.id})`)).rows;
+  const stars = [5, 4, 3, 2, 1].map((n) => ({ stars: n, count: Number(numbers.find((r) => r.what === "stars" && r.key === String(n))?.n ?? 0) }));
+  const alterations = numbers.filter((r) => r.what === "alteration").map((r) => ({ id: r.key, count: Number(r.n) }))
+    .sort((a, b) => b.count - a.count || a.id.localeCompare(b.id));
+
+  let designerInfo = null;
+  if (entry.designerId && view.designer) {
+    const [profile] = await db.select({ shopUrl: publicProfilesView.shopUrl, instagram: publicProfilesView.instagram }).from(publicProfilesView)
+      .where(eq(publicProfilesView.userId, entry.designerId));
+    const [{ patterns }] = await db.select({ patterns: count() }).from(catalogTable).where(eq(catalogTable.designerId, entry.designerId));
+    const followed = viewer.userId
+      ? (await db.select({ n: count() }).from(followsTable).where(and(eq(followsTable.followerId, viewer.userId), eq(followsTable.followeeId, entry.designerId))))[0].n > 0
+      : false;
+    designerInfo = { shopUrl: profile?.shopUrl ?? null, instagram: profile?.instagram ?? null, patterns, followedByMe: followed, isMe: entry.designerId === viewer.userId };
+  }
+  return { gallery, sizes: await sizeChart(db, entry.id), stars, alterations, designerInfo };
+}
+
+/** Replace a pattern page's size chart: its creator or an admin. Labels must differ. */
+export async function setCatalogSizes(db: Tx, viewer: Viewer, id: number, sizes: CatalogSizeView[]): Promise<Ok<CatalogSizeView[]> | Fail<"not_found" | "invalid">> {
+  const [entry] = await db.select().from(catalogTable).where(eq(catalogTable.id, id));
+  if (!entry || entry.kind !== "pattern" || !viewer.userId || (entry.createdBy !== viewer.userId && !viewer.isAdmin)) return { ok: false, error: "not_found" };
+  const clean = sizes.map((s) => ({ ...s, label: s.label.trim() })).filter((s) => s.label);
+  if (new Set(clean.map((s) => s.label.toLowerCase())).size !== clean.length || clean.length > 60) return { ok: false, error: "invalid" };
+  await db.delete(catalogSizesTable).where(eq(catalogSizesTable.catalogId, id));
+  if (clean.length) {
+    await db.insert(catalogSizesTable).values(clean.map((s, position) => ({ catalogId: id, position, label: s.label, bustCm: s.bustCm, waistCm: s.waistCm, hipCm: s.hipCm })));
+  }
+  return { ok: true, value: await sizeChart(db, id) };
 }
 
 /** Entries for the sitemap. */
@@ -511,6 +575,7 @@ export interface ReviewView {
   helpfulCount: number;
   helpedByMe: boolean;
   isMine: boolean;
+  alterations: string[];
 }
 
 /** Reviews by people the viewer hasn't blocked (and who haven't blocked them). */
@@ -556,6 +621,7 @@ async function reviewViews(db: Tx, viewer: Viewer, rows: Review[]): Promise<Revi
       helpfulCount: helpfulMap.get(r.id) ?? 0,
       helpedByMe: votedSet.has(r.id),
       isMine: r.userId === viewer.userId,
+      alterations: r.alterations,
     }];
   });
 }
@@ -581,7 +647,14 @@ export interface ReviewInput {
   sizeMade?: string | null;
   body?: string;
   makeId?: number | null;
+  alterations?: string[];
 }
+
+/** The alterations people pick when reviewing (same list as the table CHECK). */
+export const ALTERATIONS = [
+  "lengthen_bodice", "shorten_bodice", "fba", "sba", "swayback", "lengthen_skirt", "shorten_skirt",
+  "grade_sizes", "take_in_waist", "let_out_hips", "narrow_shoulder", "lengthen_sleeves", "shorten_sleeves", "raise_neckline",
+] as const;
 
 /** Write or update the viewer's review. Pattern-only scores are dropped on product pages. */
 export async function saveReview(db: Tx, viewer: Viewer, catalogId: number, input: ReviewInput): Promise<Ok<ReviewView> | Fail<"not_found" | "no_handle" | "bad_make">> {
@@ -605,6 +678,7 @@ export async function saveReview(db: Tx, viewer: Viewer, catalogId: number, inpu
     sizeMade: pattern ? input.sizeMade?.trim() || null : null,
     body: (input.body ?? "").trim(),
     makeId,
+    alterations: pattern ? [...new Set((input.alterations ?? []).filter((a) => (ALTERATIONS as readonly string[]).includes(a)))].slice(0, 8) : [],
     updatedAt: new Date(),
   };
   const [row] = await db.insert(reviewsTable).values({ catalogId, userId: me, ...values })

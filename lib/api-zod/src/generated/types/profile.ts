@@ -25,4 +25,14 @@ export interface Profile {
   /** True for ADMIN_USER_IDS (shows report review) */
   isAdmin: boolean;
   defaultPostVisibility: Visibility;
+  /**
+     * Public link to your shop (https)
+     * @nullable
+     */
+  shopUrl: string | null;
+  /**
+     * Public Instagram handle, without the at sign
+     * @nullable
+     */
+  instagram: string | null;
 }

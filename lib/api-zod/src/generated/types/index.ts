@@ -7,6 +7,7 @@
  */
 
 export * from './acceptInput';
+export * from './alteration';
 export * from './altTextInput';
 export * from './assistantInput';
 export * from './assistantResponse';
@@ -28,10 +29,15 @@ export * from './catalogListFacetsDifficulty';
 export * from './catalogListFacetsSource';
 export * from './catalogMake';
 export * from './catalogPage';
+export * from './catalogPageAlterationsItem';
+export * from './catalogPageDesignerInfo';
 export * from './catalogPageFabricsUsedItem';
+export * from './catalogPageGalleryItem';
+export * from './catalogPageStarsItem';
 export * from './catalogRef';
 export * from './catalogRefKind';
 export * from './catalogSaveState';
+export * from './catalogSize';
 export * from './catalogSource';
 export * from './catalogStats';
 export * from './catalogUpdate';
@@ -212,6 +218,7 @@ export * from './searchParameter';
 export * from './searchPeopleParams';
 export * from './searchPostsParams';
 export * from './searchTagsParams';
+export * from './setCatalogSizesBody';
 export * from './suggestHashtagsParams';
 export * from './tagPage';
 export * from './thread';

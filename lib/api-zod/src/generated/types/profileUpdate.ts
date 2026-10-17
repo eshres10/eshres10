@@ -31,4 +31,15 @@ export interface ProfileUpdate {
   favoriteGarments?: string[];
   units?: ProfileUpdateUnits;
   defaultPostVisibility?: Visibility;
+  /**
+     * @maxLength 300
+     * @nullable
+     * @pattern ^https://[^\s]+$
+     */
+  shopUrl?: string | null;
+  /**
+     * @nullable
+     * @pattern ^[A-Za-z0-9._]{1,30}$
+     */
+  instagram?: string | null;
 }

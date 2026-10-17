@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { Alteration } from './alteration';
 import type { PublicPerson } from './publicPerson';
 import type { ReviewMake } from './reviewMake';
 import type { ReviewSizing } from './reviewSizing';
@@ -34,4 +35,5 @@ export interface Review {
   helpfulCount: number;
   helpedByMe: boolean;
   isMine: boolean;
+  alterations: Alteration[];
 }

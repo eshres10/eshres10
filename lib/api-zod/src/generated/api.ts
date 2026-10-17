@@ -31,7 +31,9 @@ export const GetPublicProfileResponse = zod.object({
   "followersOnlyMakes": zod.number().int(),
   "challengesEntered": zod.number().int().describe('Challenges with at least one entry the viewer can see')
 }).describe('Posts and makes count only what this viewer may see. The followersOnly counts are the followers-only posts and makes the viewer can\'t see (0 for the owner and followers); private items are never counted.'),
-  "followedByMe": zod.boolean().describe('True when the signed-in viewer follows this person')
+  "followedByMe": zod.boolean().describe('True when the signed-in viewer follows this person'),
+  "shopUrl": zod.string().nullable(),
+  "instagram": zod.string().nullable()
 }).describe('Fields of a profile that anyone may see. Never includes units, experience or other private data.')
 
 
@@ -957,6 +959,19 @@ export const GetCatalogPageParams = zod.object({
   "slug": zod.coerce.string()
 })
 
+export const getCatalogPageResponseSizesItemLabelMax = 20;
+
+export const getCatalogPageResponseSizesItemBustCmMin = 20;
+export const getCatalogPageResponseSizesItemBustCmMax = 300;
+
+export const getCatalogPageResponseSizesItemWaistCmMin = 20;
+export const getCatalogPageResponseSizesItemWaistCmMax = 300;
+
+export const getCatalogPageResponseSizesItemHipCmMin = 20;
+export const getCatalogPageResponseSizesItemHipCmMax = 300;
+
+
+
 export const GetCatalogPageResponse = zod.object({
   "entry": zod.object({
   "id": zod.number().int(),
@@ -1034,9 +1049,36 @@ export const GetCatalogPageResponse = zod.object({
 }).nullable().describe('The reviewer\'s make, only when the viewer may see it'),
   "helpfulCount": zod.number().int(),
   "helpedByMe": zod.boolean(),
-  "isMine": zod.boolean()
+  "isMine": zod.boolean(),
+  "alterations": zod.array(zod.enum(['lengthen_bodice', 'shorten_bodice', 'fba', 'sba', 'swayback', 'lengthen_skirt', 'shorten_skirt', 'grade_sizes', 'take_in_waist', 'let_out_hips', 'narrow_shoulder', 'lengthen_sleeves', 'shorten_sleeves', 'raise_neckline']).describe('Common alterations people choose when reviewing a pattern'))
 }),zod.null()]),
-  "inMyLibrary": zod.boolean().describe('You have a pattern')
+  "inMyLibrary": zod.boolean().describe('You have a pattern'),
+  "gallery": zod.array(zod.object({
+  "url": zod.string(),
+  "makeId": zod.number().int(),
+  "handle": zod.string()
+})).describe('Up to 6 photos from public makes of this pattern (make and linked pattern both public)'),
+  "sizes": zod.array(zod.object({
+  "label": zod.string().min(1).max(getCatalogPageResponseSizesItemLabelMax),
+  "bustCm": zod.number().min(getCatalogPageResponseSizesItemBustCmMin).max(getCatalogPageResponseSizesItemBustCmMax).nullable(),
+  "waistCm": zod.number().min(getCatalogPageResponseSizesItemWaistCmMin).max(getCatalogPageResponseSizesItemWaistCmMax).nullable(),
+  "hipCm": zod.number().min(getCatalogPageResponseSizesItemHipCmMin).max(getCatalogPageResponseSizesItemHipCmMax).nullable()
+})).describe('Size chart: body measurements in cm, in order'),
+  "stars": zod.array(zod.object({
+  "stars": zod.number().int(),
+  "count": zod.number().int()
+})).describe('How many reviews gave 5, 4, 3, 2 and 1 stars (every review counts)'),
+  "alterations": zod.array(zod.object({
+  "id": zod.enum(['lengthen_bodice', 'shorten_bodice', 'fba', 'sba', 'swayback', 'lengthen_skirt', 'shorten_skirt', 'grade_sizes', 'take_in_waist', 'let_out_hips', 'narrow_shoulder', 'lengthen_sleeves', 'shorten_sleeves', 'raise_neckline']).describe('Common alterations people choose when reviewing a pattern'),
+  "count": zod.number().int()
+})).describe('Alterations reviewers made, most common first, with how many reviews mention each'),
+  "designerInfo": zod.object({
+  "shopUrl": zod.string().nullable(),
+  "instagram": zod.string().nullable(),
+  "patterns": zod.number().int().describe('Pattern pages naming them as designer'),
+  "followedByMe": zod.boolean(),
+  "isMe": zod.boolean()
+}).nullable().describe('The designer\'s links and follow state, when the designer has an account')
 })
 
 
@@ -1071,7 +1113,8 @@ export const GetCatalogReviewsResponseItem = zod.object({
 }).nullable().describe('The reviewer\'s make, only when the viewer may see it'),
   "helpfulCount": zod.number().int(),
   "helpedByMe": zod.boolean(),
-  "isMine": zod.boolean()
+  "isMine": zod.boolean(),
+  "alterations": zod.array(zod.enum(['lengthen_bodice', 'shorten_bodice', 'fba', 'sba', 'swayback', 'lengthen_skirt', 'shorten_skirt', 'grade_sizes', 'take_in_waist', 'let_out_hips', 'narrow_shoulder', 'lengthen_sleeves', 'shorten_sleeves', 'raise_neckline']).describe('Common alterations people choose when reviewing a pattern'))
 })
 export const GetCatalogReviewsResponse = zod.array(GetCatalogReviewsResponseItem)
 
@@ -1285,6 +1328,59 @@ export const UpdateCatalogEntryResponse = zod.object({
 
 
 /**
+ * @summary Replace a pattern page's size chart (the page's creator or an admin). Body measurements in cm.
+ */
+export const SetCatalogSizesParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const setCatalogSizesBodySizesItemLabelMax = 20;
+
+export const setCatalogSizesBodySizesItemBustCmMin = 20;
+export const setCatalogSizesBodySizesItemBustCmMax = 300;
+
+export const setCatalogSizesBodySizesItemWaistCmMin = 20;
+export const setCatalogSizesBodySizesItemWaistCmMax = 300;
+
+export const setCatalogSizesBodySizesItemHipCmMin = 20;
+export const setCatalogSizesBodySizesItemHipCmMax = 300;
+
+export const setCatalogSizesBodySizesMax = 60;
+
+
+
+export const SetCatalogSizesBody = zod.object({
+  "sizes": zod.array(zod.object({
+  "label": zod.string().min(1).max(setCatalogSizesBodySizesItemLabelMax),
+  "bustCm": zod.number().min(setCatalogSizesBodySizesItemBustCmMin).max(setCatalogSizesBodySizesItemBustCmMax).nullable(),
+  "waistCm": zod.number().min(setCatalogSizesBodySizesItemWaistCmMin).max(setCatalogSizesBodySizesItemWaistCmMax).nullable(),
+  "hipCm": zod.number().min(setCatalogSizesBodySizesItemHipCmMin).max(setCatalogSizesBodySizesItemHipCmMax).nullable()
+})).max(setCatalogSizesBodySizesMax)
+})
+
+export const setCatalogSizesResponseLabelMax = 20;
+
+export const setCatalogSizesResponseBustCmMin = 20;
+export const setCatalogSizesResponseBustCmMax = 300;
+
+export const setCatalogSizesResponseWaistCmMin = 20;
+export const setCatalogSizesResponseWaistCmMax = 300;
+
+export const setCatalogSizesResponseHipCmMin = 20;
+export const setCatalogSizesResponseHipCmMax = 300;
+
+
+
+export const SetCatalogSizesResponseItem = zod.object({
+  "label": zod.string().min(1).max(setCatalogSizesResponseLabelMax),
+  "bustCm": zod.number().min(setCatalogSizesResponseBustCmMin).max(setCatalogSizesResponseBustCmMax).nullable(),
+  "waistCm": zod.number().min(setCatalogSizesResponseWaistCmMin).max(setCatalogSizesResponseWaistCmMax).nullable(),
+  "hipCm": zod.number().min(setCatalogSizesResponseHipCmMin).max(setCatalogSizesResponseHipCmMax).nullable()
+})
+export const SetCatalogSizesResponse = zod.array(SetCatalogSizesResponseItem)
+
+
+/**
  * @summary Save a pattern (the heart). Private to you.
  */
 export const SaveCatalogEntryParams = zod.object({
@@ -1327,6 +1423,8 @@ export const saveReviewBodySizeMadeMax = 40;
 
 export const saveReviewBodyBodyMax = 4000;
 
+export const saveReviewBodyAlterationsMax = 8;
+
 
 
 export const SaveReviewBody = zod.object({
@@ -1337,7 +1435,8 @@ export const SaveReviewBody = zod.object({
   "sizing": zod.union([zod.literal('small'),zod.literal('true'),zod.literal('large'),zod.literal(null)]).nullish(),
   "sizeMade": zod.string().max(saveReviewBodySizeMadeMax).nullish(),
   "body": zod.string().max(saveReviewBodyBodyMax).optional(),
-  "makeId": zod.number().int().nullish()
+  "makeId": zod.number().int().nullish(),
+  "alterations": zod.array(zod.enum(['lengthen_bodice', 'shorten_bodice', 'fba', 'sba', 'swayback', 'lengthen_skirt', 'shorten_skirt', 'grade_sizes', 'take_in_waist', 'let_out_hips', 'narrow_shoulder', 'lengthen_sleeves', 'shorten_sleeves', 'raise_neckline']).describe('Common alterations people choose when reviewing a pattern')).max(saveReviewBodyAlterationsMax).optional()
 })
 
 export const SaveReviewResponse = zod.object({
@@ -1363,7 +1462,8 @@ export const SaveReviewResponse = zod.object({
 }).nullable().describe('The reviewer\'s make, only when the viewer may see it'),
   "helpfulCount": zod.number().int(),
   "helpedByMe": zod.boolean(),
-  "isMine": zod.boolean()
+  "isMine": zod.boolean(),
+  "alterations": zod.array(zod.enum(['lengthen_bodice', 'shorten_bodice', 'fba', 'sba', 'swayback', 'lengthen_skirt', 'shorten_skirt', 'grade_sizes', 'take_in_waist', 'let_out_hips', 'narrow_shoulder', 'lengthen_sleeves', 'shorten_sleeves', 'raise_neckline']).describe('Common alterations people choose when reviewing a pattern'))
 })
 
 
@@ -3091,7 +3191,9 @@ export const GetProfileResponse = zod.object({
   "units": zod.enum(['metric', 'imperial']),
   "needsHandle": zod.boolean().describe('True until the user has chosen a handle'),
   "isAdmin": zod.boolean().describe('True for ADMIN_USER_IDS (shows report review)'),
-  "defaultPostVisibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.')
+  "defaultPostVisibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "shopUrl": zod.string().nullable().describe('Public link to your shop (https)'),
+  "instagram": zod.string().nullable().describe('Public Instagram handle, without the at sign')
 })
 
 
@@ -3107,6 +3209,11 @@ export const updateProfileBodyHandleMax = 30;
 export const updateProfileBodyHandleRegExp = new RegExp('^[a-z0-9_.]+$');
 export const updateProfileBodyBioMax = 500;
 
+export const updateProfileBodyShopUrlMax = 300;
+
+
+export const updateProfileBodyShopUrlRegExp = new RegExp('^https://[^\\s]+$');
+export const updateProfileBodyInstagramRegExp = new RegExp('^[A-Za-z0-9._]{1,30}$');
 
 
 export const UpdateProfileBody = zod.object({
@@ -3117,7 +3224,9 @@ export const UpdateProfileBody = zod.object({
   "experience": zod.string().optional(),
   "favoriteGarments": zod.array(zod.string()).optional(),
   "units": zod.enum(['metric', 'imperial']).optional(),
-  "defaultPostVisibility": zod.enum(['public', 'followers', 'private']).optional().describe('public: anyone, signed out included. followers: your followers. private: only you.')
+  "defaultPostVisibility": zod.enum(['public', 'followers', 'private']).optional().describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "shopUrl": zod.string().max(updateProfileBodyShopUrlMax).regex(updateProfileBodyShopUrlRegExp).nullish(),
+  "instagram": zod.string().regex(updateProfileBodyInstagramRegExp).nullish()
 })
 
 export const UpdateProfileResponse = zod.object({
@@ -3132,7 +3241,9 @@ export const UpdateProfileResponse = zod.object({
   "units": zod.enum(['metric', 'imperial']),
   "needsHandle": zod.boolean().describe('True until the user has chosen a handle'),
   "isAdmin": zod.boolean().describe('True for ADMIN_USER_IDS (shows report review)'),
-  "defaultPostVisibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.')
+  "defaultPostVisibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "shopUrl": zod.string().nullable().describe('Public link to your shop (https)'),
+  "instagram": zod.string().nullable().describe('Public Instagram handle, without the at sign')
 })
 
 
