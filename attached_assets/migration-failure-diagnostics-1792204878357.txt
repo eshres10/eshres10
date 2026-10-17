@@ -1,0 +1,813 @@
+<migration_failure>
+   Failed to run database migration statement
+CREATE TABLE "sewspace_forum_topics" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"board" text NOT NULL,
+"kind" text NOT NULL,
+"title" text NOT NULL,
+"body" text DEFAULT '' NOT NULL,
+"tags" text[] DEFAULT '{}' NOT NULL,
+"catalog_id" integer,
+"project_id" integer,
+"post_id" integer,
+"accepted_reply_id" integer,
+"pinned" boolean DEFAULT false NOT NULL,
+"locked" boolean DEFAULT false NOT NULL,
+"poll_closes_at" timestamp with time zone,
+"vote_count" integer DEFAULT 0 NOT NULL,
+"reply_count" integer DEFAULT 0 NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+"last_activity_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_forum_topics_board_check" CHECK (board = ANY (ARRAY['fitting'::text, 'fabric'::text, 'machines'::text, 'patterns'::text, 'beginners'::text, 'mending'::text, 'meetups'::text])),
+CONSTRAINT "sewspace_forum_topics_body_check" CHECK (length(body) <= 10000),
+CONSTRAINT "sewspace_forum_topics_check" CHECK ((kind = 'poll'::text) = (poll_closes_at IS NOT NULL)),
+CONSTRAINT "sewspace_forum_topics_kind_check" CHECK (kind = ANY (ARRAY['show_tell'::text, 'question'::text, 'recommendation'::text, 'info'::text, 'poll'::text])),
+CONSTRAINT "sewspace_forum_topics_tags_check" CHECK (CHECK (sewspace_valid_tags(tags),
+CONSTRAINT "sewspace_forum_topics_title_check" CHECK ((length(btrim(title)) >= 3) AND (length(btrim(title)) <= 140))
+);
+
+syntax error at or near "CHECK"
+   </migration_failure>
+
+   <generated_migration_diff>
+   CREATE TABLE "sewspace_project_photos" (
+"id" serial PRIMARY KEY NOT NULL,
+"project_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"url" text NOT NULL,
+"caption" text,
+"file_name" text,
+"position" integer DEFAULT 0 NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE "sewspace_project_photos" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_project_steps" (
+"id" serial PRIMARY KEY NOT NULL,
+"project_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"title" text NOT NULL,
+"description" text,
+"notes" text,
+"position" integer DEFAULT 0 NOT NULL,
+"completed" boolean DEFAULT false NOT NULL,
+"completed_at" timestamp with time zone,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE "sewspace_project_steps" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_patterns" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"name" text NOT NULL,
+"designer" text,
+"garment_type" text NOT NULL,
+"difficulty" text NOT NULL,
+"sizes" text,
+"required_fabric" text,
+"yardage" real,
+"recommended_fabrics" text,
+"seam_allowance" text,
+"instructions" text,
+"notes" text,
+"cover_image_url" text,
+"pdf_url" text,
+"pdf_file_name" text,
+"status" text DEFAULT 'want_to_make' NOT NULL,
+"is_demo" boolean DEFAULT false NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+"visibility" text DEFAULT 'private' NOT NULL,
+"catalog_id" integer,
+CONSTRAINT "sewspace_patterns_visibility_check" CHECK (visibility = ANY (ARRAY['public'::text, 'followers'::text, 'private'::text]))
+);
+
+
+ALTER TABLE "sewspace_patterns" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_profiles" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"name" text DEFAULT 'Maker' NOT NULL,
+"experience" text DEFAULT 'beginner' NOT NULL,
+"favorite_garments" text[] DEFAULT '{}' NOT NULL,
+"units" text DEFAULT 'metric' NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+"handle" text,
+"bio" text DEFAULT '' NOT NULL,
+"avatar_url" text,
+CONSTRAINT "sewspace_profiles_user_id_unique" UNIQUE("user_id"),
+CONSTRAINT "sewspace_profiles_bio_length" CHECK (char_length(bio) <= 500),
+CONSTRAINT "sewspace_profiles_handle_format" CHECK ((handle IS NULL) OR (handle ~ '^[a-z0-9_.]{3,30}$'::text))
+);
+
+
+ALTER TABLE "sewspace_profiles" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_threads" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"brand" text NOT NULL,
+"color" text NOT NULL,
+"color_name" text NOT NULL,
+"type" text NOT NULL,
+"weight" text,
+"quantity" real,
+"notes" text,
+"image_url" text,
+"is_demo" boolean DEFAULT false NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+"visibility" text DEFAULT 'private' NOT NULL,
+"catalog_id" integer,
+CONSTRAINT "sewspace_threads_visibility_check" CHECK (visibility = ANY (ARRAY['public'::text, 'followers'::text, 'private'::text]))
+);
+
+
+ALTER TABLE "sewspace_threads" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_posts" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"kind" text NOT NULL,
+"caption" text DEFAULT '' NOT NULL,
+"visibility" text DEFAULT 'private' NOT NULL,
+"project_id" integer,
+"pattern_id" integer,
+"fabric_id" integer,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_posts_caption_check" CHECK (char_length(caption) <= 2200),
+CONSTRAINT "sewspace_posts_kind_check" CHECK (kind = ANY (ARRAY['status'::text, 'photo'::text])),
+CONSTRAINT "sewspace_posts_visibility_check" CHECK (visibility = ANY (ARRAY['public'::text, 'followers'::text, 'private'::text]))
+);
+
+
+ALTER TABLE "sewspace_posts" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_projects" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"name" text NOT NULL,
+"status" text DEFAULT 'planning' NOT NULL,
+"progress" integer DEFAULT 0 NOT NULL,
+"pattern_id" integer,
+"fabric_id" integer,
+"thread_id" integer,
+"measurement_profile_id" integer,
+"cover_image_url" text,
+"description" text,
+"notes" text,
+"alterations" text,
+"problems" text,
+"solutions" text,
+"completed_at" date,
+"is_demo" boolean DEFAULT false NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+"visibility" text DEFAULT 'private' NOT NULL,
+"size" text,
+"published_at" timestamp with time zone,
+CONSTRAINT "sewspace_projects_visibility_check" CHECK (visibility = ANY (ARRAY['public'::text, 'followers'::text, 'private'::text]))
+);
+
+
+ALTER TABLE "sewspace_projects" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_schema_migrations" (
+"name" text PRIMARY KEY NOT NULL,
+"applied_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+CREATE TABLE "sewspace_fabrics" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"name" text NOT NULL,
+"type" text NOT NULL,
+"color" text NOT NULL,
+"width" real,
+"quantity" real,
+"unit" text DEFAULT 'm' NOT NULL,
+"composition" text,
+"stretch" text,
+"weight" text,
+"notes" text,
+"image_url" text,
+"is_demo" boolean DEFAULT false NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+"visibility" text DEFAULT 'private' NOT NULL,
+"catalog_id" integer,
+CONSTRAINT "sewspace_fabrics_visibility_check" CHECK (visibility = ANY (ARRAY['public'::text, 'followers'::text, 'private'::text]))
+);
+
+
+ALTER TABLE "sewspace_fabrics" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_media" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"full_path" text NOT NULL,
+"thumb_path" text NOT NULL,
+"source_path" text,
+"width" integer NOT NULL,
+"height" integer NOT NULL,
+"color" text,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_media_full_path_key" UNIQUE("full_path"),
+CONSTRAINT "sewspace_media_thumb_path_key" UNIQUE("thumb_path"),
+CONSTRAINT "sewspace_media_height_check" CHECK (height > 0),
+CONSTRAINT "sewspace_media_width_check" CHECK (width > 0)
+);
+
+
+ALTER TABLE "sewspace_media" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_challenges" (
+"id" serial PRIMARY KEY NOT NULL,
+"slug" text NOT NULL,
+"tag" text NOT NULL,
+"title" text NOT NULL,
+"description" text DEFAULT '' NOT NULL,
+"rules" text DEFAULT '' NOT NULL,
+"starts_at" timestamp with time zone NOT NULL,
+"ends_at" timestamp with time zone NOT NULL,
+"created_by" varchar(255) NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_challenges_slug_key" UNIQUE("slug"),
+CONSTRAINT "sewspace_challenges_check" CHECK ((tag ~ '^[A-Za-z0-9]{3,30}$'::text) AND (lower(tag) = slug)),
+CONSTRAINT "sewspace_challenges_check1" CHECK ((ends_at > starts_at) AND (ends_at <= (starts_at + '92 days'::interval))),
+CONSTRAINT "sewspace_challenges_description_check" CHECK (length(description) <= 2000),
+CONSTRAINT "sewspace_challenges_rules_check" CHECK (length(rules) <= 2000),
+CONSTRAINT "sewspace_challenges_slug_check" CHECK (slug ~ '^[a-z0-9]{3,30}$'::text),
+CONSTRAINT "sewspace_challenges_title_check" CHECK ((length(btrim(title)) >= 1) AND (length(btrim(title)) <= 80))
+);
+
+
+ALTER TABLE "sewspace_challenges" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_uploads" (
+"object_path" text PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"content_type" text NOT NULL,
+"size_bytes" integer DEFAULT 0 NOT NULL,
+"purpose" text DEFAULT 'image' NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_uploads_purpose_check" CHECK (purpose = ANY (ARRAY['image'::text, 'avatar'::text, 'pattern_pdf'::text, 'visualization'::text, 'unknown'::text]))
+);
+
+
+ALTER TABLE "sewspace_uploads" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_reviews" (
+"id" serial PRIMARY KEY NOT NULL,
+"catalog_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"rating" smallint NOT NULL,
+"fit" smallint,
+"difficulty" smallint,
+"instructions" smallint,
+"sizing" text,
+"size_made" text,
+"body" text DEFAULT '' NOT NULL,
+"make_id" integer,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_reviews_catalog_id_user_id_key" UNIQUE("catalog_id","user_id"),
+CONSTRAINT "sewspace_reviews_body_check" CHECK (length(body) <= 4000),
+CONSTRAINT "sewspace_reviews_difficulty_check" CHECK ((difficulty >= 1) AND (difficulty <= 5)),
+CONSTRAINT "sewspace_reviews_fit_check" CHECK ((fit >= 1) AND (fit <= 5)),
+CONSTRAINT "sewspace_reviews_instructions_check" CHECK ((instructions >= 1) AND (instructions <= 5)),
+CONSTRAINT "sewspace_reviews_rating_check" CHECK ((rating >= 1) AND (rating <= 5)),
+CONSTRAINT "sewspace_reviews_size_made_check" CHECK (length(size_made) <= 40),
+CONSTRAINT "sewspace_reviews_sizing_check" CHECK (sizing = ANY (ARRAY['small'::text, 'true'::text, 'large'::text]))
+);
+
+
+ALTER TABLE "sewspace_reviews" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_forum_replies" (
+"id" serial PRIMARY KEY NOT NULL,
+"topic_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"parent_id" integer,
+"body" text NOT NULL,
+"catalog_id" integer,
+"vote_count" integer DEFAULT 0 NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_forum_replies_body_check" CHECK ((length(btrim(body)) >= 1) AND (length(btrim(body)) <= 5000))
+);
+
+
+ALTER TABLE "sewspace_forum_replies" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_reports" (
+"id" serial PRIMARY KEY NOT NULL,
+"reporter_id" varchar(255) NOT NULL,
+"target_kind" text NOT NULL,
+"target_id" text NOT NULL,
+"target_user_id" varchar(255) NOT NULL,
+"reason" text NOT NULL,
+"details" text DEFAULT '' NOT NULL,
+"snapshot" jsonb DEFAULT '{}'::jsonb NOT NULL,
+"status" text DEFAULT 'open' NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"resolved_at" timestamp with time zone,
+"resolved_by" varchar(255),
+CONSTRAINT "sewspace_reports_details_check" CHECK (length(details) <= 1000),
+CONSTRAINT "sewspace_reports_reason_check" CHECK (reason = ANY (ARRAY['spam'::text, 'harassment'::text, 'nudity'::text, 'violence'::text, 'intellectual_property'::text, 'other'::text])),
+CONSTRAINT "sewspace_reports_status_check" CHECK (status = ANY (ARRAY['open'::text, 'removed'::text, 'dismissed'::text])),
+CONSTRAINT "sewspace_reports_target_kind_check" CHECK (target_kind = ANY (ARRAY['post'::text, 'comment'::text, 'profile'::text, 'review'::text, 'challenge'::text, 'topic'::text, 'forum_reply'::text]))
+);
+
+
+ALTER TABLE "sewspace_reports" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_comments" (
+"id" serial PRIMARY KEY NOT NULL,
+"post_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"parent_id" integer,
+"body" text NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_comments_body_check" CHECK ((length(btrim(body)) >= 1) AND (length(btrim(body)) <= 1000))
+);
+
+
+ALTER TABLE "sewspace_comments" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_likes" (
+"user_id" varchar(255) NOT NULL,
+"post_id" integer NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_likes_pkey" PRIMARY KEY("user_id","post_id")
+);
+
+
+ALTER TABLE "sewspace_likes" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_measurement_profiles" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"name" text NOT NULL,
+"recorded_at" date NOT NULL,
+"notes" text,
+"measurements" jsonb DEFAULT '{}'::jsonb NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+ALTER TABLE "sewspace_measurement_profiles" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_challenge_entries" (
+"id" serial PRIMARY KEY NOT NULL,
+"challenge_id" integer NOT NULL,
+"post_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"removed_at" timestamp with time zone,
+"removed_by" varchar(255),
+CONSTRAINT "sewspace_challenge_entries_challenge_id_post_id_key" UNIQUE("challenge_id","post_id")
+);
+
+
+ALTER TABLE "sewspace_challenge_entries" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_forum_poll_options" (
+"id" serial PRIMARY KEY NOT NULL,
+"topic_id" integer NOT NULL,
+"position" smallint NOT NULL,
+"label" text NOT NULL,
+CONSTRAINT "sewspace_forum_poll_options_topic_id_position_key" UNIQUE("topic_id","position"),
+CONSTRAINT "sewspace_forum_poll_options_label_check" CHECK ((length(btrim(label)) >= 1) AND (length(btrim(label)) <= 80))
+);
+
+
+ALTER TABLE "sewspace_forum_poll_options" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_catalog" (
+"id" serial PRIMARY KEY NOT NULL,
+"kind" text NOT NULL,
+"slug" text NOT NULL,
+"name" text NOT NULL,
+"maker" text DEFAULT '' NOT NULL,
+"category" text NOT NULL,
+"difficulty" text,
+"sizes" text,
+"fabric_types" text,
+"yardage" text,
+"url" text,
+"description" text DEFAULT '' NOT NULL,
+"created_by" varchar(255) NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_catalog_kind_slug_key" UNIQUE("kind","slug"),
+CONSTRAINT "sewspace_catalog_category_check" CHECK ((length(category) >= 1) AND (length(category) <= 40)),
+CONSTRAINT "sewspace_catalog_description_check" CHECK (length(description) <= 2000),
+CONSTRAINT "sewspace_catalog_difficulty_check" CHECK (difficulty = ANY (ARRAY['beginner'::text, 'intermediate'::text, 'advanced'::text])),
+CONSTRAINT "sewspace_catalog_fabric_types_check" CHECK (length(fabric_types) <= 120),
+CONSTRAINT "sewspace_catalog_kind_check" CHECK (kind = ANY (ARRAY['pattern'::text, 'product'::text])),
+CONSTRAINT "sewspace_catalog_maker_check" CHECK (length(maker) <= 120),
+CONSTRAINT "sewspace_catalog_name_check" CHECK ((length(btrim(name)) >= 1) AND (length(btrim(name)) <= 120)),
+CONSTRAINT "sewspace_catalog_sizes_check" CHECK (length(sizes) <= 80),
+CONSTRAINT "sewspace_catalog_slug_check" CHECK ((slug ~ '^[a-z0-9]+(-[a-z0-9]+)*$'::text) AND (length(slug) <= 80)),
+CONSTRAINT "sewspace_catalog_url_check" CHECK ((url ~ '^https?://'::text) AND (length(url) <= 500)),
+CONSTRAINT "sewspace_catalog_yardage_check" CHECK (length(yardage) <= 80)
+);
+
+
+ALTER TABLE "sewspace_catalog" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_challenge_members" (
+"challenge_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"joined_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_challenge_members_pkey" PRIMARY KEY("challenge_id","user_id")
+);
+
+
+ALTER TABLE "sewspace_challenge_members" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_follows" (
+"follower_id" varchar(255) NOT NULL,
+"followee_id" varchar(255) NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_follows_pkey" PRIMARY KEY("follower_id","followee_id"),
+CONSTRAINT "sewspace_follows_check" CHECK ((follower_id)::text <> (followee_id)::text)
+);
+
+
+ALTER TABLE "sewspace_follows" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_saves" (
+"user_id" varchar(255) NOT NULL,
+"post_id" integer NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_saves_pkey" PRIMARY KEY("user_id","post_id")
+);
+
+
+ALTER TABLE "sewspace_saves" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_post_media" (
+"post_id" integer NOT NULL,
+"media_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"position" integer DEFAULT 0 NOT NULL,
+CONSTRAINT "sewspace_post_media_pkey" PRIMARY KEY("post_id","media_id")
+);
+
+
+ALTER TABLE "sewspace_post_media" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_forum_votes" (
+"target_kind" text NOT NULL,
+"target_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_forum_votes_pkey" PRIMARY KEY("target_kind","target_id","user_id"),
+CONSTRAINT "sewspace_forum_votes_target_kind_check" CHECK (target_kind = ANY (ARRAY['topic'::text, 'reply'::text]))
+);
+
+
+ALTER TABLE "sewspace_forum_votes" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_forum_poll_votes" (
+"topic_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"option_id" integer NOT NULL,
+"voted_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_forum_poll_votes_pkey" PRIMARY KEY("topic_id","user_id")
+);
+
+
+ALTER TABLE "sewspace_forum_poll_votes" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_forum_topics" (
+"id" serial PRIMARY KEY NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"board" text NOT NULL,
+"kind" text NOT NULL,
+"title" text NOT NULL,
+"body" text DEFAULT '' NOT NULL,
+"tags" text[] DEFAULT '{}' NOT NULL,
+"catalog_id" integer,
+"project_id" integer,
+"post_id" integer,
+"accepted_reply_id" integer,
+"pinned" boolean DEFAULT false NOT NULL,
+"locked" boolean DEFAULT false NOT NULL,
+"poll_closes_at" timestamp with time zone,
+"vote_count" integer DEFAULT 0 NOT NULL,
+"reply_count" integer DEFAULT 0 NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
+"last_activity_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_forum_topics_board_check" CHECK (board = ANY (ARRAY['fitting'::text, 'fabric'::text, 'machines'::text, 'patterns'::text, 'beginners'::text, 'mending'::text, 'meetups'::text])),
+CONSTRAINT "sewspace_forum_topics_body_check" CHECK (length(body) <= 10000),
+CONSTRAINT "sewspace_forum_topics_check" CHECK ((kind = 'poll'::text) = (poll_closes_at IS NOT NULL)),
+CONSTRAINT "sewspace_forum_topics_kind_check" CHECK (kind = ANY (ARRAY['show_tell'::text, 'question'::text, 'recommendation'::text, 'info'::text, 'poll'::text])),
+CONSTRAINT "sewspace_forum_topics_tags_check" CHECK (CHECK (sewspace_valid_tags(tags),
+CONSTRAINT "sewspace_forum_topics_title_check" CHECK ((length(btrim(title)) >= 3) AND (length(btrim(title)) <= 140))
+);
+
+
+ALTER TABLE "sewspace_forum_topics" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_blocks" (
+"blocker_id" varchar(255) NOT NULL,
+"blocked_id" varchar(255) NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_blocks_pkey" PRIMARY KEY("blocker_id","blocked_id"),
+CONSTRAINT "sewspace_blocks_check" CHECK ((blocker_id)::text <> (blocked_id)::text)
+);
+
+
+ALTER TABLE "sewspace_blocks" ENABLE ROW LEVEL SECURITY;
+
+CREATE TABLE "sewspace_review_votes" (
+"review_id" integer NOT NULL,
+"user_id" varchar(255) NOT NULL,
+"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+CONSTRAINT "sewspace_review_votes_pkey" PRIMARY KEY("review_id","user_id")
+);
+
+
+ALTER TABLE "sewspace_review_votes" ENABLE ROW LEVEL SECURITY;
+
+ALTER TABLE "sewspace_project_photos" ADD CONSTRAINT "sewspace_project_photos_project_id_sewspace_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."sewspace_projects"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_project_steps" ADD CONSTRAINT "sewspace_project_steps_project_id_sewspace_projects_id_fk" FOREIGN KEY ("project_id") REFERENCES "public"."sewspace_projects"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_patterns" ADD CONSTRAINT "sewspace_patterns_catalog_id_fkey" FOREIGN KEY ("catalog_id") REFERENCES "public"."sewspace_catalog"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_threads" ADD CONSTRAINT "sewspace_threads_catalog_id_fkey" FOREIGN KEY ("catalog_id") REFERENCES "public"."sewspace_catalog"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_posts" ADD CONSTRAINT "sewspace_posts_fabric_id_fkey" FOREIGN KEY ("fabric_id") REFERENCES "public"."sewspace_fabrics"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_posts" ADD CONSTRAINT "sewspace_posts_pattern_id_fkey" FOREIGN KEY ("pattern_id") REFERENCES "public"."sewspace_patterns"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_posts" ADD CONSTRAINT "sewspace_posts_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."sewspace_projects"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_projects" ADD CONSTRAINT "sewspace_projects_fabric_id_sewspace_fabrics_id_fk" FOREIGN KEY ("fabric_id") REFERENCES "public"."sewspace_fabrics"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_projects" ADD CONSTRAINT "sewspace_projects_measurement_profile_id_sewspace_measurement_p" FOREIGN KEY ("measurement_profile_id") REFERENCES "public"."sewspace_measurement_profiles"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_projects" ADD CONSTRAINT "sewspace_projects_pattern_id_sewspace_patterns_id_fk" FOREIGN KEY ("pattern_id") REFERENCES "public"."sewspace_patterns"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_projects" ADD CONSTRAINT "sewspace_projects_thread_id_sewspace_threads_id_fk" FOREIGN KEY ("thread_id") REFERENCES "public"."sewspace_threads"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_fabrics" ADD CONSTRAINT "sewspace_fabrics_catalog_id_fkey" FOREIGN KEY ("catalog_id") REFERENCES "public"."sewspace_catalog"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_reviews" ADD CONSTRAINT "sewspace_reviews_catalog_id_fkey" FOREIGN KEY ("catalog_id") REFERENCES "public"."sewspace_catalog"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_reviews" ADD CONSTRAINT "sewspace_reviews_make_id_fkey" FOREIGN KEY ("make_id") REFERENCES "public"."sewspace_projects"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_replies" ADD CONSTRAINT "sewspace_forum_replies_catalog_id_fkey" FOREIGN KEY ("catalog_id") REFERENCES "public"."sewspace_catalog"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_replies" ADD CONSTRAINT "sewspace_forum_replies_parent_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "public"."sewspace_forum_replies"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_replies" ADD CONSTRAINT "sewspace_forum_replies_topic_id_fkey" FOREIGN KEY ("topic_id") REFERENCES "public"."sewspace_forum_topics"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_comments" ADD CONSTRAINT "sewspace_comments_parent_id_fkey" FOREIGN KEY ("parent_id") REFERENCES "public"."sewspace_comments"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_comments" ADD CONSTRAINT "sewspace_comments_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "public"."sewspace_posts"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_likes" ADD CONSTRAINT "sewspace_likes_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "public"."sewspace_posts"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_challenge_entries" ADD CONSTRAINT "sewspace_challenge_entries_challenge_id_fkey" FOREIGN KEY ("challenge_id") REFERENCES "public"."sewspace_challenges"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_challenge_entries" ADD CONSTRAINT "sewspace_challenge_entries_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "public"."sewspace_posts"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_poll_options" ADD CONSTRAINT "sewspace_forum_poll_options_topic_id_fkey" FOREIGN KEY ("topic_id") REFERENCES "public"."sewspace_forum_topics"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_challenge_members" ADD CONSTRAINT "sewspace_challenge_members_challenge_id_fkey" FOREIGN KEY ("challenge_id") REFERENCES "public"."sewspace_challenges"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_saves" ADD CONSTRAINT "sewspace_saves_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "public"."sewspace_posts"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_post_media" ADD CONSTRAINT "sewspace_post_media_media_id_fkey" FOREIGN KEY ("media_id") REFERENCES "public"."sewspace_media"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_post_media" ADD CONSTRAINT "sewspace_post_media_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "public"."sewspace_posts"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_poll_votes" ADD CONSTRAINT "sewspace_forum_poll_votes_option_id_fkey" FOREIGN KEY ("option_id") REFERENCES "public"."sewspace_forum_poll_options"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_poll_votes" ADD CONSTRAINT "sewspace_forum_poll_votes_topic_id_fkey" FOREIGN KEY ("topic_id") REFERENCES "public"."sewspace_forum_topics"("id") ON DELETE cascade ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_topics" ADD CONSTRAINT "sewspace_forum_topics_accepted_fk" FOREIGN KEY ("accepted_reply_id") REFERENCES "public"."sewspace_forum_replies"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_topics" ADD CONSTRAINT "sewspace_forum_topics_catalog_id_fkey" FOREIGN KEY ("catalog_id") REFERENCES "public"."sewspace_catalog"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_topics" ADD CONSTRAINT "sewspace_forum_topics_post_id_fkey" FOREIGN KEY ("post_id") REFERENCES "public"."sewspace_posts"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_forum_topics" ADD CONSTRAINT "sewspace_forum_topics_project_id_fkey" FOREIGN KEY ("project_id") REFERENCES "public"."sewspace_projects"("id") ON DELETE set null ON UPDATE no action;
+
+ALTER TABLE "sewspace_review_votes" ADD CONSTRAINT "sewspace_review_votes_review_id_fkey" FOREIGN KEY ("review_id") REFERENCES "public"."sewspace_reviews"("id") ON DELETE cascade ON UPDATE no action;
+
+CREATE INDEX "sewspace_patterns_catalog_idx" ON "sewspace_patterns" USING btree ("catalog_id");
+
+CREATE UNIQUE INDEX "sewspace_profiles_handle_lower_idx" ON "sewspace_profiles" USING btree (lower(handle)) WHERE (handle IS NOT NULL);
+
+CREATE INDEX "sewspace_threads_catalog_idx" ON "sewspace_threads" USING btree ("catalog_id");
+
+CREATE INDEX "sewspace_posts_public_created_idx" ON "sewspace_posts" USING btree ("created_at" DESC NULLS FIRST,"id" DESC NULLS FIRST) WHERE (visibility = 'public'::text);
+
+CREATE INDEX "sewspace_posts_user_created_idx" ON "sewspace_posts" USING btree ("user_id","created_at" DESC NULLS FIRST,"id" DESC NULLS FIRST);
+
+CREATE INDEX "sewspace_projects_user_visibility_idx" ON "sewspace_projects" USING btree ("user_id","visibility");
+
+CREATE INDEX "sewspace_fabrics_catalog_idx" ON "sewspace_fabrics" USING btree ("catalog_id");
+
+CREATE INDEX "sewspace_media_user_idx" ON "sewspace_media" USING btree ("user_id");
+
+CREATE INDEX "sewspace_challenges_dates_idx" ON "sewspace_challenges" USING btree ("ends_at","starts_at");
+
+CREATE INDEX "sewspace_uploads_user_id_idx" ON "sewspace_uploads" USING btree ("user_id");
+
+CREATE INDEX "sewspace_reviews_user_idx" ON "sewspace_reviews" USING btree ("user_id");
+
+CREATE INDEX "sewspace_forum_replies_topic_idx" ON "sewspace_forum_replies" USING btree ("topic_id","created_at");
+
+CREATE UNIQUE INDEX "sewspace_reports_once_idx" ON "sewspace_reports" USING btree ("reporter_id","target_kind","target_id") WHERE (status = 'open'::text);
+
+CREATE INDEX "sewspace_reports_status_idx" ON "sewspace_reports" USING btree ("status","created_at");
+
+CREATE INDEX "sewspace_comments_parent_idx" ON "sewspace_comments" USING btree ("parent_id");
+
+CREATE INDEX "sewspace_comments_post_idx" ON "sewspace_comments" USING btree ("post_id","created_at");
+
+CREATE INDEX "sewspace_likes_post_idx" ON "sewspace_likes" USING btree ("post_id");
+
+CREATE INDEX "sewspace_challenge_entries_post_idx" ON "sewspace_challenge_entries" USING btree ("post_id");
+
+CREATE INDEX "sewspace_catalog_name_idx" ON "sewspace_catalog" USING btree ("kind",lower(name));
+
+CREATE INDEX "sewspace_challenge_members_user_idx" ON "sewspace_challenge_members" USING btree ("user_id");
+
+CREATE INDEX "sewspace_follows_followee_idx" ON "sewspace_follows" USING btree ("followee_id");
+
+CREATE INDEX "sewspace_post_media_media_idx" ON "sewspace_post_media" USING btree ("media_id");
+
+CREATE INDEX "sewspace_forum_topics_activity_idx" ON "sewspace_forum_topics" USING btree ("last_activity_at" DESC NULLS FIRST);
+
+CREATE INDEX "sewspace_forum_topics_board_idx" ON "sewspace_forum_topics" USING btree ("board","kind");
+
+CREATE INDEX "sewspace_forum_topics_catalog_idx" ON "sewspace_forum_topics" USING btree ("catalog_id");
+
+CREATE INDEX "sewspace_forum_topics_project_idx" ON "sewspace_forum_topics" USING btree ("project_id");
+
+CREATE INDEX "sewspace_blocks_blocked_idx" ON "sewspace_blocks" USING btree ("blocked_id");
+
+CREATE VIEW "public"."sewspace_public_profiles" WITH (security_barrier = true) AS (SELECT user_id, handle, name, bio, avatar_url, created_at FROM sewspace_profiles WHERE handle IS NOT NULL AND NOT sewspace_blocked_with(user_id::text));
+
+CREATE POLICY "visible_read" ON "sewspace_project_photos" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_project_photos" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_project_steps" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_project_steps" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_patterns" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_patterns" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_profiles" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_threads" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_threads" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_posts" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_posts" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "admin_read" ON "sewspace_posts" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "admin_delete" ON "sewspace_posts" AS PERMISSIVE FOR DELETE TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_projects" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_projects" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_fabrics" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_fabrics" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_media" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_media" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_challenges" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_insert" ON "sewspace_challenges" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "host_update" ON "sewspace_challenges" AS PERMISSIVE FOR UPDATE TO "sewspace_app";
+
+CREATE POLICY "admin_delete" ON "sewspace_challenges" AS PERMISSIVE FOR DELETE TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_uploads" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "public_avatar_read" ON "sewspace_uploads" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "visible_image_read" ON "sewspace_uploads" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_reviews" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_reviews" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "admin_delete" ON "sewspace_reviews" AS PERMISSIVE FOR DELETE TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_forum_replies" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_insert" ON "sewspace_forum_replies" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "own_update" ON "sewspace_forum_replies" AS PERMISSIVE FOR UPDATE TO "sewspace_app";
+
+CREATE POLICY "own_delete" ON "sewspace_forum_replies" AS PERMISSIVE FOR DELETE TO "sewspace_app";
+
+CREATE POLICY "own_reports" ON "sewspace_reports" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_insert" ON "sewspace_reports" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "admin_all" ON "sewspace_reports" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_comments" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_insert" ON "sewspace_comments" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "author_delete" ON "sewspace_comments" AS PERMISSIVE FOR DELETE TO "sewspace_app";
+
+CREATE POLICY "admin_read" ON "sewspace_comments" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_likes" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_insert" ON "sewspace_likes" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "own_delete" ON "sewspace_likes" AS PERMISSIVE FOR DELETE TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_measurement_profiles" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_challenge_entries" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_enter" ON "sewspace_challenge_entries" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "own_withdraw" ON "sewspace_challenge_entries" AS PERMISSIVE FOR DELETE TO "sewspace_app";
+
+CREATE POLICY "host_remove" ON "sewspace_challenge_entries" AS PERMISSIVE FOR UPDATE TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_forum_poll_options" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "author_insert" ON "sewspace_forum_poll_options" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "public_read" ON "sewspace_catalog" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_insert" ON "sewspace_catalog" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "editor_update" ON "sewspace_catalog" AS PERMISSIVE FOR UPDATE TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_challenge_members" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_join" ON "sewspace_challenge_members" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "own_leave" ON "sewspace_challenge_members" AS PERMISSIVE FOR DELETE TO "sewspace_app";
+
+CREATE POLICY "own_follows" ON "sewspace_follows" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "own_saves" ON "sewspace_saves" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "owner_all" ON "sewspace_post_media" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_post_media" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_votes" ON "sewspace_forum_votes" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "own_poll_vote" ON "sewspace_forum_poll_votes" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "visible_read" ON "sewspace_forum_topics" AS PERMISSIVE FOR SELECT TO "sewspace_app";
+
+CREATE POLICY "own_insert" ON "sewspace_forum_topics" AS PERMISSIVE FOR INSERT TO "sewspace_app";
+
+CREATE POLICY "author_update" ON "sewspace_forum_topics" AS PERMISSIVE FOR UPDATE TO "sewspace_app";
+
+CREATE POLICY "author_delete" ON "sewspace_forum_topics" AS PERMISSIVE FOR DELETE TO "sewspace_app";
+
+CREATE POLICY "own_blocks" ON "sewspace_blocks" AS PERMISSIVE FOR ALL TO "sewspace_app";
+
+CREATE POLICY "own_votes" ON "sewspace_review_votes" AS PERMISSIVE FOR ALL TO "sewspace_app";
+   </generated_migration_diff>
+
+   <migration_warnings>
+   No additional migration warnings were generated.
+   </migration_warnings>
