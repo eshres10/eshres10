@@ -53,11 +53,7 @@ export function ForumPage() {
 
   return (
     <div className="mx-auto max-w-[1232px]">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div className="min-w-0">
-          <p className="eyebrow">Forum{board && ` · ${BOARDS[board]}`}</p>
-          <h1 className="mt-1 font-display text-[29px] leading-tight tracking-[-.05em] sm:text-[34px]">Ask, share, help</h1>
-        </div>
+      <div className="flex justify-end">
         <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={() => { if (!ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) return;
           const p = new URLSearchParams();
           if (board) p.set('board', board);

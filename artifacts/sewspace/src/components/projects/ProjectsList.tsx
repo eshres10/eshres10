@@ -53,23 +53,14 @@ export function ProjectsList() {
 
   return (
     <>
-      <div className="mb-6 flex flex-col gap-4 md:mb-8 md:flex-row md:items-end md:justify-between md:gap-5">
-        <div>
-          <p className="eyebrow text-red-ink">The notebook</p>
-          <h1 className="mt-2 font-display text-4xl leading-[1.1] tracking-[-.06em] text-ink md:text-5xl md:leading-none">Projects</h1>
-          <p className="mt-3 max-w-xl text-sm leading-6 text-subtle">
-            A gentle record of what is on your machine.
-          </p>
-        </div>
-        <div className="mt-2 md:mt-0">
-          <Link
-            href="/projects/new"
-            data-testid="button-create-project"
-            className="btn btn-primary min-h-[44px] w-full no-underline md:w-auto"
-          >
-            <Plus size={16} /> Start a project
-          </Link>
-        </div>
+      <div className="mb-5 flex justify-end">
+        <Link
+          href="/projects/new"
+          data-testid="button-create-project"
+          className="btn btn-primary min-h-[44px] w-full no-underline md:w-auto"
+        >
+          <Plus size={16} /> Start a project
+        </Link>
       </div>
 
       <div className="mb-6 flex items-center gap-3">

@@ -57,11 +57,7 @@ export function ExplorePage() {
   const posts = feed.data?.pages.flatMap(page => page.items) ?? [];
   return (
     <div className="mx-auto max-w-[1232px]">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">Explore</p>
-          <h1 className="mt-1 font-display text-[34px] leading-tight tracking-[-.05em]">Fresh from sewing tables</h1>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap gap-1.5">
         <div className="flex gap-1 rounded-full bg-white p-1" role="group" aria-label="Order">
           {SORTS.map(o => (

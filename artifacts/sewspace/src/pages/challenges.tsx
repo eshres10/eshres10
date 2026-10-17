@@ -25,12 +25,7 @@ export function ChallengesPage() {
   useEffect(() => { document.title = 'Sewing challenges · Seams Club'; }, []);
   return (
     <div className="mx-auto max-w-[1232px]">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">Challenges</p>
-          <h1 className="mt-1 font-display text-[34px] leading-tight tracking-[-.05em]">Sew along with everyone</h1>
-          <p className="mt-1 max-w-xl text-sm text-subtle">Join a challenge, share your make with the tag, and cheer on everyone else's.</p>
-        </div>
+      <div className="flex justify-end">
         <button type="button" className="btn btn-primary" onClick={() => { if (ask({ title: 'Sign in to start a challenge', body: "You'll come straight back here." })) setStarting(true); }}>
           <Plus size={16} aria-hidden="true" />Start a challenge
         </button>

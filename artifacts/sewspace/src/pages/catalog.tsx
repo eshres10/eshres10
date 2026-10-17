@@ -45,12 +45,7 @@ export function CatalogPage() {
 
   return (
     <div className="mx-auto max-w-[1232px]">
-      <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="eyebrow">Patterns &amp; supplies</p>
-          <h1 className="mt-1 font-display text-[34px] leading-tight tracking-[-.05em]">How it really sews</h1>
-          <p className="mt-1 max-w-xl text-sm text-subtle">Reviews, sizing notes and real makes from the community. Pattern files are never shared here.</p>
-        </div>
+      <div className="flex justify-end">
         <button type="button" className="btn btn-primary" onClick={() => { if (ask({ title: 'Sign in to add a page', body: "Add a pattern or product so people can review it. You'll come straight back here." })) setAdding(true); }}>
           <Plus size={16} aria-hidden="true" />Add a page
         </button>
