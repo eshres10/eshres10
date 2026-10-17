@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 
 /** Hide a header after 10px of downward scrolling; reveal it after 10px upward. */
-export function useHideOnScroll(enabled: boolean) {
+export function useHideOnScroll(enabled: boolean, resetKey?: string) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {
+    setHidden(false);
     if (!enabled) {
-      setHidden(false);
       return;
     }
 
@@ -36,7 +36,7 @@ export function useHideOnScroll(enabled: boolean) {
 
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
-  }, [enabled]);
+  }, [enabled, resetKey]);
 
   return hidden;
 }
