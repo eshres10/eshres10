@@ -16,7 +16,7 @@ import {
   type ProfileStats,
   type UsedProduct,
 } from '@workspace/api-client-react';
-import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, ShoppingBag, Spool, UserCheck, UserPlus } from 'lucide-react';
+import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Share2, ShoppingBag, Spool, UserCheck, UserPlus } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState, Loading } from '@/components/common';
@@ -65,8 +65,14 @@ function ShareButton({ name }: { name: string }) {
     }
   };
   return (
-    <button type="button" onClick={share} className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-ink px-4 text-[15px] font-semibold text-white">
-      {copied && <Check size={16} aria-hidden="true" />}{copied ? 'Link copied' : 'Share profile'}
+    <button
+      type="button"
+      onClick={share}
+      aria-label={copied ? 'Profile link copied' : 'Share profile'}
+      title={copied ? 'Profile link copied' : 'Share profile'}
+      className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+    >
+      {copied ? <Check size={19} aria-hidden="true" /> : <Share2 size={19} aria-hidden="true" />}
     </button>
   );
 }
@@ -349,17 +355,25 @@ export function PublicProfilePage({ handle }: { handle: string }) {
             : <span aria-hidden="true" className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-ink font-display text-[34px] tracking-[-.04em] text-yellow sm:h-32 sm:w-32 sm:text-[52px]">{p.name.charAt(0).toUpperCase()}</span>}
           <Stats stats={p.stats} />
         </div>
-        <div className="mt-4 flex items-start justify-between gap-3">
-          <h1 className="font-sans text-lg font-bold leading-tight">{p.name}</h1>
-          {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
+        <div className="mt-4 flex items-center gap-3">
+          <h1 className="min-w-0 flex-1 font-sans text-lg font-bold leading-tight">{p.name}</h1>
+          <div className="flex shrink-0 items-center gap-1">
+            {p.isMe && (
+              <Link
+                href="/settings"
+                aria-label="Edit profile"
+                title="Edit profile"
+                className="grid h-11 w-11 place-items-center rounded-full text-ink no-underline hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+              >
+                <Pencil size={19} aria-hidden="true" />
+              </Link>
+            )}
+            <ShareButton name={p.name} />
+            {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
+          </div>
         </div>
         {p.bio && <p className="mt-1 whitespace-pre-line text-[15px] leading-6">{p.bio}</p>}
-        <div className="mt-4 grid grid-cols-2 gap-2.5">
-          {p.isMe
-            ? <Link href="/settings" className="inline-flex min-h-[48px] w-full items-center justify-center gap-2 rounded-full bg-yellow px-4 text-[15px] font-bold text-ink no-underline"><Pencil size={16} aria-hidden="true" />Edit profile</Link>
-            : <FollowButton handle={p.handle} name={p.name} following={p.followedByMe} />}
-          <ShareButton name={p.name} />
-        </div>
+        {!p.isMe && <div className="mt-4"><FollowButton handle={p.handle} name={p.name} following={p.followedByMe} /></div>}
       </section>
 
       <div role="tablist" aria-label="Profile sections" className="mt-3 flex w-full max-w-[520px] gap-1 rounded-full bg-white p-[5px] sm:mt-[22px]">
