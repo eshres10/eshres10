@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seams Club onboarding — Mobile — pattern directory</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap">
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#d9d9d9;padding:24px 0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+@keyframes pipbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.pip-bob{animation:pipbob 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.pip-bob{animation:none}}
+</style>
+</head>
+<body>
+<!-- Static snapshot of the mockup for reference. Interactive states are in ../images and ../source. -->
+<div style="border-radius:28px;overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,.25)">
+
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background-color: rgb(242, 242, 242); background-image: radial-gradient(rgb(212, 212, 212) 1px, transparent 1px); background-size: 20px 20px; font-family: Inter, system-ui, sans-serif; color: rgb(0, 0, 0);">
+
+  <header style="position: absolute; left: 0px; right: 0px; top: 0px; z-index: 2; background: rgb(255, 255, 255); padding: 10px 12px; border-bottom: 1px solid rgb(230, 230, 230);">
+    <div style="display: flex; align-items: center; gap: 8px; padding-left: 4px;">
+      <span style="flex: 1 1 0%;"><span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: rgb(85, 85, 85);">Pattern directory</span><span style="display: block; font-family: Poppins, sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.04em;">Patterns</span></span>
+      <a href="MAccountMenu.dc.html" aria-label="Account menu" style="width: 44px; height: 44px; display: grid; place-items: center;"><span style="width: 34px; height: 34px; border-radius: 50%; background: rgb(0, 0, 0); color: rgb(230, 229, 30); display: grid; place-items: center; font-weight: 700;">E</span></a>
+    </div>
+    <label style="position: relative; display: block; margin-top: 8px;"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px);">Search patterns</span>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%);"><path d="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z m10 18-4.3-4.3"></path></svg>
+      <input type="text" placeholder="Search name, designer or garment" value="" style="width: 100%; min-height: 44px; border: 0px; border-radius: 3000px; padding: 0px 16px 0px 40px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 15px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; background: rgb(242, 242, 242);"></label>
+  </header>
+
+  <main style="position: absolute; inset: 128px 0px 0px; overflow-y: auto; padding: 10px 12px 100px;">
+    <div role="group" aria-label="Category" style="display: flex; gap: 6px; overflow-x: auto; margin: 0px -12px; padding: 0px 12px;">
+      <button aria-pressed="true" style="flex-shrink: 0; min-height: 38px; padding: 0px 14px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(0, 0, 0); background: rgb(0, 0, 0); color: rgb(255, 255, 255);">All</button><button aria-pressed="false" style="flex-shrink: 0; min-height: 38px; padding: 0px 14px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Dresses</button><button aria-pressed="false" style="flex-shrink: 0; min-height: 38px; padding: 0px 14px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Tops</button><button aria-pressed="false" style="flex-shrink: 0; min-height: 38px; padding: 0px 14px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Skirts</button><button aria-pressed="false" style="flex-shrink: 0; min-height: 38px; padding: 0px 14px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Trousers</button><button aria-pressed="false" style="flex-shrink: 0; min-height: 38px; padding: 0px 14px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Outerwear</button><button aria-pressed="false" style="flex-shrink: 0; min-height: 38px; padding: 0px 14px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Knits</button><button aria-pressed="false" style="flex-shrink: 0; min-height: 38px; padding: 0px 14px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Bags</button>
+    </div>
+    <div style="margin-top: 10px; display: flex; align-items: center; gap: 8px;">
+      <span role="status" style="flex: 1 1 0%; padding-left: 4px; font-size: 13px; color: rgb(85, 85, 85);">16 patterns</span>
+      <button aria-haspopup="dialog" style="display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0px 14px; border: 2px solid rgb(0, 0, 0); border-radius: 3000px; background: rgb(255, 255, 255); font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit;"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16 M7 12h10 M10 18h4"></path></svg>Filters</button>
+    </div>
+    
+    <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(2, minmax(0px, 1fr)); gap: 10px;">
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/188ffd136f4c0ada8a70caa52d09ec3b.jpg" alt="Willa Dress" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Willa Dress</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Fernhill Patterns</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.6</b><span style="color: rgb(85, 85, 85);">· 214</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$16</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Beginner</span>
+          <button aria-pressed="true" aria-label="Saved: Willa Dress" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="#f34646" stroke="#f34646" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/c974cd96842b2dd8418f09777861290e.jpg" alt="Everyday Box Tee" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Everyday Box Tee</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Northside Studio</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.8</b><span style="color: rgb(85, 85, 85);">· 402</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(70, 108, 243); color: rgb(255, 255, 255);">Free</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Beginner</span>
+          <button aria-pressed="false" aria-label="Save Everyday Box Tee" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/5fb545dfebc25a3ab288dabc4d4f34cc.jpg" alt="Harbour Wide Leg" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Harbour Wide Leg</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Linden &amp; Co</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.4</b><span style="color: rgb(85, 85, 85);">· 187</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(255, 255, 255); color: rgb(0, 0, 0); box-shadow: rgb(212, 212, 212) 0px 0px 0px 1px inset;">$22</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Intermediate</span>
+          <button aria-pressed="false" aria-label="Save Harbour Wide Leg" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/c14805936ea42c8a216102adbfceffbc.jpg" alt="Tiered Maxi Skirt" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Tiered Maxi Skirt</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Marlow Patterns</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.7</b><span style="color: rgb(85, 85, 85);">· 158</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$11</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Beginner</span>
+          <button aria-pressed="false" aria-label="Save Tiered Maxi Skirt" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/1192463bd0067b49a26194ff1b40ec1c.jpg" alt="Harbour Pinafore" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Harbour Pinafore</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Saltmarsh Sewing</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.6</b><span style="color: rgb(85, 85, 85);">· 133</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$12</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Beginner</span>
+          <button aria-pressed="false" aria-label="Save Harbour Pinafore" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/3fb41ae12053aadbcaf96b90bd6f28ea.jpg" alt="Meadow Skirt" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Meadow Skirt</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Linden &amp; Co</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.5</b><span style="color: rgb(85, 85, 85);">· 120</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(70, 108, 243); color: rgb(255, 255, 255);">Free</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Beginner</span>
+          <button aria-pressed="false" aria-label="Save Meadow Skirt" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/0a8ae6a44e186ecaeb7322a09be76d15.jpg" alt="Poppy Sundress" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Poppy Sundress</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Juniper Studio</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.5</b><span style="color: rgb(85, 85, 85);">· 110</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(255, 255, 255); color: rgb(0, 0, 0); box-shadow: rgb(212, 212, 212) 0px 0px 0px 1px inset;">$18</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Intermediate</span>
+          <button aria-pressed="false" aria-label="Save Poppy Sundress" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/b15aceab26480c18148934a44710873a.jpg" alt="Field Chore Coat" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Field Chore Coat</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Oakwork Patterns</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.2</b><span style="color: rgb(85, 85, 85);">· 96</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(255, 255, 255); color: rgb(0, 0, 0); box-shadow: rgb(212, 212, 212) 0px 0px 0px 1px inset;">$24</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Intermediate</span>
+          <button aria-pressed="false" aria-label="Save Field Chore Coat" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/e9b9124af50eb749d99a9f4a4477d928.jpg" alt="Bayside Sailor Top" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Bayside Sailor Top</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Tidewater Patterns</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.5</b><span style="color: rgb(85, 85, 85);">· 96</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$14</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Intermediate</span>
+          <button aria-pressed="false" aria-label="Save Bayside Sailor Top" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/e551a46b8280f8ecc8ee3ab17952c2bf.jpg" alt="Shirred Sundress" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Shirred Sundress</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Saltmarsh Sewing</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.5</b><span style="color: rgb(85, 85, 85);">· 89</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$16</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Intermediate</span>
+          <button aria-pressed="false" aria-label="Save Shirred Sundress" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/378fd54e9a610caf64290fbec065ccf9.jpg" alt="Bow Blouse" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Bow Blouse</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Juniper Studio</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.6</b><span style="color: rgb(85, 85, 85);">· 77</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$14</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Intermediate</span>
+          <button aria-pressed="false" aria-label="Save Bow Blouse" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/5bf905114ac1edcca363e2d2dc675860.jpg" alt="Knot Bag" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Knot Bag</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Fold &amp; Form</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.7</b><span style="color: rgb(85, 85, 85);">· 66</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(70, 108, 243); color: rgb(255, 255, 255);">Free</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Beginner</span>
+          <button aria-pressed="false" aria-label="Save Knot Bag" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/cedd8232af110501083827e498f729f6.jpg" alt="Colour-block Jumper" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Colour-block Jumper</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Northline</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.3</b><span style="color: rgb(85, 85, 85);">· 62</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$13</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Beginner</span>
+          <button aria-pressed="false" aria-label="Save Colour-block Jumper" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/156a03273ae96fc256def755c3066a37.jpg" alt="Bias Slip" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Bias Slip</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Fold &amp; Form</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.4</b><span style="color: rgb(85, 85, 85);">· 58</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$12</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Intermediate</span>
+          <button aria-pressed="false" aria-label="Save Bias Slip" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/a93207f7db6c002a302477269ae8ce59.jpg" alt="Wrap Vest" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Wrap Vest</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Fold &amp; Form</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.3</b><span style="color: rgb(85, 85, 85);">· 41</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$15</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Advanced</span>
+          <button aria-pressed="false" aria-label="Save Wrap Vest" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+        <article style="position: relative; background: rgb(255, 255, 255); border-radius: 22px; overflow: hidden;">
+          <a href="MPatternDetail.dc.html" style="display: block; text-decoration: none;">
+            <img src="img/b24763864c8c89e98667824487e6a6eb.jpg" alt="Flounce Halter" style="display: block; width: 100%; height: 200px; object-fit: cover;">
+            <span style="display: block; padding: 8px 10px 10px;">
+              <b style="display: block; font-size: 13px;">Flounce Halter</b>
+              <span style="display: block; font-size: 12px; color: rgb(85, 85, 85);">Marlow Patterns</span>
+              <span style="margin-top: 6px; display: flex; align-items: center; gap: 5px; font-size: 12px;"><svg width="12" height="12" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg><b>4.1</b><span style="color: rgb(85, 85, 85);">· 34</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 2px 8px; font-size: 11px; font-weight: 700; background: rgb(255, 255, 255); color: rgb(0, 0, 0); box-shadow: rgb(212, 212, 212) 0px 0px 0px 1px inset;">$20</span></span>
+            </span>
+          </a>
+          <span style="position: absolute; left: 8px; top: 8px; border-radius: 3000px; padding: 3px 8px; background: rgb(255, 255, 255); font-size: 10px; font-weight: 700;">Advanced</span>
+          <button aria-pressed="false" aria-label="Save Flounce Halter" style="position: absolute; right: 8px; top: 8px; width: 36px; height: 36px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+        </article>
+      
+    </div>
+  </main>
+
+  <nav aria-label="App" style="position: absolute; left: 0px; right: 0px; bottom: 0px; z-index: 3; display: flex; align-items: center; justify-content: space-between; background: rgb(255, 255, 255); padding: 8px 20px 24px; border-top: 1px solid rgb(230, 230, 230);"><a href="MFeed.dc.html" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Home" role="img"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10"></path></svg></a><a href="MPatternShop.dc.html" aria-current="page" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px; background: rgb(0, 0, 0);"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="Explore" role="img"><path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z m4.24 5.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z"></path></svg></a><a href="FlowPost.dc.html" style="width: 58px; height: 52px; display: grid; place-items: center; border-radius: 20px; background: rgb(230, 229, 30);"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" aria-label="New post" role="img"><path d="M12 5v14 M5 12h14"></path></svg></a><a href="MStudio.dc.html" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label="My studio" role="img"><path d="M3 3h18v18H3z M8 7v7 M12 7v4 M16 7v9"></path></svg></a><a href="MProfile.dc.html" style="width: 52px; height: 48px; display: grid; place-items: center; border-radius: 18px;"><span aria-label="My profile" role="img" style="width: 28px; height: 28px; border-radius: 50%; background: rgb(0, 0, 0); color: rgb(255, 255, 255); display: grid; place-items: center; font-size: 12px; font-weight: 700;">E</span></a></nav>
+
+  
+</div>
+</div>
+</body>
+</html>

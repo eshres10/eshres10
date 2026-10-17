@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seams Club onboarding — Desktop — pattern directory</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap">
+<style>
+body{margin:0;}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+@keyframes pipbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.pip-bob{animation:pipbob 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.pip-bob{animation:none}}
+</style>
+</head>
+<body>
+<!-- Static snapshot of the mockup for reference. Interactive states are in ../images and ../source. -->
+<div style="">
+
+<div style="min-height: 100vh; background-color: rgb(242, 242, 242); background-image: radial-gradient(rgb(212, 212, 212) 1px, transparent 1px); background-size: 20px 20px; font-family: Inter, system-ui, sans-serif; color: rgb(0, 0, 0); padding-bottom: 48px;">
+  <header style="max-width: 1312px; margin: 0px auto; padding: 20px 16px 0px;"><nav aria-label="Main" style="display: flex; align-items: center; justify-content: space-between; gap: 20px; background: rgb(255, 255, 255); border-radius: 30px; padding: 10px 12px 10px 18px; box-shadow: rgba(0, 0, 0, 0.12) 0px 10px 14px -8px;"><a href="AppFeed.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none;"><svg viewBox="0 0 100 100" width="38" height="38" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#000000"></circle><g transform="translate(50 50) scale(0.92) translate(-49 -50)"><path d="M66.89 23.06 L66.65 22.58 L66.39 22.08 L66.12 21.59 L65.86 21.10 L65.59 20.62 L65.31 20.15 L65.03 19.67 L64.75 19.21 L64.47 18.75 L64.18 18.29 L63.89 17.84 L63.59 17.40 L63.30 16.96 L63.00 16.53 L62.70 16.11 L62.40 15.70 L62.10 15.29 L61.79 14.89 L61.48 14.50 L61.09 14.01 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.27 9.43 L53.54 8.64 L51.74 7.99 L49.89 7.49 L47.99 7.14 L46.07 6.93 L44.14 6.87 L42.20 6.96 L40.27 7.20 L38.37 7.60 L36.50 8.17 L34.70 8.91 L32.96 9.82 L31.32 10.92 L29.79 12.20 L28.41 13.68 L27.19 15.35 L26.16 17.19 L25.34 19.21 L24.76 21.39 L24.41 23.72 L24.37 25.69 L24.53 27.56 L24.90 29.35 L25.46 31.06 L26.18 32.68 L27.06 34.20 L28.06 35.62 L29.18 36.96 L30.39 38.22 L31.68 39.39 L33.05 40.50 L34.47 41.54 L35.95 42.53 L37.47 43.46 L39.01 44.35 L40.58 45.19 L42.16 46.00 L43.74 46.77 L45.32 47.50 L46.87 48.21 L48.40 48.90 L49.89 49.56 L51.33 50.20 L52.70 50.81 L54.12 51.48 L55.47 52.17 L56.77 52.87 L58.00 53.58 L59.18 54.32 L60.29 55.07 L61.34 55.84 L62.32 56.63 L63.23 57.43 L64.07 58.26 L64.84 59.10 L65.54 59.95 L66.17 60.83 L66.73 61.72 L67.22 62.64 L67.65 63.58 L68.00 64.54 L68.29 65.54 L68.50 66.58 L68.65 67.66 L68.72 68.79 L68.71 69.97 L68.62 71.20 L68.45 72.45 L68.17 73.70 L67.76 74.80 L67.20 75.86 L66.50 76.86 L65.64 77.83 L64.65 78.75 L63.51 79.61 L62.24 80.41 L60.86 81.14 L59.37 81.80 L57.79 82.38 L56.13 82.88 L54.42 83.29 L52.65 83.61 L50.86 83.84 L49.05 83.98 L47.24 84.02 L45.45 83.97 L43.68 83.82 L41.96 83.58 L40.31 83.24 L38.72 82.82 L37.23 82.30 L35.77 81.67 L35.08 81.34 L34.39 80.98 L33.72 80.61 L33.08 80.21 L32.46 79.81 L31.86 79.39 L31.30 78.96 L30.75 78.51 L30.24 78.06 L29.76 77.59 L29.30 77.11 L28.87 76.63 L28.47 76.13 L28.11 75.63 L27.77 75.12 L27.46 74.61 L27.18 74.09 L26.93 73.56 L26.72 73.02 L26.53 72.48 L26.37 71.93 L26.25 71.38 L26.15 70.81 L26.08 70.16 L19.92 70.84 L20.01 71.67 L20.17 72.58 L20.37 73.47 L20.62 74.34 L20.91 75.20 L21.25 76.04 L21.64 76.85 L22.06 77.65 L22.52 78.43 L23.02 79.18 L23.56 79.91 L24.13 80.62 L24.73 81.31 L25.37 81.97 L26.03 82.61 L26.73 83.23 L27.45 83.82 L28.20 84.39 L28.97 84.94 L29.77 85.46 L30.60 85.96 L31.44 86.44 L32.31 86.89 L33.23 87.33 L34.99 88.09 L36.91 88.75 L38.89 89.28 L40.92 89.69 L42.99 89.98 L45.10 90.16 L47.22 90.22 L49.36 90.17 L51.49 90.01 L53.60 89.74 L55.69 89.36 L57.74 88.87 L59.75 88.27 L61.69 87.55 L63.56 86.72 L65.35 85.77 L67.04 84.70 L68.62 83.50 L70.07 82.17 L71.37 80.70 L72.49 79.09 L73.42 77.34 L74.12 75.46 L74.55 73.55 L74.78 71.85 L74.90 70.22 L74.91 68.62 L74.82 67.06 L74.61 65.54 L74.31 64.06 L73.90 62.63 L73.39 61.24 L72.79 59.90 L72.09 58.61 L71.32 57.36 L70.46 56.17 L69.52 55.03 L68.52 53.94 L67.45 52.89 L66.31 51.89 L65.12 50.93 L63.87 50.01 L62.56 49.12 L61.20 48.27 L59.79 47.46 L58.34 46.67 L56.84 45.91 L55.30 45.19 L53.86 44.54 L52.41 43.89 L50.92 43.23 L49.42 42.56 L47.92 41.88 L46.41 41.17 L44.92 40.45 L43.46 39.70 L42.02 38.93 L40.63 38.13 L39.30 37.31 L38.03 36.46 L36.83 35.58 L35.72 34.68 L34.70 33.76 L33.79 32.82 L32.98 31.85 L32.29 30.86 L31.71 29.86 L31.24 28.83 L30.90 27.77 L30.67 26.66 L30.56 25.49 L30.59 24.28 L30.83 22.64 L31.22 21.18 L31.75 19.86 L32.41 18.69 L33.18 17.64 L34.06 16.70 L35.05 15.87 L36.13 15.15 L37.31 14.53 L38.58 14.01 L39.91 13.61 L41.30 13.32 L42.73 13.14 L44.18 13.07 L45.64 13.11 L47.09 13.27 L48.51 13.54 L49.89 13.91 L51.21 14.38 L52.45 14.95 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.45 18.13 L56.62 18.35 L56.88 18.68 L57.14 19.02 L57.40 19.37 L57.67 19.73 L57.93 20.10 L58.19 20.47 L58.44 20.85 L58.70 21.24 L58.96 21.63 L59.21 22.03 L59.46 22.44 L59.71 22.85 L59.95 23.27 L60.20 23.69 L60.44 24.12 L60.67 24.55 L60.91 24.98 L61.13 25.42 L61.36 25.87 Z" fill="#f34646"></path><circle cx="64.13" cy="24.47" r="3.10" fill="#f34646"></circle><circle cx="23.00" cy="70.50" r="3.10" fill="#f34646"></circle><path d="M37.50 93.00 L47.65 65.61 L62.88 11.32 Q63.71 8.33 61.11 7.61 Q58.51 6.89 57.68 9.88 L42.86 64.29 Z M58.41 21.29 L61.15 11.40 A1.05 1.05 0 0 0 59.12 10.84 L56.39 20.73 A1.05 1.05 0 0 0 58.41 21.29 Z" fill="#ffffff" fill-rule="evenodd" stroke="#000000" stroke-width="2" paint-order="stroke"></path><path d="M61.06 13.98 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.40 9.49 L52.32 14.88 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.48 18.16 Z" fill="#f34646"></path></g></svg><span style="font-family: Poppins, sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.04em;">seams club</span></a><div style="display: flex; gap: 28px; font-size: 15px;"><a href="Explore.dc.html" style="text-decoration: none; font-weight: 500;">Explore</a><a href="Challenge.dc.html" style="text-decoration: none; font-weight: 500;">Challenges</a><a href="ForumIndex.dc.html" style="text-decoration: none; font-weight: 500;">Forum</a><a href="PatternsDesk.dc.html" aria-current="page" style="text-decoration: none; font-weight: 700; box-shadow: rgb(0, 0, 0) 0px -2px 0px inset;">Patterns</a><a href="Shop.dc.html" style="text-decoration: none; font-weight: 500;">Shop</a></div><div style="display: flex; align-items: center; gap: 8px;"><a href="FlowPostDesk.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0px 18px; border-radius: 3000px; background: rgb(0, 0, 0); color: rgb(255, 255, 255); text-decoration: none; font-size: 14px; font-weight: 700;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14 M5 12h14"></path></svg>New post</a><a href="AccountMenuDesk.dc.html" aria-label="Account menu" style="display: grid; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: rgb(242, 242, 242);"><span style="width: 34px; height: 34px; border-radius: 50%; background: rgb(0, 0, 0); color: rgb(230, 229, 30); display: grid; place-items: center; font-weight: 700;">E</span></a></div></nav></header>
+
+  <main style="max-width: 1312px; margin: 0px auto; padding: 28px 16px 0px;">
+    <div style="display: flex; align-items: flex-end; gap: 24px;">
+      <div style="flex: 1 1 0%;">
+        <div style="color: rgb(196, 42, 42); font-size: 12px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase;">Pattern directory</div>
+        <h1 style="margin: 8px 0px 0px; font-family: Poppins, sans-serif; font-weight: 700; font-size: 60px; line-height: 1; letter-spacing: -0.06em;">Patterns</h1>
+        <p style="margin: 10px 0px 0px; font-size: 16px; color: rgb(51, 51, 51);">Every pattern the club has sewn, with real makes, fit notes and reviews.</p>
+      </div>
+      <label style="position: relative; display: block; width: 440px;"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0px, 0px, 0px, 0px);">Search patterns</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" style="position: absolute; left: 18px; top: 50%; transform: translateY(-50%);"><path d="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z m10 18-4.3-4.3"></path></svg>
+        <input type="text" placeholder="Search by name, designer or garment" value="" style="width: 100%; min-height: 54px; border: 2px solid rgb(0, 0, 0); border-radius: 3000px; padding: 0px 20px 0px 48px; font-style: inherit; font-variant: inherit; font-weight: inherit; font-stretch: inherit; font-size: 15px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; background: rgb(255, 255, 255);"></label>
+    </div>
+
+    <div role="group" aria-label="Category" style="margin-top: 22px; display: flex; gap: 8px; flex-wrap: wrap;">
+      <button aria-pressed="true" style="min-height: 42px; padding: 0px 18px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 14px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(0, 0, 0); background: rgb(0, 0, 0); color: rgb(255, 255, 255);">All</button><button aria-pressed="false" style="min-height: 42px; padding: 0px 18px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 14px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Dresses</button><button aria-pressed="false" style="min-height: 42px; padding: 0px 18px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 14px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Tops</button><button aria-pressed="false" style="min-height: 42px; padding: 0px 18px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 14px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Skirts</button><button aria-pressed="false" style="min-height: 42px; padding: 0px 18px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 14px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Trousers</button><button aria-pressed="false" style="min-height: 42px; padding: 0px 18px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 14px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Outerwear</button><button aria-pressed="false" style="min-height: 42px; padding: 0px 18px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 14px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Knits</button><button aria-pressed="false" style="min-height: 42px; padding: 0px 18px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 14px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; border: 2px solid rgb(255, 255, 255); background: rgb(255, 255, 255); color: rgb(0, 0, 0);">Bags</button>
+    </div>
+
+    <div style="margin-top: 22px; display: grid; grid-template-columns: 260px minmax(0px, 1fr); gap: 24px; align-items: start;">
+      <aside aria-label="Filters" style="position: sticky; top: 20px; background: rgb(255, 255, 255); border-radius: 28px; padding: 20px;">
+        <div style="display: flex; align-items: baseline;"><h2 style="margin: 0px; flex: 1 1 0%; font-family: Poppins, sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.03em;">Filters</h2></div>
+        <fieldset style="margin: 16px 0px 0px; padding: 0px; border: 0px;"><legend style="font-size: 13px; font-weight: 700; color: rgb(85, 85, 85);">Difficulty</legend>
+          <label style="display: flex; align-items: center; gap: 10px; min-height: 38px; font-size: 14px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px; margin: 0px; accent-color: rgb(0, 0, 0);"><span style="flex: 1 1 0%;">Beginner</span><span style="font-size: 12px; color: rgb(119, 119, 119);">7</span></label><label style="display: flex; align-items: center; gap: 10px; min-height: 38px; font-size: 14px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px; margin: 0px; accent-color: rgb(0, 0, 0);"><span style="flex: 1 1 0%;">Intermediate</span><span style="font-size: 12px; color: rgb(119, 119, 119);">7</span></label><label style="display: flex; align-items: center; gap: 10px; min-height: 38px; font-size: 14px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px; margin: 0px; accent-color: rgb(0, 0, 0);"><span style="flex: 1 1 0%;">Advanced</span><span style="font-size: 12px; color: rgb(119, 119, 119);">2</span></label>
+        </fieldset>
+        <div style="margin-top: 14px; height: 1px; background: rgb(236, 236, 236);"></div>
+        <fieldset style="margin: 14px 0px 0px; padding: 0px; border: 0px;"><legend style="font-size: 13px; font-weight: 700; color: rgb(85, 85, 85);">Where to get it</legend>
+          <label style="display: flex; align-items: center; gap: 10px; min-height: 38px; font-size: 14px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px; margin: 0px; accent-color: rgb(0, 0, 0);"><span style="flex: 1 1 0%;">On Seams Club</span><span style="font-size: 12px; color: rgb(119, 119, 119);">9</span></label><label style="display: flex; align-items: center; gap: 10px; min-height: 38px; font-size: 14px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px; margin: 0px; accent-color: rgb(0, 0, 0);"><span style="flex: 1 1 0%;">Free</span><span style="font-size: 12px; color: rgb(119, 119, 119);">3</span></label><label style="display: flex; align-items: center; gap: 10px; min-height: 38px; font-size: 14px; cursor: pointer;"><input type="checkbox" style="width: 18px; height: 18px; margin: 0px; accent-color: rgb(0, 0, 0);"><span style="flex: 1 1 0%;">Designer's site</span><span style="font-size: 12px; color: rgb(119, 119, 119);">4</span></label>
+        </fieldset>
+        <div style="margin-top: 14px; padding-top: 14px; border-top: 1px solid rgb(236, 236, 236); display: flex; align-items: center; gap: 12px;">
+          <span style="flex: 1 1 0%; font-size: 14px;"><b style="display: block; font-size: 13px; color: rgb(85, 85, 85);">Rated 4.5 and up</b></span>
+          <button role="switch" aria-checked="false" aria-label="Only patterns rated 4.5 and up" style="width: 48px; height: 30px; border: 0px; border-radius: 3000px; padding: 3px; display: flex; background: rgb(196, 196, 196); justify-content: flex-start;"><span style="width: 24px; height: 24px; border-radius: 50%; background: rgb(255, 255, 255);"></span></button>
+        </div>
+        <div style="margin-top: 16px; border-radius: 18px; background: rgb(242, 242, 242); padding: 12px; font-size: 12px; line-height: 1.45; color: rgb(51, 51, 51);">Patterns sold on Seams Club go to your private library. Others link to the designer.</div>
+      </aside>
+
+      <section aria-label="Results">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <span role="status" style="flex: 1 1 0%; font-size: 15px;"><b>16 patterns</b></span>
+          <div role="radiogroup" aria-label="Sort" style="display: flex; gap: 4px; background: rgb(255, 255, 255); border-radius: 3000px; padding: 4px;">
+            <button role="radio" aria-checked="true" style="min-height: 38px; padding: 0px 16px; border: 0px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; background: rgb(0, 0, 0); color: rgb(255, 255, 255);">Most made</button><button role="radio" aria-checked="false" style="min-height: 38px; padding: 0px 16px; border: 0px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; background: transparent; color: rgb(0, 0, 0);">Top rated</button><button role="radio" aria-checked="false" style="min-height: 38px; padding: 0px 16px; border: 0px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 13px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; background: transparent; color: rgb(0, 0, 0);">New</button>
+          </div>
+        </div>
+        
+        <div style="margin-top: 14px; display: grid; grid-template-columns: repeat(4, minmax(0px, 1fr)); gap: 14px;">
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/188ffd136f4c0ada8a70caa52d09ec3b.jpg" alt="Willa Dress" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Willa Dress</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Fernhill Patterns</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.6</span><span style="color: rgb(85, 85, 85);">214 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$16</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Beginner</span></span>
+              <button aria-pressed="true" aria-label="Saved: Willa Dress" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="#f34646" stroke="#f34646" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/c974cd96842b2dd8418f09777861290e.jpg" alt="Everyday Box Tee" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Everyday Box Tee</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Northside Studio</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.8</span><span style="color: rgb(85, 85, 85);">402 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(70, 108, 243); color: rgb(255, 255, 255);">Free</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Beginner</span></span>
+              <button aria-pressed="false" aria-label="Save Everyday Box Tee" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/5fb545dfebc25a3ab288dabc4d4f34cc.jpg" alt="Harbour Wide Leg" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Harbour Wide Leg</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Linden &amp; Co</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.4</span><span style="color: rgb(85, 85, 85);">187 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(255, 255, 255); color: rgb(0, 0, 0); box-shadow: rgb(212, 212, 212) 0px 0px 0px 1px inset;">$22</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Intermediate</span></span>
+              <button aria-pressed="false" aria-label="Save Harbour Wide Leg" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/c14805936ea42c8a216102adbfceffbc.jpg" alt="Tiered Maxi Skirt" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Tiered Maxi Skirt</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Marlow Patterns</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.7</span><span style="color: rgb(85, 85, 85);">158 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$11</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Beginner</span></span>
+              <button aria-pressed="false" aria-label="Save Tiered Maxi Skirt" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/1192463bd0067b49a26194ff1b40ec1c.jpg" alt="Harbour Pinafore" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Harbour Pinafore</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Saltmarsh Sewing</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.6</span><span style="color: rgb(85, 85, 85);">133 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$12</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Beginner</span></span>
+              <button aria-pressed="false" aria-label="Save Harbour Pinafore" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/3fb41ae12053aadbcaf96b90bd6f28ea.jpg" alt="Meadow Skirt" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Meadow Skirt</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Linden &amp; Co</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.5</span><span style="color: rgb(85, 85, 85);">120 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(70, 108, 243); color: rgb(255, 255, 255);">Free</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Beginner</span></span>
+              <button aria-pressed="false" aria-label="Save Meadow Skirt" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/0a8ae6a44e186ecaeb7322a09be76d15.jpg" alt="Poppy Sundress" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Poppy Sundress</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Juniper Studio</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.5</span><span style="color: rgb(85, 85, 85);">110 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(255, 255, 255); color: rgb(0, 0, 0); box-shadow: rgb(212, 212, 212) 0px 0px 0px 1px inset;">$18</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Intermediate</span></span>
+              <button aria-pressed="false" aria-label="Save Poppy Sundress" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/b15aceab26480c18148934a44710873a.jpg" alt="Field Chore Coat" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Field Chore Coat</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Oakwork Patterns</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.2</span><span style="color: rgb(85, 85, 85);">96 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(255, 255, 255); color: rgb(0, 0, 0); box-shadow: rgb(212, 212, 212) 0px 0px 0px 1px inset;">$24</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Intermediate</span></span>
+              <button aria-pressed="false" aria-label="Save Field Chore Coat" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/e9b9124af50eb749d99a9f4a4477d928.jpg" alt="Bayside Sailor Top" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Bayside Sailor Top</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Tidewater Patterns</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.5</span><span style="color: rgb(85, 85, 85);">96 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$14</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Intermediate</span><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(243, 70, 70); color: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">New</span></span>
+              <button aria-pressed="false" aria-label="Save Bayside Sailor Top" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/e551a46b8280f8ecc8ee3ab17952c2bf.jpg" alt="Shirred Sundress" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Shirred Sundress</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Saltmarsh Sewing</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.5</span><span style="color: rgb(85, 85, 85);">89 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$16</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Intermediate</span><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(243, 70, 70); color: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">New</span></span>
+              <button aria-pressed="false" aria-label="Save Shirred Sundress" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/378fd54e9a610caf64290fbec065ccf9.jpg" alt="Bow Blouse" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Bow Blouse</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Juniper Studio</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.6</span><span style="color: rgb(85, 85, 85);">77 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$14</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Intermediate</span></span>
+              <button aria-pressed="false" aria-label="Save Bow Blouse" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/5bf905114ac1edcca363e2d2dc675860.jpg" alt="Knot Bag" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Knot Bag</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Fold &amp; Form</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.7</span><span style="color: rgb(85, 85, 85);">66 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(70, 108, 243); color: rgb(255, 255, 255);">Free</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Beginner</span></span>
+              <button aria-pressed="false" aria-label="Save Knot Bag" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/cedd8232af110501083827e498f729f6.jpg" alt="Colour-block Jumper" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Colour-block Jumper</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Northline</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.3</span><span style="color: rgb(85, 85, 85);">62 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$13</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Beginner</span><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(243, 70, 70); color: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">New</span></span>
+              <button aria-pressed="false" aria-label="Save Colour-block Jumper" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/156a03273ae96fc256def755c3066a37.jpg" alt="Bias Slip" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Bias Slip</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Fold &amp; Form</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.4</span><span style="color: rgb(85, 85, 85);">58 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$12</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Intermediate</span></span>
+              <button aria-pressed="false" aria-label="Save Bias Slip" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/a93207f7db6c002a302477269ae8ce59.jpg" alt="Wrap Vest" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Wrap Vest</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Fold &amp; Form</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.3</span><span style="color: rgb(85, 85, 85);">41 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(230, 229, 30); color: rgb(0, 0, 0);">$15</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Advanced</span><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(243, 70, 70); color: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">New</span></span>
+              <button aria-pressed="false" aria-label="Save Wrap Vest" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+            <article style="position: relative; background: rgb(255, 255, 255); border-radius: 24px; overflow: hidden;">
+              <a href="PatternDetailDesk.dc.html" style="display: block; text-decoration: none;">
+                <img src="img/b24763864c8c89e98667824487e6a6eb.jpg" alt="Flounce Halter" style="display: block; width: 100%; height: 270px; object-fit: cover;">
+                <span style="display: block; padding: 12px 14px 14px;">
+                  <b style="display: block; font-size: 15px;">Flounce Halter</b>
+                  <span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(85, 85, 85);">Marlow Patterns</span>
+                  <span style="margin-top: 10px; display: flex; align-items: center; gap: 8px; font-size: 13px;"><span style="display: inline-flex; align-items: center; gap: 3px; font-weight: 700;"><svg width="13" height="13" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z"></path></svg>4.1</span><span style="color: rgb(85, 85, 85);">34 makes</span><span style="flex: 1 1 0%;"></span><span style="border-radius: 3000px; padding: 3px 9px; font-size: 12px; font-weight: 700; background: rgb(255, 255, 255); color: rgb(0, 0, 0); box-shadow: rgb(212, 212, 212) 0px 0px 0px 1px inset;">$20</span></span>
+                </span>
+              </a>
+              <span style="position: absolute; left: 10px; top: 10px; display: flex; gap: 4px;"><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">Advanced</span><span style="border-radius: 3000px; padding: 3px 9px; background: rgb(243, 70, 70); color: rgb(255, 255, 255); font-size: 11px; font-weight: 700;">New</span></span>
+              <button aria-pressed="false" aria-label="Save Flounce Halter" style="position: absolute; right: 10px; top: 10px; width: 38px; height: 38px; border: 0px; border-radius: 50%; background: rgba(255, 255, 255, 0.94); display: grid; place-items: center;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+            </article>
+          
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+</div>
+</body>
+</html>

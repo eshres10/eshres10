@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seams Club mobile — Willa Dress</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+input:focus,textarea:focus{outline:2px solid #466cf3;outline-offset:1px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #f2f2f2; font-family: 'Inter', system-ui, sans-serif; color: #000">
+
+  <header style="position: absolute; left: 0; right: 0; top: 0; z-index: 2; display: flex; align-items: center; gap: 6px; min-height: 64px; background: #fff; padding: 8px 12px 8px 8px; border-bottom: 1px solid #e6e6e6">
+    <a href="MPatternsDir.dc.html" aria-label="Back to patterns" style="width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.back}}"></path></svg></a>
+    <span style="flex: 1; min-width: 0"><span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: #555">Pattern</span><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 19px; letter-spacing: -0.04em">Willa Dress</span></span>
+    <button aria-label="Share" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.share}}"></path></svg></button>
+    <button onClick="{{toggleSave}}" aria-pressed="{{savedOn}}" aria-label="Save to wishlist" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="{{heartFill}}" stroke="{{heartStroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.heart}}"></path></svg></button>
+  </header>
+
+  <main style="position: absolute; left: 0; right: 0; top: 64px; bottom: 0; overflow-y: auto; padding: 0 0 110px">
+    <div style="position: relative; height: 420px; background: #ddd">
+      <img src="{{cover}}" alt="{{coverAlt}}" style="width: 100%; height: 100%; object-fit: cover">
+      <div role="group" aria-label="Photos" style="position: absolute; left: 0; right: 0; bottom: 10px; display: flex; justify-content: center; gap: 2px">
+        <sc-for list="{{thumbs}}" as="d" hint-placeholder-count="4"><button onClick="{{d.go}}" aria-label="{{d.label}}" aria-current="{{d.cur}}" style="width: 28px; height: 28px; border: 0; padding: 0; background: transparent; display: grid; place-items: center"><span style="display: block; border-radius: 3000px; {{d.dot}}"></span></button></sc-for>
+      </div>
+    </div>
+
+    <div style="padding: 12px; display: flex; flex-direction: column; gap: 10px">
+      <section style="background: #fff; border-radius: 26px; padding: 16px">
+        <span style="font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #c42a2a">Indie PDF pattern · Sold here</span>
+        <h1 style="margin: 4px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.05em; line-height: 1.05">Willa Dress</h1>
+        <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px">
+          <span style="width: 36px; height: 36px; border-radius: 50%; background: #466cf3; color: #fff; display: grid; place-items: center; font-weight: 700">F</span>
+          <span style="flex: 1"><b style="display: block; font-size: 14px">Fernhill Patterns</b><span style="font-size: 12px; color: #555">Independent designer</span></span>
+          <button onClick="{{toggleFollow}}" aria-pressed="{{followOn}}" style="min-height: 38px; padding: 0 14px; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{followStyle}}">{{followLabel}}</button>
+        </div>
+        <div style="margin-top: 12px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; text-align: center">
+          <span style="border-radius: 16px; background: #000; color: #fff; padding: 10px 4px"><b style="display: flex; align-items: center; justify-content: center; gap: 4px; font-family: 'Poppins', sans-serif; font-size: 20px"><svg width="14" height="14" viewBox="0 0 24 24" fill="#e6e51e" aria-hidden="true"><path d="{{i.star}}"></path></svg>4.6</b><span style="font-size: 11px; color: #c9c9c9">96 reviews</span></span>
+          <span style="border-radius: 16px; background: #f2f2f2; padding: 10px 4px"><b style="display: block; font-family: 'Poppins', sans-serif; font-size: 20px">214</b><span style="font-size: 11px; color: #555">makes</span></span>
+          <span style="border-radius: 16px; background: #f2f2f2; padding: 10px 4px"><b style="display: block; font-family: 'Poppins', sans-serif; font-size: 20px">74%</b><span style="font-size: 11px; color: #555">true to size</span></span>
+        </div>
+        <div style="margin-top: 12px; display: flex; flex-wrap: wrap; gap: 6px">
+          <span style="border-radius: 3000px; padding: 5px 10px; background: #f2f2f2; font-size: 12px; font-weight: 700">Beginner</span>
+          <span style="border-radius: 3000px; padding: 5px 10px; background: #f2f2f2; font-size: 12px; font-weight: 700">Sizes 4–30</span>
+          <span style="border-radius: 3000px; padding: 5px 10px; background: #f2f2f2; font-size: 12px; font-weight: 700">Wovens</span>
+          <span style="border-radius: 3000px; padding: 5px 10px; background: #f2f2f2; font-size: 12px; font-weight: 700">2.6–3.4 m</span>
+        </div>
+        <button onClick="{{toggleMade}}" aria-pressed="{{madeOn}}" style="margin-top: 12px; width: 100%; min-height: 44px; border-radius: 3000px; font: inherit; font-size: 14px; font-weight: 700; {{madeStyle}}">{{madeLabel}}</button>
+      </section>
+
+      <section style="background: #fff; border-radius: 26px; padding: 16px">
+        <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">How it sews</h2>
+        <div style="margin-top: 12px; display: flex; flex-direction: column; gap: 10px">
+          <sc-for list="{{ratings}}" as="r" hint-placeholder-count="3"><div><div style="display: flex; justify-content: space-between; font-size: 13px"><span style="font-weight: 600">{{r.label}}</span><span><b>{{r.score}}</b> <span style="color: #555">{{r.word}}</span></span></div><div style="margin-top: 5px; height: 8px; border-radius: 3000px; background: #f2f2f2; overflow: hidden"><div style="height: 100%; border-radius: 3000px; background: #466cf3; width: {{r.pct}}"></div></div></div></sc-for>
+        </div>
+        <div style="margin-top: 12px; font-size: 13px; font-weight: 600">Most common alterations</div>
+        <div style="margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{alts}}" as="a" hint-placeholder-count="4"><span style="border-radius: 3000px; padding: 5px 10px; background: #ffe2d8; font-size: 12px; font-weight: 600">{{a.label}}<b style="margin-left: 5px">{{a.pct}}</b></span></sc-for></div>
+      </section>
+
+      <section style="background: #fff; border-radius: 26px; padding: 16px">
+        <div style="display: flex; align-items: center"><h2 style="margin: 0; flex: 1; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">Size chart</h2>
+          <div role="radiogroup" aria-label="Units" style="display: flex; gap: 2px; background: #f2f2f2; border-radius: 3000px; padding: 3px"><sc-for list="{{unitBtns}}" as="u" hint-placeholder-count="2"><button role="radio" aria-checked="{{u.on}}" onClick="{{u.pick}}" style="min-width: 44px; min-height: 32px; border: 0; border-radius: 3000px; font: inherit; font-size: 12px; font-weight: 700; {{u.style}}">{{u.label}}</button></sc-for></div></div>
+        <div style="margin: 10px -16px 0; padding: 0 16px; overflow-x: auto">
+          <div role="table" aria-label="Size chart" style="width: 720px; font-size: 12px; text-align: center">
+            <div role="row" style="display: grid; grid-template-columns: 56px repeat(14, minmax(0, 1fr))"><span role="columnheader" style="text-align: left; padding: 7px 4px; font-weight: 700">Size</span><sc-for list="{{sizeHead}}" as="h" hint-placeholder-count="14"><span role="columnheader" style="padding: 7px 2px; font-weight: 700; border-radius: 8px 8px 0 0; {{h.style}}">{{h.z}}</span></sc-for></div>
+            <sc-for list="{{sizeRows}}" as="r" hint-placeholder-count="3"><div role="row" style="display: grid; grid-template-columns: 56px repeat(14, minmax(0, 1fr)); border-top: 1px solid #ececec"><span role="rowheader" style="text-align: left; padding: 8px 4px; font-weight: 600">{{r.label}}</span><sc-for list="{{r.cells}}" as="c" hint-placeholder-count="14"><span role="cell" style="padding: 8px 2px; {{c.style}}">{{c.v}}</span></sc-for></div></sc-for>
+          </div>
+        </div>
+        <p style="margin: 8px 0 0; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #333"><span style="width: 12px; height: 12px; border-radius: 3px; background: #e6e51e"></span>Size 14 is closest to your measurements. Only you see this.</p>
+      </section>
+
+      <section style="background: #fff; border-radius: 26px; padding: 16px">
+        <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">Fabrics people used</h2>
+        <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px"><sc-for list="{{fabrics}}" as="f" hint-placeholder-count="5"><span style="display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 10px 0 3px; border: 1px solid #e6e6e6; border-radius: 3000px; font-size: 12px; font-weight: 600"><img src="{{f.img}}" alt="" style="width: 26px; height: 26px; border-radius: 50%; object-fit: cover">{{f.name}} <span style="color: #777">{{f.n}}</span></span></sc-for></div>
+        <div style="margin-top: 12px; border-radius: 18px; background: #f2f2f2; padding: 10px">
+          <div style="display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.lock}}"></path></svg>In your stash · only you see this</div>
+          <span style="margin-top: 8px; display: flex; align-items: center; gap: 10px; background: #fff; border-radius: 14px; padding: 6px"><img src="/_blob/5fb545dfebc25a3ab288dabc4d4f34cc" alt="" style="width: 32px; height: 32px; border-radius: 10px; object-fit: cover"><span style="flex: 1; font-size: 12px"><b>Chambray linen</b> · 3.2 m</span><span style="font-size: 11px; font-weight: 700">Enough</span></span>
+        </div>
+      </section>
+
+      <section>
+        <div style="display: flex; align-items: baseline; padding: 0 6px"><h2 style="margin: 0; flex: 1; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">214 makes</h2><a href="#" style="font-size: 13px; font-weight: 700">See all</a></div>
+        <div role="radiogroup" aria-label="Show makes" style="margin-top: 8px; display: flex; gap: 6px"><sc-for list="{{mkChips}}" as="c" hint-placeholder-count="3"><button role="radio" aria-checked="{{c.on}}" onClick="{{c.pick}}" style="min-height: 34px; padding: 0 12px; border: 0; border-radius: 3000px; font: inherit; font-size: 12px; font-weight: 700; {{c.style}}">{{c.label}}</button></sc-for></div>
+        <div style="margin: 8px -12px 0; padding: 0 12px; display: flex; gap: 8px; overflow-x: auto">
+          <sc-for list="{{makes}}" as="m" hint-placeholder-count="4"><a href="MPost.dc.html" style="flex: 0 0 128px; text-decoration: none"><img src="{{m.img}}" alt="{{m.alt}}" style="display: block; width: 128px; height: 168px; border-radius: 18px; object-fit: cover"><b style="display: block; margin-top: 4px; font-size: 12px">{{m.by}}</b><span style="font-size: 11px; color: #555">{{m.meta}}</span></a></sc-for>
+        </div>
+      </section>
+
+      <section style="background: #fff; border-radius: 26px; padding: 16px">
+        <div style="display: flex; align-items: center; gap: 8px"><h2 style="margin: 0; flex: 1; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">Reviews</h2><b style="display: inline-flex; align-items: center; gap: 4px; font-size: 14px"><svg width="14" height="14" viewBox="0 0 24 24" fill="#000" aria-hidden="true"><path d="{{i.star}}"></path></svg>4.6</b><span style="font-size: 12px; color: #555">· 96</span></div>
+        <sc-for list="{{reviews}}" as="r" hint-placeholder-count="3">
+          <article style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #ececec">
+            <div style="display: flex; align-items: center; gap: 8px"><span style="width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; {{r.av}}">{{r.initial}}</span><span><b style="display: block; font-size: 13px">{{r.who}}</b><span style="font-size: 11px; color: #555">{{r.made}}</span></span></div>
+            <p style="margin: 8px 0 0; font-size: 13px; line-height: 1.5">{{r.text}}</p>
+            <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 4px; font-size: 11px; font-weight: 700"><span style="border-radius: 3000px; padding: 3px 8px; background: #f2f2f2">Fit {{r.fit}}/5</span><span style="border-radius: 3000px; padding: 3px 8px; background: #f2f2f2">Difficulty {{r.diff}}/5</span><span style="flex: 1"></span><button onClick="{{r.markHelpful}}" aria-pressed="{{r.helpfulOn}}" style="min-height: 30px; padding: 0 10px; border: 0; border-radius: 3000px; font: inherit; font-size: 11px; font-weight: 600; {{r.helpfulStyle}}">{{r.helpfulLabel}}</button></div>
+          </article>
+        </sc-for>
+        <button style="margin-top: 14px; width: 100%; min-height: 44px; border: 2px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 14px; font-weight: 700">Write a review</button>
+      </section>
+    </div>
+  </main>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: flex; align-items: center; gap: 12px; background: #fff; padding: 12px 16px 28px; border-top: 1px solid #e6e6e6">
+    <sc-if value="{{notOwned}}" hint-placeholder-val="{{true}}">
+      <span style="flex: 1"><b style="display: block; font-family: 'Poppins', sans-serif; font-size: 22px; letter-spacing: -0.04em">$16</b><span style="font-size: 11px; color: #555">Designer keeps 90%</span></span>
+      <button onClick="{{openBuy}}" style="min-height: 52px; padding: 0 28px; border: 0; border-radius: 3000px; background: #e6e51e; font: inherit; font-size: 15px; font-weight: 700">Buy pattern</button>
+    </sc-if>
+    <sc-if value="{{owned}}" hint-placeholder-val="{{false}}">
+      <span style="flex: 1; font-size: 13px; font-weight: 700">In your library</span>
+      <a href="MPatterns.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 22px; border-radius: 3000px; background: #000; color: #fff; text-decoration: none; font-size: 15px; font-weight: 700">Download PDF</a>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{buy}}" hint-placeholder-val="{{false}}">
+    <div onClick="{{closeBuy}}" aria-hidden="true" style="position: absolute; inset: 0; z-index: 5; background: rgba(0,0,0,.45)"></div>
+    <section role="dialog" aria-modal="true" aria-label="Buy this pattern" style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; background: #fff; border-radius: 30px 30px 0 0; padding: 18px 16px 28px">
+      <sc-if value="{{stCheckout}}" hint-placeholder-val="{{true}}">
+        <div style="display: flex; align-items: center"><h2 style="margin: 0; flex: 1; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.04em">Buy this pattern</h2><button onClick="{{closeBuy}}" aria-label="Close" style="width: 40px; height: 40px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="{{i.close}}"></path></svg></button></div>
+        <p style="margin: 12px 0 0; display: flex; font-size: 14px"><span style="flex: 1">Willa Dress · PDF, sizes 4–30</span><b>$16.00</b></p>
+        <div role="radiogroup" aria-label="Pay with" style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 8px"><sc-for list="{{pays}}" as="p" hint-placeholder-count="2"><button role="radio" aria-checked="{{p.on}}" style="min-height: 50px; border-radius: 16px; background: #fff; font: inherit; font-size: 14px; font-weight: 700; {{p.ring}}">{{p.label}}</button></sc-for></div>
+        <button onClick="{{pay}}" style="margin-top: 14px; width: 100%; min-height: 54px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 16px; font-weight: 700">Pay $16.00</button>
+      </sc-if>
+      <sc-if value="{{stDone}}" hint-placeholder-val="{{false}}">
+        <div style="text-align: center"><span style="display: inline-grid; place-items: center; width: 60px; height: 60px; border-radius: 50%; background: #e6e51e"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.check}}"></path></svg></span><h2 style="margin: 10px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 24px; letter-spacing: -0.04em">It's yours</h2><p style="margin: 6px 0 0; font-size: 14px; color: #333">It's in your pattern library. Only you can download the PDF.</p></div>
+        <button onClick="{{closeBuy}}" style="margin-top: 16px; width: 100%; min-height: 52px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 15px; font-weight: 700">Done</button>
+      </sc-if>
+    </section>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { photo: 0, saved: false, follow: false, owned: false, made: false, buy: false, done: false, unit: 'cm', mk: 'liked', helpful: {} }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var i = {"search": "M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z m10 18-4.3-4.3", "home": "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10", "compass": "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z m4.24 5.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z", "plus": "M12 5v14 M5 12h14", "kanban": "M3 3h18v18H3z M8 7v7 M12 7v4 M16 7v9", "lock": "M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4", "pdf": "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6", "back": "M15 18l-6-6 6-6", "close": "M18 6 6 18 M6 6l12 12", "check": "M20 6 9 17l-5-5", "heart": "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z", "download": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3", "upload": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12", "share": "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M16 6l-4-4-4 4 M12 2v13", "image": "M3 3h18v18H3z M8.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z M21 15l-5-5L5 21", "star": "M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z", "sparkle": "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z", "vote": "M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11", "palette": "M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A5.6 5.6 0 0 0 22 9.8C22 5.5 17.5 2 12 2z M6.5 11.5h.01 M9.5 7.5h.01 M14.5 7.5h.01 M17.5 11.5h.01", "card": "M2 5h20v14H2z M2 10h20", "receipt": "M4 2v20l3-2 3 2 3-2 3 2 3-2 3 2V2l-3 2-3-2-3 2-3-2-3 2z M8 8h8 M8 12h8 M8 16h5", "store": "M3 9l1.5-5h15L21 9 M3 9v11h18V9 M3 9h18 M9 20v-6h6v6", "trend": "M3 17l6-6 4 4 8-8 M15 7h6v6", "pen": "M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z", "info": "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 16v-4 M12 8h.01"};
+    var B = function (id) { return '/_blob/' + id; };
+    var photos = [
+      { src: B('e551a46b8280f8ecc8ee3ab17952c2bf'), alt: 'Willa Dress in green floral gingham, made by @slowseams' },
+      { src: B('188ffd136f4c0ada8a70caa52d09ec3b'), alt: 'Willa Dress in cream lavender cotton' },
+      { src: B('701b827f636929720e8290d66c043951'), alt: 'Willa Dress in a blue organza' },
+      { src: B('057c4fedc8c7a51b83d0aa3f797c4b48'), alt: 'Pattern pieces laid out on fabric' }
+    ];
+    var SIZES = [4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30];
+    var BUST = [78, 82, 86, 90, 95, 100, 105, 111, 117, 123, 129, 135, 141, 147];
+    var WAIST = [60, 64, 68, 72, 77, 82, 87, 93, 99, 105, 111, 117, 123, 129];
+    var HIP = [84, 88, 92, 96, 101, 106, 111, 117, 123, 129, 135, 141, 147, 153];
+    var MINE = 14;
+    function u(cm) { if (s.unit === 'cm') return String(cm); var v = Math.round(cm / 2.54 * 4) / 4, w = Math.floor(v), fr = v - w; return w + (fr === 0.25 ? '¼' : fr === 0.5 ? '½' : fr === 0.75 ? '¾' : ''); }
+    var MAKES = [
+      { by: '@slowseams', size: 18, fabric: 'gingham', img: B('e551a46b8280f8ecc8ee3ab17952c2bf'), likes: 233, age: 3 },
+      { by: '@mara.makes', size: 14, fabric: 'lawn', img: B('188ffd136f4c0ada8a70caa52d09ec3b'), likes: 312, age: 1 },
+      { by: '@priya.pins', size: 10, fabric: 'linen', img: B('0a8ae6a44e186ecaeb7322a09be76d15'), likes: 407, age: 6 },
+      { by: '@junesews', size: 14, fabric: 'linen', img: B('5fb545dfebc25a3ab288dabc4d4f34cc'), likes: 528, age: 9 },
+      { by: '@tilly.tacks', size: 8, fabric: 'sateen', img: B('31f9090e0f46023c17a2689be64e6db3'), likes: 140, age: 2 },
+      { by: '@ama.sews', size: 12, fabric: 'crepe', img: B('b24763864c8c89e98667824487e6a6eb'), likes: 342, age: 4 },
+      { by: '@ada_alters', size: 8, fabric: 'organza', img: B('701b827f636929720e8290d66c043951'), likes: 178, age: 5 },
+      { by: '@nell.needles', size: 16, fabric: 'satin', img: B('156a03273ae96fc256def755c3066a37'), likes: 96, age: 7 }
+    ];
+    var mk = MAKES.slice();
+    if (s.mk === 'liked') mk.sort(function (a, b) { return b.likes - a.likes; });
+    if (s.mk === 'new') mk.sort(function (a, b) { return a.age - b.age; });
+    if (s.mk === 'near') mk = mk.filter(function (m) { return Math.abs(m.size - MINE) <= 2; });
+    var REVIEWS = [
+      { id: 'a', who: '@junesews', initial: 'J', av: 'background:#e6e51e;color:#000', made: 'Made size 14, graded to 16 · Aug 2026', fit: 5, diff: 3, instr: 4, text: 'The bodice runs short if you are taller than 168 cm. Add 2 cm before cutting. Pockets are generous and the drawstring channel is easy to thread.', helpful: 42 },
+      { id: 'b', who: '@priya.pins', initial: 'P', av: 'background:#466cf3;color:#fff', made: 'Made size 10 · Jul 2026', fit: 4, diff: 2, instr: 5, text: 'Great second dress pattern. The illustrated steps for the neck facing are the clearest I have seen. Double gauze worked well but frays, so overlock first.', helpful: 18 },
+      { id: 'c', who: '@slowseams', initial: 'S', av: 'background:#000;color:#fff', made: 'Made size 18 · Jun 2026', fit: 4, diff: 3, instr: 4, text: 'Did a 2 cm FBA and it was straightforward with the dart already there. Linen gives it more structure than the samples, which I liked.', helpful: 11 }
+    ];
+    var pays = ['Wallet', 'Card'];
+    return {
+      i: i,
+      cover: photos[s.photo].src, coverAlt: photos[s.photo].alt,
+      thumbs: photos.map(function (p, n) { var on = n === s.photo; return { src: p.src, label: 'Show photo ' + (n + 1) + ': ' + p.alt, cur: on ? 'true' : 'false', ring: on ? 'border:3px solid #000' : 'border:3px solid #fff', dot: on ? 'width:22px;height:8px;background:#fff' : 'width:8px;height:8px;background:rgba(255,255,255,.6)', go: function () { self.setState({ photo: n }); } }; }),
+      savedOn: s.saved ? 'true' : 'false', heartFill: s.saved ? '#f34646' : 'none', heartStroke: s.saved ? '#f34646' : '#000', saveText: s.saved ? 'Saved' : 'Save',
+      toggleSave: function () { self.setState({ saved: !s.saved }); },
+      followOn: s.follow ? 'true' : 'false', followLabel: s.follow ? 'Following' : 'Follow',
+      followStyle: s.follow ? 'border:2px solid #000;background:#fff;color:#000' : 'border:2px solid #000;background:#000;color:#fff',
+      toggleFollow: function () { self.setState({ follow: !s.follow }); },
+      madeOn: s.made ? 'true' : 'false', madeLabel: s.made ? 'You made this ✓' : "I've made this", madeStyle: s.made ? 'background:#000;color:#fff;border:2px solid #000' : 'background:#fff;color:#000;border:2px solid #000',
+      toggleMade: function () { self.setState({ made: !s.made }); },
+      notOwned: !s.owned, owned: s.owned,
+      openBuy: function () { self.setState({ buy: true, done: false }); }, closeBuy: function () { self.setState({ buy: false }); },
+      buy: s.buy, stCheckout: !s.done, stDone: s.done,
+      pay: function () { self.setState({ done: true, owned: true }); },
+      pays: pays.map(function (p, n) { return { label: p, on: n === 0 ? 'true' : 'false', ring: n === 0 ? 'border:2px solid #000' : 'border:2px solid #e6e6e6' }; }),
+      ratings: [
+        { label: 'Fit', score: '4.6', word: 'great', pct: '92%' },
+        { label: 'Difficulty', score: '2.8', word: 'moderate', pct: '56%' },
+        { label: 'Instructions', score: '4.3', word: 'clear', pct: '86%' }
+      ],
+      alts: [
+        { label: 'Lengthen bodice', pct: '38%' }, { label: 'Swayback adjustment', pct: '21%' },
+        { label: 'Full bust adjustment', pct: '17%' }, { label: 'Shorten skirt', pct: '12%' }
+      ],
+      fabrics: [
+        { name: 'Cotton lawn', n: 64, img: B('057c4fedc8c7a51b83d0aa3f797c4b48') }, { name: 'Linen', n: 41, img: B('623f53848a0fba7bb103667b6cd6d996') },
+        { name: 'Rayon challis', n: 33, img: B('769e9f00331c5518d858d9a671756c46') }, { name: 'Viscose linen', n: 19, img: B('5fb545dfebc25a3ab288dabc4d4f34cc') },
+        { name: 'Poplin', n: 11, img: B('544eca3d47a401399c1e405afd3fada4') }
+      ],
+      files: [
+        { name: 'Print at home', note: 'A4 and US letter, with layers' }, { name: 'Copy shop', note: 'A0, one sheet per size range' },
+        { name: 'Projector file', note: 'Cut straight from the screen' }, { name: 'Instructions', note: '24 illustrated pages' }
+      ],
+      unitBtns: ['cm', 'in'].map(function (x) { var on = s.unit === x; return { label: x, on: on ? 'true' : 'false', style: on ? 'background:#000;color:#fff' : 'background:transparent;color:#000', pick: function () { self.setState({ unit: x }); } }; }),
+      sizeHead: SIZES.map(function (z) { return { z: z, style: z === MINE ? 'background:#e6e51e' : '' }; }),
+      sizeRows: [['Bust', BUST], ['Waist', WAIST], ['Hip', HIP]].map(function (r) { return { label: r[0], cells: r[1].map(function (v, n) { return { v: u(v), style: SIZES[n] === MINE ? 'background:#fff9b8;font-weight:700' : '' }; }) }; }),
+      mkChips: [['liked', 'Most liked'], ['new', 'Newest'], ['near', 'Near my size']].map(function (c) { var on = s.mk === c[0]; return { label: c[1], on: on ? 'true' : 'false', style: on ? 'background:#000;color:#fff' : 'background:#fff;color:#000', pick: function () { self.setState({ mk: c[0] }); } }; }),
+      makes: mk.slice(0, 6).map(function (m) { return { by: m.by, meta: 'Size ' + m.size + ' · ' + m.fabric, img: m.img, alt: 'Willa Dress by ' + m.by + ' in ' + m.fabric }; }),
+      starsRows: [[5, 61], [4, 26], [3, 8], [2, 3], [1, 2]].map(function (r) { return { n: r[0], pct: r[1] + '%' }; }),
+      reviews: REVIEWS.map(function (r) {
+        var on = !!s.helpful[r.id];
+        return { who: r.who, initial: r.initial, av: r.av, made: r.made, fit: r.fit, diff: r.diff, instr: r.instr, text: r.text,
+          helpfulLabel: (r.helpful + (on ? 1 : 0)) + ' found this helpful', helpfulOn: on ? 'true' : 'false', helpfulStyle: on ? 'background:#000;color:#fff' : 'background:#f2f2f2;color:#000',
+          markHelpful: function () { var h = Object.assign({}, s.helpful); h[r.id] = !on; self.setState({ helpful: h }); } };
+      })
+    };
+  }
+}
+</script>
+</body>
+</html>
