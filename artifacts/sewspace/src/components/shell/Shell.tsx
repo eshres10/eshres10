@@ -1,13 +1,14 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useGetProfile } from '@workspace/api-client-react';
-import { Bookmark, BookMarked, BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, Menu, MessageCircle, MessagesSquare, Plus, Ruler, Scissors, Search, Sparkles, Spool, Store, Trophy, X } from 'lucide-react';
+import { Bookmark, BookMarked, BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, LogOut, Menu, MessageCircle, MessagesSquare, Plus, Ruler, Scissors, Search, Sparkles, Spool, Store, Trophy, X } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
-import { useAuth } from '@clerk/react';
+import { useAuth, useClerk } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
 import { PublicHeader } from '@/components/shell/PublicHeader';
 import { UserAvatar } from '@/components/avatar';
 import { Logo } from '@/components/brand/Logo';
 import { currentAppPath } from '@/lib/navigation';
+import { basePath } from '@/lib/clerk';
 import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
 import { inCommunity } from '@/components/shell/CommunityTabs';
 import { inStudio, StudioMobileHeader, studioSection } from '@/components/shell/StudioMobile';
@@ -57,6 +58,7 @@ function useMyProfile() {
 
 function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: () => void }) {
   const me = useMyProfile();
+  const { signOut } = useClerk();
   return (
     <div className="flex h-full flex-col gap-[22px]">
       <Logo href="/studio" />
@@ -83,6 +85,18 @@ function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: (
           <span className="block truncate text-xs">{me?.handle ? `@${me.handle} · ` : ''}Profile &amp; settings</span>
         </span>
       </Link>
+      <button
+        type="button"
+        onClick={() => {
+          onNavigate?.();
+          void signOut({ redirectUrl: basePath || '/' });
+        }}
+        data-testid="button-sign-out"
+        className="flex min-h-[44px] items-center gap-3 rounded-[18px] px-3 text-left text-sm font-semibold text-ink hover:bg-white/60"
+      >
+        <LogOut size={18} aria-hidden="true" />
+        <span>Sign out</span>
+      </button>
     </div>
   );
 }
