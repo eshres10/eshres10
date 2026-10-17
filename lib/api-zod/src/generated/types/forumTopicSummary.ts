@@ -10,6 +10,7 @@ import type { ForumKind } from './forumKind';
 import type { ForumPoll } from './forumPoll';
 import type { ForumTopicSummaryAcceptedAnswer } from './forumTopicSummaryAcceptedAnswer';
 import type { ForumTopicSummaryTopRecommendationsItem } from './forumTopicSummaryTopRecommendationsItem';
+import type { Media } from './media';
 import type { PublicPerson } from './publicPerson';
 
 export interface ForumTopicSummary {
@@ -33,4 +34,6 @@ export interface ForumTopicSummary {
   acceptedAnswer: ForumTopicSummaryAcceptedAnswer;
   /** Pages most recommended in replies (recommendation topics) */
   topRecommendations: ForumTopicSummaryTopRecommendationsItem[];
+  /** Show & tell photos, in order (they follow the topic) */
+  photos: Media[];
 }

@@ -38,6 +38,8 @@ export interface FlowShellProps {
   steadyHeight?: boolean;
   /** Desktop: a narrower dialog for one-screen forms (Quick start). */
   narrow?: boolean;
+  /** Phones: a small label at the right of the header (the forum post type). */
+  badge?: ReactNode;
   /** A line under the main button on phones, beside it on desktop ("Only you can see it…"). */
   footnote?: ReactNode;
   children: ReactNode;
@@ -62,7 +64,7 @@ function PrimaryButton({ action, describedBy, className }: { action: FlowAction;
  * preview pane.
  */
 export function FlowShell(props: FlowShellProps) {
-  const { title, subtitle, steps, current, canOpen, onStep, onClose, onBack, primary, primaryInHeader, desktopPrimaryInHeader, aside, plainDesktop, steadyHeight, narrow, footnote, children } = props;
+  const { title, subtitle, steps, current, canOpen, onStep, onClose, onBack, primary, primaryInHeader, desktopPrimaryInHeader, aside, plainDesktop, steadyHeight, narrow, footnote, badge, children } = props;
   const dialog = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const reasonId = useId();
@@ -100,6 +102,7 @@ export function FlowShell(props: FlowShellProps) {
             {primaryInHeader && primary && (
               <PrimaryButton action={primary} describedBy={reasonMobileId} className="inline-flex min-h-[48px] shrink-0 items-center gap-1.5 rounded-full px-5 text-base font-bold" />
             )}
+            {!primaryInHeader && badge && <span className="mr-2 shrink-0">{badge}</span>}
           </div>
         </div>
         {steps.length > 0 && <div className="shrink-0 pt-1 lg:hidden"><StepBar steps={steps} current={current} canOpen={canOpen} onStep={onStep} /></div>}

@@ -6,9 +6,7 @@ import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
 import { ErrorState } from '@/components/common';
-import { Composer } from '@/components/forum/Composer';
 import { BOARDS, KINDS, TopicCard } from '@/components/forum/parts';
-import { Sheet } from '@/components/social/Sheet';
 
 const SORTS: Array<{ id: ListForumTopicsSort; label: string }> = [
   { id: 'hot', label: 'Hot' },
@@ -25,7 +23,6 @@ export function ForumPage() {
   const sort = (params.get('sort') ?? 'hot') as ListForumTopicsSort;
   const [q, setQ] = useState(params.get('q') ?? '');
   const [debounced, setDebounced] = useState(q);
-  const [composing, setComposing] = useState(false);
   const ask = useRequireSignIn();
   useEffect(() => { const t = setTimeout(() => setDebounced(q), 300); return () => clearTimeout(t); }, [q]);
   useEffect(() => { document.title = 'Forum · SewSpace'; }, []);
@@ -61,7 +58,12 @@ export function ForumPage() {
           <p className="eyebrow">Forum{board && ` · ${BOARDS[board]}`}</p>
           <h1 className="mt-1 font-display text-[34px] leading-tight tracking-[-.05em]">Ask, share, help</h1>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => { if (ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) setComposing(true); }}>
+        <button type="button" className="btn btn-primary" onClick={() => { if (!ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) return;
+          const p = new URLSearchParams();
+          if (board) p.set('board', board);
+          if (filter !== 'all' && filter !== 'solved') p.set('kind', filter);
+          setLocation(`/forum/new${p.size ? `?${p}` : ''}`);
+        }}>
           <Plus size={16} aria-hidden="true" />Start a discussion
         </button>
       </div>
@@ -143,11 +145,6 @@ export function ForumPage() {
         </aside>
       </div>
 
-      {composing && (
-        <Sheet label="Start a discussion" onClose={() => setComposing(false)}>
-          <Composer initialBoard={board} initialKind={filter !== 'all' && filter !== 'solved' ? filter : 'question'} onCancel={() => setComposing(false)} onCreated={t => { setComposing(false); setLocation(`/forum/topics/${t.id}`); }} />
-        </Sheet>
-      )}
     </div>
   );
 }

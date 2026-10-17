@@ -27,6 +27,7 @@ import { CatalogPage } from '@/pages/catalog';
 import { ChallengesPage } from '@/pages/challenges';
 import { ForumPage } from '@/pages/forum';
 import { ForumTopicPage } from '@/pages/forum-topic';
+import { NewTopicPage } from '@/pages/forum-flow';
 import { ChallengePage } from '@/pages/challenge';
 import { CatalogEntryPage } from '@/pages/catalog-entry';
 import { AdminReportsPage } from '@/pages/admin-reports';
@@ -89,6 +90,7 @@ function Router() {
     <Route path="/saved" component={InShellSavedPage} />
     <Route path="/admin/reports" component={InShellAdminReports} />
     <Route path="/forum">{() => <AdaptiveLayout><ForumPage /></AdaptiveLayout>}</Route>
+    <Route path="/forum/new">{() => <Shell><NewTopicPage /></Shell>}</Route>
     <Route path="/forum/topics/:id">{(params: { id: string }) => <AdaptiveLayout><ForumTopicPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
     <Route path="/challenges">{() => <AdaptiveLayout><ChallengesPage /></AdaptiveLayout>}</Route>
     <Route path="/challenges/:slug">{(params: { slug: string }) => <AdaptiveLayout><ChallengePage slug={params.slug} /></AdaptiveLayout>}</Route>

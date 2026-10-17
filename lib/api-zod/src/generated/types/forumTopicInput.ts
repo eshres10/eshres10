@@ -34,8 +34,11 @@ export interface ForumTopicInput {
      */
   pollOptions?: string[];
   pollDays?: ForumTopicInputPollDays;
-  /** Show & tell only - also post it publicly to your feed */
+  /** Show & tell only - also post it publicly to your feed with the same photos */
   shareToFeed?: boolean;
-  /** @maxItems 10 */
+  /**
+     * Show & tell photos (1 to 10 of your own processed media)
+     * @maxItems 10
+     */
   mediaIds?: number[];
 }

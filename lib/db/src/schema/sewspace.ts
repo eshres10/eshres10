@@ -441,6 +441,14 @@ export const forumVotesTable = pgTable("sewspace_forum_votes", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.targetKind, t.targetId, t.userId] })]);
 
+// Show & tell photos on a topic (migration 0013); they follow their topic.
+export const forumTopicMediaTable = pgTable("sewspace_forum_topic_media", {
+  topicId: integer("topic_id").notNull().references(() => forumTopicsTable.id, { onDelete: "cascade" }),
+  mediaId: integer("media_id").notNull().references(() => mediaTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  position: smallint("position").notNull(),
+}, (t) => [primaryKey({ columns: [t.topicId, t.mediaId] })]);
+
 export const forumPollOptionsTable = pgTable("sewspace_forum_poll_options", {
   id: serial("id").primaryKey(),
   topicId: integer("topic_id").notNull().references(() => forumTopicsTable.id, { onDelete: "cascade" }),

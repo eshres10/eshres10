@@ -32,6 +32,7 @@ function ReplyRow({ reply, topic, onReply, child = false }: { reply: ForumReplyC
   const client = useQueryClient();
   const remove = useDeleteForumReply();
   const accept = useSetAcceptedAnswer();
+  const [confirming, setConfirming] = useState(false);
   const refresh = () => {
     client.invalidateQueries({ queryKey: getGetForumRepliesQueryKey(topic.id) });
     client.invalidateQueries({ queryKey: getGetForumTopicQueryKey(topic.id) });
@@ -57,7 +58,12 @@ function ReplyRow({ reply, topic, onReply, child = false }: { reply: ForumReplyC
                 <Check size={13} aria-hidden="true" />{reply.accepted ? 'Unmark answer' : 'This worked'}
               </button>
             )}
-            {reply.isMine && <button type="button" disabled={remove.isPending} onClick={() => remove.mutate({ id: reply.id }, { onSuccess: refresh })} className="inline-flex min-h-[40px] items-center gap-1 px-2 font-bold text-subtle"><Trash2 size={13} aria-hidden="true" />Delete</button>}
+            {reply.isMine && (confirming
+              ? <span className="inline-flex items-center gap-1" role="group" aria-label="Delete this reply?">
+                  <button type="button" disabled={remove.isPending} onClick={() => remove.mutate({ id: reply.id }, { onSuccess: refresh })} className="inline-flex min-h-[40px] items-center gap-1 rounded-full bg-red px-3 font-bold text-white">{remove.isPending && <Loader2 size={13} className="animate-spin" aria-hidden="true" />}Delete reply</button>
+                  <button type="button" onClick={() => setConfirming(false)} className="min-h-[40px] rounded-full border border-line px-3 font-bold">Keep</button>
+                </span>
+              : <button type="button" onClick={() => setConfirming(true)} className="inline-flex min-h-[40px] items-center gap-1 px-2 font-bold text-subtle"><Trash2 size={13} aria-hidden="true" />Delete</button>)}
           </div>
         </div>
         {!reply.isMine && <SafetyMenu kind="forum_reply" targetId={String(reply.id)} what="reply" authorHandle={reply.author.handle} label={`Options for reply by @${reply.author.handle}`} size={40} />}
@@ -167,6 +173,15 @@ export function ForumTopicPage({ id }: { id: number }) {
           <p className="mt-2 text-sm text-subtle">{t.kind === 'question' ? 'Asked' : 'Posted'} by <Link href={`/@${t.author.handle}`} className="font-bold text-ink">@{t.author.handle}</Link> · {timeAgo(t.createdAt)}</p>
           <h1 className="mt-2 font-display text-[clamp(26px,3.4vw,38px)] leading-[1.08] tracking-[-.04em]">{t.title}</h1>
           {t.body && <p className="mt-3 whitespace-pre-line break-words text-[16px] leading-relaxed">{t.body}</p>}
+          {t.photos.length > 0 && (
+            <div className={`mt-4 grid gap-2 ${t.photos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+              {t.photos.map(p => (
+                <a key={p.id} href={p.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-[18px]" style={{ backgroundColor: p.color ?? undefined }}>
+                  <img src={p.url} alt={p.altText} width={p.width} height={p.height} loading="lazy" className="h-full max-h-[560px] w-full object-cover" />
+                </a>
+              ))}
+            </div>
+          )}
           {t.poll && <div className="mt-4"><Poll topicId={t.id} poll={t.poll} /></div>}
           {(t.catalog || t.make || t.tags.length > 0) && (
             <div className="mt-4 flex flex-wrap gap-2 text-sm">
@@ -190,7 +205,9 @@ export function ForumTopicPage({ id }: { id: number }) {
           {t.canModerate && <div className="mt-4"><AdminTools topic={t} /></div>}
         </article>
 
-        {t.post && <div className="mx-auto max-w-[620px]"><p className="eyebrow mb-2">Shared to the feed</p><PostCard post={t.post} /></div>}
+        {t.post && (t.photos.length
+          ? <p className="px-2 text-sm text-subtle">Also shared to the feed: <Link href={`/posts/${t.post.id}`} className="font-bold text-ink">see the post</Link></p>
+          : <div className="mx-auto max-w-[620px]"><p className="eyebrow mb-2">Shared to the feed</p><PostCard post={t.post} /></div>)}
 
         <section id="replies" aria-labelledby="replies-title" className="scroll-mt-28 rounded-[30px] bg-white p-5 sm:p-7">
           <h2 id="replies-title" className="font-display text-[22px] tracking-[-.03em]">

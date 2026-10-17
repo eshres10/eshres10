@@ -3,7 +3,8 @@ import assert from "node:assert/strict";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import path from "node:path";
-import { as, ownerSql, startApp, withoutRls } from "./harness";
+import sharp from "sharp";
+import { as, ownerSql, startApp, storedObjects, withoutRls } from "./harness";
 
 process.env.ADMIN_USER_IDS = "q_adm";
 const { getTopic, listReplies, viewerFor } = await import("../src/access");
@@ -49,7 +50,10 @@ test("starting topics", async () => {
   const poll = await ask("POST", "/api/forum/topics", { board: "machines", kind: "poll", title: "Which trouser closure do you trust?", pollOptions: ["Fly zip", "Buttons", "Side zip"], pollDays: 3 });
   assert.equal(poll.status, 201, poll.text);
   ids.poll = poll.json.id;
-  const show = await help("POST", "/api/forum/topics", { board: "mending", kind: "show_tell", title: "Visible mending on my oldest jeans", body: "Sashiko patches.", shareToFeed: true });
+  const up = await help("POST", "/api/storage/uploads/request-url", { name: "p.jpg", size: 1000, contentType: "image/jpeg" });
+  storedObjects.set(up.json.objectPath, { body: await sharp({ create: { width: 400, height: 500, channels: 3, background: "#335577" } }).jpeg().toBuffer(), contentType: "image/jpeg" });
+  const media = await help("POST", "/api/media", { objectPath: up.json.objectPath });
+  const show = await help("POST", "/api/forum/topics", { board: "mending", kind: "show_tell", title: "Visible mending on my oldest jeans", body: "Sashiko patches.", shareToFeed: true, mediaIds: [media.json.id] });
   assert.equal(show.status, 201, show.text);
   assert.equal(show.json.post.caption, "Visible mending on my oldest jeans\n\nSashiko patches.");
   assert.equal((await anon("GET", `/api/public/posts/${show.json.post.id}`)).json.visibility, "public", "shared to the feed");

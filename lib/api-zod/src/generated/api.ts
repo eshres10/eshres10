@@ -1564,10 +1564,87 @@ export const ListForumTopicsResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 })),
   "nextCursor": zod.string().nullable()
 })
+
+
+/**
+ * @summary Up to 3 questions whose titles share the most words with q (Already asked?). Works signed out.
+ */
+export const listSimilarQuestionsQueryQMax = 140;
+
+
+
+export const ListSimilarQuestionsQueryParams = zod.object({
+  "q": zod.coerce.string().max(listSimilarQuestionsQueryQMax)
+})
+
+export const ListSimilarQuestionsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "lastActivityAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "replies": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "solved": zod.boolean(),
+  "pinned": zod.boolean(),
+  "locked": zod.boolean(),
+  "poll": zod.union([zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.'),zod.null()]),
+  "acceptedAnswer": zod.object({
+  "author": zod.string(),
+  "excerpt": zod.string()
+}).nullable(),
+  "topRecommendations": zod.array(zod.object({
+  "catalog": zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),
+  "count": zod.number().int()
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
+})
+export const ListSimilarQuestionsResponse = zod.array(ListSimilarQuestionsResponseItem)
 
 
 /**
@@ -1652,7 +1729,16 @@ export const GetForumDiscussionsResponseItem = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 })
 export const GetForumDiscussionsResponse = zod.array(GetForumDiscussionsResponseItem)
 
@@ -1704,7 +1790,16 @@ export const GetForumTopicResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({
@@ -1839,8 +1934,8 @@ export const CreateForumTopicBody = zod.object({
   "makeId": zod.number().int().nullish(),
   "pollOptions": zod.array(zod.string().max(createForumTopicBodyPollOptionsItemMax)).max(createForumTopicBodyPollOptionsMax).optional(),
   "pollDays": zod.union([zod.literal(1),zod.literal(3),zod.literal(7)]).optional(),
-  "shareToFeed": zod.boolean().optional().describe('Show & tell only - also post it publicly to your feed'),
-  "mediaIds": zod.array(zod.number().int()).max(createForumTopicBodyMediaIdsMax).optional()
+  "shareToFeed": zod.boolean().optional().describe('Show & tell only - also post it publicly to your feed with the same photos'),
+  "mediaIds": zod.array(zod.number().int()).max(createForumTopicBodyMediaIdsMax).optional().describe('Show & tell photos (1 to 10 of your own processed media)')
 })
 
 export const CreateForumTopicResponse = zod.object({
@@ -1886,7 +1981,16 @@ export const CreateForumTopicResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({
@@ -2007,7 +2111,16 @@ export const UpdateForumTopicResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({
@@ -2125,7 +2238,16 @@ export const SetAcceptedAnswerResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({
@@ -2237,7 +2359,16 @@ export const ModerateForumTopicResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({

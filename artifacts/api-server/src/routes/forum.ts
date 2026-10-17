@@ -17,6 +17,8 @@ import {
   GetForumTopicResponse,
   ListForumTopicsQueryParams,
   ListForumTopicsResponse,
+  ListSimilarQuestionsQueryParams,
+  ListSimilarQuestionsResponse,
   ModerateForumTopicBody,
   ModerateForumTopicParams,
   ModerateForumTopicResponse,
@@ -43,6 +45,7 @@ import {
   getTopic,
   listReplies,
   listTopics,
+  similarQuestions,
   moderateTopic,
   setAccepted,
   setForumVote,
@@ -65,6 +68,11 @@ forumPublicRouter.get("/public/forum/topics", scoped(async (req, res, db): Promi
   const query = ListForumTopicsQueryParams.safeParse(req.query);
   const q = query.success ? query.data : {};
   res.json(ListForumTopicsResponse.parse(await listTopics(db, viewerOf(req), q)));
+}));
+
+forumPublicRouter.get("/public/forum/similar", scoped(async (req, res, db): Promise<void> => {
+  const query = ListSimilarQuestionsQueryParams.safeParse(req.query);
+  res.json(ListSimilarQuestionsResponse.parse(query.success ? await similarQuestions(db, viewerOf(req), query.data.q) : []));
 }));
 
 forumPublicRouter.get("/public/forum/overview", scoped(async (req, res, db): Promise<void> => {
@@ -107,7 +115,8 @@ router.post("/forum/topics", scoped(async (req, res, db): Promise<void> => {
       bad_poll: [400, "A poll needs 2 to 6 different options."],
       bad_make: [400, "You can only link one of your own makes."],
       bad_catalog: [400, "That pattern or product page doesn't exist."],
-      bad_media: [400, "Photos go with Show & tell shared to your feed, and must be your own."],
+      bad_media: [400, "Photos go with Show & tell (up to 10), and must be your own."],
+      no_photo: [400, "Show & tell needs at least one photo."],
     }[result.error] as [number, string];
     return void fail(res, status, error);
   }

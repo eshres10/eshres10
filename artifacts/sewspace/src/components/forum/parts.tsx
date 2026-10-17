@@ -81,6 +81,12 @@ function closesIn(date: string) {
   return days >= 1 ? `${days} day${days === 1 ? '' : 's'} left` : hours >= 1 ? `${hours} hour${hours === 1 ? '' : 's'} left` : 'closes soon';
 }
 
+/** "3 days" / "1 week" for a poll that hasn't started yet (the flow's preview). */
+function pollLength(closesAt: string) {
+  const days = Math.max(1, Math.round((new Date(closesAt).getTime() - Date.now()) / 86400000));
+  return days === 7 ? '1 week' : `${days} day${days === 1 ? '' : 's'}`;
+}
+
 /** Inline poll: choose an option to see results; change your vote while it's open. */
 export function Poll({ topicId, poll: initial }: { topicId: number; poll: ForumPoll }) {
   const ask = useRequireSignIn();
@@ -127,19 +133,42 @@ export function Poll({ topicId, poll: initial }: { topicId: number; poll: ForumP
   );
 }
 
-/** A topic in a list, as in the design: votes, badges, title, excerpt, poll, accepted answer. */
-export function TopicCard({ topic: t }: { topic: ForumTopicSummary }) {
+/** Show & tell photos: up to three thumbnails, the rest as "+n". */
+export function TopicPhotos({ photos, preview = false }: { photos: ForumTopicSummary['photos']; preview?: boolean }) {
+  if (!photos.length) return null;
+  const shown = photos.slice(0, 3);
+  return (
+    <div className={`mt-3 grid gap-1.5 ${shown.length === 1 ? 'grid-cols-1' : shown.length === 2 ? 'grid-cols-2' : 'grid-cols-3'}`}>
+      {shown.map((p, i) => (
+        <span key={p.id} className="relative block overflow-hidden rounded-[14px] bg-canvas" style={{ aspectRatio: shown.length === 1 ? '4 / 3' : '4 / 5', backgroundColor: p.color ?? undefined }}>
+          <img src={p.thumbUrl} alt={p.altText} loading={preview ? undefined : 'lazy'} className="h-full w-full object-cover" />
+          {i === 2 && photos.length > 3 && <span className="absolute inset-0 grid place-items-center bg-ink/55 font-display text-xl text-white">+{photos.length - 3}</span>}
+        </span>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * A topic in a list, as in the design: votes, badges, title, excerpt, photos,
+ * poll, accepted answer. `preview` shows it as it will appear, without links or
+ * voting (the forum flow's Preview step).
+ */
+export function TopicCard({ topic: t, preview = false }: { topic: ForumTopicSummary; preview?: boolean }) {
   return (
     <article className="flex gap-3 rounded-[30px] bg-white p-4 sm:p-5">
-      <Upvote kind="topic" id={t.id} votes={t.votes} voted={t.votedByMe} own={false} vertical />
+      <Upvote kind="topic" id={t.id} votes={t.votes} voted={t.votedByMe} own={preview} vertical />
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-1.5"><KindBadge kind={t.kind} /><StateBadges topic={t} /></div>
         <p className="mt-1.5 text-xs text-subtle">{BOARDS[t.board]} · @{t.author.handle} · {timeAgo(t.createdAt)}</p>
         <h3 className="mt-1 font-display text-[19px] leading-snug tracking-[-.03em]">
-          <Link href={`/forum/topics/${t.id}`} className="text-ink no-underline hover:underline">{t.title}</Link>
+          {preview ? t.title : <Link href={`/forum/topics/${t.id}`} className="text-ink no-underline hover:underline">{t.title}</Link>}
         </h3>
         {t.excerpt && t.kind !== 'poll' && <p className="mt-1 line-clamp-2 text-sm text-subtle">{t.excerpt}</p>}
-        {t.poll && <div className="mt-3"><Poll topicId={t.id} poll={t.poll} /></div>}
+        <TopicPhotos photos={t.photos} preview={preview} />
+        {t.poll && (preview
+          ? <div className="mt-3 space-y-2">{t.poll.options.map(o => <p key={o.id} className="flex min-h-[44px] items-center rounded-[16px] border-2 border-ink px-4 text-sm font-semibold">{o.label}</p>)}<p className="text-xs text-subtle">{pollLength(t.poll.closesAt)} to vote · results show once people vote</p></div>
+          : <div className="mt-3"><Poll topicId={t.id} poll={t.poll} /></div>)}
         {t.acceptedAnswer && (
           <div className="mt-3 rounded-[16px] bg-canvas p-3 text-sm">
             <p className="text-xs font-bold"><Check size={12} className="mr-1 inline" aria-hidden="true" />Accepted answer from @{t.acceptedAnswer.author}</p>
@@ -152,11 +181,11 @@ export function TopicCard({ topic: t }: { topic: ForumTopicSummary }) {
           ))}</p>
         )}
         <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
-          <Link href={`/forum/topics/${t.id}#replies`} className="inline-flex items-center gap-1 font-semibold text-ink no-underline">
+          {!preview && <Link href={`/forum/topics/${t.id}#replies`} className="inline-flex items-center gap-1 font-semibold text-ink no-underline">
             <MessageCircle size={14} aria-hidden="true" />
             {t.replies ? `${t.replies} ${t.kind === 'question' ? (t.replies === 1 ? 'answer' : 'answers') : (t.replies === 1 ? 'reply' : 'replies')}` : t.kind === 'question' ? 'Be the first to answer' : 'No replies yet'}
-          </Link>
-          {t.tags.map(tag => <Link key={tag} href={`/forum?q=${encodeURIComponent(tag)}`} className="text-subtle">#{tag}</Link>)}
+          </Link>}
+          {t.tags.map(tag => preview ? <span key={tag} className="text-subtle">#{tag}</span> : <Link key={tag} href={`/forum?q=${encodeURIComponent(tag)}`} className="text-subtle">#{tag}</Link>)}
         </div>
       </div>
     </article>

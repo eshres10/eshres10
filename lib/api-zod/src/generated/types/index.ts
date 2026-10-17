@@ -111,6 +111,7 @@ export * from './listForumTopicsSort';
 export * from './listPatternsParams';
 export * from './listReportsParams';
 export * from './listReportsStatus';
+export * from './listSimilarQuestionsParams';
 export * from './listThreadsParams';
 export * from './makeSummary';
 export * from './measurementProfile';

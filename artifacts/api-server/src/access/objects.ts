@@ -1,6 +1,8 @@
-import { and, eq, inArray, or, type SQL } from "drizzle-orm";
+import { and, eq, inArray, or, sql, type SQL } from "drizzle-orm";
 import {
   fabricsTable,
+  forumTopicMediaTable,
+  forumTopicsTable,
   mediaTable,
   patternsTable,
   postMediaTable,
@@ -90,6 +92,15 @@ async function shownOnVisibleRow(db: Tx, viewer: Viewer, ownerId: string, url: s
         eq(mediaTable.userId, ownerId), eq(postsTable.userId, ownerId),
         or(eq(mediaTable.fullPath, url.replace(/^\/api\/storage/, "")), eq(mediaTable.thumbPath, url.replace(/^\/api\/storage/, ""))) as SQL,
         visibleTo(postsTable, viewer),
+      )).limit(1),
+    // Show & tell photos on a forum topic (public, except across a block).
+    db.select({ id: mediaTable.id }).from(mediaTable)
+      .innerJoin(forumTopicMediaTable, eq(forumTopicMediaTable.mediaId, mediaTable.id))
+      .innerJoin(forumTopicsTable, eq(forumTopicsTable.id, forumTopicMediaTable.topicId))
+      .where(and(
+        eq(mediaTable.userId, ownerId), eq(forumTopicMediaTable.userId, ownerId), eq(forumTopicsTable.userId, ownerId),
+        or(eq(mediaTable.fullPath, url.replace(/^\/api\/storage/, "")), eq(mediaTable.thumbPath, url.replace(/^\/api\/storage/, ""))) as SQL,
+        viewer.userId ? sql`NOT sewspace_blocked_with(${forumTopicsTable.userId})` : undefined,
       )).limit(1),
   ];
   // One query at a time: a request transaction has a single connection.

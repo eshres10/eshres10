@@ -91,6 +91,7 @@ import type {
   ListForumTopicsParams,
   ListPatternsParams,
   ListReportsParams,
+  ListSimilarQuestionsParams,
   ListThreadsParams,
   MeasurementProfile,
   MeasurementProfileInput,
@@ -4567,6 +4568,114 @@ export function useListForumTopics<TData = Awaited<ReturnType<typeof listForumTo
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getListForumTopicsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListSimilarQuestionsUrl = (params: ListSimilarQuestionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/forum/similar?${stringifiedParams}` : `/api/public/forum/similar`
+}
+
+/**
+ * @summary Up to 3 questions whose titles share the most words with q (Already asked?). Works signed out.
+ */
+export const listSimilarQuestions = async (params: ListSimilarQuestionsParams, options?: Parameters<typeof customFetch>[1]): Promise<ForumTopicSummary[]> => {
+
+  return customFetch<ForumTopicSummary[]>(getListSimilarQuestionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSimilarQuestionsQueryKey = (params?: ListSimilarQuestionsParams,) => {
+    return [
+    `/api/public/forum/similar`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListSimilarQuestionsQueryOptions = <TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(params: ListSimilarQuestionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSimilarQuestionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSimilarQuestions>>> = ({ signal }) => listSimilarQuestions(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListSimilarQuestionsQueryResult = NonNullable<Awaited<ReturnType<typeof listSimilarQuestions>>>
+export type ListSimilarQuestionsQueryError = ErrorType<unknown>
+
+
+export function useListSimilarQuestions<TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(
+ params: ListSimilarQuestionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSimilarQuestions>>,
+          TError,
+          Awaited<ReturnType<typeof listSimilarQuestions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSimilarQuestions<TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(
+ params: ListSimilarQuestionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSimilarQuestions>>,
+          TError,
+          Awaited<ReturnType<typeof listSimilarQuestions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSimilarQuestions<TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(
+ params: ListSimilarQuestionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Up to 3 questions whose titles share the most words with q (Already asked?). Works signed out.
+ */
+
+export function useListSimilarQuestions<TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(
+ params: ListSimilarQuestionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListSimilarQuestionsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
