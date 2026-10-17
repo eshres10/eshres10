@@ -19,7 +19,7 @@ import { Bookmark, Check, ExternalLink, Loader2, Pencil, Scissors, ThumbsUp } fr
 import { Link, useLocation } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
-import { capitalise, EditEntryForm, ReviewForm, Stars } from '@/components/catalog/parts';
+import { capitalise, DeletePage, EditEntryForm, ReviewForm, Stars } from '@/components/catalog/parts';
 import { Alterations, DesignerRow, FabricsUsed, Gallery, GetIt, SizeChart, StarSummary, StatTiles } from '@/components/catalog/PatternPage';
 import { Loading } from '@/components/common';
 import { Discussions } from '@/components/forum/Discussions';
@@ -180,6 +180,7 @@ function MadeIt({ entry: e, me }: { entry: CatalogEntry; me: CatalogMe | undefin
 
 function Actions({ page, me }: { page: CatalogPage; me: CatalogMe | undefined }) {
   const ask = useRequireSignIn();
+  const [, navigate] = useLocation();
   const client = useQueryClient();
   const save = useAddCatalogPatternToLibrary();
   const e = page.entry;
@@ -202,6 +203,7 @@ function Actions({ page, me }: { page: CatalogPage; me: CatalogMe | undefined })
       {editing && (
         <Sheet label={`Edit ${e.name}`} onClose={() => setEditing(false)}>
           <EditEntryForm entry={e} sizes={page.sizes} onDone={() => setEditing(false)} />
+          {page.canDelete && <DeletePage entry={e} onDeleted={() => { setEditing(false); navigate(e.kind === 'pattern' ? '/catalog' : '/catalog?kind=product'); }} />}
         </Sheet>
       )}
     </div>

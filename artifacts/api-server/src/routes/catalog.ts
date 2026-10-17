@@ -4,6 +4,7 @@ import {
   AddCatalogPatternToLibraryResponse,
   CreateCatalogEntryBody,
   CreateCatalogEntryResponse,
+  DeleteCatalogEntryParams,
   DeleteReviewParams,
   GetCatalogEntryParams,
   GetCatalogMeParams,
@@ -36,6 +37,7 @@ import {
   addToLibrary,
   catalogMe,
   createCatalogEntry,
+  deleteCatalogEntry,
   deleteReview,
   getCatalogEntry,
   getCatalogPage,
@@ -133,6 +135,16 @@ router.patch("/catalog/:id", scoped(async (req, res, db): Promise<void> => {
     return;
   }
   res.json(UpdateCatalogEntryResponse.parse(result.value));
+}));
+
+router.delete("/catalog/:id", scoped(async (req, res, db): Promise<void> => {
+  const params = DeleteCatalogEntryParams.safeParse(req.params);
+  const result = params.success ? await deleteCatalogEntry(db, viewerOf(req), params.data.id) : { ok: false as const, error: "not_found" as const };
+  if (!result.ok) {
+    res.status(result.error === "in_use" ? 409 : 404).json({ error: result.error === "in_use" ? "Other people use this page now, so it can't be deleted." : "Page not found" });
+    return;
+  }
+  res.sendStatus(204);
 }));
 
 router.put("/catalog/:id/review", scoped(async (req, res, db): Promise<void> => {

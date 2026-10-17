@@ -1146,6 +1146,8 @@ export interface CatalogPage {
      * @nullable
      */
   designerInfo: CatalogPageDesignerInfo;
+  /** You added this page and nobody else uses it yet */
+  canDelete: boolean;
 }
 
 /**

@@ -587,6 +587,16 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/CatalogEntry" }
         "404": { description: Not found or not yours to edit }
+    delete:
+      operationId: deleteCatalogEntry
+      tags: [catalog]
+      summary: "Delete a page you added, while nobody else uses it (no one else's review, save, linked item or forum post)."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Deleted }
+        "404": { description: Not found or not yours }
+        "409": { description: Someone else uses this page }
   /catalog/{id}/sizes:
     put:
       operationId: setCatalogSizes
@@ -2792,7 +2802,8 @@ components:
             followedByMe: { type: boolean }
             isMe: { type: boolean }
           required: [shopUrl, instagram, patterns, followedByMe, isMe]
-      required: [entry, makes, fabricsUsed, myReview, inMyLibrary, gallery, sizes, stars, alterations, designerInfo]
+        canDelete: { type: boolean, description: "You added this page and nobody else uses it yet" }
+      required: [entry, makes, fabricsUsed, myReview, inMyLibrary, gallery, sizes, stars, alterations, designerInfo, canDelete]
     CatalogSize:
       type: object
       properties:

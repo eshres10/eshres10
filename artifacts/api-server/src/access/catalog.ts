@@ -366,7 +366,9 @@ export async function getCatalogPage(db: Tx, viewer: Viewer, kind: CatalogKind, 
       if ((hit?.n ?? 0) > 0) inMyLibrary = true;
     }
   }
-  return { entry: view, makes: makes.map(({ fabricType: _t, ...m }) => m), fabricsUsed, myReview, inMyLibrary, ...extras };
+  // Only the person who added the page sees canDelete, and only while nobody else uses it.
+  const canDelete = entry.createdBy === viewer.userId && !(await usedByOthers(db, entry.id));
+  return { entry: view, makes: makes.map(({ fabricType: _t, ...m }) => m), fabricsUsed, myReview, inMyLibrary, ...extras, canDelete };
 }
 
 export interface CatalogSizeView { label: string; bustCm: number | null; waistCm: number | null; hipCm: number | null }
@@ -539,6 +541,26 @@ export async function createCatalogEntry(
 }
 
 /** Corrections by the person who added the page, or an admin. Kind and slug never change. */
+/** Someone else's review, save, linked item or forum post names this page (migration 0018). */
+async function usedByOthers(db: Tx, id: number): Promise<boolean> {
+  const r = await db.execute<{ used: boolean }>(sql`SELECT sewspace_catalog_used_by_others(${id}) AS used`);
+  return Boolean(r.rows[0]?.used);
+}
+
+/**
+ * Delete a page you added, while nobody else uses it. Your own links to it go
+ * back to unlinked; your review, sizes and saves go with it. RLS (creator_delete)
+ * checks the same thing.
+ */
+export async function deleteCatalogEntry(db: Tx, viewer: Viewer, id: number): Promise<Ok<null> | Fail<"not_found" | "in_use">> {
+  const me = viewer.userId;
+  const [entry] = me ? await db.select({ createdBy: catalogTable.createdBy }).from(catalogTable).where(eq(catalogTable.id, id)) : [];
+  if (!me || !entry || entry.createdBy !== me) return { ok: false, error: "not_found" };
+  if (await usedByOthers(db, id)) return { ok: false, error: "in_use" };
+  const gone = await db.delete(catalogTable).where(and(eq(catalogTable.id, id), eq(catalogTable.createdBy, me))).returning({ id: catalogTable.id });
+  return gone.length ? { ok: true, value: null } : { ok: false, error: "in_use" };
+}
+
 export async function updateCatalogEntry(db: Tx, viewer: Viewer, id: number, input: CatalogFields): Promise<Ok<CatalogEntryView> | Fail<FieldError | "not_found">> {
   const [entry] = await db.select().from(catalogTable).where(eq(catalogTable.id, id));
   if (!entry || !viewer.userId || (entry.createdBy !== viewer.userId && !viewer.isAdmin)) return { ok: false, error: "not_found" };

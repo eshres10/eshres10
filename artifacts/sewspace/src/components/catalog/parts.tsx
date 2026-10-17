@@ -3,6 +3,7 @@ import { useSheetDirty } from '@/components/social/Sheet';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useCreateCatalogEntry,
+  useDeleteCatalogEntry,
   useGetProfile,
   useSaveReview,
   useDeleteReview,
@@ -16,7 +17,7 @@ import {
   type Review,
   type ReviewInputSizing,
 } from '@workspace/api-client-react';
-import { Loader2, Star } from 'lucide-react';
+import { Globe, Loader2, Star, Trash2 } from 'lucide-react';
 import { CURRENCIES, defaultCurrency } from '@/lib/currency';
 
 export const PATTERN_CATEGORIES = ['dresses', 'tops', 'trousers', 'skirts', 'jumpsuits', 'outerwear', 'knitwear', 'lingerie', 'activewear', 'menswear', 'kids', 'bags', 'accessories', 'home', 'other'] as const;
@@ -201,7 +202,11 @@ export function NewEntryForm({ kind, initial, onCreated, onCancel }: {
       }, { onSuccess: onCreated });
     }}>
       <h2 className="font-display text-2xl">Add a {kind === 'pattern' ? 'pattern' : 'product'} page</h2>
-      <p className="text-sm text-subtle">Pages are shared by everyone on Seams Club. Only add patterns and products you can name; never upload pattern files.</p>
+      <div role="note" className="flex gap-2.5 rounded-[16px] bg-yellow px-4 py-3 text-sm">
+        <Globe size={17} aria-hidden="true" className="mt-0.5 shrink-0" />
+        <p><b>This page will be public.</b> Anyone, signed out too, can see the name, {kind === 'pattern' ? 'designer' : 'brand'} and details you add, and it's listed in the {kind === 'pattern' ? 'pattern directory' : 'catalog'}. Your own {kind === 'pattern' ? 'pattern' : 'item'} in your studio stays private. You can delete the page while nobody else uses it.</p>
+      </div>
+      <p className="text-sm text-subtle">Only add {kind === 'pattern' ? 'patterns' : 'products'} you can name; never upload pattern files.</p>
       <label className="block text-xs font-semibold">Name
         <input value={form.name} onChange={e => set('name', e.target.value)} required maxLength={120} className="field mt-1.5" placeholder={kind === 'pattern' ? 'Willa Dress' : 'Mara 100'} />
       </label>
@@ -386,5 +391,35 @@ export function EditEntryForm({ entry, sizes, onDone }: { entry: CatalogEntry; s
         <button type="submit" disabled={busy} className="btn btn-primary flex-1">{busy && <Loader2 size={15} className="animate-spin" />}Save</button>
       </div>
     </form>
+  );
+}
+
+/**
+ * Delete a page you added, while nobody else uses it (the API checks again).
+ * Asks first; your own pattern stays in your library, unlinked.
+ */
+export function DeletePage({ entry, onDeleted }: { entry: CatalogEntry; onDeleted: () => void }) {
+  const client = useQueryClient();
+  const remove = useDeleteCatalogEntry();
+  const [asking, setAsking] = useState(false);
+  return (
+    <section aria-labelledby="delete-page-title" className="mt-6 border-t border-line pt-5">
+      <h3 id="delete-page-title" className="text-sm font-bold">Delete this page</h3>
+      <p className="mt-1 text-sm text-subtle">You added it and nobody else uses it yet, so you can remove it from Seams Club. Your own {entry.kind === 'pattern' ? 'pattern' : 'item'} stays in your studio.</p>
+      {!asking
+        ? <button type="button" onClick={() => setAsking(true)} className="mt-3 inline-flex min-h-[44px] items-center gap-2 rounded-full border border-red-ink px-4 text-sm font-bold text-red-ink">
+            <Trash2 size={15} aria-hidden="true" />Delete page
+          </button>
+        : <div role="group" aria-label={`Delete ${entry.name}?`} className="mt-3 flex flex-wrap items-center gap-2 rounded-[16px] bg-canvas p-3">
+            <p className="min-w-[10rem] flex-1 text-sm font-semibold">Delete "{entry.name}" for everyone? This can't be undone.</p>
+            <button type="button" autoFocus onClick={() => setAsking(false)} className="min-h-[44px] rounded-full bg-white px-4 text-sm font-bold">Keep it</button>
+            <button type="button" disabled={remove.isPending}
+              onClick={() => remove.mutate({ id: entry.id }, { onSuccess: () => { client.invalidateQueries(); onDeleted(); } })}
+              className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-red-ink px-4 text-sm font-bold text-white disabled:opacity-60">
+              {remove.isPending && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}Delete
+            </button>
+          </div>}
+      {remove.isError && <p role="alert" className="mt-2 text-sm font-semibold text-red-ink">{errorText(remove.error, "Couldn't delete the page.")}</p>}
+    </section>
   );
 }

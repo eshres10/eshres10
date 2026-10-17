@@ -1078,7 +1078,8 @@ export const GetCatalogPageResponse = zod.object({
   "patterns": zod.number().int().describe('Pattern pages naming them as designer'),
   "followedByMe": zod.boolean(),
   "isMe": zod.boolean()
-}).nullable().describe('The designer\'s links and follow state, when the designer has an account')
+}).nullable().describe('The designer\'s links and follow state, when the designer has an account'),
+  "canDelete": zod.boolean().describe('You added this page and nobody else uses it yet')
 })
 
 
@@ -1325,6 +1326,16 @@ export const UpdateCatalogEntryResponse = zod.object({
   "isNew": zod.boolean().describe('Added in the last 30 days'),
   "savedByMe": zod.boolean()
 })
+
+
+/**
+ * @summary Delete a page you added, while nobody else uses it (no one else's review, save, linked item or forum post).
+ */
+export const DeleteCatalogEntryParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteCatalogEntryResponse = zod.void()
 
 
 /**

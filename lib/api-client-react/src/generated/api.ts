@@ -3455,6 +3455,80 @@ export const useUpdateCatalogEntry = <TError = ErrorType<void>,
       return useMutation(getUpdateCatalogEntryMutationOptions(options), queryClient);
     }
 
+export const getDeleteCatalogEntryUrl = (id: number,) => {
+
+
+
+
+  return `/api/catalog/${id}`
+}
+
+/**
+ * @summary Delete a page you added, while nobody else uses it (no one else's review, save, linked item or forum post).
+ */
+export const deleteCatalogEntry = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteCatalogEntryUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteCatalogEntryMutationKey = () => ['deleteCatalogEntry'] as const;
+
+export const getDeleteCatalogEntryMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCatalogEntry>>, TError,DeleteCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteCatalogEntry>>, TError,DeleteCatalogEntryMutationVariables, TContext> => {
+
+const mutationKey = getDeleteCatalogEntryMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteCatalogEntry>>, DeleteCatalogEntryMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteCatalogEntry(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteCatalogEntryMutationResult = NonNullable<Awaited<ReturnType<typeof deleteCatalogEntry>>>
+
+    export type DeleteCatalogEntryMutationError = ErrorType<void>
+    export type DeleteCatalogEntryMutationVariables = {id: number}
+
+    /**
+ * @summary Delete a page you added, while nobody else uses it (no one else's review, save, linked item or forum post).
+ */
+export const useDeleteCatalogEntry = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCatalogEntry>>, TError,DeleteCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteCatalogEntry>>,
+        TError,
+        DeleteCatalogEntryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteCatalogEntryMutationOptions(options), queryClient);
+    }
+
 export const getSetCatalogSizesUrl = (id: number,) => {
 
 
