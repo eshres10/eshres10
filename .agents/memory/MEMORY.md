@@ -1,1 +1,2 @@
 - [Manual web builds](manual-web-build-env.md) — direct Vite builds need the artifact's `PORT` and `BASE_PATH` environment variables.
+- [Publish diff and custom checks](publish-diff-custom-checks.md) — a CHECK using a user-defined function was serialized malformed, and the diff omitted the function definition.
