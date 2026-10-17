@@ -6,6 +6,7 @@ import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { capitalise, catalogPath, NewEntryForm, Stars } from '@/components/catalog/parts';
 import { ErrorState } from '@/components/common';
 import { Sheet } from '@/components/social/Sheet';
+import { CommunityTabs } from '@/components/shell/CommunityTabs';
 
 const KINDS = [
   { id: 'pattern', label: 'Patterns', icon: BookOpen },
@@ -45,6 +46,7 @@ export function CatalogPage() {
 
   return (
     <div className="mx-auto max-w-[1232px]">
+      <CommunityTabs />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="eyebrow">Patterns &amp; supplies</p>

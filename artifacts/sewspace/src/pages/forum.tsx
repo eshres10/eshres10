@@ -7,6 +7,7 @@ import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
 import { ErrorState } from '@/components/common';
 import { BOARDS, KINDS, TopicCard } from '@/components/forum/parts';
+import { CommunityTabs } from '@/components/shell/CommunityTabs';
 
 const SORTS: Array<{ id: ListForumTopicsSort; label: string }> = [
   { id: 'hot', label: 'Hot' },
@@ -53,6 +54,7 @@ export function ForumPage() {
 
   return (
     <div className="mx-auto max-w-[1232px]">
+      <CommunityTabs />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="eyebrow">Forum{board && ` · ${BOARDS[board]}`}</p>

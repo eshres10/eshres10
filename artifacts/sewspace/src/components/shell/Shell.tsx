@@ -8,6 +8,7 @@ import { PublicHeader } from '@/components/shell/PublicHeader';
 import { UserAvatar } from '@/components/avatar';
 import { Logo } from '@/components/brand/Logo';
 import { currentAppPath } from '@/lib/navigation';
+import { inCommunity } from '@/components/shell/CommunityTabs';
 
 type NavItem = { href: string; label: string; icon: typeof Home };
 
@@ -86,7 +87,8 @@ function MobileTabBar({ location }: { location: string }) {
   const me = useMyProfile();
   const meHref = me?.handle ? `/@${me.handle}` : '/settings';
   const tab = (href: string, label: string, Icon: typeof Home) => {
-    const active = isActive(location, href);
+    // Explore is the door to all community sections (forum, challenges, patterns).
+    const active = href === '/explore' ? inCommunity(location) : isActive(location, href);
     return (
       <Link href={href} aria-label={label} aria-current={active ? 'page' : undefined}
         className={`grid h-12 w-[52px] place-items-center rounded-[18px] ${active ? 'bg-ink text-white' : 'text-ink'}`}>

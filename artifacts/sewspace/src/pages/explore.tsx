@@ -6,6 +6,7 @@ import { Link } from 'wouter';
 import { ErrorState } from '@/components/common';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { CaptionText } from '@/components/feed/CaptionText';
+import { CommunityTabs } from '@/components/shell/CommunityTabs';
 
 const KINDS = [
   { id: 'all', label: 'All' },
@@ -57,24 +58,26 @@ export function ExplorePage() {
   const posts = feed.data?.pages.flatMap(page => page.items) ?? [];
   return (
     <div className="mx-auto max-w-[1232px]">
+      <CommunityTabs />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="eyebrow">Explore</p>
           <h1 className="mt-1 font-display text-[34px] leading-tight tracking-[-.05em]">Fresh from sewing tables</h1>
         </div>
-        <div className="flex flex-wrap gap-1.5">
-        <div className="flex gap-1 rounded-full bg-white p-1" role="group" aria-label="Order">
+      </div>
+      <div className="-mx-3 mt-4 flex items-center gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:px-0">
+        <div className="flex shrink-0 gap-1.5" role="group" aria-label="Order">
           {SORTS.map(o => (
             <button key={o.id} type="button" aria-pressed={sort === o.id} onClick={() => setSort(o.id)}
-              className={`min-h-[40px] rounded-full px-4 text-sm font-bold ${sort === o.id ? 'bg-yellow text-ink' : 'text-ink'}`}>{o.label}</button>
+              className={`min-h-[44px] shrink-0 rounded-full border-2 px-4 text-sm font-bold ${sort === o.id ? 'border-ink bg-yellow text-ink' : 'border-line bg-transparent text-ink'}`}>{o.label}</button>
           ))}
         </div>
-        <div className="flex flex-wrap gap-1.5" role="group" aria-label="Show">
+        <span aria-hidden="true" className="mx-1.5 h-7 w-px shrink-0 bg-subtle/30" />
+        <div className="flex shrink-0 gap-1.5" role="group" aria-label="Show">
           {KINDS.map(k => (
             <button key={k.id} type="button" aria-pressed={kind === k.id} onClick={() => setKind(k.id)}
-              className={`min-h-[44px] rounded-full px-4 text-sm font-semibold ${kind === k.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>{k.label}</button>
+              className={`min-h-[44px] shrink-0 rounded-full px-4 text-sm font-semibold ${kind === k.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>{k.label}</button>
           ))}
-        </div>
         </div>
       </div>
       {sort === 'popular' && <p className="mt-3 text-sm text-subtle">Most liked in the last two weeks.</p>}
