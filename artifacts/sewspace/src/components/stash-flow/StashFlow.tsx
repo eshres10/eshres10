@@ -37,6 +37,7 @@ import {
 import { AudienceCards, type Audience } from '@/components/post-flow/parts';
 import { GARMENTS } from '@/components/projects/QuickStart';
 import { uploadFile } from '@/lib/upload';
+import { takeHandedOverFile } from '@/lib/pending-file';
 import { ColourField, FoundRow, KIND_LABEL, KIND_TITLE, KindCards, ReadingCard, SourceList, StashPreview, Stepper, type Source, type StashKind } from './parts';
 
 const STEPS = ['start', 'details', 'more', 'save'] as const;
@@ -226,6 +227,12 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
       setReading('done');
     }).catch(() => setReading('failed'));
   }, [pdfItem?.status]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // A PDF chosen on the Pattern library's "Import a pattern PDF" banner.
+  useEffect(() => {
+    const file = isEdit ? null : takeHandedOverFile();
+    if (file) { setKind('pattern'); setSource('pdf'); readPdf(file); }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const pickSource = (s: Source) => {
     setSource(s);

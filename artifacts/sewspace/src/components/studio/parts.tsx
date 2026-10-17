@@ -38,8 +38,8 @@ const row = 'flex min-h-[52px] w-full items-center gap-3 rounded-[16px] px-3 tex
  * flow, which also holds who can see it), downloads, the shared page link and
  * delete (asks twice).
  */
-export function ItemActions({ title, editHref, imageUrl, item, fallbackName, catalog, onDelete, deleting, onClose }: {
-  title: string; editHref: string; imageUrl?: string | null; item: AnyRecord; fallbackName: string;
+export function ItemActions({ title, editHref, imageUrl, pdf, item, fallbackName, catalog, onDelete, deleting, onClose }: {
+  title: string; editHref: string; imageUrl?: string | null; pdf?: { url: string; fileName: string } | null; item: AnyRecord; fallbackName: string;
   catalog?: ReactNode; onDelete: () => void; deleting: boolean; onClose: () => void;
 }) {
   const [confirm, setConfirm] = useState(false);
@@ -48,6 +48,7 @@ export function ItemActions({ title, editHref, imageUrl, item, fallbackName, cat
       <h2 className="mb-2 truncate px-1 font-display text-[22px] tracking-[-.04em]">{title}</h2>
       <Link href={editHref} className={row}><Pencil size={18} aria-hidden="true" />Edit</Link>
       {imageUrl && <a href={imageUrl} download={`${title}-photo`} className={row}><Download size={18} aria-hidden="true" />Download photo</a>}
+      {pdf && <a href={pdf.url} download={pdf.fileName} className={row}><Download size={18} aria-hidden="true" />Download PDF</a>}
       <button type="button" onClick={() => downloadDetails(item, title, fallbackName)} className={row}><FileText size={18} aria-hidden="true" />Download details</button>
       {catalog && <div className="px-3 py-2">{catalog}</div>}
       <button type="button" onClick={() => (confirm ? onDelete() : setConfirm(true))} disabled={deleting} aria-live="polite"
