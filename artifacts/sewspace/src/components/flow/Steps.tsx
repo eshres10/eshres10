@@ -12,10 +12,12 @@ interface StepsProps {
   onStep: (id: string) => void;
 }
 
-function stateOf(steps: readonly FlowStepDef[], current: string, id: string) {
+// Steps before the current one are done; so are later ones that can be opened
+// (visited already, or every step in edit mode).
+function stateOf(steps: readonly FlowStepDef[], current: string, id: string, canOpen: (id: string) => boolean) {
   const at = steps.findIndex(s => s.id === current);
   const i = steps.findIndex(s => s.id === id);
-  return i === at ? 'current' : i < at ? 'done' : 'todo';
+  return i === at ? 'current' : i < at || canOpen(id) ? 'done' : 'todo';
 }
 
 /** Phone: labelled segments under the header. Done steps (and every step in edit mode) can be opened. */
@@ -23,7 +25,7 @@ export function StepBar({ steps, current, canOpen, onStep }: StepsProps) {
   return (
     <ol className="grid gap-2 px-6" style={{ gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))` }} aria-label="Steps">
       {steps.map((s, i) => {
-        const state = stateOf(steps, current, s.id);
+        const state = stateOf(steps, current, s.id, canOpen);
         const open = state !== 'current' && !s.skipped && canOpen(s.id);
         const inner = (
           <>
@@ -51,7 +53,7 @@ export function StepPills({ steps, current, canOpen, onStep }: StepsProps) {
   return (
     <ol className="flex items-center gap-1.5" aria-label="Steps">
       {steps.map((s, i) => {
-        const state = stateOf(steps, current, s.id);
+        const state = stateOf(steps, current, s.id, canOpen);
         const open = state !== 'current' && !s.skipped && canOpen(s.id);
         const cls = `inline-flex min-h-[40px] items-center gap-2 rounded-full px-3.5 text-sm font-bold ${state === 'current' ? 'bg-canvas text-ink' : 'bg-canvas text-subtle'} ${s.skipped ? 'line-through' : ''}`;
         const inner = (

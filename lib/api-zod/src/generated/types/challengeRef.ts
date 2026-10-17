@@ -9,4 +9,6 @@
 export interface ChallengeRef {
   slug: string;
   tag: string;
+  /** On posts: the entry, so its author can withdraw it */
+  entryId?: number;
 }

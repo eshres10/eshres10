@@ -32,6 +32,10 @@ export interface FlowShellProps {
   desktopPrimaryInHeader?: boolean;
   /** Desktop only: a preview pane beside the form. */
   aside?: { side: 'left' | 'right'; title?: string; content: ReactNode; dark?: boolean };
+  /** Desktop: white behind the form instead of canvas grey (New post). */
+  plainDesktop?: boolean;
+  /** Desktop: keep one height across steps instead of fitting each step. */
+  steadyHeight?: boolean;
   children: ReactNode;
 }
 
@@ -54,7 +58,7 @@ function PrimaryButton({ action, describedBy, className }: { action: FlowAction;
  * preview pane.
  */
 export function FlowShell(props: FlowShellProps) {
-  const { title, subtitle, steps, current, canOpen, onStep, onClose, onBack, primary, primaryInHeader, desktopPrimaryInHeader, aside, children } = props;
+  const { title, subtitle, steps, current, canOpen, onStep, onClose, onBack, primary, primaryInHeader, desktopPrimaryInHeader, aside, plainDesktop, steadyHeight, children } = props;
   const dialog = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const reasonId = useId();
@@ -68,7 +72,7 @@ export function FlowShell(props: FlowShellProps) {
     : <button type="button" onClick={onClose} aria-label="Close" className={`${round} ${extra}`}><X size={20} aria-hidden="true" /></button>;
 
   const pane = aside && (
-    <aside className={`hidden min-h-0 shrink-0 overflow-y-auto border-line p-5 lg:block ${aside.side === 'left' ? 'order-first border-r' : 'border-l'} ${aside.dark ? 'w-[46%] bg-ink text-white' : aside.side === 'left' ? 'w-[300px] bg-white' : 'w-[320px] bg-white'}`}
+    <aside className={`hidden min-h-0 shrink-0 overflow-y-auto border-line p-5 lg:block ${aside.side === 'left' ? 'order-first border-r' : 'border-l'} ${aside.dark ? 'w-[55%] bg-ink text-white' : aside.side === 'left' ? 'w-[300px] bg-white' : 'w-[320px] bg-white'}`}
       aria-label={aside.title ?? 'Preview'}>
       {aside.title && <p className={`eyebrow mb-3 ${aside.dark ? 'text-white/70' : 'text-subtle'}`}>{aside.title}</p>}
       {aside.content}
@@ -79,7 +83,7 @@ export function FlowShell(props: FlowShellProps) {
     <div className="fixed inset-0 z-[55] flex flex-col bg-canvas lg:items-center lg:justify-center lg:bg-ink/45 lg:p-6"
       onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={dialog} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}
-        className="flex min-h-0 flex-1 flex-col outline-none lg:max-h-[min(880px,calc(100dvh-48px))] lg:w-full lg:max-w-[1080px] lg:flex-none lg:overflow-hidden lg:rounded-[34px] lg:bg-white">
+        className={`flex min-h-0 flex-1 flex-col outline-none lg:max-h-[min(880px,calc(100dvh-48px))] lg:w-full lg:max-w-[1080px] lg:flex-none lg:overflow-hidden lg:rounded-[34px] lg:bg-white ${steadyHeight ? 'lg:h-[min(760px,calc(100dvh-48px))]' : ''}`}>
 
         {/* Phone header and step bar */}
         <div className="shrink-0 px-3 pt-[calc(.75rem+env(safe-area-inset-top))] lg:hidden">
@@ -94,7 +98,7 @@ export function FlowShell(props: FlowShellProps) {
             )}
           </div>
         </div>
-        <div className="shrink-0 pt-1 lg:hidden"><StepBar steps={steps} current={current} canOpen={canOpen} onStep={onStep} /></div>
+        {steps.length > 0 && <div className="shrink-0 pt-1 lg:hidden"><StepBar steps={steps} current={current} canOpen={canOpen} onStep={onStep} /></div>}
 
         {/* Desktop header with step pills */}
         <div className="hidden shrink-0 grid-cols-[1fr_auto_1fr] items-center gap-4 border-b border-line px-4 py-3 lg:grid">
@@ -105,7 +109,7 @@ export function FlowShell(props: FlowShellProps) {
               {subtitle && <p className="truncate text-xs text-subtle">{subtitle}</p>}
             </div>
           </div>
-          <StepPills steps={steps} current={current} canOpen={canOpen} onStep={onStep} />
+          {steps.length > 0 ? <StepPills steps={steps} current={current} canOpen={canOpen} onStep={onStep} /> : <span />}
           <div className="flex items-center justify-end gap-3">
             {desktopPrimaryInHeader
               ? primary && <>
@@ -118,7 +122,7 @@ export function FlowShell(props: FlowShellProps) {
 
         <div className="flex min-h-0 flex-1">
           <div className="flex min-w-0 flex-1 flex-col">
-            <main className="min-h-0 flex-1 overflow-y-auto px-3 pb-6 pt-3 lg:bg-canvas lg:p-5">
+            <main className={`min-h-0 flex-1 overflow-y-auto px-3 pb-6 pt-3 lg:p-5 ${plainDesktop ? 'lg:bg-white' : 'lg:bg-canvas'}`}>
               {children}
             </main>
 

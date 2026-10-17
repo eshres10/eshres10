@@ -77,6 +77,8 @@ import type {
   GetHomeFeedParams,
   GetProfilePostsParams,
   GetSavedPostsParams,
+  GetTagPostsParams,
+  HashtagCount,
   HealthStatus,
   HelpfulState,
   LibraryResult,
@@ -127,6 +129,8 @@ import type {
   Review,
   ReviewInput,
   SaveState,
+  SuggestHashtagsParams,
+  TagPage,
   Thread,
   ThreadInput,
   ThreadUpdate,
@@ -866,6 +870,230 @@ export function useGetPublicPost<TData = Awaited<ReturnType<typeof getPublicPost
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetPublicPostQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetTagPostsUrl = (tag: string,
+    params?: GetTagPostsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/tags/${tag}?${stringifiedParams}` : `/api/public/tags/${tag}`
+}
+
+/**
+ * @summary Public posts with a hashtag, newest first. Works signed out; blocks apply.
+ */
+export const getTagPosts = async (tag: string,
+    params?: GetTagPostsParams, options?: Parameters<typeof customFetch>[1]): Promise<TagPage> => {
+
+  return customFetch<TagPage>(getGetTagPostsUrl(tag,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTagPostsQueryKey = (tag: string,
+    params?: GetTagPostsParams,) => {
+    return [
+    `/api/public/tags/${tag}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetTagPostsQueryOptions = <TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(tag: string,
+    params?: GetTagPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTagPostsQueryKey(tag,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTagPosts>>> = ({ signal }) => getTagPosts(tag,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: tag !== null && tag !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTagPostsQueryResult = NonNullable<Awaited<ReturnType<typeof getTagPosts>>>
+export type GetTagPostsQueryError = ErrorType<void>
+
+
+export function useGetTagPosts<TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(
+ tag: string,
+    params: undefined |  GetTagPostsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTagPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getTagPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTagPosts<TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(
+ tag: string,
+    params?: GetTagPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTagPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getTagPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTagPosts<TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(
+ tag: string,
+    params?: GetTagPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Public posts with a hashtag, newest first. Works signed out; blocks apply.
+ */
+
+export function useGetTagPosts<TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(
+ tag: string,
+    params?: GetTagPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTagPostsQueryOptions(tag,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSuggestHashtagsUrl = (params?: SuggestHashtagsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/hashtags/suggest?${stringifiedParams}` : `/api/hashtags/suggest`
+}
+
+/**
+ * @summary Up to 6 hashtags: by prefix (q), or with no q from the tagged make, pattern, fabric, challenge and your recent tags.
+ */
+export const suggestHashtags = async (params?: SuggestHashtagsParams, options?: Parameters<typeof customFetch>[1]): Promise<HashtagCount[]> => {
+
+  return customFetch<HashtagCount[]>(getSuggestHashtagsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSuggestHashtagsQueryKey = (params?: SuggestHashtagsParams,) => {
+    return [
+    `/api/hashtags/suggest`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSuggestHashtagsQueryOptions = <TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(params?: SuggestHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSuggestHashtagsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof suggestHashtags>>> = ({ signal }) => suggestHashtags(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SuggestHashtagsQueryResult = NonNullable<Awaited<ReturnType<typeof suggestHashtags>>>
+export type SuggestHashtagsQueryError = ErrorType<unknown>
+
+
+export function useSuggestHashtags<TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(
+ params: undefined |  SuggestHashtagsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof suggestHashtags>>,
+          TError,
+          Awaited<ReturnType<typeof suggestHashtags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSuggestHashtags<TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(
+ params?: SuggestHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof suggestHashtags>>,
+          TError,
+          Awaited<ReturnType<typeof suggestHashtags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSuggestHashtags<TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(
+ params?: SuggestHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Up to 6 hashtags: by prefix (q), or with no q from the tagged make, pattern, fabric, challenge and your recent tags.
+ */
+
+export function useSuggestHashtags<TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(
+ params?: SuggestHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSuggestHashtagsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

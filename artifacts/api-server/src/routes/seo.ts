@@ -3,7 +3,7 @@ import path from "node:path";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { createProxyMiddleware } from "http-proxy-middleware";
 import { withUser } from "@workspace/db";
-import { getCatalogPage, getChallengePage, getTopic, listChallengesForSitemap, listTopicsForSitemap, getMakeForViewer, getPostForViewer, getPublicProfile, HANDLE_PATH_PATTERN, listCatalogForSitemap, listPublicHandles, listPublicMakes, listPublicPosts } from "../access";
+import { getCatalogPage, getChallengePage, getTopic, listChallengesForSitemap, listTopicsForSitemap, getMakeForViewer, getPostForViewer, getPublicProfile, HANDLE_PATH_PATTERN, listTagsForSitemap, tagPage, listCatalogForSitemap, listPublicHandles, listPublicMakes, listPublicPosts } from "../access";
 import { logger } from "../lib/logger";
 
 // Server-rendered <head> tags for public pages, so search engines and link
@@ -114,6 +114,15 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
     res.status(status).type("html").set("Cache-Control", cache).send(html);
   }
 
+  // App pages under API-owned prefixes (/posts/:id/edit, /forum/new): the plain
+  // SPA, never indexed or stored by shared caches, and no page-specific tags.
+  async function sendAppPage(req: Request, res: Response): Promise<void> {
+    const html = (await template(req))
+      .replace(/<meta\s+name="robots"[^>]*>\s*/gi, "")
+      .replace(/<\/head>/i, `    <meta name="robots" content="noindex, nofollow" />\n  </head>`);
+    res.status(200).type("html").set("Cache-Control", "private, no-store").send(html);
+  }
+
   const notFound: PageMeta = {
     title: "Page not found · SewSpace",
     description: "This page doesn't exist or isn't public.",
@@ -197,6 +206,34 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
     } catch (error) {
       next(error);
     }
+  });
+
+  router.get([/^\/posts\/\d+\/edit\/?$/, /^\/forum\/new\/?$/], (req, res, next) => {
+    sendAppPage(req, res).catch(next);
+  });
+
+  // Hashtag pages: /tags/:tag (public posts only).
+  router.get(/^\/tags\/([^/]+)\/?$/, async (req, res, next) => {
+    try {
+      const raw = decodeURIComponent((req.params as Record<string, string>)[0]);
+      const viewer = req.viewer ?? { userId: null, isAdmin: false };
+      const page = await withUser(viewer.userId, (db) => tagPage(db, viewer, raw));
+      if (!page) return sendPage(req, res, notFound, 404);
+      const first = page.items.find((p) => p.media.length);
+      await sendPage(req, res, {
+        title: `#${page.tag} · Seams Club`,
+        description: truncate(`${page.posts} public post${page.posts === 1 ? "" : "s"} tagged #${page.tag} on Seams Club, the sewing community.`, MAX_DESCRIPTION),
+        canonicalPath: `/tags/${page.tag}`,
+        imageUrl: first?.media[0]?.url ?? null,
+        noindex: page.posts === 0,
+      }, 200, !viewer.userId);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  router.get(/^\/tags(\/.*)?$/, (req, res, next) => {
+    sendPage(req, res, notFound, 404).catch(next);
   });
 
   // Forum topics: /forum/topics/:id and the /forum index.
@@ -294,13 +331,14 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
   router.get("/sitemap.xml", async (req, res, next) => {
     try {
       const origin = originOf(req);
-      const { handles, makes, posts, catalog, challenges, topics } = await withUser(null, async (db) => ({
+      const { handles, makes, posts, catalog, challenges, topics, tags } = await withUser(null, async (db) => ({
         handles: await listPublicHandles(db),
         makes: await listPublicMakes(db),
         posts: await listPublicPosts(db, 20000),
         catalog: await listCatalogForSitemap(db, 20000),
         challenges: await listChallengesForSitemap(db),
         topics: await listTopicsForSitemap(db),
+        tags: await listTagsForSitemap(db),
       }));
       const urls = [
         `<url><loc>${escapeHtml(origin)}/</loc></url>`,
@@ -319,6 +357,7 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
         ...catalog.map(
           (c) => `<url><loc>${escapeHtml(`${origin}/catalog/${c.kind}/${c.slug}`)}</loc><lastmod>${c.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,
         ),
+        ...tags.map((t) => `<url><loc>${escapeHtml(`${origin}/tags/${t}`)}</loc></url>`),
         ...makes.map(
           (m) => `<url><loc>${escapeHtml(`${origin}/makes/${m.id}`)}</loc><lastmod>${m.updatedAt.toISOString().slice(0, 10)}</lastmod></url>`,
         ),

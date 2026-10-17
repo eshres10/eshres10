@@ -215,11 +215,15 @@ export const mediaTable = pgTable("sewspace_media", {
   width: integer("width").notNull(),
   height: integer("height").notNull(),
   color: text("color"),
+  // Phase F1 (migration 0010): read aloud by screen readers; at most 500 characters.
+  altText: text("alt_text").notNull().default(""),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const POST_KINDS = ["status", "photo"] as const;
 export type PostKind = (typeof POST_KINDS)[number];
+export const POST_ASPECTS = ["4:5", "1:1", "original"] as const;
+export type PostAspect = (typeof POST_ASPECTS)[number];
 
 export const postsTable = pgTable("sewspace_posts", {
   id: serial("id").primaryKey(),
@@ -230,6 +234,8 @@ export const postsTable = pgTable("sewspace_posts", {
   projectId: integer("project_id").references(() => projectsTable.id, { onDelete: "set null" }),
   patternId: integer("pattern_id").references(() => patternsTable.id, { onDelete: "set null" }),
   fabricId: integer("fabric_id").references(() => fabricsTable.id, { onDelete: "set null" }),
+  // Phase F1: display crop for the photos (object-fit: cover). Older posts are 'original'.
+  aspect: text("aspect").$type<PostAspect>().notNull().default("4:5"),
   ...timestamps,
 });
 
@@ -242,6 +248,20 @@ export const postMediaTable = pgTable("sewspace_post_media", {
 
 export type Media = typeof mediaTable.$inferSelect;
 export type Post = typeof postsTable.$inferSelect;
+
+// Phase F1 (migration 0010): hashtags. Tags are created only through
+// sewspace_hashtag_ids(); post tags follow their post.
+export const hashtagsTable = pgTable("sewspace_hashtags", {
+  id: serial("id").primaryKey(),
+  tag: text("tag").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const postHashtagsTable = pgTable("sewspace_post_hashtags", {
+  postId: integer("post_id").notNull().references(() => postsTable.id, { onDelete: "cascade" }),
+  hashtagId: integer("hashtag_id").notNull().references(() => hashtagsTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+}, (t) => [primaryKey({ columns: [t.postId, t.hashtagId] })]);
 
 // Phase 4: likes, comments (one level of replies), saves and reports (migration 0005).
 export const likesTable = pgTable("sewspace_likes", {

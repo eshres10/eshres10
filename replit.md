@@ -22,7 +22,7 @@ A social space for the sewing community built on a private sewing studio. The pr
 
 ## Where things live
 
-See "Where things live" in `CLAUDE.md`. Step-by-step forms (Phase F) are built from the shared pieces in `artifacts/sewspace/src/components/flow/`; their designs are in `docs/design/flows/` (the step screenshots in `images/` are kept out of git).
+See "Where things live" in `CLAUDE.md`. Step-by-step forms (Phase F) are built from the shared pieces in `artifacts/sewspace/src/components/flow/` (New post / Edit post: `components/post-flow/`; hashtag pages: `/tags/:tag`, served by the API for meta tags); their designs are in `docs/design/flows/` (the step screenshots in `images/` are kept out of git).
 
 ## Architecture decisions
 

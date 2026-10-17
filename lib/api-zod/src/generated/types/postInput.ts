@@ -5,6 +5,8 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { AltTextInput } from './altTextInput';
+import type { PostAspect } from './postAspect';
 import type { PostInputKind } from './postInputKind';
 import type { Visibility } from './visibility';
 
@@ -21,4 +23,7 @@ export interface PostInput {
   patternId?: number | null;
   /** @nullable */
   fabricId?: number | null;
+  aspect?: PostAspect;
+  /** @maxItems 10 */
+  altTexts?: AltTextInput[];
 }

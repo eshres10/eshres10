@@ -19,4 +19,6 @@ export interface Media {
      * @nullable
      */
   color: string | null;
+  /** Read aloud by screen readers; empty when not given */
+  altText: string;
 }

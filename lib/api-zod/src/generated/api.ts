@@ -66,7 +66,8 @@ export const GetProfilePostsResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -79,8 +80,10 @@ export const GetProfilePostsResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -275,7 +278,8 @@ export const GetPublicPostResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -288,9 +292,85 @@ export const GetPublicPostResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })
+
+
+/**
+ * @summary Public posts with a hashtag, newest first. Works signed out; blocks apply.
+ */
+export const GetTagPostsParams = zod.object({
+  "tag": zod.coerce.string()
+})
+
+export const GetTagPostsQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional()
+})
+
+export const GetTagPostsResponse = zod.object({
+  "tag": zod.string(),
+  "posts": zod.number().int().describe('Public posts with this tag that you may see'),
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+})),
+  "nextCursor": zod.string().nullable()
+})
+
+
+/**
+ * @summary Up to 6 hashtags: by prefix (q), or with no q from the tagged make, pattern, fabric, challenge and your recent tags.
+ */
+export const SuggestHashtagsQueryParams = zod.object({
+  "q": zod.coerce.string().optional(),
+  "projectId": zod.coerce.number().int().optional(),
+  "patternId": zod.coerce.number().int().optional(),
+  "fabricId": zod.coerce.number().int().optional(),
+  "challenge": zod.coerce.string().optional()
+})
+
+export const SuggestHashtagsResponseItem = zod.object({
+  "tag": zod.string().describe('Lower case, without the hash sign'),
+  "posts": zod.number().int().describe('Public posts using it (followers-only and private posts are never counted)')
+})
+export const SuggestHashtagsResponse = zod.array(SuggestHashtagsResponseItem)
 
 
 /**
@@ -325,7 +405,8 @@ export const GetExploreFeedResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -338,8 +419,10 @@ export const GetExploreFeedResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -500,7 +583,8 @@ export const GetSavedPostsResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -513,8 +597,10 @@ export const GetSavedPostsResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -1192,7 +1278,8 @@ export const GetChallengeEntriesResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1205,8 +1292,10 @@ export const GetChallengeEntriesResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),
   "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
   "isMine": zod.boolean()
@@ -1380,7 +1469,8 @@ export const EnterChallengeResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1393,8 +1483,10 @@ export const EnterChallengeResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),
   "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
   "isMine": zod.boolean()
@@ -1644,7 +1736,8 @@ export const GetForumTopicResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1657,8 +1750,10 @@ export const GetForumTopicResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -1823,7 +1918,8 @@ export const CreateForumTopicResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1836,8 +1932,10 @@ export const CreateForumTopicResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -1941,7 +2039,8 @@ export const UpdateForumTopicResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1954,8 +2053,10 @@ export const UpdateForumTopicResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2056,7 +2157,8 @@ export const SetAcceptedAnswerResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2069,8 +2171,10 @@ export const SetAcceptedAnswerResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2165,7 +2269,8 @@ export const ModerateForumTopicResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2178,8 +2283,10 @@ export const ModerateForumTopicResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2322,7 +2429,8 @@ export const GetHomeFeedResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2335,8 +2443,10 @@ export const GetHomeFeedResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -2355,7 +2465,8 @@ export const CreateMediaResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })
 
 
@@ -2366,6 +2477,10 @@ export const createPostBodyCaptionMax = 2200;
 
 export const createPostBodyMediaIdsMax = 10;
 
+export const createPostBodyAltTextsItemTextMax = 500;
+
+export const createPostBodyAltTextsMax = 10;
+
 
 
 export const CreatePostBody = zod.object({
@@ -2375,7 +2490,12 @@ export const CreatePostBody = zod.object({
   "mediaIds": zod.array(zod.number().int()).max(createPostBodyMediaIdsMax).optional(),
   "projectId": zod.number().int().nullish(),
   "patternId": zod.number().int().nullish(),
-  "fabricId": zod.number().int().nullish()
+  "fabricId": zod.number().int().nullish(),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "altTexts": zod.array(zod.object({
+  "mediaId": zod.number().int(),
+  "text": zod.string().max(createPostBodyAltTextsItemTextMax)
+})).max(createPostBodyAltTextsMax).optional()
 })
 
 export const CreatePostResponse = zod.object({
@@ -2397,7 +2517,8 @@ export const CreatePostResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2410,8 +2531,10 @@ export const CreatePostResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })
 
 
@@ -2424,6 +2547,12 @@ export const UpdatePostParams = zod.object({
 
 export const updatePostBodyCaptionMax = 2200;
 
+export const updatePostBodyMediaIdsMax = 10;
+
+export const updatePostBodyAltTextsItemTextMax = 500;
+
+export const updatePostBodyAltTextsMax = 10;
+
 
 
 export const UpdatePostBody = zod.object({
@@ -2431,7 +2560,13 @@ export const UpdatePostBody = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "projectId": zod.number().int().nullish(),
   "patternId": zod.number().int().nullish(),
-  "fabricId": zod.number().int().nullish()
+  "fabricId": zod.number().int().nullish(),
+  "mediaIds": zod.array(zod.number().int()).max(updatePostBodyMediaIdsMax).optional().describe('Photo posts: the photos in order (1 to 10). Leave out to keep them as they are.'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "altTexts": zod.array(zod.object({
+  "mediaId": zod.number().int(),
+  "text": zod.string().max(updatePostBodyAltTextsItemTextMax)
+})).max(updatePostBodyAltTextsMax).optional()
 })
 
 export const UpdatePostResponse = zod.object({
@@ -2453,7 +2588,8 @@ export const UpdatePostResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2466,8 +2602,10 @@ export const UpdatePostResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })
 
 

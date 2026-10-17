@@ -92,7 +92,7 @@ test("joining and entering", async () => {
   const auto = await oth("POST", "/api/challenges/octoberdenim/entries", { postId: othPost });
   assert.equal(auto.status, 201, "entering joins you");
   assert.equal((await oth("GET", "/api/public/challenges/octoberdenim")).json.challenge.joinedByMe, true);
-  assert.deepEqual((await anon("GET", `/api/public/posts/${entPost}`)).json.challenges, [{ slug: "octoberdenim", tag: "OctoberDenim" }]);
+  assert.deepEqual((await anon("GET", `/api/public/posts/${entPost}`)).json.challenges, [{ slug: "octoberdenim", tag: "OctoberDenim", entryId: entEntry }]);
   assert.deepEqual((await oth("GET", "/api/challenges/joined")).json.map((c: { slug: string }) => c.slug), ["octoberdenim"]);
 });
 

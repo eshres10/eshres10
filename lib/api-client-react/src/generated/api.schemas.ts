@@ -275,6 +275,8 @@ export interface Media {
      * @nullable
      */
   color: string | null;
+  /** Read aloud by screen readers; empty when not given */
+  altText: string;
 }
 
 export type PostTagKind = typeof PostTagKind[keyof typeof PostTagKind];
@@ -303,7 +305,21 @@ export const FeedPostKind = {
 export interface ChallengeRef {
   slug: string;
   tag: string;
+  /** On posts: the entry, so its author can withdraw it */
+  entryId?: number;
 }
+
+/**
+ * How photos are cropped for display: 4:5, 1:1 or the first photo's own shape
+ */
+export type PostAspect = typeof PostAspect[keyof typeof PostAspect];
+
+
+export const PostAspect = {
+  '4:5': '4:5',
+  '1:1': '1:1',
+  original: 'original',
+} as const;
 
 export interface FeedPost {
   id: number;
@@ -323,6 +339,29 @@ export interface FeedPost {
   savedByMe: boolean;
   /** Challenges this post is a (not removed) entry in */
   challenges: ChallengeRef[];
+  aspect: PostAspect;
+}
+
+export interface AltTextInput {
+  mediaId: number;
+  /** @maxLength 500 */
+  text: string;
+}
+
+export interface HashtagCount {
+  /** Lower case, without the hash sign */
+  tag: string;
+  /** Public posts using it (followers-only and private posts are never counted) */
+  posts: number;
+}
+
+export interface TagPage {
+  tag: string;
+  /** Public posts with this tag that you may see */
+  posts: number;
+  items: FeedPost[];
+  /** @nullable */
+  nextCursor: string | null;
 }
 
 export interface FeedPage {
@@ -355,6 +394,9 @@ export interface PostInput {
   patternId?: number | null;
   /** @nullable */
   fabricId?: number | null;
+  aspect?: PostAspect;
+  /** @maxItems 10 */
+  altTexts?: AltTextInput[];
 }
 
 export interface PostUpdate {
@@ -367,6 +409,14 @@ export interface PostUpdate {
   patternId?: number | null;
   /** @nullable */
   fabricId?: number | null;
+  /**
+     * Photo posts: the photos in order (1 to 10). Leave out to keep them as they are.
+     * @maxItems 10
+     */
+  mediaIds?: number[];
+  aspect?: PostAspect;
+  /** @maxItems 10 */
+  altTexts?: AltTextInput[];
 }
 
 export interface LikeState {
@@ -1775,6 +1825,18 @@ export type SearchParameter = string;
 
 export type GetProfilePostsParams = {
 cursor?: string;
+};
+
+export type GetTagPostsParams = {
+cursor?: string;
+};
+
+export type SuggestHashtagsParams = {
+q?: string;
+projectId?: number;
+patternId?: number;
+fabricId?: number;
+challenge?: string;
 };
 
 export type GetExploreFeedParams = {

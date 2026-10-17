@@ -7,6 +7,7 @@
  */
 
 export * from './acceptInput';
+export * from './altTextInput';
 export * from './assistantInput';
 export * from './assistantResponse';
 export * from './assistantResponseMode';
@@ -90,6 +91,8 @@ export * from './getForumDiscussionsParams';
 export * from './getHomeFeedParams';
 export * from './getProfilePostsParams';
 export * from './getSavedPostsParams';
+export * from './getTagPostsParams';
+export * from './hashtagCount';
 export * from './healthStatus';
 export * from './helpfulState';
 export * from './libraryResult';
@@ -125,6 +128,7 @@ export * from './patternPdfAnalysisRequest';
 export * from './patternStatus';
 export * from './patternUpdate';
 export * from './pollVoteInput';
+export * from './postAspect';
 export * from './postInput';
 export * from './postInputKind';
 export * from './postTag';
@@ -174,6 +178,8 @@ export * from './reviewMake';
 export * from './reviewSizing';
 export * from './saveState';
 export * from './searchParameter';
+export * from './suggestHashtagsParams';
+export * from './tagPage';
 export * from './thread';
 export * from './threadInput';
 export * from './threadUpdate';

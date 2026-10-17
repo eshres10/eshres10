@@ -8,6 +8,7 @@
 import type { ChallengeRef } from './challengeRef';
 import type { FeedPostKind } from './feedPostKind';
 import type { Media } from './media';
+import type { PostAspect } from './postAspect';
 import type { PostTag } from './postTag';
 import type { PublicPerson } from './publicPerson';
 import type { Visibility } from './visibility';
@@ -30,4 +31,5 @@ export interface FeedPost {
   savedByMe: boolean;
   /** Challenges this post is a (not removed) entry in */
   challenges: ChallengeRef[];
+  aspect: PostAspect;
 }

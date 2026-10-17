@@ -18,7 +18,8 @@ import { Studio } from '@/pages/studio';
 import { ProjectsList, ProjectDetail } from '@/components/projects';
 import { SignInPromptProvider } from '@/components/auth/SignInPrompt';
 import { PublicMakePage } from '@/pages/public-make';
-import { ComposePage } from '@/pages/compose';
+import { EditPostPage, NewPostPage } from '@/pages/post-flow';
+import { TagPage } from '@/pages/tag';
 import { SavedPage } from '@/pages/saved';
 import { CatalogPage } from '@/pages/catalog';
 import { ChallengesPage } from '@/pages/challenges';
@@ -40,7 +41,7 @@ const queryClient = new QueryClient();
 const studio = (Page: React.ComponentType) => () => <Shell><Page /></Shell>;
 const InShellStudio = studio(Studio);
 const InShellFeedPage = studio(FeedPage);
-const InShellComposePage = studio(ComposePage);
+const InShellNewPostPage = studio(NewPostPage);
 const InShellSavedPage = studio(SavedPage);
 const InShellAdminReports = studio(AdminReportsPage);
 const InShellFabricPage = studio(FabricPage);
@@ -77,7 +78,7 @@ function Router() {
     <Route path="/marketplace" component={InShellMarketplace} />
     <Route path="/settings" component={InShellSettingsPage} />
     <Route path="/feed" component={InShellFeedPage} />
-    <Route path="/new" component={InShellComposePage} />
+    <Route path="/new" component={InShellNewPostPage} />
     <Route path="/saved" component={InShellSavedPage} />
     <Route path="/admin/reports" component={InShellAdminReports} />
     <Route path="/forum">{() => <AdaptiveLayout><ForumPage /></AdaptiveLayout>}</Route>
@@ -87,6 +88,8 @@ function Router() {
     <Route path="/catalog">{() => <AdaptiveLayout><CatalogPage /></AdaptiveLayout>}</Route>
     <Route path="/catalog/:kind/:slug">{(params: { kind: string; slug: string }) => <AdaptiveLayout><CatalogEntryPage kind={params.kind} slug={params.slug} /></AdaptiveLayout>}</Route>
     <Route path="/explore">{() => <AdaptiveLayout><ExplorePage /></AdaptiveLayout>}</Route>
+    <Route path="/posts/:id/edit">{(params: { id: string }) => <Shell><EditPostPage id={Number(params.id)} /></Shell>}</Route>
+    <Route path="/tags/:tag">{(params: { tag: string }) => <AdaptiveLayout><TagPage tag={decodeURIComponent(params.tag)} /></AdaptiveLayout>}</Route>
     <Route path="/posts/:id">{(params: { id: string }) => <AdaptiveLayout><PostPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
     <Route path="/welcome" component={WelcomePage} />
     <Route path="/makes/:id">{(params: { id: string }) => <PublicMakePage id={Number(params.id)} />}</Route>

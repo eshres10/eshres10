@@ -142,6 +142,40 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/FeedPost" }
         "404": { description: Not found or not visible }
+  /public/tags/{tag}:
+    get:
+      operationId: getTagPosts
+      tags: [public]
+      summary: "Public posts with a hashtag, newest first. Works signed out; blocks apply."
+      parameters:
+        - { name: tag, in: path, required: true, schema: { type: string } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TagPage" }
+        "404": { description: Not a valid hashtag }
+  /hashtags/suggest:
+    get:
+      operationId: suggestHashtags
+      tags: [feed]
+      summary: "Up to 6 hashtags: by prefix (q), or with no q from the tagged make, pattern, fabric, challenge and your recent tags."
+      parameters:
+        - { name: q, in: query, required: false, schema: { type: string } }
+        - { name: projectId, in: query, required: false, schema: { type: integer } }
+        - { name: patternId, in: query, required: false, schema: { type: integer } }
+        - { name: fabricId, in: query, required: false, schema: { type: integer } }
+        - { name: challenge, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/HashtagCount" }
   /public/explore:
     get:
       operationId: getExploreFeed
@@ -1982,7 +2016,8 @@ components:
         width: { type: integer }
         height: { type: integer }
         color: { type: string, nullable: true, description: Dominant colour as a placeholder while loading }
-      required: [id, url, thumbUrl, width, height, color]
+        altText: { type: string, description: "Read aloud by screen readers; empty when not given" }
+      required: [id, url, thumbUrl, width, height, color, altText]
     PostTag:
       type: object
       properties:
@@ -2016,7 +2051,34 @@ components:
           type: array
           description: Challenges this post is a (not removed) entry in
           items: { $ref: "#/components/schemas/ChallengeRef" }
-      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges]
+        aspect: { $ref: "#/components/schemas/PostAspect" }
+      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect]
+    PostAspect:
+      type: string
+      description: "How photos are cropped for display: 4:5, 1:1 or the first photo's own shape"
+      enum: ["4:5", "1:1", original]
+    AltTextInput:
+      type: object
+      properties:
+        mediaId: { type: integer }
+        text: { type: string, maxLength: 500 }
+      required: [mediaId, text]
+    HashtagCount:
+      type: object
+      properties:
+        tag: { type: string, description: "Lower case, without the hash sign" }
+        posts: { type: integer, description: "Public posts using it (followers-only and private posts are never counted)" }
+      required: [tag, posts]
+    TagPage:
+      type: object
+      properties:
+        tag: { type: string }
+        posts: { type: integer, description: Public posts with this tag that you may see }
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/FeedPost" }
+        nextCursor: { type: string, nullable: true }
+      required: [tag, posts, items, nextCursor]
     FeedPage:
       type: object
       properties:
@@ -2038,6 +2100,11 @@ components:
         projectId: { type: integer, nullable: true }
         patternId: { type: integer, nullable: true }
         fabricId: { type: integer, nullable: true }
+        aspect: { $ref: "#/components/schemas/PostAspect" }
+        altTexts:
+          type: array
+          maxItems: 10
+          items: { $ref: "#/components/schemas/AltTextInput" }
       required: [kind, caption, visibility]
     PostUpdate:
       type: object
@@ -2047,6 +2114,16 @@ components:
         projectId: { type: integer, nullable: true }
         patternId: { type: integer, nullable: true }
         fabricId: { type: integer, nullable: true }
+        mediaIds:
+          type: array
+          description: "Photo posts: the photos in order (1 to 10). Leave out to keep them as they are."
+          maxItems: 10
+          items: { type: integer }
+        aspect: { $ref: "#/components/schemas/PostAspect" }
+        altTexts:
+          type: array
+          maxItems: 10
+          items: { $ref: "#/components/schemas/AltTextInput" }
     LikeState:
       type: object
       properties:
@@ -2320,6 +2397,7 @@ components:
       properties:
         slug: { type: string }
         tag: { type: string }
+        entryId: { type: integer, description: "On posts: the entry, so its author can withdraw it" }
       required: [slug, tag]
     ChallengeSummary:
       type: object
