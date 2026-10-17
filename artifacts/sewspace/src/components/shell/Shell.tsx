@@ -11,7 +11,7 @@ import { currentAppPath } from '@/lib/navigation';
 import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
 import { inCommunity } from '@/components/shell/CommunityTabs';
 import { inStudio, StudioMobileHeader, studioSection } from '@/components/shell/StudioMobile';
-import { AccountMenuDesktop, AccountMenuMobile } from '@/components/shell/AccountMenu';
+import { AccountMenuDesktop, AccountMenuMobile, LogOut } from '@/components/shell/AccountMenu';
 
 type NavItem = { href: string; label: string; icon: typeof Home };
 
@@ -83,6 +83,10 @@ function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: (
           <span className="block truncate text-xs">{me?.handle ? `@${me.handle} · ` : ''}Profile &amp; settings</span>
         </span>
       </Link>
+      <div className="-mt-3">
+        <LogOut close={onNavigate} panelClass="bg-white" cancelClass="bg-canvas"
+          rowClass="flex min-h-[44px] w-full items-center gap-3 rounded-[18px] px-3 text-left text-sm font-semibold text-ink hover:bg-white/60" />
+      </div>
     </div>
   );
 }

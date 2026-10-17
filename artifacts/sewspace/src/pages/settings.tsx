@@ -7,6 +7,7 @@ import { UserAvatar } from '@/components/avatar';
 import { ErrorState, Loading } from '@/components/common';
 import { HandleField } from '@/components/profile/HandleField';
 import { BlockedAccounts } from '@/components/social/BlockedAccounts';
+import { LogOut } from '@/components/shell/AccountMenu';
 import { uploadFile } from '@/lib/upload';
 import { VisibilityPicker, type Visibility } from '@/components/visibility';
 
@@ -165,6 +166,14 @@ export function SettingsPage() {
       </section>
 
       <BlockedAccounts />
+
+      <section aria-labelledby="account-title" className="studio-card p-6 sm:p-8">
+        <h2 id="account-title" className="eyebrow">Account</h2>
+        <p className="mt-1 text-sm text-subtle">Log out of Seams Club on this device.</p>
+        <div className="mt-4 max-w-md">
+          <LogOut rowClass="btn btn-line min-h-[44px]" />
+        </div>
+      </section>
 
       <div className="sticky bottom-28 z-20 flex flex-wrap items-center justify-end gap-3 rounded-[30px] bg-white/95 p-3 shadow-float backdrop-blur md:bottom-4">
         {update.isError && <p role="alert" className="mr-auto pl-2 text-sm font-semibold text-red-ink">{errorMessage(update.error)}</p>}

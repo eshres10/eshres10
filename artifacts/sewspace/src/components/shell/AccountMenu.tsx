@@ -65,7 +65,13 @@ function MeasureIn({ me }: { me: Profile | undefined }) {
 }
 
 /** Log out, with "Log out of Seams Club?" in place before it happens. */
-function LogOut({ close }: { close: () => void }) {
+/**
+ * Log out with an "are you sure?" step. Used in the account menu, the sidebar
+ * (also the phone ☰ menu) and Settings, so it's easy to find.
+ */
+export function LogOut({ close, rowClass = ROW, panelClass = 'bg-canvas', cancelClass = 'bg-white' }: {
+  close?: () => void; rowClass?: string; panelClass?: string; cancelClass?: string;
+}) {
   const { signOut } = useClerk();
   const [asking, setAsking] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -74,15 +80,15 @@ function LogOut({ close }: { close: () => void }) {
   const confirmId = useId();
   return (
     <>
-      <button type="button" onClick={() => setAsking(a => !a)} aria-expanded={asking} aria-controls={confirmId} className={ROW}>
+      <button type="button" onClick={() => setAsking(a => !a)} aria-expanded={asking} aria-controls={confirmId} data-testid="button-log-out" className={rowClass}>
         <LogOutIcon size={19} aria-hidden="true" className="shrink-0" /><span className="flex-1">Log out</span>
       </button>
       {asking && (
-        <div id={confirmId} role="group" aria-label="Log out of Seams Club?" className="mt-1 flex items-center gap-2 rounded-[16px] bg-canvas p-2.5 pl-3">
-          <p className="flex-1 text-[13px] font-semibold leading-snug">Log out of Seams Club?</p>
-          <button ref={cancel} type="button" onClick={() => setAsking(false)} className="min-h-[40px] rounded-full bg-white px-3.5 text-[13px] font-bold">Cancel</button>
-          <button type="button" disabled={busy} onClick={async () => { setBusy(true); try { await signOut({ redirectUrl: `${basePath}/` }); } finally { setBusy(false); close(); } }}
-            className="inline-flex min-h-[40px] items-center gap-1.5 rounded-full bg-ink px-3.5 text-[13px] font-bold text-white disabled:opacity-60">
+        <div id={confirmId} role="group" aria-label="Log out of Seams Club?" className={`mt-1 flex flex-wrap items-center gap-2 rounded-[16px] p-2.5 pl-3 ${panelClass}`}>
+          <p className="min-w-[9.5rem] flex-1 text-[13px] font-semibold leading-snug">Log out of Seams Club?</p>
+          <button ref={cancel} type="button" onClick={() => setAsking(false)} className={`min-h-[44px] whitespace-nowrap rounded-full px-3.5 text-[13px] font-bold ${cancelClass}`}>Cancel</button>
+          <button type="button" disabled={busy} onClick={async () => { setBusy(true); try { await signOut({ redirectUrl: `${basePath}/` }); } finally { setBusy(false); close?.(); } }}
+            className="inline-flex min-h-[44px] items-center gap-1.5 whitespace-nowrap rounded-full bg-ink px-3.5 text-[13px] font-bold text-white disabled:opacity-60">
             {busy && <Loader2 size={13} className="animate-spin" aria-hidden="true" />}Log out
           </button>
         </div>
