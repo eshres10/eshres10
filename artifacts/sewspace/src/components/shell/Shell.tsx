@@ -41,6 +41,7 @@ export const navGroups: Array<{ label: string; items: NavItem[] }> = [
 // Only shown to admins (ADMIN_USER_IDS); the API checks again.
 const adminGroup = { label: 'Admin', items: [{ href: '/admin/reports', label: 'Reports', icon: Flag }] };
 const allItems = [...navGroups, adminGroup].flatMap(group => group.items);
+const compactToolbarPages = new Set(['/forum', '/catalog', '/challenges', '/projects', '/patterns', '/stash/fabrics', '/stash/threads']);
 
 function isActive(location: string, href: string) {
   return location === href || (href !== '/studio' && location.startsWith(`${href}/`));
@@ -150,7 +151,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
           {location !== '/new' && <Link href="/new" className="hidden min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white no-underline md:inline-flex"><Plus size={16} aria-hidden="true" />New post</Link>}
           <Link href="/settings" aria-label="Profile & settings" className="hidden md:block"><UserAvatar name={profile.data?.name} avatarUrl={profile.data?.avatarUrl} size={40} /></Link>
         </header>
-        <main className={`${location === '/new' ? 'mx-auto w-full max-w-7xl px-0 py-0 md:px-2 md:py-8' : location.startsWith('/posts/') ? 'mx-auto flex h-[100dvh] min-h-0 w-full max-w-7xl flex-col overflow-hidden px-3 py-0 md:block md:h-auto md:overflow-visible md:px-2 md:py-8' : location === '/forum' ? 'mx-auto w-full max-w-7xl px-4 pb-6 pt-0 md:px-2 md:pb-8 md:pt-0' : 'mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8'}`}>{children}</main>
+        <main className={`${location === '/new' ? 'mx-auto w-full max-w-7xl px-0 py-0 md:px-2 md:py-8' : location.startsWith('/posts/') ? 'mx-auto flex h-[100dvh] min-h-0 w-full max-w-7xl flex-col overflow-hidden px-3 py-0 md:block md:h-auto md:overflow-visible md:px-2 md:py-8' : compactToolbarPages.has(location) ? 'mx-auto w-full max-w-7xl px-4 pb-6 pt-4 md:px-2 md:pb-8 md:pt-6' : 'mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8'}`}>{children}</main>
       </div>
       {!mobileFocus && <MobileTabBar location={location} />}
     </div>
@@ -165,12 +166,12 @@ export function AdaptiveLayout({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
   const [location] = useLocation();
   const postDetail = location.startsWith('/posts/');
-  const forumPage = location === '/forum';
+  const compactToolbarPage = compactToolbarPages.has(location);
   if (isLoaded && isSignedIn) return <ShellFrame>{children}</ShellFrame>;
   return (
     <div className={`${postDetail ? 'h-[100dvh] overflow-hidden pb-0' : 'min-h-[100dvh] pb-14'}`}>
       <div className={postDetail ? 'hidden md:block' : ''}><PublicHeader /></div>
-      <main className={postDetail ? 'mx-auto h-[100dvh] max-w-[1232px] px-3 pt-0 md:h-auto md:px-4 md:pt-7' : `mx-auto max-w-[1232px] px-4 ${forumPage ? 'pt-0' : 'pt-7'}`}>{children}</main>
+      <main className={postDetail ? 'mx-auto h-[100dvh] max-w-[1232px] px-3 pt-0 md:h-auto md:px-4 md:pt-7' : `mx-auto max-w-[1232px] px-4 ${compactToolbarPage ? 'pt-4 md:pt-6' : 'pt-7'}`}>{children}</main>
     </div>
   );
 }

@@ -45,23 +45,21 @@ export function CatalogPage() {
 
   return (
     <div className="mx-auto max-w-[1232px]">
-      <div className="flex justify-end">
-        <button type="button" className="btn btn-primary" onClick={() => { if (ask({ title: 'Sign in to add a page', body: "Add a pattern or product so people can review it. You'll come straight back here." })) setAdding(true); }}>
-          <Plus size={16} aria-hidden="true" />Add a page
-        </button>
-      </div>
-      <div className="mt-5 flex flex-wrap items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <div role="tablist" aria-label="Kind" className="flex gap-1 rounded-full bg-white p-1">
           {KINDS.map(k => (
             <button key={k.id} type="button" role="tab" aria-selected={kind === k.id} onClick={() => setKind(k.id)}
               className={`inline-flex min-h-[44px] items-center gap-2 rounded-full px-4 text-sm font-bold ${kind === k.id ? 'bg-ink text-white' : 'text-ink'}`}><k.icon size={15} aria-hidden="true" />{k.label}</button>
           ))}
         </div>
-        <label className="relative min-w-[220px] flex-1 sm:max-w-sm">
+        <label className="relative min-w-[180px] flex-1 sm:max-w-sm">
           <span className="sr-only">Search</span>
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden="true" />
           <input value={q} onChange={e => setQ(e.target.value)} type="search" className="field min-h-[48px] pl-9" placeholder={kind === 'pattern' ? 'Pattern or designer' : 'Product or brand'} />
         </label>
+        <button type="button" className="btn btn-primary ml-auto min-h-[48px] shrink-0 whitespace-nowrap" onClick={() => { if (ask({ title: 'Sign in to add a page', body: "Add a pattern or product so people can review it. You'll come straight back here." })) setAdding(true); }}>
+          <Plus size={16} aria-hidden="true" />Add a page
+        </button>
       </div>
       <div className="mt-5">
         {list.isLoading ? <div className="grid place-items-center py-16" role="status" aria-label="Loading"><Loader2 className="animate-spin" /></div>
