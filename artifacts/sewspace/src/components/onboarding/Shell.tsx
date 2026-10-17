@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ButtonHTMLAttributes, type KeyboardEvent, type ReactNode, type Ref } from 'react';
 import { ChevronLeft, Loader2 } from 'lucide-react';
 import { Logo } from '@/components/brand/Logo';
-import { GLYPH, QUESTION_COUNT, TONE, toneAt, type GlyphName, type Option, type Tone } from './copy';
+import { GLYPH, MAKE_ART, QUESTION_COUNT, TONE, toneAt, type GlyphName, type Option, type Tone } from './copy';
 import { Pip, type PipPose } from './Pip';
 
 // The onboarding shell (Phase O2): full-height screens with no app bars.
@@ -194,7 +194,7 @@ export function SingleOptions<V extends string>({ label, options, value, onChang
   );
 }
 
-/** Question 4: tiles in 3 columns on phones, 5 from 768 px (role="checkbox" in a group). */
+/** Question 4: illustrated tiles in 3 columns on phones, 5 from 768 px (role="checkbox" in a group). */
 export function TileOptions({ label, options, value, onChange }: { label: string; options: readonly string[]; value: string[]; onChange: (value: string[]) => void }) {
   return (
     <div role="group" aria-label={label} className="grid grid-cols-3 gap-2.5 md:grid-cols-5 md:gap-3">
@@ -203,7 +203,13 @@ export function TileOptions({ label, options, value, onChange }: { label: string
         return (
           <button key={o} type="button" role="checkbox" aria-checked={on} onClick={() => onChange(on ? value.filter(v => v !== o) : [...value, o])}
             className={`relative flex flex-col overflow-hidden rounded-[22px] border-2 bg-white text-left text-ink ${on ? 'border-ink' : 'border-line'}`}>
-            <span className={`block aspect-[4/5] w-full ${TONE[toneAt(i)]}`} aria-hidden="true" />
+            <span className={`grid aspect-[4/5] w-full place-items-center ${TONE[toneAt(i)]}`} aria-hidden="true">
+              {MAKE_ART[o] && (
+                <svg viewBox="0 0 48 48" className="h-[55%] w-[55%] text-ink" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d={MAKE_ART[o]} />
+                </svg>
+              )}
+            </span>
             <span className="absolute right-2 top-2"><Mark on={on} round /></span>
             <span className="px-3 py-2.5 text-[15px] font-bold">{o}</span>
           </button>

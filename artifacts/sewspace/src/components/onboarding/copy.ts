@@ -55,6 +55,22 @@ export const EXPERIENCE: Option<OnboardingExperience>[] = [
   { value: 'years', label: 'Five years or more', sub: 'I alter patterns to fit me', glyph: 'star' },
   { value: 'pro', label: 'I teach or sew for a living', glyph: 'cap' },
 ];
+/**
+ * Question 4's illustrations (owner's call: no photos; the mockup's are not
+ * ours). 48×48 line drawings, stroked in ink on the tile colour.
+ */
+export const MAKE_ART: Record<string, string> = {
+  Dresses: 'M19 5v7 M29 5v7 M17 12h14l-2 8H19z M19 20 11 42h26L29 20 M15 34h18',
+  Tops: 'M18 8 9 13l3 7 5-2v22h14V18l5 2 3-7-9-5c-2 4-10 4-12 0z',
+  Skirts: 'M15 8h18v5H15z M15 13 9 40h30l-6-27 M19 20l-3 18 M24 20v18 M29 20l3 18',
+  Trousers: 'M14 7h20v6H14z M14 13l-2 29h9l3-21 3 21h9l-2-29',
+  Outerwear: 'M18 6l6 8 6-8 8 4 3 30h-8v2H15v-2H7l3-30z M24 14v28 M28 23h.5 M28 31h.5',
+  Knits: 'M18 8 9 12 6 34h6l2-12v20h20V22l2 12h6l-3-22-9-4c-2 4-10 4-12 0z M14 36h20 M18 36v6 M24 36v6 M30 36v6',
+  Bags: 'M10 18h28l-3 24H13z M18 18v-4a6 6 0 0 1 12 0v4 M17 26h14',
+  Costume: 'M8 36 10 14l8 9 6-13 6 13 8-9 2 22z M8 41h32 M24 26v.5',
+  Mending: 'M8 14h22v22H8z M12 18h2 M18 18h2 M24 18h2 M12 32h2 M18 32h2 M24 32h2 M34 34 44 8 M41.5 11.5a2 2 0 1 1 2.5-3',
+};
+
 /** Question 4: saved as the profile's "favourite things to make" (favoriteGarments), so the values are the labels. */
 export const MAKES = ['Dresses', 'Tops', 'Skirts', 'Trousers', 'Outerwear', 'Knits', 'Bags', 'Costume', 'Mending'] as const;
 export const TOOLS: Option<OnboardingTool>[] = [
