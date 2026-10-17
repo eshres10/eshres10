@@ -9,14 +9,17 @@ import {
   useDeleteForumTopic,
   useGetForumReplies,
   useGetForumTopic,
+  useGetCatalogPage,
   useListCatalog,
+  useListForumTopics,
+  useListSimilarQuestions,
   useModerateForumTopic,
   useSetAcceptedAnswer,
   type ForumReply,
   type ForumReplyChild,
   type ForumTopic,
 } from '@workspace/api-client-react';
-import { Check, Loader2, Lock, Pin, Scissors, Share2, Trash2, X } from 'lucide-react';
+import { Check, Loader2, Lock, Pin, Scissors, Send, Trash2, X } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
@@ -85,10 +88,12 @@ function ReplyComposer({ topic, replyTo, clearReplyTo, inputRef }: { topic: Foru
   if (topic.locked) return <p className="flex items-center gap-2 rounded-[20px] bg-canvas p-4 text-sm font-semibold"><Lock size={16} aria-hidden="true" />This topic is locked. No new replies.</p>;
   if (!isSignedIn) {
     return (
-      <div className="rounded-[24px] bg-canvas p-5 text-center">
-        <p className="font-display text-lg">Know a better way?</p>
-        <p className="mt-1 text-sm text-subtle">Sign in to answer. We'll bring you straight back to this thread.</p>
-        <button type="button" className="btn btn-primary mt-3" onClick={() => ask({ title: 'Sign in to answer', body: "We'll bring you straight back to this thread." })}>Write an answer</button>
+      <div className="flex flex-col gap-4 rounded-[30px] bg-ink p-6 text-white sm:flex-row sm:items-center">
+        <div className="flex-1">
+          <p className="font-display text-[22px] tracking-[-.04em]">Know a better way?</p>
+          <p className="mt-1 text-[15px] text-white/80">Sign in to answer. We'll bring you straight back to this thread.</p>
+        </div>
+        <button type="button" className="inline-flex min-h-[50px] items-center self-start rounded-full bg-yellow px-6 text-[16px] font-bold text-ink sm:self-auto" onClick={() => ask({ title: 'Sign in to answer', body: "We'll bring you straight back to this thread." })}>Write an answer</button>
       </div>
     );
   }
@@ -139,6 +144,47 @@ function AdminTools({ topic }: { topic: ForumTopic }) {
   );
 }
 
+/** Questions with similar titles, then other busy topics on the same board. */
+function RelatedThreads({ topic: t }: { topic: ForumTopic }) {
+  const similar = useListSimilarQuestions({ q: t.title.slice(0, 140) });
+  const board = useListForumTopics({ board: t.board, sort: 'hot' });
+  const seen = new Set([t.id]);
+  const items = [...(similar.data ?? []), ...(board.data?.items ?? [])].filter(x => !seen.has(x.id) && (seen.add(x.id), true)).slice(0, 3);
+  if (!items.length) return null;
+  return (
+    <section aria-labelledby="related-title" className="rounded-[30px] bg-white p-5 sm:p-6">
+      <h2 id="related-title" className="font-display text-[22px] tracking-[-.04em]">Related threads</h2>
+      <ul className="mt-2 divide-y divide-line">
+        {items.map(x => (
+          <li key={x.id} className="py-3">
+            <Link href={`/forum/topics/${x.id}`} className="block text-[15px] font-semibold text-ink no-underline hover:underline">{x.title}</Link>
+            <p className="mt-0.5 text-xs text-subtle">{[KINDS[x.kind].label, x.poll ? `${x.poll.total} ${x.poll.total === 1 ? 'vote' : 'votes'}` : `${x.replies} ${x.kind === 'question' ? (x.replies === 1 ? 'answer' : 'answers') : (x.replies === 1 ? 'reply' : 'replies')}`, x.solved && 'solved', x.pinned && 'pinned'].filter(Boolean).join(' · ')}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/** The linked pattern or product: a photo from a make, rating and makes. */
+function CatalogInThread({ catalog }: { catalog: NonNullable<ForumTopic['catalog']> }) {
+  const page = useGetCatalogPage(catalog.kind, catalog.slug, { query: { retry: false } });
+  const cover = page.data?.makes.find(m => m.coverImageUrl)?.coverImageUrl;
+  const s = page.data?.entry.stats;
+  return (
+    <Link href={`/catalog/${catalog.kind}/${catalog.slug}`} className="block overflow-hidden rounded-[30px] bg-white text-ink no-underline hover:outline hover:outline-2 hover:outline-ink">
+      {cover && <img src={cover} alt="" className="block aspect-[3/2] w-full object-cover" />}
+      <span className="block p-5">
+        <span className="eyebrow eyebrow-red block">{catalog.kind === 'pattern' ? 'Pattern in this thread' : 'Product in this thread'}</span>
+        <span className="mt-1.5 block font-display text-[22px] tracking-[-.04em]">{catalog.name}</span>
+        <span className="mt-1 block text-sm text-subtle">
+          {s ? [s.rating !== null && `${s.rating.toFixed(1)} rating`, `${s.makes} ${s.makes === 1 ? 'make' : 'makes'}`].filter(Boolean).join(' · ') : 'See reviews, sizing notes and makes.'}
+        </span>
+      </span>
+    </Link>
+  );
+}
+
 /** A forum topic at /forum/topics/:id. Works signed out. */
 export function ForumTopicPage({ id }: { id: number }) {
   const [, setLocation] = useLocation();
@@ -149,6 +195,7 @@ export function ForumTopicPage({ id }: { id: number }) {
   const [replyTo, setReplyTo] = useState<{ id: number; handle: string } | null>(null);
   const [copied, setCopied] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const { isSignedIn } = useAuth();
   useEffect(() => { if (topic.data) document.title = `${topic.data.title} · Forum · Seams Club`; }, [topic.data]);
   useEffect(() => {
     const hash = window.location.hash.slice(1);
@@ -161,38 +208,42 @@ export function ForumTopicPage({ id }: { id: number }) {
   const list: ForumReply[] = replies.data ?? [];
   const share = async () => { if (await shareLink(window.location.href.split('#')[0], t.title)) { setCopied(true); setTimeout(() => setCopied(false), 2000); } };
 
+  const what = t.kind === 'question' ? (t.replies === 1 ? 'answer' : 'answers') : (t.replies === 1 ? 'reply' : 'replies');
   return (
-    <div className="mx-auto grid max-w-[1232px] gap-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-start">
+    <div className="mx-auto grid max-w-[1232px] gap-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
       <div className="min-w-0 space-y-4">
-        <nav aria-label="Breadcrumb" className="text-sm text-subtle">
-          <Link href="/forum" className="text-subtle">Forum</Link><span aria-hidden="true"> / </span>
-          <Link href={`/forum?board=${t.board}`} className="text-subtle">{BOARDS[t.board]}</Link><span aria-hidden="true"> / </span>{KINDS[t.kind].label}
+        <nav aria-label="Breadcrumb" className="text-sm">
+          <Link href="/forum" className="text-ink underline underline-offset-4">Forum</Link><span aria-hidden="true" className="text-subtle"> / </span>
+          <Link href={`/forum?board=${t.board}`} className="text-ink underline underline-offset-4">{BOARDS[t.board]}</Link><span aria-hidden="true" className="text-subtle"> / </span><b>{KINDS[t.kind].label}</b>
         </nav>
-        <article className="rounded-[30px] bg-white p-5 sm:p-7">
-          <div className="flex flex-wrap items-center gap-1.5"><KindBadge kind={t.kind} /><StateBadges topic={t} /></div>
-          <p className="mt-2 text-sm text-subtle">{t.kind === 'question' ? 'Asked' : 'Posted'} by <Link href={`/@${t.author.handle}`} className="font-bold text-ink">@{t.author.handle}</Link> · {timeAgo(t.createdAt)}</p>
-          <h1 className="mt-2 font-display text-[clamp(26px,3.4vw,38px)] leading-[1.08] tracking-[-.04em]">{t.title}</h1>
-          {t.body && <p className="mt-3 whitespace-pre-line break-words text-[16px] leading-relaxed">{t.body}</p>}
+        <article className="rounded-[30px] bg-white p-5 sm:p-8">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <KindBadge kind={t.kind} /><StateBadges topic={t} />
+            <span className="ml-1 text-sm text-subtle">{t.kind === 'question' ? 'Asked' : 'Posted'} by <Link href={`/@${t.author.handle}`} className="font-semibold text-ink underline underline-offset-4">@{t.author.handle}</Link> · {timeAgo(t.createdAt)}</span>
+          </div>
+          <h1 className="mt-4 font-display text-[clamp(28px,3.8vw,46px)] leading-[1.05] tracking-[-.05em]">{t.title}</h1>
+          {t.body && <p className="mt-4 whitespace-pre-line break-words text-[17px] leading-relaxed">{t.body}</p>}
           {t.photos.length > 0 && (
-            <div className={`mt-4 grid gap-2 ${t.photos.length === 1 ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            <div className="mt-5 flex flex-wrap gap-2">
               {t.photos.map(p => (
-                <a key={p.id} href={p.url} target="_blank" rel="noreferrer" className="block overflow-hidden rounded-[18px]" style={{ backgroundColor: p.color ?? undefined }}>
-                  <img src={p.url} alt={p.altText} width={p.width} height={p.height} loading="lazy" className="h-full max-h-[560px] w-full object-cover" />
+                <a key={p.id} href={p.url} target="_blank" rel="noreferrer" className="block h-[150px] overflow-hidden rounded-[18px]" style={{ backgroundColor: p.color ?? undefined, aspectRatio: `${p.width} / ${p.height}` }}>
+                  <img src={p.thumbUrl} alt={p.altText} width={p.width} height={p.height} loading="lazy" className="h-full w-full object-cover" />
                 </a>
               ))}
             </div>
           )}
-          {t.poll && <div className="mt-4"><Poll topicId={t.id} poll={t.poll} /></div>}
+          {t.poll && <div className="mt-5"><Poll topicId={t.id} poll={t.poll} /></div>}
           {(t.catalog || t.make || t.tags.length > 0) && (
-            <div className="mt-4 flex flex-wrap gap-2 text-sm">
-              {t.catalog && <Link href={`/catalog/${t.catalog.kind}/${t.catalog.slug}`} className="rounded-full bg-canvas px-3 py-1.5 font-semibold text-ink no-underline">{t.catalog.kind === 'pattern' ? 'Pattern' : 'Product'} · {t.catalog.name}</Link>}
-              {t.make && <Link href={`/makes/${t.make.id}`} className="inline-flex items-center gap-1 rounded-full bg-canvas px-3 py-1.5 font-semibold text-ink no-underline"><Scissors size={13} aria-hidden="true" />Make · {t.make.name}</Link>}
-              {t.tags.map(tag => <Link key={tag} href={`/forum?q=${encodeURIComponent(tag)}`} className="rounded-full px-2 py-1.5 text-subtle">#{tag}</Link>)}
+            <div className="mt-5 flex flex-wrap items-center gap-2 text-sm">
+              {t.catalog && <Link href={`/catalog/${t.catalog.kind}/${t.catalog.slug}`} className="rounded-full bg-canvas px-3.5 py-2 font-semibold text-ink no-underline">{t.catalog.kind === 'pattern' ? 'Pattern' : 'Product'} · {t.catalog.name}</Link>}
+              {t.make && <Link href={`/makes/${t.make.id}`} className="inline-flex items-center gap-1 rounded-full bg-canvas px-3.5 py-2 font-semibold text-ink no-underline"><Scissors size={13} aria-hidden="true" />Make · {t.make.name}</Link>}
+              {t.tags.map(tag => <Link key={tag} href={`/forum?q=${encodeURIComponent(tag)}`} className="px-1 py-1.5 font-semibold text-blue-ink no-underline hover:underline">#{tag}</Link>)}
             </div>
           )}
-          <div className="mt-5 flex flex-wrap items-center gap-2">
+          <div className="mt-6 flex flex-wrap items-center gap-2 border-t border-line pt-5">
             <Upvote kind="topic" id={t.id} votes={t.votes} voted={t.votedByMe} own={t.isMine} />
-            <button type="button" onClick={share} className="btn btn-line">{copied ? <Check size={15} aria-hidden="true" /> : <Share2 size={15} aria-hidden="true" />}{copied ? 'Link copied' : 'Share'}</button>
+            <button type="button" onClick={share} className="inline-flex min-h-[44px] items-center gap-2 rounded-full bg-canvas px-4 text-[15px] font-semibold">{copied ? <Check size={15} aria-hidden="true" /> : <Send size={15} aria-hidden="true" />}{copied ? 'Link copied' : 'Share'}</button>
+            <span className="flex-1" />
             {t.isMine
               ? confirmDelete
                 ? <>
@@ -209,37 +260,30 @@ export function ForumTopicPage({ id }: { id: number }) {
           ? <p className="px-2 text-sm text-subtle">Also shared to the feed: <Link href={`/posts/${t.post.id}`} className="font-bold text-ink">see the post</Link></p>
           : <div className="mx-auto max-w-[620px]"><p className="eyebrow mb-2">Shared to the feed</p><PostCard post={t.post} /></div>)}
 
-        <section id="replies" aria-labelledby="replies-title" className="scroll-mt-28 rounded-[30px] bg-white p-5 sm:p-7">
-          <h2 id="replies-title" className="font-display text-[22px] tracking-[-.03em]">
-            {list.length ? `${t.replies} ${t.kind === 'question' ? (t.replies === 1 ? 'answer' : 'answers') : (t.replies === 1 ? 'reply' : 'replies')}` : t.kind === 'question' ? 'No answers yet' : 'No replies yet'}
-          </h2>
-          {list.length > 0 && <p className="text-xs text-subtle">{t.kind === 'question' ? 'Accepted answer first, then most helpful' : 'Most upvoted first'}</p>}
-          <ul className="mt-4 space-y-6">
-            {list.map(r => (
-              <li key={r.id}>
-                <ReplyRow reply={r} topic={t} onReply={() => { setReplyTo({ id: r.id, handle: r.author.handle }); input.current?.focus(); }} />
-                {r.replies.length > 0 && <ul className="ml-12 mt-4 space-y-4">{r.replies.map(c => <li key={c.id}><ReplyRow reply={c} topic={t} child /></li>)}</ul>}
-              </li>
-            ))}
-          </ul>
-          <div className="mt-6 border-t border-line pt-5">
+        <section id="replies" aria-labelledby="replies-title" className="scroll-mt-28 space-y-3 pt-2">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 px-1.5">
+            <h2 id="replies-title" className="font-display text-[26px] tracking-[-.04em]">{list.length ? `${t.replies} ${what}` : t.kind === 'question' ? 'No answers yet' : 'No replies yet'}</h2>
+            {list.length > 1 && <p className="text-sm text-subtle">{t.kind === 'question' ? 'Accepted answer first, then most helpful' : 'Most upvoted first'}</p>}
+          </div>
+          {list.length > 0 && (
+            <ul className="space-y-3">
+              {list.map(r => (
+                <li key={r.id} className={`rounded-[30px] bg-white p-5 sm:p-6 ${r.accepted ? 'border-2 border-yellow' : ''}`}>
+                  <ReplyRow reply={r} topic={t} onReply={() => { setReplyTo({ id: r.id, handle: r.author.handle }); input.current?.focus(); }} />
+                  {r.replies.length > 0 && <ul className="ml-3 mt-4 space-y-4 border-l-2 border-line pl-4 sm:ml-12">{r.replies.map(c => <li key={c.id}><ReplyRow reply={c} topic={t} child /></li>)}</ul>}
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className={isSignedIn && !t.locked ? 'rounded-[30px] bg-white p-5 sm:p-6' : ''}>
             <ReplyComposer topic={t} replyTo={replyTo} clearReplyTo={() => setReplyTo(null)} inputRef={input} />
           </div>
         </section>
       </div>
 
       <aside className="space-y-4">
-        {t.catalog && (
-          <section className="rounded-[30px] bg-white p-5">
-            <h2 className="eyebrow">{t.catalog.kind === 'pattern' ? 'Pattern in this thread' : 'Product in this thread'}</h2>
-            <Link href={`/catalog/${t.catalog.kind}/${t.catalog.slug}`} className="mt-2 block font-display text-xl text-ink no-underline hover:underline">{t.catalog.name}</Link>
-            <p className="mt-1 text-sm text-subtle">See reviews, sizing notes and makes.</p>
-          </section>
-        )}
-        <section className="rounded-[30px] bg-white p-5">
-          <h2 className="eyebrow">Be kind</h2>
-          <p className="mt-2 text-sm text-subtle">Answer the question asked, credit patterns and tutorials, and use Report for anything that breaks the rules.</p>
-        </section>
+        <RelatedThreads topic={t} />
+        {t.catalog && <CatalogInThread catalog={t.catalog} />}
       </aside>
     </div>
   );
