@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getExploreFeed, type FeedPost } from '@workspace/api-client-react';
-import { Loader2, Images } from 'lucide-react';
-import { Link } from 'wouter';
+import { Loader2, Images, Search } from 'lucide-react';
+import { Link, useLocation } from 'wouter';
 import { ErrorState } from '@/components/common';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { CaptionText } from '@/components/feed/CaptionText';
 import { CommunityTabs } from '@/components/shell/CommunityTabs';
+import { SearchBox, searchHref } from '@/components/search/SearchBox';
 
 const KINDS = [
   { id: 'all', label: 'All' },
@@ -48,6 +49,8 @@ export function PostTile({ post }: { post: FeedPost }) {
 export function ExplorePage() {
   const [kind, setKind] = useState<Kind>('all');
   const [sort, setSort] = useState<Sort>('recent');
+  const [query, setQuery] = useState('');
+  const [, setLocation] = useLocation();
   useEffect(() => { document.title = 'Explore · Seams Club'; }, []);
   const feed = useInfiniteQuery({
     queryKey: FEED_KEYS.explore(kind, sort),
@@ -59,7 +62,9 @@ export function ExplorePage() {
   return (
     <div className="mx-auto max-w-[1232px]">
       <CommunityTabs />
-      <div className="-mx-3 mt-4 flex items-center gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:px-0">
+      {/* Phones: a search button leads the chip row. Wider screens: a search bar at its end (it wraps under the chips when they don't fit). */}
+      <div className="-mx-3 mt-4 flex items-center gap-1.5 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0">
+        <Link href="/search" aria-label="Search" className="grid h-11 w-11 shrink-0 place-items-center rounded-full border border-line bg-white text-ink sm:hidden"><Search size={18} aria-hidden="true" /></Link>
         <div className="flex shrink-0 gap-1.5" role="group" aria-label="Order">
           {SORTS.map(o => (
             <button key={o.id} type="button" aria-pressed={sort === o.id} onClick={() => setSort(o.id)}
@@ -73,6 +78,7 @@ export function ExplorePage() {
               className={`min-h-[44px] shrink-0 rounded-full px-4 text-sm font-semibold ${kind === k.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>{k.label}</button>
           ))}
         </div>
+        <SearchBox value={query} onChange={setQuery} onSubmit={value => setLocation(searchHref(value))} className="hidden min-w-[240px] sm:ml-auto sm:flex sm:w-[300px]" />
       </div>
       {sort === 'popular' && <p className="mt-3 text-sm text-subtle">Most liked in the last two weeks.</p>}
       <div className="mt-5">

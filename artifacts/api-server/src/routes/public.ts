@@ -16,8 +16,14 @@ import {
   GetTagPostsParams,
   GetTagPostsQueryParams,
   GetTagPostsResponse,
+  SearchPeopleQueryParams,
+  SearchPeopleResponse,
+  SearchPostsQueryParams,
+  SearchPostsResponse,
+  SearchTagsQueryParams,
+  SearchTagsResponse,
 } from "@workspace/api-zod";
-import { exploreFeed, listComments, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, tagPage } from "../access";
+import { exploreFeed, listComments, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, searchPeople, searchPosts, searchTags, tagPage } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { scoped } from "../lib/scoped";
 
@@ -109,6 +115,24 @@ router.get("/public/tags/:tag", scoped(async (req, res, db): Promise<void> => {
     return;
   }
   res.json(GetTagPostsResponse.parse(page));
+}));
+
+// Search (Explore). Public content only; too-short or invalid queries give empty
+// results, not errors, because the box searches as you type.
+router.get("/public/search/posts", scoped(async (req, res, db): Promise<void> => {
+  const query = SearchPostsQueryParams.safeParse(req.query);
+  const page = query.success ? await searchPosts(db, viewerOf(req), query.data.q, query.data.cursor) : { items: [], nextCursor: null };
+  res.json(SearchPostsResponse.parse(page));
+}));
+
+router.get("/public/search/people", scoped(async (req, res, db): Promise<void> => {
+  const query = SearchPeopleQueryParams.safeParse(req.query);
+  res.json(SearchPeopleResponse.parse(query.success ? await searchPeople(db, query.data.q) : []));
+}));
+
+router.get("/public/search/tags", scoped(async (req, res, db): Promise<void> => {
+  const query = SearchTagsQueryParams.safeParse(req.query);
+  res.json(SearchTagsResponse.parse(query.success ? await searchTags(db, query.data.q) : []));
 }));
 
 export default router;

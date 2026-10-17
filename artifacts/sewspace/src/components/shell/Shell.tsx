@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useGetProfile } from '@workspace/api-client-react';
-import { Bookmark, BookMarked, BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, Menu, MessageCircle, MessagesSquare, Plus, Ruler, Scissors, Sparkles, Spool, Store, Trophy, X } from 'lucide-react';
+import { Bookmark, BookMarked, BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, Menu, MessageCircle, MessagesSquare, Plus, Ruler, Scissors, Search, Sparkles, Spool, Store, Trophy, X } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
 import { useAuth } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
@@ -106,7 +106,7 @@ function MobileTabBar({ location, full = false }: { location: string; full?: boo
       : 'fixed inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between rounded-[30px] bg-white px-3 py-2 shadow-float md:hidden'}>
       {tab('/feed', 'Home', House, isActive(location, '/feed'))}
       {/* Explore is the door to all community sections (forum, challenges, patterns). */}
-      {tab('/explore', 'Explore', Compass, inCommunity(location))}
+      {tab('/explore', 'Explore', Compass, inCommunity(location) || location === '/search')}
       <Link href="/new" aria-label="New post" className="grid h-[52px] w-[58px] place-items-center rounded-[20px] bg-yellow text-ink"><Plus size={26} aria-hidden="true" /></Link>
       {tab('/studio', 'My studio', Scissors, inStudio(location))}
       <Link href={meHref} aria-label="My profile" aria-current={location === meHref ? 'page' : undefined} className="grid h-12 w-[52px] place-items-center rounded-[18px]">
@@ -131,7 +131,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
 
   const studio = studioSection(location);
   const title = allItems.find(item => isActive(location, item.href))?.label
-    ?? ({ '/settings': 'Profile & settings', '/new': 'New post' } as Record<string, string>)[location]
+    ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search' } as Record<string, string>)[location]
     ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'Seams Club');
   return (
     <div className={`${mobileFocus ? 'min-h-[100dvh] pb-0' : 'min-h-[100dvh] pb-[calc(6rem+env(safe-area-inset-bottom))]'} md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]`}>
@@ -158,6 +158,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
             ? <div className="min-w-0 flex-1 md:hidden"><Logo href="/feed" /></div>
             : <h1 className={`min-w-0 flex-1 truncate font-display text-[20px] tracking-[-.04em] md:text-[22px] ${title === 'Home' ? 'font-bold' : ''}`}>{title}</h1>}
           <h1 className={location === '/feed' ? `sr-only md:not-sr-only md:min-w-0 md:flex-1 md:truncate md:font-display md:text-[22px] md:tracking-[-.04em] ${title === 'Home' ? 'md:font-bold' : ''}` : 'hidden'}>{title}</h1>
+          {inCommunity(location) && <Link href="/search" aria-label="Search" className="grid h-10 w-10 shrink-0 place-items-center rounded-full md:hidden"><Search size={19} aria-hidden="true" /></Link>}
           <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="grid h-10 w-10 shrink-0 place-items-center rounded-full md:hidden"><Menu size={19} /></button>
           {location !== '/new' && <Link href="/new" className="hidden min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white no-underline md:inline-flex"><Plus size={16} aria-hidden="true" />New post</Link>}
           <Link href="/settings" aria-label="Profile & settings" className="hidden md:block"><UserAvatar name={profile.data?.name} avatarUrl={profile.data?.avatarUrl} size={40} /></Link>

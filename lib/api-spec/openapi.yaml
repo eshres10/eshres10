@@ -157,6 +157,50 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/TagPage" }
         "404": { description: Not a valid hashtag }
+  /public/search/posts:
+    get:
+      operationId: searchPosts
+      tags: [public]
+      summary: "Public posts whose caption contains q (at least 2 characters), newest first. Works signed out; blocks apply."
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, maxLength: 80 } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: A page of posts (empty when q is shorter than 2 characters)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/FeedPage" }
+  /public/search/people:
+    get:
+      operationId: searchPeople
+      tags: [public]
+      summary: "Up to 20 people whose handle starts with q or whose name contains it. Works signed out; blocked people are left out."
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, maxLength: 80 } }
+      responses:
+        "200":
+          description: Exact handle first, then handles starting with q, then names
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/PublicPerson" }
+  /public/search/tags:
+    get:
+      operationId: searchTags
+      tags: [public]
+      summary: "Up to 10 hashtags starting with q, most used first. Counts are public posts only; blocks apply."
+      parameters:
+        - { name: q, in: query, required: true, schema: { type: string, maxLength: 80 } }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/HashtagCount" }
   /hashtags/suggest:
     get:
       operationId: suggestHashtags

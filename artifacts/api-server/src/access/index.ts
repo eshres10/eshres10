@@ -18,3 +18,4 @@ export * from "./forum";
 export * from "./drafts";
 export * from "./hashtags";
 export * from "./ideas";
+export * from "./search";

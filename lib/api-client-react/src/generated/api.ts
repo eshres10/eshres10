@@ -125,6 +125,7 @@ import type {
   ProjectStepUpdate,
   ProjectUpdate,
   PublicMake,
+  PublicPerson,
   PublicProfile,
   Recommendation,
   Report,
@@ -134,6 +135,9 @@ import type {
   Review,
   ReviewInput,
   SaveState,
+  SearchPeopleParams,
+  SearchPostsParams,
+  SearchTagsParams,
   SuggestHashtagsParams,
   TagPage,
   Thread,
@@ -991,6 +995,330 @@ export function useGetTagPosts<TData = Awaited<ReturnType<typeof getTagPosts>>, 
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetTagPostsQueryOptions(tag,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSearchPostsUrl = (params: SearchPostsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/search/posts?${stringifiedParams}` : `/api/public/search/posts`
+}
+
+/**
+ * @summary Public posts whose caption contains q (at least 2 characters), newest first. Works signed out; blocks apply.
+ */
+export const searchPosts = async (params: SearchPostsParams, options?: Parameters<typeof customFetch>[1]): Promise<FeedPage> => {
+
+  return customFetch<FeedPage>(getSearchPostsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchPostsQueryKey = (params?: SearchPostsParams,) => {
+    return [
+    `/api/public/search/posts`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchPostsQueryOptions = <TData = Awaited<ReturnType<typeof searchPosts>>, TError = ErrorType<unknown>>(params: SearchPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchPostsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchPosts>>> = ({ signal }) => searchPosts(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchPosts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SearchPostsQueryResult = NonNullable<Awaited<ReturnType<typeof searchPosts>>>
+export type SearchPostsQueryError = ErrorType<unknown>
+
+
+export function useSearchPosts<TData = Awaited<ReturnType<typeof searchPosts>>, TError = ErrorType<unknown>>(
+ params: SearchPostsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPosts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchPosts>>,
+          TError,
+          Awaited<ReturnType<typeof searchPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchPosts<TData = Awaited<ReturnType<typeof searchPosts>>, TError = ErrorType<unknown>>(
+ params: SearchPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPosts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchPosts>>,
+          TError,
+          Awaited<ReturnType<typeof searchPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchPosts<TData = Awaited<ReturnType<typeof searchPosts>>, TError = ErrorType<unknown>>(
+ params: SearchPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Public posts whose caption contains q (at least 2 characters), newest first. Works signed out; blocks apply.
+ */
+
+export function useSearchPosts<TData = Awaited<ReturnType<typeof searchPosts>>, TError = ErrorType<unknown>>(
+ params: SearchPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSearchPostsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSearchPeopleUrl = (params: SearchPeopleParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/search/people?${stringifiedParams}` : `/api/public/search/people`
+}
+
+/**
+ * @summary Up to 20 people whose handle starts with q or whose name contains it. Works signed out; blocked people are left out.
+ */
+export const searchPeople = async (params: SearchPeopleParams, options?: Parameters<typeof customFetch>[1]): Promise<PublicPerson[]> => {
+
+  return customFetch<PublicPerson[]>(getSearchPeopleUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchPeopleQueryKey = (params?: SearchPeopleParams,) => {
+    return [
+    `/api/public/search/people`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchPeopleQueryOptions = <TData = Awaited<ReturnType<typeof searchPeople>>, TError = ErrorType<unknown>>(params: SearchPeopleParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPeople>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchPeopleQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchPeople>>> = ({ signal }) => searchPeople(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchPeople>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SearchPeopleQueryResult = NonNullable<Awaited<ReturnType<typeof searchPeople>>>
+export type SearchPeopleQueryError = ErrorType<unknown>
+
+
+export function useSearchPeople<TData = Awaited<ReturnType<typeof searchPeople>>, TError = ErrorType<unknown>>(
+ params: SearchPeopleParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPeople>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchPeople>>,
+          TError,
+          Awaited<ReturnType<typeof searchPeople>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchPeople<TData = Awaited<ReturnType<typeof searchPeople>>, TError = ErrorType<unknown>>(
+ params: SearchPeopleParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPeople>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchPeople>>,
+          TError,
+          Awaited<ReturnType<typeof searchPeople>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchPeople<TData = Awaited<ReturnType<typeof searchPeople>>, TError = ErrorType<unknown>>(
+ params: SearchPeopleParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPeople>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Up to 20 people whose handle starts with q or whose name contains it. Works signed out; blocked people are left out.
+ */
+
+export function useSearchPeople<TData = Awaited<ReturnType<typeof searchPeople>>, TError = ErrorType<unknown>>(
+ params: SearchPeopleParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchPeople>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSearchPeopleQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSearchTagsUrl = (params: SearchTagsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/search/tags?${stringifiedParams}` : `/api/public/search/tags`
+}
+
+/**
+ * @summary Up to 10 hashtags starting with q, most used first. Counts are public posts only; blocks apply.
+ */
+export const searchTags = async (params: SearchTagsParams, options?: Parameters<typeof customFetch>[1]): Promise<HashtagCount[]> => {
+
+  return customFetch<HashtagCount[]>(getSearchTagsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSearchTagsQueryKey = (params?: SearchTagsParams,) => {
+    return [
+    `/api/public/search/tags`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSearchTagsQueryOptions = <TData = Awaited<ReturnType<typeof searchTags>>, TError = ErrorType<unknown>>(params: SearchTagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSearchTagsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof searchTags>>> = ({ signal }) => searchTags(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof searchTags>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SearchTagsQueryResult = NonNullable<Awaited<ReturnType<typeof searchTags>>>
+export type SearchTagsQueryError = ErrorType<unknown>
+
+
+export function useSearchTags<TData = Awaited<ReturnType<typeof searchTags>>, TError = ErrorType<unknown>>(
+ params: SearchTagsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTags>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchTags>>,
+          TError,
+          Awaited<ReturnType<typeof searchTags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchTags<TData = Awaited<ReturnType<typeof searchTags>>, TError = ErrorType<unknown>>(
+ params: SearchTagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTags>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof searchTags>>,
+          TError,
+          Awaited<ReturnType<typeof searchTags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSearchTags<TData = Awaited<ReturnType<typeof searchTags>>, TError = ErrorType<unknown>>(
+ params: SearchTagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Up to 10 hashtags starting with q, most used first. Counts are public posts only; blocks apply.
+ */
+
+export function useSearchTags<TData = Awaited<ReturnType<typeof searchTags>>, TError = ErrorType<unknown>>(
+ params: SearchTagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof searchTags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSearchTagsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

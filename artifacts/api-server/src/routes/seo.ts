@@ -158,7 +158,7 @@ export function createSeoRouter(options: SeoOptions = {}): IRouter {
 
   // Served here (not as a static file) so the Sitemap line can be absolute.
   router.get("/robots.txt", (req, res) => {
-    const disallow = ["/api/", "/feed", "/new", "/studio", "/settings", "/welcome", "/sign-in", "/sign-up", "/stash/", "/projects", "/measurements", "/assistant", "/ai-studio", "/marketplace", "/saved", "/admin"];
+    const disallow = ["/api/", "/feed", "/new", "/studio", "/settings", "/welcome", "/sign-in", "/sign-up", "/stash/", "/projects", "/measurements", "/assistant", "/ai-studio", "/marketplace", "/saved", "/admin", "/search"];
     res
       .type("text/plain")
       .set("Cache-Control", "public, max-age=3600")

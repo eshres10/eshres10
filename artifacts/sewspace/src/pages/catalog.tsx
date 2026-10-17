@@ -14,7 +14,7 @@ const KINDS = [
 ] as const;
 type Kind = (typeof KINDS)[number]['id'];
 
-function EntryCard({ entry }: { entry: CatalogEntry }) {
+export function EntryCard({ entry }: { entry: CatalogEntry }) {
   const s = entry.stats;
   return (
     <Link href={catalogPath(entry)} className="flex flex-col rounded-[30px] bg-white p-5 text-ink no-underline hover:outline hover:outline-2 hover:outline-ink">

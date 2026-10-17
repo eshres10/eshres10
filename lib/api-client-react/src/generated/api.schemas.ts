@@ -2032,6 +2032,28 @@ export type GetTagPostsParams = {
 cursor?: string;
 };
 
+export type SearchPostsParams = {
+/**
+ * @maxLength 80
+ */
+q: string;
+cursor?: string;
+};
+
+export type SearchPeopleParams = {
+/**
+ * @maxLength 80
+ */
+q: string;
+};
+
+export type SearchTagsParams = {
+/**
+ * @maxLength 80
+ */
+q: string;
+};
+
 export type SuggestHashtagsParams = {
 q?: string;
 projectId?: number;

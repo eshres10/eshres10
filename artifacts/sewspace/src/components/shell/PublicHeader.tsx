@@ -1,4 +1,5 @@
 import { useAuth } from '@clerk/react';
+import { Search } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { Logo } from '@/components/brand/Logo';
 import { authHref } from '@/lib/navigation';
@@ -21,6 +22,8 @@ export function PublicHeader() {
           <Link href="/challenges" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Challenges</Link>
           <Link href="/catalog" className="rounded-full px-3.5 py-2 text-[15px] font-semibold text-ink no-underline hover:bg-canvas">Patterns</Link>
         </span>
+        <span className="flex items-center gap-1 sm:gap-2">
+        {location !== '/search' && <Link href="/search" aria-label="Search" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink hover:bg-canvas"><Search size={20} aria-hidden="true" /></Link>}
         {isSignedIn ? (
           <Link href="/feed" className="inline-flex min-h-[44px] items-center rounded-full bg-ink px-[22px] text-[15px] font-semibold text-white no-underline">Open Seams Club</Link>
         ) : (
@@ -29,6 +32,7 @@ export function PublicHeader() {
             <Link href={authHref('sign-up')} className="inline-flex min-h-[44px] items-center rounded-full bg-ink px-[18px] text-[15px] font-semibold text-white no-underline sm:px-[22px]">Join<span className="hidden sm:inline">&nbsp;free</span></Link>
           </div>
         )}
+        </span>
       </nav>
     </header>
     </>

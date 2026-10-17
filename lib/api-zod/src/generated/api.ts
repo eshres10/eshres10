@@ -371,6 +371,103 @@ export const GetTagPostsResponse = zod.object({
 
 
 /**
+ * @summary Public posts whose caption contains q (at least 2 characters), newest first. Works signed out; blocks apply.
+ */
+export const searchPostsQueryQMax = 80;
+
+
+
+export const SearchPostsQueryParams = zod.object({
+  "q": zod.coerce.string().max(searchPostsQueryQMax),
+  "cursor": zod.coerce.string().optional()
+})
+
+export const SearchPostsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "forumTopic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "replies": zod.number().int()
+}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+})),
+  "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
+})
+
+
+/**
+ * @summary Up to 20 people whose handle starts with q or whose name contains it. Works signed out; blocked people are left out.
+ */
+export const searchPeopleQueryQMax = 80;
+
+
+
+export const SearchPeopleQueryParams = zod.object({
+  "q": zod.coerce.string().max(searchPeopleQueryQMax)
+})
+
+export const SearchPeopleResponseItem = zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+})
+export const SearchPeopleResponse = zod.array(SearchPeopleResponseItem)
+
+
+/**
+ * @summary Up to 10 hashtags starting with q, most used first. Counts are public posts only; blocks apply.
+ */
+export const searchTagsQueryQMax = 80;
+
+
+
+export const SearchTagsQueryParams = zod.object({
+  "q": zod.coerce.string().max(searchTagsQueryQMax)
+})
+
+export const SearchTagsResponseItem = zod.object({
+  "tag": zod.string().describe('Lower case, without the hash sign'),
+  "posts": zod.number().int().describe('Public posts using it (followers-only and private posts are never counted)')
+})
+export const SearchTagsResponse = zod.array(SearchTagsResponseItem)
+
+
+/**
  * @summary Up to 6 hashtags: by prefix (q), or with no q from the tagged make, pattern, fabric, challenge and your recent tags.
  */
 export const SuggestHashtagsQueryParams = zod.object({
