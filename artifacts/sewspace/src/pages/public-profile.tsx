@@ -49,7 +49,7 @@ function plural(n: number, one: string, many = `${one}s`) {
   return `${n} ${n === 1 ? one : many}`;
 }
 
-function ShareButton({ name }: { name: string }) {
+function ShareButton({ name, labeled = false }: { name: string; labeled?: boolean }) {
   const [copied, setCopied] = useState(false);
   const share = async () => {
     const url = window.location.href.split('?')[0];
@@ -70,9 +70,13 @@ function ShareButton({ name }: { name: string }) {
       onClick={share}
       aria-label={copied ? 'Profile link copied' : 'Share profile'}
       title={copied ? 'Profile link copied' : 'Share profile'}
-      className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+      data-testid={labeled ? 'button-share-profile-desktop' : 'button-share-profile'}
+      className={labeled
+        ? 'inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-full border border-line bg-white px-4 text-sm font-bold text-ink hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'
+        : 'grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink'}
     >
       {copied ? <Check size={19} aria-hidden="true" /> : <Share2 size={19} aria-hidden="true" />}
+      {labeled && <span>{copied ? 'Copied' : 'Share profile'}</span>}
     </button>
   );
 }
@@ -105,18 +109,21 @@ function FollowButton({ handle, name, following }: { handle: string; name: strin
   );
 }
 
-function Stats({ stats }: { stats: ProfileStats }) {
+function Stats({ stats, desktop = false }: { stats: ProfileStats; desktop?: boolean }) {
   const items = [
     { count: stats.posts, label: stats.posts === 1 ? 'post' : 'posts' },
+    ...(desktop ? [{ count: stats.makes, label: stats.makes === 1 ? 'make' : 'makes' }] : []),
     { count: stats.followers, label: stats.followers === 1 ? 'follower' : 'followers' },
     { count: stats.following, label: 'following' },
   ];
   return (
-    <div className="grid min-w-0 flex-1 grid-cols-3 gap-1 text-center">
+    <div className={desktop
+      ? 'grid max-w-[520px] grid-cols-4 gap-x-8 text-left'
+      : 'grid min-w-0 flex-1 grid-cols-3 gap-1 text-center'}>
       {items.map(item => (
         <div key={item.label} className="min-w-0">
-          <div className="font-display text-[22px] font-bold leading-tight sm:text-2xl">{compact(item.count)}</div>
-          <div className="truncate text-xs text-subtle sm:text-sm">{item.label}</div>
+          <div className={`font-display font-bold leading-tight ${desktop ? 'text-[18px]' : 'text-[22px] sm:text-2xl'}`}>{compact(item.count)}</div>
+          <div className={`truncate text-subtle ${desktop ? 'text-[11px]' : 'text-xs sm:text-sm'}`}>{item.label}</div>
         </div>
       ))}
     </div>
@@ -159,7 +166,7 @@ function PostTile({ post, showVisibility }: { post: FeedPost; showVisibility: bo
   const label = post.caption ? post.caption.slice(0, 120) : post.kind === 'photo' ? 'Photo post' : 'Post';
   return (
     <Link href={`/posts/${post.id}`} aria-label={label}
-      className="relative block aspect-square overflow-hidden rounded-[22px] bg-line text-ink no-underline"
+      className="relative block aspect-square overflow-hidden rounded-[22px] bg-line text-ink no-underline md:aspect-[4/5] md:rounded-[12px]"
       style={cover?.color ? { backgroundColor: cover.color } : undefined}>
       {cover
         ? <img src={cover.thumbUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
@@ -168,7 +175,7 @@ function PostTile({ post, showVisibility }: { post: FeedPost; showVisibility: bo
           </span>}
       {post.media.length > 1 && <span className="absolute right-2.5 top-2.5 rounded-full bg-ink/75 px-2 py-0.5 text-[11px] font-semibold text-white">1/{post.media.length}</span>}
       {showVisibility && post.visibility !== 'public' && (
-        <span className="absolute bottom-2 left-2"><VisibilityBadge value={post.visibility} /></span>
+        <span className="absolute bottom-2 left-2 md:bottom-auto md:top-2"><VisibilityBadge value={post.visibility} /></span>
       )}
     </Link>
   );
@@ -187,7 +194,7 @@ function PostsTab({ handle, name, isMe, locked }: { handle: string; name: string
   return (
     <>
       {items.length
-        ? <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] sm:gap-2.5">
+        ? <div className="grid grid-cols-3 gap-1.5 md:grid-cols-4 md:gap-2.5">
             {items.map(post => <PostTile key={post.id} post={post} showVisibility={isMe} />)}
           </div>
         : <Empty icon={Grid3x3} title={isMe ? 'Share your first post' : 'No posts yet'}
@@ -348,51 +355,98 @@ export function PublicProfilePage({ handle }: { handle: string }) {
 
   return (
     <AdaptiveLayout>
-      <section className="rounded-[30px] bg-white p-5 sm:p-7">
-        <div className="flex items-center gap-4 sm:gap-6">
-          {p.avatarUrl
-            ? <img src={p.avatarUrl} alt="" className="h-24 w-24 shrink-0 rounded-full object-cover sm:h-32 sm:w-32" />
-            : <span aria-hidden="true" className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-ink font-display text-[34px] tracking-[-.04em] text-yellow sm:h-32 sm:w-32 sm:text-[52px]">{p.name.charAt(0).toUpperCase()}</span>}
-          <Stats stats={p.stats} />
-        </div>
-        <div className="mt-4 flex items-center gap-3">
-          <h1 className="min-w-0 flex-1 font-sans text-lg font-bold leading-tight">{p.name}</h1>
-          <div className="flex shrink-0 items-center gap-1">
-            {p.isMe && (
-              <Link
-                href="/settings"
-                aria-label="Edit profile"
-                title="Edit profile"
-                className="grid h-11 w-11 place-items-center rounded-full text-ink no-underline hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-              >
-                <Pencil size={19} aria-hidden="true" />
-              </Link>
-            )}
-            <ShareButton name={p.name} />
-            {p.isMe && (
-              <Link
-                href="/saved"
-                aria-label="View saved posts"
-                title="Saved posts"
-                className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink no-underline hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
-              >
-                <Bookmark size={19} aria-hidden="true" />
-              </Link>
-            )}
-            {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
+      <section>
+        <div className="hidden items-start gap-9 px-1 pb-6 pt-2 md:flex">
+          <div className="grid h-[132px] w-[132px] shrink-0 place-items-center rounded-full border-[2px] border-ink p-[3px]">
+            {p.avatarUrl
+              ? <img src={p.avatarUrl} alt="" className="h-full w-full rounded-full border-2 border-white object-cover" />
+              : <span aria-hidden="true" className="grid h-full w-full place-items-center rounded-full border-2 border-white bg-ink font-display text-[48px] text-yellow">{p.name.charAt(0).toUpperCase()}</span>}
+          </div>
+
+          <div className="min-w-0 flex-1 pt-1">
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+              <p className="shrink-0 text-[15px] font-bold">@{p.handle}</p>
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                {p.isMe
+                  ? <>
+                      <Link href="/settings" data-testid="link-edit-profile-desktop" className="inline-flex h-10 items-center justify-center rounded-full bg-yellow px-4 text-sm font-bold text-ink no-underline hover:bg-ink hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
+                        Edit profile
+                      </Link>
+                      <ShareButton name={p.name} labeled />
+                      <Link href="/saved" aria-label="View saved posts" title="Saved posts" data-testid="link-saved-posts-desktop" className="grid h-10 w-10 shrink-0 place-items-center rounded-full text-ink no-underline hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink">
+                        <Bookmark size={19} aria-hidden="true" />
+                      </Link>
+                    </>
+                  : <>
+                      <div className="w-[150px]"><FollowButton handle={p.handle} name={p.name} following={p.followedByMe} /></div>
+                      <ShareButton name={p.name} labeled />
+                      <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />
+                    </>}
+              </div>
+            </div>
+
+            <div className="mt-3.5">
+              <Stats stats={p.stats} desktop />
+            </div>
+
+            <div className="mt-3.5">
+              <h1 className="font-display text-[18px] tracking-[-.04em]">{p.name}</h1>
+              {p.bio && <p className="mt-0.5 whitespace-pre-line text-[13px] leading-[1.55]">{p.bio}</p>}
+              {p.isMe && <p className="mt-2 flex items-center gap-1.5 text-[11px] text-subtle"><Lock size={12} aria-hidden="true" />Your private stash, patterns and measurements are not shared on your profile.</p>}
+            </div>
           </div>
         </div>
-        {p.bio && <p className="mt-1 whitespace-pre-line text-[15px] leading-6">{p.bio}</p>}
-        {!p.isMe && <div className="mt-4"><FollowButton handle={p.handle} name={p.name} following={p.followedByMe} /></div>}
+
+        <div className="rounded-[30px] bg-white p-5 sm:p-7 md:hidden">
+          <div className="flex items-center gap-4 sm:gap-6">
+            {p.avatarUrl
+              ? <img src={p.avatarUrl} alt="" className="h-24 w-24 shrink-0 rounded-full object-cover sm:h-32 sm:w-32" />
+              : <span aria-hidden="true" className="grid h-24 w-24 shrink-0 place-items-center rounded-full bg-ink font-display text-[34px] tracking-[-.04em] text-yellow sm:h-32 sm:w-32 sm:text-[52px]">{p.name.charAt(0).toUpperCase()}</span>}
+            <Stats stats={p.stats} />
+          </div>
+          <div className="mt-4 flex items-center gap-3">
+            <h1 className="min-w-0 flex-1 font-sans text-lg font-bold leading-tight">{p.name}</h1>
+            <div className="flex shrink-0 items-center gap-1">
+              {p.isMe && (
+                <Link
+                  href="/settings"
+                  aria-label="Edit profile"
+                  title="Edit profile"
+                  className="grid h-11 w-11 place-items-center rounded-full text-ink no-underline hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                >
+                  <Pencil size={19} aria-hidden="true" />
+                </Link>
+              )}
+              <ShareButton name={p.name} />
+              {p.isMe && (
+                <Link
+                  href="/saved"
+                  aria-label="View saved posts"
+                  title="Saved posts"
+                  className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink no-underline hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"
+                >
+                  <Bookmark size={19} aria-hidden="true" />
+                </Link>
+              )}
+              {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
+            </div>
+          </div>
+          {p.bio && <p className="mt-1 whitespace-pre-line text-[15px] leading-6">{p.bio}</p>}
+          {!p.isMe && <div className="mt-4"><FollowButton handle={p.handle} name={p.name} following={p.followedByMe} /></div>}
+        </div>
       </section>
 
-      <div role="tablist" aria-label="Profile sections" className="mt-3 flex w-full max-w-[520px] gap-1 rounded-full bg-white p-[5px] sm:mt-[22px]">
+      <div role="tablist" aria-label="Profile sections" className="mt-3 flex w-full max-w-[520px] gap-1 rounded-full bg-white p-[5px] sm:mt-[22px] md:mt-1 md:max-w-none md:justify-center md:gap-3 md:rounded-none md:border-b md:border-line md:bg-transparent md:p-0">
         {TABS.map(t => (
           <button key={t.id} type="button" role="tab" id={`tab-${t.id}`} aria-selected={tab === t.id} aria-controls="profile-panel" onClick={() => setTab(t.id)}
-            className={`min-h-[44px] flex-1 rounded-full text-[15px] font-bold ${tab === t.id ? 'bg-ink text-white' : 'text-ink'}`}>{t.label}</button>
+            data-testid={`tab-profile-${t.id}`}
+            className={`min-h-[44px] flex-1 rounded-full text-[15px] font-bold md:flex-none md:rounded-none md:border-b-2 md:px-5 md:text-[11px] md:uppercase md:tracking-[.16em] ${tab === t.id ? 'bg-ink text-white md:border-ink md:bg-transparent md:text-ink' : 'text-ink md:border-transparent md:text-subtle'}`}>
+            <span className="md:hidden">{t.label}</span>
+            <span className="hidden md:inline">{t.id === 'used' ? 'Used products' : t.label}</span>
+          </button>
         ))}
       </div>
-      <section id="profile-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="mt-5">
+      <section id="profile-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="mt-5 md:mt-4">
         {tab === 'posts' && <PostsTab handle={p.handle} name={p.name} isMe={p.isMe} locked={p.stats.followersOnlyPosts} />}
         {tab === 'makes' && <MakesTab handle={p.handle} name={p.name} isMe={p.isMe} locked={p.stats.followersOnlyMakes} />}
         {tab === 'used' && <UsedTab handle={p.handle} name={p.name} isMe={p.isMe} />}

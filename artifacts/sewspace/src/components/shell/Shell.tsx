@@ -146,7 +146,11 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   const studio = studioSection(location);
   const title = allItems.find(item => isActive(location, item.href))?.label
     ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search' } as Record<string, string>)[location]
-    ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'Seams Club');
+    ?? (location.startsWith('/posts/')
+      ? 'Post'
+      : location.startsWith('/@')
+        ? profile.data?.handle && location.toLowerCase() === `/@${profile.data.handle.toLowerCase()}` ? 'My profile' : 'Profile'
+        : 'Seams Club');
   return (
     <div className={`${mobileFocus ? 'min-h-[100dvh] pb-0' : 'min-h-[100dvh] pb-[calc(6rem+env(safe-area-inset-bottom))]'} md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]`}>
       <aside className="sticky top-[18px] hidden h-[calc(100dvh-36px)] w-[260px] shrink-0 overflow-y-auto rounded-[30px] bg-yellow px-4 py-[22px] md:block">
