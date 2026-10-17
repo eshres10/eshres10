@@ -477,10 +477,19 @@ paths:
           in: query
           required: false
           schema: { type: string, enum: [pattern, product], default: pattern }
-        - { name: q, in: query, required: false, schema: { type: string, maxLength: 80 } }
+        - { name: q, in: query, required: false, description: "Matches name, designer and category", schema: { type: string, maxLength: 80 } }
+        - { name: category, in: query, required: false, schema: { type: string, maxLength: 40 } }
+        - { name: difficulty, in: query, required: false, description: "Comma-separated: beginner, intermediate, advanced", schema: { type: string, maxLength: 60 } }
+        - { name: source, in: query, required: false, description: "Comma-separated: seams_club, free, designer", schema: { type: string, maxLength: 60 } }
+        - { name: minRating, in: query, required: false, schema: { type: number, minimum: 0, maximum: 5 } }
+        - name: sort
+          in: query
+          required: false
+          schema: { type: string, enum: [made, rating, new], default: made }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
       responses:
         "200":
-          description: Up to 60 entries, most reviewed first (or best match when searching)
+          description: "24 entries at a time, with the total and filter counts. Makes and ratings come from public data only"
           content:
             application/json:
               schema: { $ref: "#/components/schemas/CatalogList" }
@@ -578,6 +587,34 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/CatalogEntry" }
         "404": { description: Not found or not yours to edit }
+  /catalog/{id}/save:
+    put:
+      operationId: saveCatalogEntry
+      tags: [catalog]
+      summary: Save a pattern (the heart). Private to you.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogSaveState" }
+        "404": { description: Not found }
+        "429": { description: Too many saves this hour }
+    delete:
+      operationId: unsaveCatalogEntry
+      tags: [catalog]
+      summary: Remove a saved pattern.
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Not saved any more
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogSaveState" }
+        "429": { description: Too many saves this hour }
   /catalog/{id}/review:
     put:
       operationId: saveReview
@@ -2506,14 +2543,54 @@ components:
         description: { type: string }
         canEdit: { type: boolean }
         stats: { $ref: "#/components/schemas/CatalogStats" }
-      required: [id, kind, slug, name, maker, category, difficulty, sizes, fabricTypes, yardage, url, description, canEdit, stats]
+        source: { $ref: "#/components/schemas/CatalogSource" }
+        priceCents: { type: integer, nullable: true, description: "Price in the page's own currency, in cents" }
+        currency: { type: string, nullable: true, description: ISO 4217 code }
+        designer:
+          allOf: [{ $ref: "#/components/schemas/PublicPerson" }]
+          nullable: true
+          description: "The designer's Seams Club account, when they are on it (and not blocked either way)"
+        coverImageUrl: { type: string, nullable: true, description: "A photo from a public make of this pattern" }
+        isNew: { type: boolean, description: Added in the last 30 days }
+        savedByMe: { type: boolean }
+      required: [id, kind, slug, name, maker, category, difficulty, sizes, fabricTypes, yardage, url, description, canEdit, stats, source, priceCents, currency, designer, coverImageUrl, isNew, savedByMe]
+    CatalogSaveState:
+      type: object
+      properties:
+        saved: { type: boolean }
+      required: [saved]
+    CatalogSource:
+      type: string
+      description: "Where to get it: on Seams Club (pattern sales, not open yet), free, or from the designer's site"
+      enum: [seams_club, free, designer]
     CatalogList:
       type: object
       properties:
         items:
           type: array
           items: { $ref: "#/components/schemas/CatalogEntry" }
-      required: [items]
+        total: { type: integer, description: Entries matching every filter }
+        facets:
+          type: object
+          description: "Counts for the filter options, each with the other filters applied"
+          properties:
+            difficulty:
+              type: object
+              properties:
+                beginner: { type: integer }
+                intermediate: { type: integer }
+                advanced: { type: integer }
+              required: [beginner, intermediate, advanced]
+            source:
+              type: object
+              properties:
+                seams_club: { type: integer }
+                free: { type: integer }
+                designer: { type: integer }
+              required: [seams_club, free, designer]
+          required: [difficulty, source]
+        nextCursor: { type: string, nullable: true }
+      required: [items, total, facets, nextCursor]
     CatalogInput:
       type: object
       properties:
@@ -2527,6 +2604,10 @@ components:
         yardage: { type: string, nullable: true, maxLength: 80 }
         url: { type: string, nullable: true, maxLength: 500 }
         description: { type: string, maxLength: 2000 }
+        source: { type: string, enum: [free, designer] }
+        priceCents: { type: integer, nullable: true, minimum: 0, maximum: 100000 }
+        currency: { type: string, nullable: true, pattern: "^[A-Za-z]{3}$", description: "ISO 4217 code, e.g. AUD" }
+        designerHandle: { type: string, nullable: true, description: "Your own handle to say you designed it (admins may name anyone); null for none" }
       required: [kind, name, category]
     CatalogUpdate:
       type: object
@@ -2540,6 +2621,10 @@ components:
         yardage: { type: string, nullable: true, maxLength: 80 }
         url: { type: string, nullable: true, maxLength: 500 }
         description: { type: string, maxLength: 2000 }
+        source: { type: string, enum: [free, designer] }
+        priceCents: { type: integer, nullable: true, minimum: 0, maximum: 100000 }
+        currency: { type: string, nullable: true, pattern: "^[A-Za-z]{3}$", description: "ISO 4217 code, e.g. AUD" }
+        designerHandle: { type: string, nullable: true, description: "Your own handle to say you designed it (admins may name anyone); null for none" }
     CatalogMake:
       type: object
       properties:

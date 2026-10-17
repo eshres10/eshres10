@@ -872,11 +872,26 @@ export const ResolveReportResponse = zod.object({
 export const listCatalogQueryKindDefault = `pattern`;
 export const listCatalogQueryQMax = 80;
 
+export const listCatalogQueryCategoryMax = 40;
 
+export const listCatalogQueryDifficultyMax = 60;
+
+export const listCatalogQuerySourceMax = 60;
+
+export const listCatalogQueryMinRatingMin = 0;
+export const listCatalogQueryMinRatingMax = 5;
+
+export const listCatalogQuerySortDefault = `made`;
 
 export const ListCatalogQueryParams = zod.object({
   "kind": zod.enum(['pattern', 'product']).default(listCatalogQueryKindDefault),
-  "q": zod.coerce.string().max(listCatalogQueryQMax).optional()
+  "q": zod.coerce.string().max(listCatalogQueryQMax).optional().describe('Matches name, designer and category'),
+  "category": zod.coerce.string().max(listCatalogQueryCategoryMax).optional(),
+  "difficulty": zod.coerce.string().max(listCatalogQueryDifficultyMax).optional().describe('Comma-separated: beginner, intermediate, advanced'),
+  "source": zod.coerce.string().max(listCatalogQuerySourceMax).optional().describe('Comma-separated: seams_club, free, designer'),
+  "minRating": zod.coerce.number().min(listCatalogQueryMinRatingMin).max(listCatalogQueryMinRatingMax).optional(),
+  "sort": zod.enum(['made', 'rating', 'new']).default(listCatalogQuerySortDefault),
+  "cursor": zod.coerce.string().optional()
 })
 
 export const ListCatalogResponse = zod.object({
@@ -904,8 +919,33 @@ export const ListCatalogResponse = zod.object({
   "runsTrue": zod.number().int(),
   "runsLarge": zod.number().int(),
   "makes": zod.number().int()
-}).describe('Review numbers count every review; makes counts what this viewer may see.')
-}))
+}).describe('Review numbers count every review; makes counts what this viewer may see.'),
+  "source": zod.enum(['seams_club', 'free', 'designer']).describe('Where to get it: on Seams Club (pattern sales, not open yet), free, or from the designer\'s site'),
+  "priceCents": zod.number().int().nullable().describe('Price in the page\'s own currency, in cents'),
+  "currency": zod.string().nullable().describe('ISO 4217 code'),
+  "designer": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).describe('The designer\'s Seams Club account, when they are on it (and not blocked either way)'),
+  "coverImageUrl": zod.string().nullable().describe('A photo from a public make of this pattern'),
+  "isNew": zod.boolean().describe('Added in the last 30 days'),
+  "savedByMe": zod.boolean()
+})),
+  "total": zod.number().int().describe('Entries matching every filter'),
+  "facets": zod.object({
+  "difficulty": zod.object({
+  "beginner": zod.number().int(),
+  "intermediate": zod.number().int(),
+  "advanced": zod.number().int()
+}),
+  "source": zod.object({
+  "seams_club": zod.number().int(),
+  "free": zod.number().int(),
+  "designer": zod.number().int()
+})
+}).describe('Counts for the filter options, each with the other filters applied'),
+  "nextCursor": zod.string().nullable()
 })
 
 
@@ -942,7 +982,18 @@ export const GetCatalogPageResponse = zod.object({
   "runsTrue": zod.number().int(),
   "runsLarge": zod.number().int(),
   "makes": zod.number().int()
-}).describe('Review numbers count every review; makes counts what this viewer may see.')
+}).describe('Review numbers count every review; makes counts what this viewer may see.'),
+  "source": zod.enum(['seams_club', 'free', 'designer']).describe('Where to get it: on Seams Club (pattern sales, not open yet), free, or from the designer\'s site'),
+  "priceCents": zod.number().int().nullable().describe('Price in the page\'s own currency, in cents'),
+  "currency": zod.string().nullable().describe('ISO 4217 code'),
+  "designer": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).describe('The designer\'s Seams Club account, when they are on it (and not blocked either way)'),
+  "coverImageUrl": zod.string().nullable().describe('A photo from a public make of this pattern'),
+  "isNew": zod.boolean().describe('Added in the last 30 days'),
+  "savedByMe": zod.boolean()
 }),
   "makes": zod.array(zod.object({
   "id": zod.number().int(),
@@ -1053,7 +1104,18 @@ export const GetCatalogEntryResponse = zod.object({
   "runsTrue": zod.number().int(),
   "runsLarge": zod.number().int(),
   "makes": zod.number().int()
-}).describe('Review numbers count every review; makes counts what this viewer may see.')
+}).describe('Review numbers count every review; makes counts what this viewer may see.'),
+  "source": zod.enum(['seams_club', 'free', 'designer']).describe('Where to get it: on Seams Club (pattern sales, not open yet), free, or from the designer\'s site'),
+  "priceCents": zod.number().int().nullable().describe('Price in the page\'s own currency, in cents'),
+  "currency": zod.string().nullable().describe('ISO 4217 code'),
+  "designer": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).describe('The designer\'s Seams Club account, when they are on it (and not blocked either way)'),
+  "coverImageUrl": zod.string().nullable().describe('A photo from a public make of this pattern'),
+  "isNew": zod.boolean().describe('Added in the last 30 days'),
+  "savedByMe": zod.boolean()
 })
 
 
@@ -1076,6 +1138,10 @@ export const createCatalogEntryBodyUrlMax = 500;
 
 export const createCatalogEntryBodyDescriptionMax = 2000;
 
+export const createCatalogEntryBodyPriceCentsMin = 0;
+export const createCatalogEntryBodyPriceCentsMax = 100000;
+
+export const createCatalogEntryBodyCurrencyRegExp = new RegExp('^[A-Za-z]{3}$');
 
 
 export const CreateCatalogEntryBody = zod.object({
@@ -1088,7 +1154,11 @@ export const CreateCatalogEntryBody = zod.object({
   "fabricTypes": zod.string().max(createCatalogEntryBodyFabricTypesMax).nullish(),
   "yardage": zod.string().max(createCatalogEntryBodyYardageMax).nullish(),
   "url": zod.string().max(createCatalogEntryBodyUrlMax).nullish(),
-  "description": zod.string().max(createCatalogEntryBodyDescriptionMax).optional()
+  "description": zod.string().max(createCatalogEntryBodyDescriptionMax).optional(),
+  "source": zod.enum(['free', 'designer']).optional(),
+  "priceCents": zod.number().int().min(createCatalogEntryBodyPriceCentsMin).max(createCatalogEntryBodyPriceCentsMax).nullish(),
+  "currency": zod.string().regex(createCatalogEntryBodyCurrencyRegExp).nullish().describe('ISO 4217 code, e.g. AUD'),
+  "designerHandle": zod.string().nullish().describe('Your own handle to say you designed it (admins may name anyone); null for none')
 })
 
 export const CreateCatalogEntryResponse = zod.object({
@@ -1115,7 +1185,18 @@ export const CreateCatalogEntryResponse = zod.object({
   "runsTrue": zod.number().int(),
   "runsLarge": zod.number().int(),
   "makes": zod.number().int()
-}).describe('Review numbers count every review; makes counts what this viewer may see.')
+}).describe('Review numbers count every review; makes counts what this viewer may see.'),
+  "source": zod.enum(['seams_club', 'free', 'designer']).describe('Where to get it: on Seams Club (pattern sales, not open yet), free, or from the designer\'s site'),
+  "priceCents": zod.number().int().nullable().describe('Price in the page\'s own currency, in cents'),
+  "currency": zod.string().nullable().describe('ISO 4217 code'),
+  "designer": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).describe('The designer\'s Seams Club account, when they are on it (and not blocked either way)'),
+  "coverImageUrl": zod.string().nullable().describe('A photo from a public make of this pattern'),
+  "isNew": zod.boolean().describe('Added in the last 30 days'),
+  "savedByMe": zod.boolean()
 })
 
 
@@ -1142,6 +1223,10 @@ export const updateCatalogEntryBodyUrlMax = 500;
 
 export const updateCatalogEntryBodyDescriptionMax = 2000;
 
+export const updateCatalogEntryBodyPriceCentsMin = 0;
+export const updateCatalogEntryBodyPriceCentsMax = 100000;
+
+export const updateCatalogEntryBodyCurrencyRegExp = new RegExp('^[A-Za-z]{3}$');
 
 
 export const UpdateCatalogEntryBody = zod.object({
@@ -1153,7 +1238,11 @@ export const UpdateCatalogEntryBody = zod.object({
   "fabricTypes": zod.string().max(updateCatalogEntryBodyFabricTypesMax).nullish(),
   "yardage": zod.string().max(updateCatalogEntryBodyYardageMax).nullish(),
   "url": zod.string().max(updateCatalogEntryBodyUrlMax).nullish(),
-  "description": zod.string().max(updateCatalogEntryBodyDescriptionMax).optional()
+  "description": zod.string().max(updateCatalogEntryBodyDescriptionMax).optional(),
+  "source": zod.enum(['free', 'designer']).optional(),
+  "priceCents": zod.number().int().min(updateCatalogEntryBodyPriceCentsMin).max(updateCatalogEntryBodyPriceCentsMax).nullish(),
+  "currency": zod.string().regex(updateCatalogEntryBodyCurrencyRegExp).nullish().describe('ISO 4217 code, e.g. AUD'),
+  "designerHandle": zod.string().nullish().describe('Your own handle to say you designed it (admins may name anyone); null for none')
 })
 
 export const UpdateCatalogEntryResponse = zod.object({
@@ -1180,7 +1269,42 @@ export const UpdateCatalogEntryResponse = zod.object({
   "runsTrue": zod.number().int(),
   "runsLarge": zod.number().int(),
   "makes": zod.number().int()
-}).describe('Review numbers count every review; makes counts what this viewer may see.')
+}).describe('Review numbers count every review; makes counts what this viewer may see.'),
+  "source": zod.enum(['seams_club', 'free', 'designer']).describe('Where to get it: on Seams Club (pattern sales, not open yet), free, or from the designer\'s site'),
+  "priceCents": zod.number().int().nullable().describe('Price in the page\'s own currency, in cents'),
+  "currency": zod.string().nullable().describe('ISO 4217 code'),
+  "designer": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).describe('The designer\'s Seams Club account, when they are on it (and not blocked either way)'),
+  "coverImageUrl": zod.string().nullable().describe('A photo from a public make of this pattern'),
+  "isNew": zod.boolean().describe('Added in the last 30 days'),
+  "savedByMe": zod.boolean()
+})
+
+
+/**
+ * @summary Save a pattern (the heart). Private to you.
+ */
+export const SaveCatalogEntryParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const SaveCatalogEntryResponse = zod.object({
+  "saved": zod.boolean()
+})
+
+
+/**
+ * @summary Remove a saved pattern.
+ */
+export const UnsaveCatalogEntryParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UnsaveCatalogEntryResponse = zod.object({
+  "saved": zod.boolean()
 })
 
 
@@ -3366,7 +3490,18 @@ export const GetOnboardingRecommendationsResponse = zod.object({
   "runsTrue": zod.number().int(),
   "runsLarge": zod.number().int(),
   "makes": zod.number().int()
-}).describe('Review numbers count every review; makes counts what this viewer may see.')
+}).describe('Review numbers count every review; makes counts what this viewer may see.'),
+  "source": zod.enum(['seams_club', 'free', 'designer']).describe('Where to get it: on Seams Club (pattern sales, not open yet), free, or from the designer\'s site'),
+  "priceCents": zod.number().int().nullable().describe('Price in the page\'s own currency, in cents'),
+  "currency": zod.string().nullable().describe('ISO 4217 code'),
+  "designer": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).describe('The designer\'s Seams Club account, when they are on it (and not blocked either way)'),
+  "coverImageUrl": zod.string().nullable().describe('A photo from a public make of this pattern'),
+  "isNew": zod.boolean().describe('Added in the last 30 days'),
+  "savedByMe": zod.boolean()
 })),
   "challenge": zod.union([zod.object({
   "slug": zod.string(),

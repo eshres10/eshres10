@@ -6,7 +6,7 @@ import { Bookmark, Globe, Heart, Lock, MessageCircle, MoreHorizontal, Scissors, 
 import { Link, Redirect } from 'wouter';
 import { STATUS_LABEL, challengeMeta } from '@/components/challenges/parts';
 import { Logo } from '@/components/brand/Logo';
-import { MAKE_ART } from '@/components/onboarding/copy';
+import { Garment } from '@/components/brand/Garment';
 import { Glyph } from '@/components/onboarding/Shell';
 import { PublicHeader } from '@/components/shell/PublicHeader';
 import { authHref } from '@/lib/navigation';
@@ -19,13 +19,6 @@ import { authHref } from '@/lib/navigation';
 
 const join = () => authHref('sign-up', '/feed');
 
-function Garment({ name, tone, className = '' }: { name: string; tone: string; className?: string }) {
-  return (
-    <span className={`grid place-items-center ${tone} ${className}`} aria-hidden="true">
-      <svg viewBox="0 0 48 48" className="h-[45%] w-[45%]" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d={MAKE_ART[name]} /></svg>
-    </span>
-  );
-}
 
 function Label({ children }: { children: string }) {
   return <span className="inline-flex rounded-full bg-red px-3 py-1 text-[13px] font-semibold text-white">{children}</span>;

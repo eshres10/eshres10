@@ -7,6 +7,7 @@
  */
 import type { CatalogInputDifficulty } from './catalogInputDifficulty';
 import type { CatalogInputKind } from './catalogInputKind';
+import type { CatalogInputSource } from './catalogInputSource';
 
 export interface CatalogInput {
   kind: CatalogInputKind;
@@ -46,4 +47,22 @@ export interface CatalogInput {
   url?: string | null;
   /** @maxLength 2000 */
   description?: string;
+  source?: CatalogInputSource;
+  /**
+     * @minimum 0
+     * @maximum 100000
+     * @nullable
+     */
+  priceCents?: number | null;
+  /**
+     * ISO 4217 code, e.g. AUD
+     * @nullable
+     * @pattern ^[A-Za-z]{3}$
+     */
+  currency?: string | null;
+  /**
+     * Your own handle to say you designed it (admins may name anyone); null for none
+     * @nullable
+     */
+  designerHandle?: string | null;
 }

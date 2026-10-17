@@ -7,6 +7,7 @@ import { capitalise, catalogPath, NewEntryForm, Stars } from '@/components/catal
 import { ErrorState } from '@/components/common';
 import { Sheet } from '@/components/social/Sheet';
 import { CommunityTabs } from '@/components/shell/CommunityTabs';
+import { PatternDirectory } from '@/components/catalog/Directory';
 
 const KINDS = [
   { id: 'pattern', label: 'Patterns', icon: BookOpen },
@@ -40,8 +41,24 @@ export function CatalogPage() {
   const [adding, setAdding] = useState(false);
   const ask = useRequireSignIn();
   useEffect(() => { const t = setTimeout(() => setDebounced(q), 250); return () => clearTimeout(t); }, [q]);
-  useEffect(() => { document.title = 'Sewing patterns and supplies · Seams Club'; }, []);
-  const list = useListCatalog({ kind, q: debounced.trim() || undefined });
+  useEffect(() => { document.title = kind === 'pattern' ? 'Sewing patterns · Seams Club' : 'Fabrics and supplies · Seams Club'; }, [kind]);
+  const addSheet = adding && (
+    <Sheet label="Add a page" onClose={() => setAdding(false)}>
+      <NewEntryForm kind={kind} initial={{ name: q }} onCancel={() => setAdding(false)} onCreated={entry => { setAdding(false); setLocation(catalogPath(entry)); }} />
+    </Sheet>
+  );
+  const add = () => { if (ask({ title: 'Sign in to add a page', body: "Add a pattern or product so people can review it. You'll come straight back here." })) setAdding(true); };
+  if (kind === 'pattern') {
+    return (
+      <div className="mx-auto max-w-[1232px]">
+        <CommunityTabs />
+        <PatternDirectory onAdd={add} />
+        <p className="mt-8 text-sm text-subtle">Looking for fabric, thread or notions? <Link href="/catalog?kind=product" className="font-semibold text-ink underline underline-offset-4">Fabrics &amp; supplies</Link></p>
+        {addSheet}
+      </div>
+    );
+  }
+  const list = useListCatalog({ kind: 'product', q: debounced.trim() || undefined }, { query: { enabled: kind === 'product' } });
   const setKind = (next: Kind) => setLocation(next === 'pattern' ? '/catalog' : '/catalog?kind=product', { replace: true });
 
   return (
@@ -57,9 +74,9 @@ export function CatalogPage() {
         <label className="relative min-w-[180px] flex-1 sm:max-w-sm">
           <span className="sr-only">Search</span>
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden="true" />
-          <input value={q} onChange={e => setQ(e.target.value)} type="search" className="field min-h-[48px] pl-9" placeholder={kind === 'pattern' ? 'Pattern or designer' : 'Product or brand'} />
+          <input value={q} onChange={e => setQ(e.target.value)} type="search" className="field min-h-[48px] pl-9" placeholder="Product or brand" />
         </label>
-        <button type="button" className="btn btn-primary ml-auto min-h-[48px] shrink-0 whitespace-nowrap" onClick={() => { if (ask({ title: 'Sign in to add a page', body: "Add a pattern or product so people can review it. You'll come straight back here." })) setAdding(true); }}>
+        <button type="button" className="btn btn-primary ml-auto min-h-[48px] shrink-0 whitespace-nowrap" onClick={add}>
           <Plus size={16} aria-hidden="true" />Add a page
         </button>
       </div>
@@ -70,11 +87,7 @@ export function CatalogPage() {
             ? <div className="rounded-[30px] bg-white px-6 py-14 text-center text-sm text-subtle">{debounced ? 'Nothing matches yet. Add the page so others can find it.' : 'No pages yet. Be the first to add one.'}</div>
             : <div className="grid grid-cols-[repeat(auto-fill,minmax(min(100%,260px),1fr))] gap-3">{list.data.items.map(e => <EntryCard key={e.id} entry={e} />)}</div>}
       </div>
-      {adding && (
-        <Sheet label="Add a page" onClose={() => setAdding(false)}>
-          <NewEntryForm kind={kind} initial={{ name: q }} onCancel={() => setAdding(false)} onCreated={entry => { setAdding(false); setLocation(catalogPath(entry)); }} />
-        </Sheet>
-      )}
+      {addSheet}
     </div>
   );
 }

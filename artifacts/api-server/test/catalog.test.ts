@@ -88,18 +88,20 @@ test("linking your own items to pages", async () => {
 });
 
 test("a page shows only makes the viewer may see, through items they may see", async () => {
-  const table: Array<[string, ReturnType<typeof as>, number[]]> = [
-    ["signed out", anon, [m1.id]],
-    ["other user", oth, [m1.id]],
-    ["follower", fol, [m1.id, m2.id]],
-    ["owner", kim, [m1.id, m2.id, m3.id]],
-    ["blocked", blk, []],
+  // The list follows the viewer; the count is public makes only (the same for
+  // everyone, never followers-only or private ones), minus a blocked owner.
+  const table: Array<[string, ReturnType<typeof as>, number[], number]> = [
+    ["signed out", anon, [m1.id], 1],
+    ["other user", oth, [m1.id], 1],
+    ["follower", fol, [m1.id, m2.id], 1],
+    ["owner", kim, [m1.id, m2.id, m3.id], 1],
+    ["blocked", blk, [], 0],
   ];
-  for (const [label, user, ids] of table) {
+  for (const [label, user, ids, publicCount] of table) {
     const r = await user("GET", "/api/public/catalog/pattern/fernhill-willa-dress");
     assert.equal(r.status, 200, `${label}: ${r.text}`);
     assert.deepEqual(r.json.makes.map((m: { id: number }) => m.id).sort(), [...ids].sort(), label);
-    assert.equal(r.json.entry.stats.makes, ids.length, label);
+    assert.equal(r.json.entry.stats.makes, publicCount, label);
     assert.ok(!/pdfUrl|measurement|k_kim/.test(r.text), `${label}: nothing private`);
   }
   const out = await anon("GET", "/api/public/catalog/pattern/fernhill-willa-dress");

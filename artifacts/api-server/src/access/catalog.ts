@@ -1,5 +1,6 @@
 import { and, count, desc, eq, gt, ilike, inArray, or, sql, type SQL } from "drizzle-orm";
 import {
+  catalogSavesTable,
   catalogTable,
   fabricsTable,
   patternsTable,
@@ -86,31 +87,44 @@ async function makesUsing(db: Tx, viewer: Viewer, entry: Pick<CatalogEntry, "id"
     .map((r) => ({ make: r.make, usedWithId: r.make.patternId }));
 }
 
-/** How many visible makes use each entry (for lists), with the same rule as makesUsing. */
-async function makeCounts(db: Tx, viewer: Viewer, entries: Array<Pick<CatalogEntry, "id" | "kind">>): Promise<Map<number, number>> {
+/**
+ * Public makes using each entry: the make and the linked pattern/fabric/thread
+ * are both public. Followers-only and private makes are never counted, so the
+ * numbers are the same for everyone (owner decision, pattern directory).
+ */
+function publicMakeCountsSql(kind: CatalogKind): SQL {
+  const one = (table: "sewspace_patterns" | "sewspace_fabrics" | "sewspace_threads", column: "pattern_id" | "fabric_id" | "thread_id") => sql`
+    SELECT l.catalog_id AS id, p.id AS make_id FROM sewspace_projects p
+    JOIN ${sql.raw(table)} l ON l.id = p.${sql.raw(column)} AND l.user_id = p.user_id
+    WHERE p.visibility = 'public' AND l.visibility = 'public' AND l.catalog_id IS NOT NULL`;
+  const union = kind === "pattern"
+    ? one("sewspace_patterns", "pattern_id")
+    : sql`${one("sewspace_fabrics", "fabric_id")} UNION ${one("sewspace_threads", "thread_id")}`;
+  return sql`SELECT id, count(DISTINCT make_id)::int AS n FROM (${union}) u GROUP BY id`;
+}
+
+async function makeCounts(db: Tx, entries: Array<Pick<CatalogEntry, "id" | "kind">>): Promise<Map<number, number>> {
   const counts = new Map<number, number>();
-  const add = (rows: Array<{ id: number | null; n: number }>) => rows.forEach((r) => r.id !== null && counts.set(r.id, (counts.get(r.id) ?? 0) + r.n));
-  const patternIds = entries.filter((e) => e.kind === "pattern").map((e) => e.id);
-  const productIds = entries.filter((e) => e.kind === "product").map((e) => e.id);
-  const n = sql<number>`count(DISTINCT ${projectsTable.id})::int`;
-  if (patternIds.length) {
-    add(await db.select({ id: patternsTable.catalogId, n }).from(projectsTable)
-      .innerJoin(patternsTable, and(eq(patternsTable.id, projectsTable.patternId), eq(patternsTable.userId, projectsTable.userId)))
-      .where(and(inArray(patternsTable.catalogId, patternIds), visibleTo(projectsTable, viewer), visibleTo(patternsTable, viewer)))
-      .groupBy(patternsTable.catalogId));
-  }
-  if (productIds.length) {
-    // A make using both a fabric and a thread from the same page counts twice; rare enough for a list.
-    add(await db.select({ id: fabricsTable.catalogId, n }).from(projectsTable)
-      .innerJoin(fabricsTable, and(eq(fabricsTable.id, projectsTable.fabricId), eq(fabricsTable.userId, projectsTable.userId)))
-      .where(and(inArray(fabricsTable.catalogId, productIds), visibleTo(projectsTable, viewer), visibleTo(fabricsTable, viewer)))
-      .groupBy(fabricsTable.catalogId));
-    add(await db.select({ id: threadsTable.catalogId, n }).from(projectsTable)
-      .innerJoin(threadsTable, and(eq(threadsTable.id, projectsTable.threadId), eq(threadsTable.userId, projectsTable.userId)))
-      .where(and(inArray(threadsTable.catalogId, productIds), visibleTo(projectsTable, viewer), visibleTo(threadsTable, viewer)))
-      .groupBy(threadsTable.catalogId));
+  for (const kind of ["pattern", "product"] as const) {
+    const ids = entries.filter((e) => e.kind === kind).map((e) => e.id);
+    if (!ids.length) continue;
+    const rows = await db.execute<{ id: number; n: number }>(sql`SELECT id, n FROM (${publicMakeCountsSql(kind)}) c WHERE id = ANY(${`{${ids.join(",")}}`}::integer[])`);
+    rows.rows.forEach((r) => counts.set(Number(r.id), Number(r.n)));
   }
   return counts;
+}
+
+/** A cover photo per pattern page: the newest public make with a photo. */
+async function covers(db: Tx, entries: Array<Pick<CatalogEntry, "id" | "kind">>): Promise<Map<number, string>> {
+  const ids = entries.filter((e) => e.kind === "pattern").map((e) => e.id);
+  if (!ids.length) return new Map();
+  const rows = await db.execute<{ id: number; url: string }>(sql`
+    SELECT DISTINCT ON (l.catalog_id) l.catalog_id AS id, p.cover_image_url AS url
+    FROM sewspace_projects p JOIN sewspace_patterns l ON l.id = p.pattern_id AND l.user_id = p.user_id
+    WHERE p.visibility = 'public' AND l.visibility = 'public' AND p.cover_image_url IS NOT NULL
+      AND l.catalog_id = ANY(${`{${ids.join(",")}}`}::integer[])
+    ORDER BY l.catalog_id, p.published_at DESC NULLS LAST, p.id DESC`);
+  return new Map(rows.rows.map((r) => [Number(r.id), r.url]));
 }
 
 // ------------------------------------------------------------------ entries
@@ -126,7 +140,12 @@ export interface CatalogStatsView {
   runsLarge: number;
   makes: number;
 }
-export type CatalogEntryView = Omit<CatalogEntry, "createdBy" | "createdAt" | "updatedAt"> & { canEdit: boolean; stats: CatalogStatsView };
+type PublicPersonView = { handle: string; name: string; avatarUrl: string | null };
+export type CatalogEntryView = Omit<CatalogEntry, "createdBy" | "createdAt" | "updatedAt" | "designerId"> & {
+  canEdit: boolean; stats: CatalogStatsView; designer: PublicPersonView | null; coverImageUrl: string | null; isNew: boolean; savedByMe: boolean;
+};
+
+const NEW_FOR_MS = 30 * 86400_000;
 
 export async function entryViews(db: Tx, viewer: Viewer, rows: CatalogEntry[]): Promise<CatalogEntryView[]> {
   if (!rows.length) return [];
@@ -135,7 +154,15 @@ export async function entryViews(db: Tx, viewer: Viewer, rows: CatalogEntry[]): 
     runs_small: string; runs_true: string; runs_large: string;
   }>(sql`SELECT * FROM sewspace_catalog_stats(${`{${rows.map((r) => r.id).join(",")}}`}::integer[])`);
   const byId = new Map(stats.rows.map((r) => [Number(r.catalog_id), r]));
-  const makes = await makeCounts(db, viewer, rows);
+  const makes = await makeCounts(db, rows);
+  const coverMap = await covers(db, rows);
+  const designerIds = [...new Set(rows.map((r) => r.designerId).filter((id): id is string => Boolean(id)))];
+  const designers = designerIds.length ? await db.select().from(publicProfilesView).where(inArray(publicProfilesView.userId, designerIds)) : [];
+  const designerMap = new Map(designers.map((d) => [d.userId, { handle: d.handle, name: d.name, avatarUrl: d.avatarUrl }]));
+  const saved = viewer.userId
+    ? new Set((await db.select({ id: catalogSavesTable.catalogId }).from(catalogSavesTable)
+        .where(and(eq(catalogSavesTable.userId, viewer.userId), inArray(catalogSavesTable.catalogId, rows.map((r) => r.id))))).map((r) => r.id))
+    : new Set<number>();
   const num = (v: string | null | undefined) => (v === null || v === undefined ? null : Number(v));
   return rows.map((r) => {
     const s = byId.get(r.id);
@@ -152,6 +179,13 @@ export async function entryViews(db: Tx, viewer: Viewer, rows: CatalogEntry[]): 
       yardage: r.yardage,
       url: r.url,
       description: r.description,
+      source: r.source,
+      priceCents: r.priceCents,
+      currency: r.currency,
+      designer: (r.designerId && designerMap.get(r.designerId)) || null,
+      coverImageUrl: coverMap.get(r.id) ?? null,
+      isNew: Date.now() - r.createdAt.getTime() < NEW_FOR_MS,
+      savedByMe: saved.has(r.id),
       canEdit: Boolean(viewer.userId) && (r.createdBy === viewer.userId || viewer.isAdmin),
       stats: {
         reviews: Number(s?.reviews ?? 0),
@@ -173,17 +207,89 @@ function escapeLike(q: string): string {
   return q.replace(/[\\%_]/g, (c) => `\\${c}`);
 }
 
-/** Browse or search. Most reviewed first; when searching, names starting with the query first. */
-export async function listCatalog(db: Tx, viewer: Viewer, kind: CatalogKind, q?: string) {
-  const query = q?.trim().slice(0, 80);
-  const reviews = sql`(SELECT count(*) FROM ${reviewsTable} WHERE ${reviewsTable.catalogId} = ${catalogTable.id})`;
-  const rows = await db
-    .select()
-    .from(catalogTable)
-    .where(and(eq(catalogTable.kind, kind), query ? or(ilike(catalogTable.name, `%${escapeLike(query)}%`), ilike(catalogTable.maker, `%${escapeLike(query)}%`)) : undefined))
-    .orderBy(...(query ? [sql`(lower(${catalogTable.name}) LIKE ${`${escapeLike(query.toLowerCase())}%`}) DESC`] : []), desc(reviews), catalogTable.name)
-    .limit(60);
-  return { items: await entryViews(db, viewer, rows) };
+export const CATALOG_PAGE = 24;
+export type CatalogSort = "made" | "rating" | "new";
+const DIFFICULTIES = ["beginner", "intermediate", "advanced"] as const;
+const SOURCES = ["seams_club", "free", "designer"] as const;
+
+export interface CatalogQuery {
+  q?: string;
+  category?: string;
+  difficulty?: string[];
+  source?: string[];
+  minRating?: number;
+  sort?: CatalogSort;
+  cursor?: string;
+}
+
+/**
+ * The directory: search (name, designer, category), category, difficulty,
+ * where to get it, rating, sort, 24 at a time. Ratings count every review (as
+ * on the page); makes are public makes only. Each filter's counts apply the
+ * other filters. Offset cursor ("o:<n>").
+ */
+export async function listCatalog(db: Tx, viewer: Viewer, kind: CatalogKind, options: CatalogQuery = {}) {
+  const query = options.q?.trim().slice(0, 80);
+  const like = query ? `%${escapeLike(query)}%` : null;
+  const difficulty = (options.difficulty ?? []).filter((d) => (DIFFICULTIES as readonly string[]).includes(d));
+  const source = (options.source ?? []).filter((d) => (SOURCES as readonly string[]).includes(d));
+  const offset = Math.min(Number(/^o:(\d+)$/.exec(Buffer.from(options.cursor ?? "", "base64url").toString("utf8"))?.[1] ?? 0), 5000);
+  const base = sql`
+    WITH stats AS (SELECT * FROM sewspace_catalog_stats(ARRAY(SELECT id FROM sewspace_catalog WHERE kind = ${kind}))),
+    made AS (${publicMakeCountsSql(kind)}),
+    base AS (
+      SELECT c.id, c.name, c.created_at, c.difficulty, c.source, s.rating, s.reviews, coalesce(m.n, 0) AS makes
+      FROM sewspace_catalog c
+      LEFT JOIN stats s ON s.catalog_id = c.id
+      LEFT JOIN made m ON m.id = c.id
+      WHERE c.kind = ${kind}
+        ${options.category ? sql`AND c.category = ${options.category.toLowerCase()}` : sql``}
+        ${like ? sql`AND (c.name ILIKE ${like} OR c.maker ILIKE ${like} OR c.category ILIKE ${like})` : sql``}
+        ${options.minRating ? sql`AND s.rating >= ${options.minRating}` : sql``}
+    )`;
+  const byDifficulty = difficulty.length ? sql`AND difficulty = ANY(${`{${difficulty.join(",")}}`}::text[])` : sql``;
+  const bySource = source.length ? sql`AND source = ANY(${`{${source.join(",")}}`}::text[])` : sql``;
+  const order = options.sort === "rating"
+    ? sql`rating DESC NULLS LAST, reviews DESC, makes DESC, id DESC`
+    : options.sort === "new"
+      ? sql`created_at DESC, id DESC`
+      : sql`makes DESC, rating DESC NULLS LAST, reviews DESC, name`;
+  const page = await db.execute<{ id: number }>(sql`${base} SELECT id FROM base WHERE true ${byDifficulty} ${bySource} ORDER BY ${order} LIMIT ${CATALOG_PAGE + 1} OFFSET ${offset}`);
+  const [total] = (await db.execute<{ n: number }>(sql`${base} SELECT count(*)::int AS n FROM base WHERE true ${byDifficulty} ${bySource}`)).rows;
+  const diffCounts = await db.execute<{ k: string; n: number }>(sql`${base} SELECT difficulty AS k, count(*)::int AS n FROM base WHERE true ${bySource} GROUP BY difficulty`);
+  const sourceCounts = await db.execute<{ k: string; n: number }>(sql`${base} SELECT source AS k, count(*)::int AS n FROM base WHERE true ${byDifficulty} GROUP BY source`);
+  const ids = page.rows.slice(0, CATALOG_PAGE).map((r) => Number(r.id));
+  const rows = ids.length ? await db.select().from(catalogTable).where(inArray(catalogTable.id, ids)) : [];
+  const byId = new Map(rows.map((r) => [r.id, r]));
+  const counted = <K extends string>(keys: readonly K[], list: Array<{ k: string; n: number }>) =>
+    Object.fromEntries(keys.map((k) => [k, Number(list.find((r) => r.k === k)?.n ?? 0)])) as Record<K, number>;
+  return {
+    items: await entryViews(db, viewer, ids.map((id) => byId.get(id)!).filter(Boolean)),
+    total: Number(total?.n ?? 0),
+    facets: { difficulty: counted(DIFFICULTIES, diffCounts.rows), source: counted(SOURCES, sourceCounts.rows) },
+    nextCursor: page.rows.length > CATALOG_PAGE ? Buffer.from(`o:${offset + CATALOG_PAGE}`).toString("base64url") : null,
+  };
+}
+
+// ------------------------------------------------------------------ saves
+
+export const CATALOG_SAVES_PER_HOUR = 120;
+
+/** The heart: private saves of pattern pages. 120 changes an hour. */
+export async function setCatalogSave(db: Tx, viewer: Viewer, id: number, on: boolean): Promise<Ok<{ saved: boolean }> | Fail<"not_found" | "rate_limited">> {
+  const me = viewer.userId;
+  if (!me) return { ok: false, error: "not_found" };
+  const [{ recent }] = await db.select({ recent: count() }).from(catalogSavesTable)
+    .where(and(eq(catalogSavesTable.userId, me), gt(catalogSavesTable.createdAt, new Date(Date.now() - 3600_000))));
+  if (on && recent >= CATALOG_SAVES_PER_HOUR) return { ok: false, error: "rate_limited" };
+  if (on) {
+    const [entry] = await db.select({ id: catalogTable.id }).from(catalogTable).where(eq(catalogTable.id, id));
+    if (!entry) return { ok: false, error: "not_found" };
+    await db.insert(catalogSavesTable).values({ userId: me, catalogId: id }).onConflictDoNothing();
+  } else {
+    await db.delete(catalogSavesTable).where(and(eq(catalogSavesTable.userId, me), eq(catalogSavesTable.catalogId, id)));
+  }
+  return { ok: true, value: { saved: on } };
 }
 
 async function findEntry(db: Tx, kind: CatalogKind, slug: string): Promise<CatalogEntry | null> {
@@ -269,12 +375,29 @@ export interface CatalogFields {
   yardage?: string | null;
   url?: string | null;
   description?: string;
+  source?: "free" | "designer";
+  priceCents?: number | null;
+  currency?: string | null;
+  designerHandle?: string | null;
+}
+type CleanFields = Omit<CatalogFields, "designerHandle">;
+
+type FieldError = "invalid_name" | "invalid_category" | "invalid_url" | "invalid_price" | "not_your_handle";
+
+/**
+ * "I designed this": your own handle sets you as the page's designer; an admin
+ * may name anyone with a handle. (The database refuses anything else too.)
+ */
+async function designerFor(db: Tx, viewer: Viewer, handle: string | null): Promise<Ok<string | null> | Fail<"not_your_handle">> {
+  if (handle === null) return { ok: true, value: null };
+  const clean = handle.trim().replace(/^@/, "").toLowerCase();
+  const [person] = await db.select({ userId: publicProfilesView.userId }).from(publicProfilesView).where(sql`lower(${publicProfilesView.handle}) = ${clean}`);
+  if (!person || (person.userId !== viewer.userId && !viewer.isAdmin)) return { ok: false, error: "not_your_handle" };
+  return { ok: true, value: person.userId };
 }
 
-type FieldError = "invalid_name" | "invalid_category" | "invalid_url";
-
-function cleanFields(kind: CatalogKind, input: CatalogFields): Ok<CatalogFields> | Fail<FieldError> {
-  const out: CatalogFields = {};
+function cleanFields(kind: CatalogKind, input: CatalogFields): Ok<CleanFields> | Fail<FieldError> {
+  const out: CleanFields = {};
   const opt = (v: string | null | undefined) => (v === undefined ? undefined : v === null ? null : v.trim() || null);
   if (input.name !== undefined) {
     out.name = input.name.trim().replace(/\s+/g, " ");
@@ -294,6 +417,16 @@ function cleanFields(kind: CatalogKind, input: CatalogFields): Ok<CatalogFields>
   out.fabricTypes = kind === "pattern" ? opt(input.fabricTypes) : null;
   out.yardage = kind === "pattern" ? opt(input.yardage) : null;
   if (input.description !== undefined) out.description = input.description.trim();
+  // Where to get it. Free has no price; a price needs a currency.
+  if (input.source !== undefined) out.source = input.source;
+  if (input.priceCents !== undefined || input.currency !== undefined || input.source === "free") {
+    const free = (input.source ?? out.source) === "free";
+    out.priceCents = free ? null : input.priceCents ?? null;
+    out.currency = free ? null : input.currency ? input.currency.toUpperCase() : null;
+    if (out.priceCents !== null && (!out.currency || !/^[A-Z]{3}$/.test(out.currency) || out.priceCents < 0 || out.priceCents > 100000)) {
+      return { ok: false, error: "invalid_price" };
+    }
+  }
   return { ok: true, value: out };
 }
 
@@ -310,6 +443,8 @@ export async function createCatalogEntry(
   if (!me || !(await hasHandle(db, me))) return { ok: false, error: "no_handle" };
   const fields = cleanFields(input.kind, { ...input, maker: input.maker ?? "" });
   if (!fields.ok) return fields;
+  const designer = await designerFor(db, viewer, input.designerHandle ?? null);
+  if (!designer.ok) return designer;
   const slug = catalogSlug(fields.value.maker ?? "", fields.value.name ?? "");
   if (!slug) return { ok: false, error: "invalid_name" };
   const existing = await findEntry(db, input.kind, slug);
@@ -329,6 +464,10 @@ export async function createCatalogEntry(
     yardage: fields.value.yardage ?? null,
     url: fields.value.url ?? null,
     description: fields.value.description ?? "",
+    source: fields.value.source ?? "designer",
+    priceCents: fields.value.priceCents ?? null,
+    currency: fields.value.currency ?? null,
+    designerId: designer.value,
     createdBy: me,
   }).onConflictDoNothing().returning();
   const entry = row ?? (await findEntry(db, input.kind, slug))!;
@@ -343,7 +482,13 @@ export async function updateCatalogEntry(db: Tx, viewer: Viewer, id: number, inp
     sizes: entry.sizes, fabricTypes: entry.fabricTypes, yardage: entry.yardage, ...input,
   });
   if (!fields.ok) return fields;
-  const [row] = await db.update(catalogTable).set({ ...fields.value, updatedAt: new Date() }).where(eq(catalogTable.id, id)).returning();
+  let designerId: string | null | undefined;
+  if (input.designerHandle !== undefined) {
+    const designer = await designerFor(db, viewer, input.designerHandle);
+    if (!designer.ok) return designer;
+    designerId = designer.value;
+  }
+  const [row] = await db.update(catalogTable).set({ ...fields.value, ...(designerId !== undefined ? { designerId } : {}), updatedAt: new Date() }).where(eq(catalogTable.id, id)).returning();
   if (!row) return { ok: false, error: "not_found" };
   return { ok: true, value: (await entryViews(db, viewer, [row]))[0] };
 }

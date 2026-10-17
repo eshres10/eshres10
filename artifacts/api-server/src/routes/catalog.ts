@@ -24,6 +24,8 @@ import {
   UpdateCatalogEntryBody,
   UpdateCatalogEntryParams,
   UpdateCatalogEntryResponse,
+  SaveCatalogEntryParams,
+  SaveCatalogEntryResponse,
 } from "@workspace/api-zod";
 import {
   addToLibrary,
@@ -37,6 +39,7 @@ import {
   PRODUCT_CATEGORIES,
   saveReview,
   setCatalogLink,
+  setCatalogSave,
   setHelpful,
   updateCatalogEntry,
 } from "../access";
@@ -53,8 +56,11 @@ const notFound = (res: Reply) => res.status(404).json({ error: "Page not found" 
 
 catalogPublicRouter.get("/public/catalog", scoped(async (req, res, db): Promise<void> => {
   const query = ListCatalogQueryParams.safeParse(req.query);
-  const { kind, q } = query.success ? query.data : { kind: "pattern" as const, q: undefined };
-  res.json(ListCatalogResponse.parse(await listCatalog(db, viewerOf(req), kind ?? "pattern", q)));
+  const q: Partial<NonNullable<typeof query.data>> = query.success ? query.data : {};
+  const list = (v?: string) => (v ? v.split(",").map((x) => x.trim()).filter(Boolean) : undefined);
+  res.json(ListCatalogResponse.parse(await listCatalog(db, viewerOf(req), q.kind ?? "pattern", {
+    q: q.q, category: q.category, difficulty: list(q.difficulty), source: list(q.source), minRating: q.minRating, sort: q.sort, cursor: q.cursor,
+  })));
 }));
 
 catalogPublicRouter.get("/public/catalog/:kind/:slug", scoped(async (req, res, db): Promise<void> => {
@@ -82,6 +88,8 @@ const FIELD_ERRORS = {
   invalid_name: [400, "Give it a name."],
   invalid_category: [400, `Choose a category: patterns ${PATTERN_CATEGORIES.join(", ")}; products ${PRODUCT_CATEGORIES.join(", ")}.`],
   invalid_url: [400, "Links must start with http:// or https://."],
+  invalid_price: [400, "Give the price with its currency, up to 1000."],
+  not_your_handle: [400, "You can only name yourself as the designer."],
   no_handle: [409, "Choose a handle first."],
   rate_limited: [429, "You've added a lot of pages today. Try again tomorrow."],
   not_found: [404, "Page not found"],
@@ -155,6 +163,18 @@ for (const on of [true, false]) {
       return;
     }
     res.json(MarkReviewHelpfulResponse.parse(result.value));
+  }));
+}
+
+for (const on of [true, false]) {
+  router[on ? "put" : "delete"]("/catalog/:id/save", scoped(async (req, res, db): Promise<void> => {
+    const params = SaveCatalogEntryParams.safeParse(req.params);
+    const result = params.success ? await setCatalogSave(db, viewerOf(req), params.data.id, on) : { ok: false as const, error: "not_found" as const };
+    if (!result.ok) {
+      res.status(result.error === "rate_limited" ? 429 : 404).json({ error: result.error === "rate_limited" ? "That's a lot of saving for one hour. Try again later." : "Page not found" });
+      return;
+    }
+    res.json(SaveCatalogEntryResponse.parse(result.value));
   }));
 }
 

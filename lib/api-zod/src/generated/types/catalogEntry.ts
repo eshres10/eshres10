@@ -7,7 +7,9 @@
  */
 import type { CatalogEntryDifficulty } from './catalogEntryDifficulty';
 import type { CatalogEntryKind } from './catalogEntryKind';
+import type { CatalogSource } from './catalogSource';
 import type { CatalogStats } from './catalogStats';
+import type { PublicPerson } from './publicPerson';
 
 export interface CatalogEntry {
   id: number;
@@ -33,4 +35,25 @@ export interface CatalogEntry {
   description: string;
   canEdit: boolean;
   stats: CatalogStats;
+  source: CatalogSource;
+  /**
+     * Price in the page's own currency, in cents
+     * @nullable
+     */
+  priceCents: number | null;
+  /**
+     * ISO 4217 code
+     * @nullable
+     */
+  currency: string | null;
+  /** The designer's Seams Club account, when they are on it (and not blocked either way) */
+  designer: PublicPerson | null;
+  /**
+     * A photo from a public make of this pattern
+     * @nullable
+     */
+  coverImageUrl: string | null;
+  /** Added in the last 30 days */
+  isNew: boolean;
+  savedByMe: boolean;
 }

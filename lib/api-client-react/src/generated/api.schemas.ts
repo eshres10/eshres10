@@ -638,6 +638,18 @@ export const CatalogEntryDifficulty = {
   advanced: 'advanced',
 } as const;
 
+/**
+ * Where to get it: on Seams Club (pattern sales, not open yet), free, or from the designer's site
+ */
+export type CatalogSource = typeof CatalogSource[keyof typeof CatalogSource];
+
+
+export const CatalogSource = {
+  seams_club: 'seams_club',
+  free: 'free',
+  designer: 'designer',
+} as const;
+
 export interface CatalogEntry {
   id: number;
   kind: CatalogEntryKind;
@@ -662,10 +674,61 @@ export interface CatalogEntry {
   description: string;
   canEdit: boolean;
   stats: CatalogStats;
+  source: CatalogSource;
+  /**
+     * Price in the page's own currency, in cents
+     * @nullable
+     */
+  priceCents: number | null;
+  /**
+     * ISO 4217 code
+     * @nullable
+     */
+  currency: string | null;
+  /** The designer's Seams Club account, when they are on it (and not blocked either way) */
+  designer: PublicPerson | null;
+  /**
+     * A photo from a public make of this pattern
+     * @nullable
+     */
+  coverImageUrl: string | null;
+  /** Added in the last 30 days */
+  isNew: boolean;
+  savedByMe: boolean;
 }
+
+export interface CatalogSaveState {
+  saved: boolean;
+}
+
+export type CatalogListFacetsDifficulty = {
+  beginner: number;
+  intermediate: number;
+  advanced: number;
+};
+
+export type CatalogListFacetsSource = {
+  seams_club: number;
+  free: number;
+  designer: number;
+};
+
+/**
+ * Counts for the filter options, each with the other filters applied
+ */
+export type CatalogListFacets = {
+  difficulty: CatalogListFacetsDifficulty;
+  source: CatalogListFacetsSource;
+};
 
 export interface CatalogList {
   items: CatalogEntry[];
+  /** Entries matching every filter */
+  total: number;
+  /** Counts for the filter options, each with the other filters applied */
+  facets: CatalogListFacets;
+  /** @nullable */
+  nextCursor: string | null;
 }
 
 export type CatalogInputKind = typeof CatalogInputKind[keyof typeof CatalogInputKind];
@@ -686,6 +749,14 @@ export const CatalogInputDifficulty = {
   beginner: 'beginner',
   intermediate: 'intermediate',
   advanced: 'advanced',
+} as const;
+
+export type CatalogInputSource = typeof CatalogInputSource[keyof typeof CatalogInputSource];
+
+
+export const CatalogInputSource = {
+  free: 'free',
+  designer: 'designer',
 } as const;
 
 export interface CatalogInput {
@@ -726,6 +797,24 @@ export interface CatalogInput {
   url?: string | null;
   /** @maxLength 2000 */
   description?: string;
+  source?: CatalogInputSource;
+  /**
+     * @minimum 0
+     * @maximum 100000
+     * @nullable
+     */
+  priceCents?: number | null;
+  /**
+     * ISO 4217 code, e.g. AUD
+     * @nullable
+     * @pattern ^[A-Za-z]{3}$
+     */
+  currency?: string | null;
+  /**
+     * Your own handle to say you designed it (admins may name anyone); null for none
+     * @nullable
+     */
+  designerHandle?: string | null;
 }
 
 /**
@@ -738,6 +827,14 @@ export const CatalogUpdateDifficulty = {
   beginner: 'beginner',
   intermediate: 'intermediate',
   advanced: 'advanced',
+} as const;
+
+export type CatalogUpdateSource = typeof CatalogUpdateSource[keyof typeof CatalogUpdateSource];
+
+
+export const CatalogUpdateSource = {
+  free: 'free',
+  designer: 'designer',
 } as const;
 
 export interface CatalogUpdate {
@@ -777,6 +874,24 @@ export interface CatalogUpdate {
   url?: string | null;
   /** @maxLength 2000 */
   description?: string;
+  source?: CatalogUpdateSource;
+  /**
+     * @minimum 0
+     * @maximum 100000
+     * @nullable
+     */
+  priceCents?: number | null;
+  /**
+     * ISO 4217 code, e.g. AUD
+     * @nullable
+     * @pattern ^[A-Za-z]{3}$
+     */
+  currency?: string | null;
+  /**
+     * Your own handle to say you designed it (admins may name anyone); null for none
+     * @nullable
+     */
+  designerHandle?: string | null;
 }
 
 export interface CatalogMake {
@@ -2245,9 +2360,31 @@ export const ListReportsStatus = {
 export type ListCatalogParams = {
 kind?: ListCatalogKind;
 /**
+ * Matches name, designer and category
  * @maxLength 80
  */
 q?: string;
+/**
+ * @maxLength 40
+ */
+category?: string;
+/**
+ * Comma-separated: beginner, intermediate, advanced
+ * @maxLength 60
+ */
+difficulty?: string;
+/**
+ * Comma-separated: seams_club, free, designer
+ * @maxLength 60
+ */
+source?: string;
+/**
+ * @minimum 0
+ * @maximum 5
+ */
+minRating?: number;
+sort?: ListCatalogSort;
+cursor?: string;
 };
 
 export type ListCatalogKind = typeof ListCatalogKind[keyof typeof ListCatalogKind];
@@ -2256,6 +2393,15 @@ export type ListCatalogKind = typeof ListCatalogKind[keyof typeof ListCatalogKin
 export const ListCatalogKind = {
   pattern: 'pattern',
   product: 'product',
+} as const;
+
+export type ListCatalogSort = typeof ListCatalogSort[keyof typeof ListCatalogSort];
+
+
+export const ListCatalogSort = {
+  made: 'made',
+  rating: 'rating',
+  new: 'new',
 } as const;
 
 export type ListChallengesParams = {

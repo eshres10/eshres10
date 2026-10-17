@@ -35,6 +35,7 @@ import type {
   CatalogLinkResult,
   CatalogList,
   CatalogPage,
+  CatalogSaveState,
   CatalogUpdate,
   Challenge,
   ChallengeEntry,
@@ -3449,6 +3450,154 @@ export const useUpdateCatalogEntry = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getUpdateCatalogEntryMutationOptions(options), queryClient);
+    }
+
+export const getSaveCatalogEntryUrl = (id: number,) => {
+
+
+
+
+  return `/api/catalog/${id}/save`
+}
+
+/**
+ * @summary Save a pattern (the heart). Private to you.
+ */
+export const saveCatalogEntry = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<CatalogSaveState> => {
+
+  return customFetch<CatalogSaveState>(getSaveCatalogEntryUrl(id),
+  {
+    ...options,
+    method: 'PUT'
+
+
+  }
+);}
+
+
+
+
+
+export const getSaveCatalogEntryMutationKey = () => ['saveCatalogEntry'] as const;
+
+export const getSaveCatalogEntryMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveCatalogEntry>>, TError,SaveCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveCatalogEntry>>, TError,SaveCatalogEntryMutationVariables, TContext> => {
+
+const mutationKey = getSaveCatalogEntryMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveCatalogEntry>>, SaveCatalogEntryMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  saveCatalogEntry(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveCatalogEntryMutationResult = NonNullable<Awaited<ReturnType<typeof saveCatalogEntry>>>
+
+    export type SaveCatalogEntryMutationError = ErrorType<void>
+    export type SaveCatalogEntryMutationVariables = {id: number}
+
+    /**
+ * @summary Save a pattern (the heart). Private to you.
+ */
+export const useSaveCatalogEntry = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveCatalogEntry>>, TError,SaveCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof saveCatalogEntry>>,
+        TError,
+        SaveCatalogEntryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveCatalogEntryMutationOptions(options), queryClient);
+    }
+
+export const getUnsaveCatalogEntryUrl = (id: number,) => {
+
+
+
+
+  return `/api/catalog/${id}/save`
+}
+
+/**
+ * @summary Remove a saved pattern.
+ */
+export const unsaveCatalogEntry = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<CatalogSaveState> => {
+
+  return customFetch<CatalogSaveState>(getUnsaveCatalogEntryUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getUnsaveCatalogEntryMutationKey = () => ['unsaveCatalogEntry'] as const;
+
+export const getUnsaveCatalogEntryMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsaveCatalogEntry>>, TError,UnsaveCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unsaveCatalogEntry>>, TError,UnsaveCatalogEntryMutationVariables, TContext> => {
+
+const mutationKey = getUnsaveCatalogEntryMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unsaveCatalogEntry>>, UnsaveCatalogEntryMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  unsaveCatalogEntry(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnsaveCatalogEntryMutationResult = NonNullable<Awaited<ReturnType<typeof unsaveCatalogEntry>>>
+
+    export type UnsaveCatalogEntryMutationError = ErrorType<void>
+    export type UnsaveCatalogEntryMutationVariables = {id: number}
+
+    /**
+ * @summary Remove a saved pattern.
+ */
+export const useUnsaveCatalogEntry = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unsaveCatalogEntry>>, TError,UnsaveCatalogEntryMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unsaveCatalogEntry>>,
+        TError,
+        UnsaveCatalogEntryMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUnsaveCatalogEntryMutationOptions(options), queryClient);
     }
 
 export const getSaveReviewUrl = (id: number,) => {

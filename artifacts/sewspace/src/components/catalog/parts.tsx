@@ -3,6 +3,7 @@ import { useSheetDirty } from '@/components/social/Sheet';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useCreateCatalogEntry,
+  useGetProfile,
   useSaveReview,
   useDeleteReview,
   useListProjects,
@@ -12,6 +13,7 @@ import {
   type ReviewInputSizing,
 } from '@workspace/api-client-react';
 import { Loader2, Star } from 'lucide-react';
+import { CURRENCIES, defaultCurrency } from '@/lib/currency';
 
 export const PATTERN_CATEGORIES = ['dresses', 'tops', 'trousers', 'skirts', 'jumpsuits', 'outerwear', 'knitwear', 'lingerie', 'activewear', 'menswear', 'kids', 'bags', 'accessories', 'home', 'other'] as const;
 export const PRODUCT_CATEGORIES = ['fabric', 'thread', 'notions', 'tools', 'machines', 'other'] as const;
@@ -143,17 +145,32 @@ export function NewEntryForm({ kind, initial, onCreated, onCancel }: {
     url: '',
     difficulty: '' as '' | 'beginner' | 'intermediate' | 'advanced',
     sizes: '',
+    source: 'designer' as 'designer' | 'free',
+    price: '',
+    currency: defaultCurrency(),
+    mine: false,
   });
-  const set = (key: keyof typeof form, value: string) => setForm(f => ({ ...f, [key]: value }));
-  useSheetDirty(Boolean(form.name.trim() || form.maker.trim() || form.url.trim() || form.sizes.trim()));
+  const me = useGetProfile().data;
+  const set = (key: keyof typeof form, value: string | boolean) => setForm(f => ({ ...f, [key]: value }));
+  useSheetDirty(Boolean(form.name.trim() || form.maker.trim() || form.url.trim() || form.sizes.trim() || form.price.trim()));
+  const priceCents = form.price.trim() ? Math.round(Number(form.price.replace(',', '.')) * 100) : null;
+  const priceInvalid = priceCents !== null && !(Number.isFinite(priceCents) && priceCents >= 0 && priceCents <= 100000);
   return (
     <form className="space-y-4" onSubmit={e => {
       e.preventDefault();
+      if (priceInvalid) return;
+      const pattern = kind === 'pattern';
       create.mutate({
         data: {
           kind, name: form.name, maker: form.maker, category: form.category, url: form.url.trim() || null,
-          difficulty: kind === 'pattern' && form.difficulty ? form.difficulty : null,
-          sizes: kind === 'pattern' ? form.sizes.trim() || null : null,
+          difficulty: pattern && form.difficulty ? form.difficulty : null,
+          sizes: pattern ? form.sizes.trim() || null : null,
+          ...(pattern ? {
+            source: form.source,
+            priceCents: form.source === 'designer' ? priceCents : null,
+            currency: form.source === 'designer' && priceCents !== null ? form.currency : null,
+            designerHandle: form.mine && me?.handle ? me.handle : null,
+          } : {}),
         },
       }, { onSuccess: onCreated });
     }}>
@@ -183,6 +200,37 @@ export function NewEntryForm({ kind, initial, onCreated, onCancel }: {
             <input value={form.sizes} onChange={e => set('sizes', e.target.value)} maxLength={80} className="field mt-1.5" placeholder="0–24" />
           </label>
         </div>
+      )}
+      {kind === 'pattern' && (
+        <fieldset className="space-y-3">
+          <legend className="text-xs font-semibold">Where to get it</legend>
+          <div role="radiogroup" aria-label="Where to get it" className="flex gap-1 rounded-full bg-canvas p-1">
+            {([['designer', "Designer's site"], ['free', 'Free']] as const).map(([value, label]) => (
+              <label key={value} className={`flex min-h-[44px] flex-1 cursor-pointer items-center justify-center rounded-full text-sm font-bold has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ink ${form.source === value ? 'bg-ink text-white' : 'text-ink'}`}>
+                <input type="radio" name="source" value={value} checked={form.source === value} onChange={() => set('source', value)} className="sr-only" />{label}
+              </label>
+            ))}
+          </div>
+          {form.source === 'designer' && (
+            <div className="grid grid-cols-[1fr_120px] gap-3">
+              <label className="block text-xs font-semibold">Price <span className="font-normal text-subtle">(optional)</span>
+                <input value={form.price} onChange={e => set('price', e.target.value)} inputMode="decimal" maxLength={8} className="field mt-1.5" placeholder="16" aria-invalid={priceInvalid || undefined} />
+              </label>
+              <label className="block text-xs font-semibold">Currency
+                <select value={form.currency} onChange={e => set('currency', e.target.value)} className="field mt-1.5">
+                  {CURRENCIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </label>
+              {priceInvalid && <p role="alert" className="col-span-2 text-sm font-semibold text-red-ink">Write the price as a number, up to 1000.</p>}
+            </div>
+          )}
+        </fieldset>
+      )}
+      {kind === 'pattern' && me?.handle && (
+        <label className="flex min-h-[44px] cursor-pointer items-center gap-3 text-sm font-semibold">
+          <input type="checkbox" checked={form.mine} onChange={e => set('mine', e.target.checked)} className="h-5 w-5 accent-ink" />
+          I designed this pattern <span className="font-normal text-subtle">(people can follow you from it)</span>
+        </label>
       )}
       <label className="block text-xs font-semibold">Where to buy it <span className="font-normal text-subtle">(optional link)</span>
         <input value={form.url} onChange={e => set('url', e.target.value)} type="url" inputMode="url" maxLength={500} className="field mt-1.5" placeholder="https://" />

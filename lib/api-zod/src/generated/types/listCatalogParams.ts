@@ -6,11 +6,34 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ListCatalogKind } from './listCatalogKind';
+import type { ListCatalogSort } from './listCatalogSort';
 
 export type ListCatalogParams = {
 kind?: ListCatalogKind;
 /**
+ * Matches name, designer and category
  * @maxLength 80
  */
 q?: string;
+/**
+ * @maxLength 40
+ */
+category?: string;
+/**
+ * Comma-separated: beginner, intermediate, advanced
+ * @maxLength 60
+ */
+difficulty?: string;
+/**
+ * Comma-separated: seams_club, free, designer
+ * @maxLength 60
+ */
+source?: string;
+/**
+ * @minimum 0
+ * @maximum 5
+ */
+minRating?: number;
+sort?: ListCatalogSort;
+cursor?: string;
 };

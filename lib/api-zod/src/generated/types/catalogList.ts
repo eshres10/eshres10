@@ -6,7 +6,14 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { CatalogEntry } from './catalogEntry';
+import type { CatalogListFacets } from './catalogListFacets';
 
 export interface CatalogList {
   items: CatalogEntry[];
+  /** Entries matching every filter */
+  total: number;
+  /** Counts for the filter options, each with the other filters applied */
+  facets: CatalogListFacets;
+  /** @nullable */
+  nextCursor: string | null;
 }

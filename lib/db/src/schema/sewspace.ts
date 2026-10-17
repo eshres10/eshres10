@@ -43,6 +43,9 @@ export const profilesTable = pgTable("sewspace_profiles", {
   avatarUrl: text("avatar_url"),
   // Who new posts are shared with by default (migration 0015; Pip's question 7).
   defaultPostVisibility: text("default_post_visibility").notNull().default("public"),
+  // Public links (migration 0016): an https shop URL and an Instagram handle.
+  shopUrl: text("shop_url"),
+  instagram: text("instagram"),
   ...timestamps,
 });
 
@@ -339,8 +342,33 @@ export const catalogTable = pgTable("sewspace_catalog", {
   url: text("url"),
   description: text("description").notNull().default(""),
   createdBy: varchar("created_by", { length: 255 }).notNull(),
+  // Migration 0016: where to get it, a price in the page's own currency, and
+  // the designer's own account (only settable to yourself, or by an admin).
+  source: text("source").$type<CatalogSource>().notNull().default("designer"),
+  priceCents: integer("price_cents"),
+  currency: text("currency"),
+  designerId: varchar("designer_id", { length: 255 }),
   ...timestamps,
 });
+
+export type CatalogSource = "designer" | "free" | "seams_club";
+
+// Size chart rows, body measurements in cm (migration 0016). Public; the page's creator writes.
+export const catalogSizesTable = pgTable("sewspace_catalog_sizes", {
+  catalogId: integer("catalog_id").notNull().references(() => catalogTable.id, { onDelete: "cascade" }),
+  position: smallint("position").notNull(),
+  label: text("label").notNull(),
+  bustCm: real("bust_cm"),
+  waistCm: real("waist_cm"),
+  hipCm: real("hip_cm"),
+}, (t) => [primaryKey({ columns: [t.catalogId, t.label] })]);
+
+// Saved patterns (the heart, migration 0016): private to the saver.
+export const catalogSavesTable = pgTable("sewspace_catalog_saves", {
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  catalogId: integer("catalog_id").notNull().references(() => catalogTable.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.userId, t.catalogId] })]);
 
 export const reviewsTable = pgTable("sewspace_reviews", {
   id: serial("id").primaryKey(),
@@ -353,6 +381,8 @@ export const reviewsTable = pgTable("sewspace_reviews", {
   sizing: text("sizing").$type<"small" | "true" | "large">(),
   sizeMade: text("size_made"),
   body: text("body").notNull().default(""),
+  // From a fixed list (migration 0016), for "Common alterations".
+  alterations: text("alterations").array().notNull().default([]),
   makeId: integer("make_id").references(() => projectsTable.id, { onDelete: "set null" }),
   ...timestamps,
 });
@@ -523,6 +553,8 @@ export const publicProfilesView = pgView("sewspace_public_profiles", {
   bio: text("bio").notNull(),
   avatarUrl: text("avatar_url"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull(),
+  shopUrl: text("shop_url"),
+  instagram: text("instagram"),
 }).existing();
 
 export const insertProfileSchema = createInsertSchema(profilesTable).omit({
