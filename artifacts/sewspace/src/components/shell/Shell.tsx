@@ -137,11 +137,11 @@ export function ShellFrame({ children }: { children: ReactNode }) {
       )}
       <div className="min-w-0 flex-1">
         <header className={`${mobileFocus ? 'hidden md:flex' : 'sticky top-[calc(.5rem+env(safe-area-inset-top))] mx-3 mt-3 flex'} relative z-30 items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:static md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3`}>
-          <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-canvas md:hidden"><Menu size={19} /></button>
           {location === '/feed'
             ? <div className="min-w-0 flex-1 md:hidden"><Logo href="/feed" /></div>
             : <h1 className="min-w-0 flex-1 truncate font-display text-[20px] tracking-[-.04em] md:text-[22px]">{title}</h1>}
           <h1 className={location === '/feed' ? 'sr-only md:not-sr-only md:min-w-0 md:flex-1 md:truncate md:font-display md:text-[22px] md:tracking-[-.04em]' : 'hidden'}>{title}</h1>
+          <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-canvas md:hidden"><Menu size={19} /></button>
           {location !== '/new' && <Link href="/new" className="hidden min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white no-underline md:inline-flex"><Plus size={16} aria-hidden="true" />New post</Link>}
           <Link href="/settings" aria-label="Profile & settings" className="hidden md:block"><UserAvatar name={profile.data?.name} avatarUrl={profile.data?.avatarUrl} size={40} /></Link>
         </header>
