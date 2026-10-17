@@ -42,8 +42,6 @@ export * from './challengeUpdate';
 export * from './checkHandleAvailability200';
 export * from './checkHandleAvailability200Reason';
 export * from './checkHandleAvailabilityParams';
-export * from './colourRequest';
-export * from './colourResult';
 export * from './comment';
 export * from './commentInput';
 export * from './commentReply';

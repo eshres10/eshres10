@@ -9,3 +9,4 @@ export * from './LeaveDialog';
 export * from './uploads';
 export * from './modal';
 export * from './DraftNotice';
+export * from './crop';

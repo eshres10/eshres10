@@ -69,8 +69,6 @@ import {
   UpdateProfileBody,
   UpdateProfileResponse,
   UpdateProjectBody,
-  ExtractColoursBody,
-  ExtractColoursResponse,
   UpdateProjectFieldsBody,
   UpdateProjectFieldsParams,
   UpdateProjectFieldsResponse,
@@ -95,8 +93,6 @@ import { ensureProfile } from "./profile";
 import { findForeignObjectField, IMAGE_FIELD, PDF_FIELD, publishedAtFor, type UploadPurpose } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { ObjectNotFoundError, ObjectStorageService } from "../lib/objectStorage";
-import { dominantColours, UnreadableColourImageError } from "../lib/colours";
-import { storageFor } from "./storage";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -437,38 +433,6 @@ router.get("/patterns", scoped(async (req, res, db): Promise<void> => {
   const rows = await db.select().from(patternsTable).where(search ? and(eq(patternsTable.userId, uid), or(ilike(patternsTable.name, `%${search}%`), ilike(patternsTable.garmentType, `%${search}%`), ilike(patternsTable.designer, `%${search}%`))) : eq(patternsTable.userId, uid)).orderBy(desc(patternsTable.createdAt));
   res.json(ListPatternsResponse.parse(rows.map(patternResponse)));
 }));
-
-// Four main colours of one of your photos, for swatches when adding fabric or
-// thread. No AI; see lib/colours.ts.
-router.post("/stash/colours", async (req, res): Promise<void> => {
-  const parsed = ExtractColoursBody.safeParse(req.body);
-  const objectPath = parsed.success ? /^\/api\/storage(\/objects\/[A-Za-z0-9._\-/]+)$/.exec(parsed.data.imageUrl)?.[1] : undefined;
-  if (!parsed.success || !objectPath || objectPath.includes("..")) {
-    res.status(400).json({ error: "Upload a photo first." });
-    return;
-  }
-  const foreign = await withUser(userId(req), (db) =>
-    findForeignObjectField(db, viewerOf(req), { imageUrl: parsed.data.imageUrl }, { imageUrl: IMAGE_FIELD }),
-  );
-  if (foreign) {
-    res.status(404).json({ error: "Photo not found" });
-    return;
-  }
-  try {
-    const image = await storageFor(req).readObjectEntity(objectPath);
-    res.json(ExtractColoursResponse.parse({ colours: await dominantColours(image) }));
-  } catch (error) {
-    if (error instanceof ObjectNotFoundError) {
-      res.status(404).json({ error: "Photo not found" });
-      return;
-    }
-    if (error instanceof UnreadableColourImageError) {
-      res.status(400).json({ error: "That file isn't a photo we can read." });
-      return;
-    }
-    throw error;
-  }
-});
 
 router.post("/patterns/analyze-pdf", async (req, res): Promise<void> => {
   const parsed = AnalyzePatternPdfBody.safeParse(req.body);

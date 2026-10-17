@@ -1425,24 +1425,6 @@ paths:
       responses:
         "204":
           description: Deleted
-  /stash/colours:
-    post:
-      operationId: extractColours
-      tags: [studio]
-      summary: "Four main colours of one of your photo uploads (no AI: resized and grouped on the server)."
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema: { $ref: "#/components/schemas/ColourRequest" }
-      responses:
-        "200":
-          description: OK
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/ColourResult" }
-        "400": { description: Not an image we can read }
-        "404": { description: Not one of your uploads }
   /patterns/analyze-pdf:
     post:
       operationId: analyzePatternPdf
@@ -1873,19 +1855,6 @@ components:
       schema:
         type: integer
   schemas:
-    ColourRequest:
-      type: object
-      properties:
-        imageUrl: { type: string, description: "/api/storage/objects/... of your own image upload" }
-      required: [imageUrl]
-    ColourResult:
-      type: object
-      properties:
-        colours:
-          type: array
-          description: "Most common first, as #rrggbb"
-          items: { type: string }
-      required: [colours]
     DraftKind:
       type: string
       enum: [post, project, stash, topic]

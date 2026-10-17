@@ -3301,18 +3301,6 @@ export const DeletePatternResponse = zod.void()
 
 
 /**
- * @summary Four main colours of one of your photo uploads (no AI: resized and grouped on the server).
- */
-export const ExtractColoursBody = zod.object({
-  "imageUrl": zod.string().describe('/api/storage/objects/... of your own image upload')
-})
-
-export const ExtractColoursResponse = zod.object({
-  "colours": zod.array(zod.string()).describe('Most common first, as #rrggbb')
-})
-
-
-/**
  * @summary Extract sewing pattern details from an uploaded PDF
  */
 

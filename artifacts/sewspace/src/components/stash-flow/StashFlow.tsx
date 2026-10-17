@@ -5,7 +5,6 @@ import {
   createFabric,
   createPattern,
   createThread,
-  extractColours,
   setCatalogLink,
   updateFabric,
   updatePattern,
@@ -16,13 +15,15 @@ import {
   type Pattern,
   type Thread,
 } from '@workspace/api-client-react';
-import { BookOpen, Check, FileText } from 'lucide-react';
+import { BookOpen, Check, Crop, FileText, ImagePlus } from 'lucide-react';
 import { useLocation } from 'wouter';
 import {
   ChoiceChips,
   DraftNotice,
   FieldCard,
   FlowShell,
+  PhotoCropper,
+  UploadTile,
   Segmented,
   draftLabel,
   fieldProps,
@@ -35,7 +36,6 @@ import {
 } from '@/components/flow';
 import { AudienceCards, type Audience } from '@/components/post-flow/parts';
 import { GARMENTS } from '@/components/projects/QuickStart';
-import { colourName } from '@/lib/colours';
 import { uploadFile } from '@/lib/upload';
 import { ColourField, FoundRow, KIND_LABEL, KIND_TITLE, KindCards, ReadingCard, SourceList, StashPreview, Stepper, type Source, type StashKind } from './parts';
 
@@ -70,7 +70,7 @@ const EMPTY: Form = {
 
 interface StashDraft extends Record<string, unknown> {
   kind: StashKind | null; source: Source | null; form: Form; photoUrl: string | null; pdfUrl: string | null; pdfFileName: string | null;
-  colours: string[]; found: string[]; reached: number;
+  found: string[]; reached: number;
 }
 
 export type StashItem = { kind: 'fabric'; item: Fabric } | { kind: 'thread'; item: Thread } | { kind: 'pattern'; item: Pattern };
@@ -100,9 +100,9 @@ function errorText(e: unknown, fallback: string) {
 
 /**
  * Add to stash (/stash/new?kind=fabric|thread|pattern) and edit
- * (/stash/:kind/:id/edit): Start → Details → More → Save, then Done. A photo
- * gives colour swatches (no AI); a pattern PDF fills empty fields with the
- * existing PDF reader. Everything starts private.
+ * (/stash/:kind/:id/edit): Start → Details → More → Save, then Done. A photo is
+ * cropped first, then uploads in the background while you carry on; a pattern
+ * PDF fills empty fields with the existing PDF reader. Everything starts private.
  */
 export function StashFlow({ editing, initialKind = null, onRestart }: { editing?: StashItem; initialKind?: StashKind | null; onRestart?: () => void }) {
   const isEdit = Boolean(editing);
@@ -112,7 +112,9 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
   const [kind, setKind] = useState<StashKind | null>(editing?.kind ?? initialKind);
   const [source, setSource] = useState<Source | null>(null);
   const [form, setForm] = useState<Form>(() => (editing ? fromItem(editing) : EMPTY));
-  const [colours, setColours] = useState<string[]>([]);
+  // Photo being cropped, and the last original (for "Adjust crop").
+  const [cropping, setCropping] = useState<File | null>(null);
+  const [original, setOriginal] = useState<File | null>(null);
   const [found, setFound] = useState<string[]>([]);
   const [reading, setReading] = useState<'idle' | 'working' | 'done' | 'failed'>('idle');
   const [pdf, setPdf] = useState<{ url: string; name: string } | null>(editing?.kind === 'pattern' && editing.item.pdfUrl ? { url: editing.item.pdfUrl, name: editing.item.pdfFileName ?? 'Pattern PDF' } : null);
@@ -134,7 +136,7 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
   // Draft (new items only).
   const dirty = isEdit ? JSON.stringify(form) !== JSON.stringify(fromItem(editing!)) || photoUrl !== (editImage ?? null)
     : Boolean(form.name.trim() || form.colorName.trim() || form.type || photo.items.length || pdf);
-  const payload: StashDraft = { kind, source, form, photoUrl, pdfUrl: pdf?.url ?? null, pdfFileName: pdf?.name ?? null, colours, found, reached };
+  const payload: StashDraft = { kind, source, form, photoUrl, pdfUrl: pdf?.url ?? null, pdfFileName: pdf?.name ?? null, found, reached };
   const [hydrated, setHydrated] = useState(isEdit);
   const draft = useDraft('stash', payload, { enabled: !isEdit, active: hydrated && dirty && !done });
   if (!hydrated && draft.loaded !== undefined) {
@@ -143,12 +145,11 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
       setKind(d.kind ?? initialKind);
       setSource(d.source ?? null);
       setForm({ ...EMPTY, ...d.form });
-      setColours(d.colours ?? []);
       setFound(d.found ?? []);
       setReached(Math.min(d.reached ?? 0, STEPS.length - 1));
       if (d.photoUrl) photo.seed([{ key: 'draft', preview: d.photoUrl, result: d.photoUrl }]);
       if (d.pdfUrl) setPdf({ url: d.pdfUrl, name: d.pdfFileName ?? 'Pattern PDF' });
-      if (d.photoUrl || d.pdfUrl) setReading('done');
+      if (d.pdfUrl) setReading('done');
     }
     setHydrated(true);
   }
@@ -177,27 +178,21 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
   const v = useValidation(errors);
   useEffect(() => { v.reset(); }, [step]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ---- Reading a photo (colours, no AI) or a pattern PDF (the existing reader).
-  const readPhoto = async (file: File, k: StashKind) => {
-    photo.seed([]);
-    setReading('working');
-    photo.add([file]);
-  };
-  const photoDone = photo.items[0]?.status === 'done' ? photo.items[0].result : null;
+  // ---- A photo: crop it, then it uploads while you fill in the details.
+  const pickPhoto = (file: File) => { setOriginal(file); setCropping(file); };
+  // The new photo replaces the old one: clear first, add once the list is empty.
+  const [queued, setQueued] = useState<File | null>(null);
   useEffect(() => {
-    if (!photoDone || reading !== 'working' || source === 'hand') return;
-    if (kind === 'pattern') { setReading('done'); return; }
-    extractColours({ imageUrl: photoDone }).then(r => {
-      setColours(r.colours);
-      if (r.colours[0]) {
-        setForm(f => ({ ...f, colorHex: f.colorHex ?? r.colours[0], colorName: kind === 'fabric' && !f.colorName ? colourName(r.colours[0]) : f.colorName }));
-        setFound(list => [...new Set([...list, 'colorHex', ...(kind === 'fabric' ? ['colorName'] : [])])]);
-      }
-      setReading('done');
-    }).catch(() => setReading('failed'));
-  }, [photoDone]); // eslint-disable-line react-hooks/exhaustive-deps
-  useEffect(() => { if (photo.items[0]?.status === 'error') setReading('failed'); }, [photo.items[0]?.status]);
+    if (queued && !photo.items.length) { photo.add([queued]); setQueued(null); }
+  }, [queued, photo.items.length]); // eslint-disable-line react-hooks/exhaustive-deps
+  const acceptCrop = (cropped: File) => {
+    setCropping(null);
+    photo.seed([]);
+    setQueued(cropped);
+    if (step === 'start') { setReached(r => Math.max(r, 1)); flow.go('details'); }
+  };
 
+  // ---- A pattern PDF: the existing reader fills empty fields.
   const readPdf = (file: File) => {
     setReading('working');
     setPdf(null);
@@ -245,7 +240,7 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
     const file = files?.[0];
     if (!file || !kind) return;
     if (which === 'pdf') readPdf(file);
-    else void readPhoto(file, kind);
+    else pickPhoto(file);
   };
 
   // ---- Submit
@@ -265,7 +260,7 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
       let id: number;
       if (kind === 'fabric') {
         const data = {
-          name: form.name.trim(), type: form.type!, color: form.colorName.trim() || (form.colorHex ? colourName(form.colorHex) : ''), colorHex: form.colorHex,
+          name: form.name.trim(), type: form.type!, color: form.colorName.trim(), colorHex: form.colorHex,
           quantity: form.quantity, unit: form.unit, width: widthValue, weight: form.weight || null, stretch: form.stretch || null,
           composition: form.composition || null, notes: form.notes || null, imageUrl: image, visibility: form.visibility,
         };
@@ -316,7 +311,7 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
   const hi = (key: string) => (found.includes(key) ? 'bg-yellow/15' : 'bg-canvas');
   const title = kind ? (isEdit ? `Edit ${KIND_LABEL[kind].toLowerCase()}` : KIND_TITLE[kind]) : 'Add to stash';
   const meta = kind === 'fabric'
-    ? [form.type && cap(form.type), form.quantity ? `${form.quantity} ${form.unit}` : null, form.colorHex ? colourName(form.colorHex) : null].filter(Boolean).join(' · ')
+    ? [form.type && cap(form.type), form.quantity ? `${form.quantity} ${form.unit}` : null, form.colorName.trim() || null].filter(Boolean).join(' · ')
     : kind === 'thread'
       ? [form.brand, THREAD_TYPES.find(t => t[0] === form.type)?.[1], form.quantity ? `${form.quantity} spool${form.quantity === 1 ? '' : 's'}` : null].filter(Boolean).join(' · ')
       : [form.designer, form.garmentType, form.sizes && `Sizes ${form.sizes}`].filter(Boolean).join(' · ');
@@ -343,10 +338,10 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
   }
 
   // ---- Start
-  const showReading = reading !== 'idle' && source !== 'hand';
+  const showReading = reading !== 'idle' && Boolean(pdf || pdfUpload.items[0]);
   const startStep = (
     <div className="space-y-3" onDragOver={e => { if (kind && !showReading) e.preventDefault(); }}
-      onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (!f || !kind) return; if (f.type === 'application/pdf') { setKind('pattern'); setSource('pdf'); readPdf(f); } else { setSource('photo'); void readPhoto(f, kind); } }}>
+      onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (!f || !kind) return; if (f.type === 'application/pdf') { setKind('pattern'); setSource('pdf'); readPdf(f); } else { setSource('photo'); pickPhoto(f); } }}>
       <input id="stash-photo" type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="sr-only" tabIndex={-1} onChange={e => { onFile(e.target.files, 'photo'); e.target.value = ''; }} />
       <input id="stash-camera" type="file" accept="image/*" capture="environment" className="sr-only" tabIndex={-1} onChange={e => { onFile(e.target.files, 'photo'); e.target.value = ''; }} />
       <input id="stash-pdf" type="file" accept="application/pdf,.pdf" className="sr-only" tabIndex={-1} onChange={e => { onFile(e.target.files, 'pdf'); e.target.value = ''; }} />
@@ -354,14 +349,14 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
         <>
           <h2 className="px-1 font-display text-[34px] leading-tight tracking-[-.05em]">What are you adding?</h2>
           <div data-field="kind">
-            <KindCards value={kind} onChange={k => { if (!isEdit) { setKind(k); setColours([]); setFound([]); } }} />
+            <KindCards value={kind} onChange={k => { if (!isEdit) { setKind(k); setFound([]); } }} />
             {v.error('kind') && <p className="mt-2 text-sm font-semibold text-red-ink">{v.error('kind')}</p>}
           </div>
           {kind && !isEdit && <SourceList kind={kind} onPick={pickSource} />}
         </>
       ) : (
         <>
-          {pdf || pdfUpload.items[0] ? (
+          {(
             <div className="rounded-[34px] bg-ink p-5 text-white">
               <div className="flex items-center gap-3">
                 <span className="grid h-14 w-12 place-items-center rounded-[12px] bg-white text-ink" aria-hidden="true"><FileText size={22} /></span>
@@ -373,28 +368,15 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
               <span className="mt-3 block h-1.5 overflow-hidden rounded-full bg-white/20"><span className="block h-full bg-yellow transition-[width]" style={{ width: `${pdfUpload.items[0]?.status === 'uploading' ? Math.max(6, pdfUpload.items[0].progress * 100) : 100}%` }} /></span>
               {pdfItem?.status === 'error' && <button type="button" onClick={() => { setReading('working'); pdfUpload.retry(pdfItem.key); }} className="mt-2 min-h-[44px] font-bold text-yellow underline">Retry</button>}
             </div>
-          ) : photo.items[0] && (
-            <div className="relative overflow-hidden rounded-[34px] bg-line" style={{ aspectRatio: '4 / 3' }}>
-              <img src={photo.items[0].result ?? photo.items[0].preview} alt="" className="h-full w-full object-cover" />
-              <div className="absolute inset-x-3 bottom-3 rounded-[18px] bg-ink/85 px-4 py-2.5 text-white">
-                <p className="font-bold">{photo.items[0].status === 'uploading' ? `Uploading ${Math.round(photo.items[0].progress * 100)}%` : photo.items[0].status === 'error' ? "That photo didn't upload" : 'Photo uploaded · resized to 1600 px'}</p>
-                <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-white/20"><span className="block h-full bg-yellow" style={{ width: `${photo.items[0].status === 'uploading' ? Math.max(6, photo.items[0].progress * 100) : 100}%` }} /></span>
-                {photo.items[0].status === 'error' && <button type="button" onClick={() => { setReading('working'); photo.retry(photo.items[0].key); }} className="mt-2 min-h-[44px] font-bold text-yellow underline">Retry</button>}
-              </div>
-            </div>
           )}
-          {reading === 'working' && <ReadingCard status="working" title={pdf || pdfUpload.items[0] ? 'Reading your PDF…' : 'Looking at your photo…'} />}
+          {reading === 'working' && <ReadingCard status="working" title="Reading your PDF…" />}
           {reading === 'failed' && (
-            <ReadingCard status="failed" title={pdf || pdfUpload.items[0] ? "We couldn't read this PDF" : "We couldn't read colours from this photo"}>
+            <ReadingCard status="failed" title="We couldn't read this PDF">
               <p className="text-[15px] text-subtle">That's fine: fill in the details yourself next.{pdf ? ' The PDF is still attached and private.' : ''}</p>
             </ReadingCard>
           )}
           {reading === 'done' && (
-            kind === 'pattern' && !pdf
-              ? <ReadingCard status="done" title="Photo added"><p className="text-[15px] text-subtle">It becomes the pattern's cover. We don't read text from photos.</p></ReadingCard>
-              : <ReadingCard status="done" title={pdf ? 'Read from your PDF' : "Here's what we found"}>
-                  {found.includes('colorHex') && form.colorHex && <FoundRow label="Colour" value={<span className="inline-flex items-center gap-2"><span className="h-5 w-5 rounded-full border border-line" style={{ backgroundColor: form.colorHex }} aria-hidden="true" />{colourName(form.colorHex)} (from the photo)</span>} />}
-                  {colours.length > 1 && <FoundRow label="Other colours" value={<span className="flex gap-1.5">{colours.slice(1).map(h => <span key={h} className="h-5 w-5 rounded-full border border-line" style={{ backgroundColor: h }} title={colourName(h)} />)}</span>} />}
+            <ReadingCard status="done" title="Read from your PDF">
                   {found.includes('name') && <FoundRow label="Name" value={form.name} />}
                   {found.includes('designer') && <FoundRow label="Designer" value={form.designer} />}
                   {found.includes('garmentType') && <FoundRow label="Garment" value={form.garmentType} />}
@@ -403,7 +385,7 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
                   {(found.includes('requiredFabric') || found.includes('yardage')) && <FoundRow label="Fabric" value={form.requiredFabric || `${form.yardage} yd`} />}
                   {found.includes('steps') && <FoundRow label="Steps" value={`${form.steps?.length} construction steps`} />}
                   {!found.length && <p className="text-[15px] text-subtle">Nothing we could fill in. Add the details next.</p>}
-                </ReadingCard>
+            </ReadingCard>
           )}
           <button type="button" onClick={() => { setReading('idle'); setSource(null); }} className="px-1 text-sm font-bold underline">Start differently</button>
         </>
@@ -418,21 +400,47 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
         className={`w-full rounded-[14px] px-3 py-3 font-display text-[24px] tracking-[-.03em] outline-none ${hi('name')}`} />
     </FieldCard>
   );
+  const photoItem = photo.items[0];
+  const photoRow = (
+    <div className="flex items-start gap-3 rounded-[26px] bg-white p-2.5">
+      {photoItem
+        ? <UploadTile item={photoItem} label="photo" className="h-20 w-20" onRemove={() => { photo.remove(photoItem.key); setOriginal(null); }} onRetry={() => photo.retry(photoItem.key)} />
+        : <span className="grid h-20 w-20 shrink-0 place-items-center rounded-[16px] bg-canvas" aria-hidden="true"><ImagePlus size={22} /></span>}
+      <div className="min-w-0 flex-1 pt-0.5">
+        <p className="font-bold" aria-live="polite">{!photoItem ? 'Add a photo' : photoItem.status === 'uploading' ? `Uploading ${Math.round(photoItem.progress * 100)}%` : photoItem.status === 'error' ? "Didn't upload" : 'Your photo'}</p>
+        <p className="text-sm text-subtle">{!photoItem ? 'Optional' : photoItem.status === 'uploading' ? 'Keep going while it uploads' : kind === 'pattern' ? 'The pattern cover' : 'The picture on its card'}</p>
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {photoItem && original && (
+            <button type="button" onClick={() => setCropping(original)} className="inline-flex min-h-[44px] items-center gap-1 rounded-full bg-canvas px-4 text-sm font-bold"><Crop size={15} aria-hidden="true" />Crop</button>
+          )}
+          <label className="inline-flex min-h-[44px] cursor-pointer items-center rounded-full border-2 border-ink px-4 text-sm font-bold focus-within:ring-4 focus-within:ring-yellow">
+            {photoItem ? 'Change photo' : 'Choose photo'}
+            <input type="file" accept="image/*" className="sr-only" onChange={e => { const f = e.target.files?.[0]; if (f) pickPhoto(f); e.target.value = ''; }} />
+          </label>
+        </div>
+      </div>
+    </div>
+  );
   const detailsStep = (
     <div className="space-y-3">
-      {(photoUrl || pdf) && (
+      {pdf && (
         <div className="flex items-center gap-3 rounded-[26px] bg-white p-2.5">
-          {photoUrl ? <img src={photoUrl} alt="" className="h-14 w-14 rounded-[14px] object-cover" /> : <span className="grid h-14 w-14 place-items-center rounded-[14px] bg-canvas" aria-hidden="true"><FileText size={22} /></span>}
-          <div className="min-w-0"><p className="truncate font-bold">{pdf ? pdf.name : 'Your photo'}</p><p className="text-sm text-subtle">{found.length ? 'Yellow fields came from it' : pdf ? 'Private: only you can open it' : 'Used as the picture'}</p></div>
+          <span className="grid h-14 w-14 place-items-center rounded-[14px] bg-canvas" aria-hidden="true"><FileText size={22} /></span>
+          <div className="min-w-0"><p className="truncate font-bold">{pdf.name}</p><p className="text-sm text-subtle">{found.length ? 'Yellow fields came from it' : 'Private: only you can open it'}</p></div>
         </div>
       )}
+      {photoRow}
       {kind === 'fabric' && <>
         {nameInput('Name', 'e.g. Chambray linen', v.error('name'))}
         <FieldCard name="type" label="Fabric type" group error={v.error('type')}>
           <ChoiceChips options={FABRIC_TYPES.map(t => ({ value: t, label: cap(t) }))} value={form.type as (typeof FABRIC_TYPES)[number] | null} onChange={t => set('type', t)} {...groupProps('type', v.error('type'))} />
         </FieldCard>
-        <FieldCard name="colour" label="Colour" group>
-          <ColourField value={form.colorHex} onChange={h => { set('colorHex', h); set('colorName', colourName(h)); }} fromPhoto={colours} labelledBy="f-colour-label" highlight={found.includes('colorHex')} />
+        <FieldCard name="colorName" label="Colour" aside="optional">
+          <input {...fieldProps('colorName')} value={form.colorName} onChange={e => set('colorName', e.target.value.slice(0, 80))} placeholder="e.g. Navy, leopard print"
+            className="w-full rounded-[14px] bg-canvas px-3 py-3 text-[17px] outline-none" />
+        </FieldCard>
+        <FieldCard name="colour" label="Closest swatch" aside="optional" group>
+          <ColourField value={form.colorHex} onChange={h => set('colorHex', h)} labelledBy="f-colour-label" />
         </FieldCard>
         <FieldCard name="quantity" label="How much do you have?" group>
           <Stepper label="Amount" value={form.quantity} onChange={q => set('quantity', q)} step={0.5} unit={form.unit} />
@@ -448,8 +456,8 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
         <FieldCard name="type" label="Thread type" group error={v.error('type')}>
           <ChoiceChips options={THREAD_TYPES.map(([value, label]) => ({ value, label }))} value={form.type as (typeof THREAD_TYPES)[number][0] | null} onChange={t => set('type', t)} {...groupProps('type', v.error('type'))} />
         </FieldCard>
-        <FieldCard name="colour" label="Colour" group>
-          <ColourField value={form.colorHex} onChange={h => set('colorHex', h)} fromPhoto={colours} labelledBy="f-colour-label" highlight={found.includes('colorHex')} />
+        <FieldCard name="colour" label="Closest swatch" aside="optional" group>
+          <ColourField value={form.colorHex} onChange={h => set('colorHex', h)} labelledBy="f-colour-label" />
         </FieldCard>
         <FieldCard name="quantity" label="Spools" group>
           <Stepper label="Spools" value={form.quantity} onChange={q => set('quantity', q === null ? null : Math.round(q))} step={1} />
@@ -573,6 +581,7 @@ export function StashFlow({ editing, initialKind = null, onRestart }: { editing?
           onStartOver={async () => { await draft.discard({ keepOpen: true }); setLocation(`/stash/new${kind ? `?kind=${kind}` : ''}`, { replace: true }); onRestart?.(); }} />
       )}
       {body}
+      {cropping && <PhotoCropper file={cropping} initialAspect={kind === 'pattern' ? '4:5' : '1:1'} onDone={acceptCrop} onCancel={() => setCropping(null)} />}
       {leave.dialog}
     </FlowShell>
   );

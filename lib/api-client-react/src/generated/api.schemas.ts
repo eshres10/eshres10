@@ -5,16 +5,6 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
-export interface ColourRequest {
-  /** /api/storage/objects/... of your own image upload */
-  imageUrl: string;
-}
-
-export interface ColourResult {
-  /** Most common first, as #rrggbb */
-  colours: string[];
-}
-
 export type DraftKind = typeof DraftKind[keyof typeof DraftKind];
 
 
