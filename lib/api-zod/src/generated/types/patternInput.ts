@@ -37,4 +37,11 @@ export interface PatternInput {
   /** @nullable */
   pdfFileName?: string | null;
   status?: PatternInputStatus;
+  /**
+     * @maxItems 60
+     * @nullable
+     * @items.minLength 1
+     * @items.maxLength 200
+     */
+  steps?: string[] | null;
 }

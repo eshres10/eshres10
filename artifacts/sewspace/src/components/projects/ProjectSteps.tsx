@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, GripVertical, Check, Trash2, Edit2, X, Loader2 } from 'lucide-react';
 import {
@@ -9,7 +9,8 @@ import {
   getListProjectsQueryKey
 } from '@workspace/api-client-react';
 
-export function ProjectSteps({ project }: { project: any }) {
+/** Steps you tick off; progress is completed ÷ total. `addSignal` opens the add field (setup: Add my own). */
+export function ProjectSteps({ project, addSignal = 0 }: { project: any; addSignal?: number }) {
   const client = useQueryClient();
   const create = useCreateProjectStep();
   const update = useUpdateProjectStep();
@@ -21,6 +22,14 @@ export function ProjectSteps({ project }: { project: any }) {
   const [editTitle, setEditTitle] = useState('');
 
   const inputRef = useRef<HTMLInputElement>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
+  const card = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!addSignal) return;
+    setAdding(true);
+    card.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    requestAnimationFrame(() => inputRef.current?.focus());
+  }, [addSignal]);
 
   const steps = [...(project.steps || [])].sort((a, b) => a.position - b.position);
 
@@ -82,13 +91,14 @@ export function ProjectSteps({ project }: { project: any }) {
     );
   };
 
+  // First tap asks "Delete?", the second deletes.
   const handleDelete = (stepId: number) => {
-    if (window.confirm('Delete this step?')) {
-      remove.mutate(
-        { projectId: project.id, stepId },
-        { onSuccess: invalidate }
-      );
+    if (confirmId !== stepId) {
+      setConfirmId(stepId);
+      return;
     }
+    setConfirmId(null);
+    remove.mutate({ projectId: project.id, stepId }, { onSuccess: invalidate });
   };
 
   const completedCount = steps.filter(s => s.completed).length;
@@ -96,16 +106,16 @@ export function ProjectSteps({ project }: { project: any }) {
   const percentage = totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0;
 
   return (
-    <div className="studio-card rounded-xl p-6">
+    <div ref={card} id="project-steps" className="rounded-[30px] bg-white p-6">
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h2 className="font-display text-2xl text-ink">Construction Steps</h2>
-          <p className="mt-1 text-sm text-subtle">Check off your progress as you sew.</p>
+          <h2 className="font-display text-2xl tracking-[-.04em] text-ink">Steps</h2>
+          <p className="mt-1 text-sm text-subtle">{totalCount ? 'Tick off steps to move your progress.' : "No steps yet. Use the pattern's steps or add your own."}</p>
         </div>
-        <div className="text-right" data-testid="progress-summary">
+        {totalCount > 0 && <div className="text-right" data-testid="progress-summary">
           <p className="font-mono-custom text-xl text-red-ink">{percentage}%</p>
           <p className="text-xs text-subtle">{completedCount} of {totalCount} completed</p>
-        </div>
+        </div>}
       </div>
 
       <div className="space-y-2">
@@ -160,7 +170,7 @@ export function ProjectSteps({ project }: { project: any }) {
               )}
             </div>
 
-            <div className="flex shrink-0 gap-1 opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100">
+            <div className={`flex shrink-0 gap-1 opacity-100 transition-opacity sm:group-hover:opacity-100 ${confirmId === step.id ? '' : 'sm:opacity-0'}`}>
               <button
                 onClick={() => { setEditTitle(step.title); setEditingId(step.id); }}
                 data-testid={`edit-step-${step.id}`}
@@ -172,10 +182,10 @@ export function ProjectSteps({ project }: { project: any }) {
               <button
                 onClick={() => handleDelete(step.id)}
                 data-testid={`delete-step-${step.id}`}
-                className="grid min-h-[44px] min-w-[44px] sm:min-h-[24px] sm:min-w-[24px] place-items-center rounded-md text-subtle hover:bg-peach-soft hover:text-red-ink"
-                aria-label="Delete step"
+                className={`grid min-h-[44px] min-w-[44px] place-items-center rounded-md hover:bg-peach-soft hover:text-red-ink ${confirmId === step.id ? 'px-2 text-sm font-bold text-red-ink' : 'text-subtle sm:min-h-[24px] sm:min-w-[24px]'}`}
+                aria-label={confirmId === step.id ? 'Confirm: delete this step' : 'Delete step'}
               >
-                <Trash2 size={16} className="sm:w-3 sm:h-3" />
+                {confirmId === step.id ? 'Delete?' : <Trash2 size={16} className="sm:w-3 sm:h-3" />}
               </button>
             </div>
           </div>
@@ -198,7 +208,7 @@ export function ProjectSteps({ project }: { project: any }) {
               type="submit"
               disabled={create.isPending || !newTitle.trim()}
               data-testid="button-save-step"
-              className="min-h-[44px] sm:min-h-[auto] flex-1 sm:flex-none justify-center rounded-md bg-yellow px-4 py-2 sm:px-3 sm:py-1.5 text-sm sm:text-xs font-semibold text-white hover:bg-yellow disabled:opacity-50 inline-flex items-center"
+              className="min-h-[44px] sm:min-h-[auto] flex-1 sm:flex-none justify-center rounded-md bg-yellow px-4 py-2 sm:px-3 sm:py-1.5 text-sm sm:text-xs font-semibold text-ink hover:bg-yellow disabled:opacity-50 inline-flex items-center"
             >
               {create.isPending ? <Loader2 size={16} className="animate-spin" /> : 'Add'}
             </button>

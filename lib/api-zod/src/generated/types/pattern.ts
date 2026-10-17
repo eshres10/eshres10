@@ -43,4 +43,9 @@ export interface Pattern {
      * @nullable
      */
   catalogId: number | null;
+  /**
+     * Construction steps as short phrases (private)
+     * @nullable
+     */
+  steps: string[] | null;
 }

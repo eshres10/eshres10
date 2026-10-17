@@ -36,6 +36,10 @@ export interface FlowShellProps {
   plainDesktop?: boolean;
   /** Desktop: keep one height across steps instead of fitting each step. */
   steadyHeight?: boolean;
+  /** Desktop: a narrower dialog for one-screen forms (Quick start). */
+  narrow?: boolean;
+  /** A line under the main button on phones, beside it on desktop ("Only you can see it…"). */
+  footnote?: ReactNode;
   children: ReactNode;
 }
 
@@ -58,7 +62,7 @@ function PrimaryButton({ action, describedBy, className }: { action: FlowAction;
  * preview pane.
  */
 export function FlowShell(props: FlowShellProps) {
-  const { title, subtitle, steps, current, canOpen, onStep, onClose, onBack, primary, primaryInHeader, desktopPrimaryInHeader, aside, plainDesktop, steadyHeight, children } = props;
+  const { title, subtitle, steps, current, canOpen, onStep, onClose, onBack, primary, primaryInHeader, desktopPrimaryInHeader, aside, plainDesktop, steadyHeight, narrow, footnote, children } = props;
   const dialog = useRef<HTMLDivElement>(null);
   const titleId = useId();
   const reasonId = useId();
@@ -83,7 +87,7 @@ export function FlowShell(props: FlowShellProps) {
     <div className="fixed inset-0 z-[55] flex flex-col bg-canvas lg:items-center lg:justify-center lg:bg-ink/45 lg:p-6"
       onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
       <div ref={dialog} role="dialog" aria-modal="true" aria-labelledby={titleId} tabIndex={-1}
-        className={`flex min-h-0 flex-1 flex-col outline-none lg:max-h-[min(880px,calc(100dvh-48px))] lg:w-full lg:max-w-[1080px] lg:flex-none lg:overflow-hidden lg:rounded-[34px] lg:bg-white ${steadyHeight ? 'lg:h-[min(760px,calc(100dvh-48px))]' : ''}`}>
+        className={`flex min-h-0 flex-1 flex-col outline-none lg:max-h-[min(880px,calc(100dvh-48px))] lg:w-full ${narrow ? 'lg:max-w-[600px]' : 'lg:max-w-[1080px]'} lg:flex-none lg:overflow-hidden lg:rounded-[34px] lg:bg-white ${steadyHeight ? 'lg:h-[min(760px,calc(100dvh-48px))]' : ''}`}>
 
         {/* Phone header and step bar */}
         <div className="shrink-0 px-3 pt-[calc(.75rem+env(safe-area-inset-top))] lg:hidden">
@@ -131,6 +135,7 @@ export function FlowShell(props: FlowShellProps) {
               <div className="shrink-0 px-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] pt-2 lg:hidden">
                 {reason && <p id={reasonMobileId} className="mb-2 text-center text-sm font-semibold text-subtle">{reason}</p>}
                 <PrimaryButton action={primary} describedBy={reasonMobileId} className="flex min-h-[56px] w-full items-center justify-center gap-2 rounded-full text-lg font-bold" />
+                {footnote && <p className="mt-2 text-center text-sm text-subtle">{footnote}</p>}
               </div>
             )}
             {primary && primaryInHeader && reason && <p id={reasonMobileId} className="shrink-0 px-4 pb-3 text-center text-sm font-semibold text-subtle lg:hidden">{reason}</p>}
@@ -138,7 +143,7 @@ export function FlowShell(props: FlowShellProps) {
             {/* Desktop footer */}
             {!desktopPrimaryInHeader && (
               <div className="hidden shrink-0 items-center justify-between gap-3 border-t border-line bg-white px-5 py-3 lg:flex">
-                {onBack ? <button type="button" onClick={onBack} className="btn btn-line min-h-[48px] px-5 text-base">Back</button> : <span />}
+                {onBack ? <button type="button" onClick={onBack} className="btn btn-line min-h-[48px] px-5 text-base">Back</button> : footnote ? <p className="text-sm text-subtle">{footnote}</p> : <span />}
                 {primary && (
                   <div className="flex items-center gap-3">
                     {reason && <p id={reasonId} className="text-sm font-semibold text-subtle">{reason}</p>}

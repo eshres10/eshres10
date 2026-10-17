@@ -2732,7 +2732,13 @@ export const GetDashboardResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 }),zod.null()]),
   "recentFabrics": zod.array(zod.object({
   "id": zod.number().int(),
@@ -2770,7 +2776,8 @@ export const GetDashboardResponse = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
 }))
 })
 
@@ -3022,7 +3029,8 @@ export const ListPatternsResponseItem = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
 })
 export const ListPatternsResponse = zod.array(ListPatternsResponseItem)
 
@@ -3030,6 +3038,12 @@ export const ListPatternsResponse = zod.array(ListPatternsResponseItem)
 /**
  * @summary Add a sewing pattern
  */
+export const createPatternBodyStepsItemMax = 200;
+
+export const createPatternBodyStepsMax = 60;
+
+
+
 export const CreatePatternBody = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "name": zod.string(),
@@ -3046,7 +3060,8 @@ export const CreatePatternBody = zod.object({
   "coverImageUrl": zod.string().nullish(),
   "pdfUrl": zod.string().nullish(),
   "pdfFileName": zod.string().nullish(),
-  "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional()
+  "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional(),
+  "steps": zod.array(zod.string().min(1).max(createPatternBodyStepsItemMax)).max(createPatternBodyStepsMax).nullish()
 })
 
 export const CreatePatternResponse = zod.object({
@@ -3068,7 +3083,8 @@ export const CreatePatternResponse = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
 })
 
 
@@ -3078,6 +3094,12 @@ export const CreatePatternResponse = zod.object({
 export const UpdatePatternParams = zod.object({
   "id": zod.coerce.number().int()
 })
+
+export const updatePatternBodyOneStepsItemMax = 200;
+
+export const updatePatternBodyOneStepsMax = 60;
+
+
 
 export const UpdatePatternBody = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
@@ -3095,7 +3117,8 @@ export const UpdatePatternBody = zod.object({
   "coverImageUrl": zod.string().nullish(),
   "pdfUrl": zod.string().nullish(),
   "pdfFileName": zod.string().nullish(),
-  "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional()
+  "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional(),
+  "steps": zod.array(zod.string().min(1).max(updatePatternBodyOneStepsItemMax)).max(updatePatternBodyOneStepsMax).nullish()
 })
 
 export const UpdatePatternResponse = zod.object({
@@ -3117,7 +3140,8 @@ export const UpdatePatternResponse = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
 })
 
 
@@ -3152,7 +3176,8 @@ export const AnalyzePatternPdfResponse = zod.object({
   "recommendedFabrics": zod.string().nullable(),
   "seamAllowance": zod.string().nullable(),
   "instructions": zod.string().nullable(),
-  "notes": zod.string().nullable()
+  "notes": zod.string().nullable(),
+  "steps": zod.array(zod.string()).nullable().describe('Main construction stages as short phrases, when the PDF has them')
 })
 
 
@@ -3183,7 +3208,13 @@ export const ListProjectsResponseItem = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 })
 export const ListProjectsResponse = zod.array(ListProjectsResponseItem)
 
@@ -3193,6 +3224,8 @@ export const ListProjectsResponse = zod.array(ListProjectsResponseItem)
  */
 export const createProjectBodyProgressMin = 0;
 export const createProjectBodyProgressMax = 100;
+
+export const createProjectBodyGarmentMax = 40;
 
 
 
@@ -3212,6 +3245,7 @@ export const CreateProjectBody = zod.object({
   "problems": zod.string().nullish(),
   "solutions": zod.string().nullish(),
   "size": zod.string().nullish(),
+  "garment": zod.string().max(createProjectBodyGarmentMax).nullish(),
   "completedAt": zod.coerce.date().nullish()
 })
 
@@ -3239,7 +3273,13 @@ export const CreateProjectResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 })
 
 
@@ -3274,7 +3314,13 @@ export const GetProjectResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 }).and(zod.object({
   "steps": zod.array(zod.object({
   "id": zod.number().int(),
@@ -3308,6 +3354,8 @@ export const UpdateProjectParams = zod.object({
 export const updateProjectBodyOneProgressMin = 0;
 export const updateProjectBodyOneProgressMax = 100;
 
+export const updateProjectBodyOneGarmentMax = 40;
+
 
 
 export const UpdateProjectBody = zod.object({
@@ -3326,6 +3374,7 @@ export const UpdateProjectBody = zod.object({
   "problems": zod.string().nullish(),
   "solutions": zod.string().nullish(),
   "size": zod.string().nullish(),
+  "garment": zod.string().max(updateProjectBodyOneGarmentMax).nullish(),
   "completedAt": zod.coerce.date().nullish()
 })
 
@@ -3353,7 +3402,13 @@ export const UpdateProjectResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 })
 
 
@@ -3365,6 +3420,103 @@ export const DeleteProjectParams = zod.object({
 })
 
 export const DeleteProjectResponse = zod.void()
+
+
+/**
+ * @summary Change some fields of your project (setup checklist answers, journal notes, stage).
+ */
+export const UpdateProjectFieldsParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateProjectFieldsBodyNameMax = 120;
+
+export const updateProjectFieldsBodySizeMax = 60;
+
+export const updateProjectFieldsBodyGarmentMax = 40;
+
+export const updateProjectFieldsBodyNotesMax = 20000;
+
+export const updateProjectFieldsBodyAlterationsMax = 20000;
+
+export const updateProjectFieldsBodyProblemsMax = 20000;
+
+export const updateProjectFieldsBodySolutionsMax = 20000;
+
+
+
+export const UpdateProjectFieldsBody = zod.object({
+  "name": zod.string().min(1).max(updateProjectFieldsBodyNameMax).optional(),
+  "status": zod.enum(['planning', 'cutting', 'sewing', 'fitting', 'finished']).optional(),
+  "patternId": zod.number().int().nullish(),
+  "fabricId": zod.number().int().nullish(),
+  "threadId": zod.number().int().nullish(),
+  "measurementProfileId": zod.number().int().nullish(),
+  "size": zod.string().max(updateProjectFieldsBodySizeMax).nullish(),
+  "garment": zod.string().max(updateProjectFieldsBodyGarmentMax).nullish(),
+  "notes": zod.string().max(updateProjectFieldsBodyNotesMax).nullish(),
+  "alterations": zod.string().max(updateProjectFieldsBodyAlterationsMax).nullish(),
+  "problems": zod.string().max(updateProjectFieldsBodyProblemsMax).nullish(),
+  "solutions": zod.string().max(updateProjectFieldsBodySolutionsMax).nullish(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).optional().describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
+}).describe('Change some fields of your project. Leave a field out to keep it; null clears it.')
+
+export const updateProjectFieldsResponseProgressMin = 0;
+export const updateProjectFieldsResponseProgressMax = 100;
+
+
+
+export const UpdateProjectFieldsResponse = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "status": zod.enum(['planning', 'cutting', 'sewing', 'fitting', 'finished']),
+  "progress": zod.number().int().min(updateProjectFieldsResponseProgressMin).max(updateProjectFieldsResponseProgressMax),
+  "patternId": zod.number().int().nullable(),
+  "fabricId": zod.number().int().nullable(),
+  "threadId": zod.number().int().nullable(),
+  "measurementProfileId": zod.number().int().nullable(),
+  "coverImageUrl": zod.string().nullable(),
+  "description": zod.string().nullish(),
+  "notes": zod.string().nullable(),
+  "alterations": zod.string().nullable(),
+  "problems": zod.string().nullable(),
+  "solutions": zod.string().nullable(),
+  "completedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "size": zod.string().nullable(),
+  "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
+})
+
+
+/**
+ * @summary Add the linked pattern's construction steps to the project.
+ */
+export const AddStepsFromPatternParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const AddStepsFromPatternResponseItem = zod.object({
+  "id": zod.number().int(),
+  "projectId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "notes": zod.string().nullable(),
+  "position": zod.number().int(),
+  "completed": zod.boolean(),
+  "completedAt": zod.coerce.date().nullable()
+})
+export const AddStepsFromPatternResponse = zod.array(AddStepsFromPatternResponseItem)
 
 
 /**
@@ -3712,7 +3864,8 @@ export const GetRecommendationsResponseItem = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
 }),
   "fabric": zod.object({
   "id": zod.number().int(),

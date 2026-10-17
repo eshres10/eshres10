@@ -1431,6 +1431,11 @@ export interface Pattern {
      * @nullable
      */
   catalogId: number | null;
+  /**
+     * Construction steps as short phrases (private)
+     * @nullable
+     */
+  steps: string[] | null;
 }
 
 export type PatternInputStatus = typeof PatternInputStatus[keyof typeof PatternInputStatus];
@@ -1472,6 +1477,13 @@ export interface PatternInput {
   /** @nullable */
   pdfFileName?: string | null;
   status?: PatternInputStatus;
+  /**
+     * @maxItems 60
+     * @nullable
+     * @items.minLength 1
+     * @items.maxLength 200
+     */
+  steps?: string[] | null;
 }
 
 export type PatternUpdate = PatternInput;
@@ -1516,6 +1528,11 @@ export interface PatternPdfAnalysis {
   instructions: string | null;
   /** @nullable */
   notes: string | null;
+  /**
+     * Main construction stages as short phrases, when the PDF has them
+     * @nullable
+     */
+  steps: string[] | null;
 }
 
 export type ProjectStatus = typeof ProjectStatus[keyof typeof ProjectStatus];
@@ -1528,6 +1545,29 @@ export const ProjectStatus = {
   fitting: 'fitting',
   finished: 'finished',
 } as const;
+
+/**
+ * @nullable
+ */
+export type ProjectSetupStepsChoice = typeof ProjectSetupStepsChoice[keyof typeof ProjectSetupStepsChoice] | null;
+
+
+export const ProjectSetupStepsChoice = {
+  pattern: 'pattern',
+  own: 'own',
+  none: 'none',
+} as const;
+
+/**
+ * The Finish setting up checklist: hidden once dismissed or all seven rows are answered
+ */
+export interface ProjectSetup {
+  dismissed?: boolean;
+  /** Who can see it counts as answered only once chosen on purpose */
+  visibilityChosen?: boolean;
+  /** @nullable */
+  stepsChoice?: ProjectSetupStepsChoice;
+}
 
 export interface Project {
   id: number;
@@ -1569,6 +1609,71 @@ export interface Project {
      */
   publishedAt: string | null;
   isDemo: boolean;
+  /** @nullable */
+  garment: string | null;
+  setup: ProjectSetup;
+}
+
+export type ProjectFieldsInputStatus = typeof ProjectFieldsInputStatus[keyof typeof ProjectFieldsInputStatus];
+
+
+export const ProjectFieldsInputStatus = {
+  planning: 'planning',
+  cutting: 'cutting',
+  sewing: 'sewing',
+  fitting: 'fitting',
+  finished: 'finished',
+} as const;
+
+/**
+ * Change some fields of your project. Leave a field out to keep it; null clears it.
+ */
+export interface ProjectFieldsInput {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name?: string;
+  status?: ProjectFieldsInputStatus;
+  /** @nullable */
+  patternId?: number | null;
+  /** @nullable */
+  fabricId?: number | null;
+  /** @nullable */
+  threadId?: number | null;
+  /** @nullable */
+  measurementProfileId?: number | null;
+  /**
+     * @maxLength 60
+     * @nullable
+     */
+  size?: string | null;
+  /**
+     * @maxLength 40
+     * @nullable
+     */
+  garment?: string | null;
+  /**
+     * @maxLength 20000
+     * @nullable
+     */
+  notes?: string | null;
+  /**
+     * @maxLength 20000
+     * @nullable
+     */
+  alterations?: string | null;
+  /**
+     * @maxLength 20000
+     * @nullable
+     */
+  problems?: string | null;
+  /**
+     * @maxLength 20000
+     * @nullable
+     */
+  solutions?: string | null;
+  setup?: ProjectSetup;
 }
 
 export type ProjectInputStatus = typeof ProjectInputStatus[keyof typeof ProjectInputStatus];
@@ -1614,6 +1719,11 @@ export interface ProjectInput {
   solutions?: string | null;
   /** @nullable */
   size?: string | null;
+  /**
+     * @maxLength 40
+     * @nullable
+     */
+  garment?: string | null;
   /** @nullable */
   completedAt?: string | null;
 }

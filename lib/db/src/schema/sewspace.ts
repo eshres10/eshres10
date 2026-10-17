@@ -100,6 +100,8 @@ export const patternsTable = pgTable("sewspace_patterns", {
   coverImageUrl: text("cover_image_url"),
   pdfUrl: text("pdf_url"),
   pdfFileName: text("pdf_file_name"),
+  // Phase F2 (migration 0011): construction steps as short phrases. Never public.
+  steps: jsonb("steps").$type<string[] | null>(),
   status: text("status").notNull().default("want_to_make"),
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   // Phase 5: the shared catalog page this item is (migration 0006).
@@ -120,6 +122,12 @@ export const measurementProfilesTable = pgTable("sewspace_measurement_profiles",
     .default({}),
   ...timestamps,
 });
+
+export interface ProjectSetup {
+  dismissed?: boolean;
+  visibilityChosen?: boolean;
+  stepsChoice?: "pattern" | "own" | "none" | null;
+}
 
 export const projectsTable = pgTable("sewspace_projects", {
   id: serial("id").primaryKey(),
@@ -151,6 +159,9 @@ export const projectsTable = pgTable("sewspace_projects", {
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   size: text("size"),
   publishedAt: timestamp("published_at", { withTimezone: true }),
+  // Phase F2 (migration 0011): garment chip and the setup checklist state.
+  garment: text("garment"),
+  setup: jsonb("setup").$type<ProjectSetup>().notNull().default({}),
   isDemo: boolean("is_demo").notNull().default(false),
   ...timestamps,
 });

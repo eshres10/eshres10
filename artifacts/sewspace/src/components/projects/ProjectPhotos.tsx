@@ -18,6 +18,8 @@ export function ProjectPhotos({ project }: { project: any }) {
   const [uploading, setUploading] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editCaption, setEditCaption] = useState('');
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [confirmId, setConfirmId] = useState<number | null>(null);
 
   const photos = [...(project.photos || [])].sort((a, b) => a.position - b.position);
 
@@ -30,6 +32,7 @@ export function ProjectPhotos({ project }: { project: any }) {
     if (!files || files.length === 0) return;
 
     setUploading(true);
+    setUploadError(null);
     try {
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -46,7 +49,7 @@ export function ProjectPhotos({ project }: { project: any }) {
       }
       invalidate();
     } catch (err: any) {
-      alert(`Upload error: ${err.message}`);
+      setUploadError(err?.message || "That photo didn't upload. Try again.");
     } finally {
       setUploading(false);
       if (e.target) e.target.value = '';
@@ -70,20 +73,22 @@ export function ProjectPhotos({ project }: { project: any }) {
     );
   };
 
+  // First tap asks, the second deletes.
   const handleDelete = (photoId: number) => {
-    if (window.confirm('Delete this photo?')) {
-      remove.mutate(
-        { projectId: project.id, photoId },
-        { onSuccess: invalidate }
-      );
+    if (confirmId !== photoId) {
+      setConfirmId(photoId);
+      return;
     }
+    setConfirmId(null);
+    remove.mutate({ projectId: project.id, photoId }, { onSuccess: invalidate });
   };
 
   return (
-    <div className="studio-card rounded-xl p-6">
+    <div className="rounded-[30px] bg-white p-6">
+      {uploadError && <p role="alert" className="mb-3 text-sm font-semibold text-red-ink">{uploadError}</p>}
       <div className="mb-6 flex items-end justify-between">
         <div>
-          <h2 className="font-display text-2xl text-ink">Progress Photos</h2>
+          <h2 className="font-display text-2xl tracking-[-.04em] text-ink">Progress photos</h2>
           <p className="mt-1 text-sm text-subtle">Document the journey.</p>
         </div>
         <div>
@@ -131,10 +136,10 @@ export function ProjectPhotos({ project }: { project: any }) {
                   <button
                     onClick={() => handleDelete(photo.id)}
                     data-testid={`delete-photo-${photo.id}`}
-                    className="grid h-11 w-11 sm:h-8 sm:w-8 place-items-center rounded-full bg-red/80 text-white backdrop-blur hover:bg-red"
-                    aria-label="Delete photo"
+                    className={`grid h-11 place-items-center rounded-full bg-red/80 text-white backdrop-blur hover:bg-red ${confirmId === photo.id ? 'px-3 text-sm font-bold' : 'w-11 sm:h-8 sm:w-8'}`}
+                    aria-label={confirmId === photo.id ? 'Confirm: delete this photo' : 'Delete photo'}
                   >
-                    <Trash2 size={18} className="sm:w-3.5 sm:h-3.5" />
+                    {confirmId === photo.id ? 'Delete?' : <Trash2 size={18} className="sm:w-3.5 sm:h-3.5" />}
                   </button>
                 </div>
 

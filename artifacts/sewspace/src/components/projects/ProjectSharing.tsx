@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getGetProjectQueryKey, getListProjectsQueryKey, useSetVisibility } from '@workspace/api-client-react';
+import { getGetProjectQueryKey, getListProjectsQueryKey, updateProjectFields, useSetVisibility } from '@workspace/api-client-react';
 import { Check, Copy, ExternalLink, Send } from 'lucide-react';
 import { Link } from 'wouter';
 import { VisibilityPicker, type Visibility } from '@/components/visibility';
@@ -15,7 +15,9 @@ export function ProjectSharing({ project }: { project: { id: number; visibility:
 
   const change = (visibility: Visibility) => {
     setVisibility.mutate({ kind: 'project', id: project.id, data: { visibility } }, {
-      onSuccess: () => {
+      onSuccess: async () => {
+        // Choosing here answers "Who can see it" in the setup list too.
+        await updateProjectFields(project.id, { setup: { visibilityChosen: true } }).catch(() => undefined);
         client.invalidateQueries({ queryKey: getGetProjectQueryKey(project.id) });
         client.invalidateQueries({ queryKey: getListProjectsQueryKey() });
       },
@@ -32,7 +34,7 @@ export function ProjectSharing({ project }: { project: { id: number; visibility:
   };
 
   return (
-    <section className="studio-card p-6" aria-labelledby="sharing-title">
+    <section className="rounded-[30px] bg-white p-6" aria-labelledby="sharing-title">
       <h2 id="sharing-title" className="eyebrow">Sharing</h2>
       <div className="mt-4">
         <VisibilityPicker value={value} onChange={change} disabled={setVisibility.isPending} legend="Who can see this make"

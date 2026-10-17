@@ -40,6 +40,11 @@ export interface ProjectInput {
   solutions?: string | null;
   /** @nullable */
   size?: string | null;
+  /**
+     * @maxLength 40
+     * @nullable
+     */
+  garment?: string | null;
   /** @nullable */
   completedAt?: Date | null;
 }

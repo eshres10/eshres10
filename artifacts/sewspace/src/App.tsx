@@ -16,6 +16,7 @@ import { MeasurementsPage } from '@/pages/measurements';
 import { FabricPage, PatternsPage, ThreadPage } from '@/pages/stash';
 import { Studio } from '@/pages/studio';
 import { ProjectsList, ProjectDetail } from '@/components/projects';
+import { QuickStart } from '@/components/projects/QuickStart';
 import { SignInPromptProvider } from '@/components/auth/SignInPrompt';
 import { PublicMakePage } from '@/pages/public-make';
 import { EditPostPage, NewPostPage } from '@/pages/post-flow';
@@ -49,6 +50,7 @@ const InShellThreadPage = studio(ThreadPage);
 const InShellPatternsPage = studio(PatternsPage);
 const InShellProjectsList = studio(ProjectsList);
 const InShellProjectDetail = studio(ProjectDetail);
+const InShellQuickStart = studio(QuickStart);
 const InShellMeasurementsPage = studio(MeasurementsPage);
 const InShellAIStudio = studio(AIStudio);
 const InShellAssistant = studio(Assistant);
@@ -71,6 +73,7 @@ function Router() {
     <Route path="/stash/threads" component={InShellThreadPage} />
     <Route path="/patterns" component={InShellPatternsPage} />
     <Route path="/projects" component={InShellProjectsList} />
+    <Route path="/projects/new" component={InShellQuickStart} />
     <Route path="/projects/:id" component={InShellProjectDetail} />
     <Route path="/measurements" component={InShellMeasurementsPage} />
     <Route path="/ai-studio" component={InShellAIStudio} />

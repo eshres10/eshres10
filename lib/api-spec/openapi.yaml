@@ -1501,6 +1501,43 @@ paths:
       responses:
         "204":
           description: Deleted
+  /projects/{id}/fields:
+    patch:
+      operationId: updateProjectFields
+      tags: [studio]
+      summary: "Change some fields of your project (setup checklist answers, journal notes, stage)."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ProjectFieldsInput" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Project" }
+        "400": { description: Invalid or not your item }
+        "404": { description: Not found }
+  /projects/{id}/steps/from-pattern:
+    post:
+      operationId: addStepsFromPattern
+      tags: [studio]
+      summary: "Add the linked pattern's construction steps to the project."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "201":
+          description: The steps added
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/ProjectStep" }
+        "400": { description: The project has no pattern with steps }
+        "404": { description: Not found }
   /projects/{projectId}/steps:
     post:
       operationId: createProjectStep
@@ -2795,7 +2832,12 @@ components:
         visibility: { $ref: "#/components/schemas/Visibility" }
         isDemo: { type: boolean }
         catalogId: { type: integer, nullable: true, description: Shared catalog page this is linked to }
-      required: [visibility, id, name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, coverImageUrl, pdfUrl, pdfFileName, status, isDemo, catalogId]
+        steps:
+          type: array
+          nullable: true
+          description: Construction steps as short phrases (private)
+          items: { type: string }
+      required: [visibility, id, name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, coverImageUrl, pdfUrl, pdfFileName, status, isDemo, catalogId, steps]
     PatternInput:
       type: object
       required: [name, garmentType, difficulty]
@@ -2816,6 +2858,11 @@ components:
         pdfUrl: { type: string, nullable: true }
         pdfFileName: { type: string, nullable: true }
         status: { type: string, enum: [want_to_make, purchased, made, favorite] }
+        steps:
+          type: array
+          nullable: true
+          maxItems: 60
+          items: { type: string, minLength: 1, maxLength: 200 }
     PatternUpdate:
       allOf:
         - $ref: "#/components/schemas/PatternInput"
@@ -2838,7 +2885,12 @@ components:
         seamAllowance: { type: string, nullable: true }
         instructions: { type: string, nullable: true }
         notes: { type: string, nullable: true }
-      required: [name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes]
+        steps:
+          type: array
+          nullable: true
+          description: Main construction stages as short phrases, when the PDF has them
+          items: { type: string }
+      required: [name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, steps]
     Project:
       type: object
       properties:
@@ -2861,7 +2913,33 @@ components:
         size: { type: string, nullable: true }
         publishedAt: { type: string, format: date-time, nullable: true, description: First time the make was shared beyond private }
         isDemo: { type: boolean }
-      required: [visibility, size, publishedAt, id, name, status, progress, patternId, fabricId, threadId, measurementProfileId, coverImageUrl, notes, alterations, problems, solutions, completedAt, isDemo]
+        garment: { type: string, nullable: true }
+        setup: { $ref: "#/components/schemas/ProjectSetup" }
+      required: [visibility, size, publishedAt, id, name, status, progress, patternId, fabricId, threadId, measurementProfileId, coverImageUrl, notes, alterations, problems, solutions, completedAt, isDemo, garment, setup]
+    ProjectSetup:
+      type: object
+      description: "The Finish setting up checklist: hidden once dismissed or all seven rows are answered"
+      properties:
+        dismissed: { type: boolean }
+        visibilityChosen: { type: boolean, description: Who can see it counts as answered only once chosen on purpose }
+        stepsChoice: { type: string, nullable: true, enum: [pattern, own, none, null] }
+    ProjectFieldsInput:
+      type: object
+      description: "Change some fields of your project. Leave a field out to keep it; null clears it."
+      properties:
+        name: { type: string, minLength: 1, maxLength: 120 }
+        status: { type: string, enum: [planning, cutting, sewing, fitting, finished] }
+        patternId: { type: integer, nullable: true }
+        fabricId: { type: integer, nullable: true }
+        threadId: { type: integer, nullable: true }
+        measurementProfileId: { type: integer, nullable: true }
+        size: { type: string, nullable: true, maxLength: 60 }
+        garment: { type: string, nullable: true, maxLength: 40 }
+        notes: { type: string, nullable: true, maxLength: 20000 }
+        alterations: { type: string, nullable: true, maxLength: 20000 }
+        problems: { type: string, nullable: true, maxLength: 20000 }
+        solutions: { type: string, nullable: true, maxLength: 20000 }
+        setup: { $ref: "#/components/schemas/ProjectSetup" }
     ProjectInput:
       type: object
       required: [name]
@@ -2881,6 +2959,7 @@ components:
         problems: { type: string, nullable: true }
         solutions: { type: string, nullable: true }
         size: { type: string, nullable: true }
+        garment: { type: string, nullable: true, maxLength: 40 }
         completedAt: { type: string, format: date, nullable: true }
     ProjectUpdate:
       allOf:

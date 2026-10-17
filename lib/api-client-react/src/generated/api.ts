@@ -111,6 +111,7 @@ import type {
   ProfileUsed,
   Project,
   ProjectDetail,
+  ProjectFieldsInput,
   ProjectInput,
   ProjectPhoto,
   ProjectPhotoInput,
@@ -8441,6 +8442,169 @@ export const useDeleteProject = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteProjectMutationOptions(options), queryClient);
+    }
+
+export const getUpdateProjectFieldsUrl = (id: number,) => {
+
+
+
+
+  return `/api/projects/${id}/fields`
+}
+
+/**
+ * @summary Change some fields of your project (setup checklist answers, journal notes, stage).
+ */
+export const updateProjectFields = async (id: number,
+    projectFieldsInput: ProjectFieldsInput, options?: Parameters<typeof customFetch>[1]): Promise<Project> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Project>(getUpdateProjectFieldsUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(projectFieldsInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateProjectFieldsMutationKey = () => ['updateProjectFields'] as const;
+
+export const getUpdateProjectFieldsMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProjectFields>>, TError,UpdateProjectFieldsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateProjectFields>>, TError,UpdateProjectFieldsMutationVariables, TContext> => {
+
+const mutationKey = getUpdateProjectFieldsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateProjectFields>>, UpdateProjectFieldsMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateProjectFields(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateProjectFieldsMutationResult = NonNullable<Awaited<ReturnType<typeof updateProjectFields>>>
+    export type UpdateProjectFieldsMutationBody = BodyType<ProjectFieldsInput>
+    export type UpdateProjectFieldsMutationError = ErrorType<void>
+    export type UpdateProjectFieldsMutationVariables = {id: number;data: BodyType<ProjectFieldsInput>}
+
+    /**
+ * @summary Change some fields of your project (setup checklist answers, journal notes, stage).
+ */
+export const useUpdateProjectFields = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProjectFields>>, TError,UpdateProjectFieldsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateProjectFields>>,
+        TError,
+        UpdateProjectFieldsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateProjectFieldsMutationOptions(options), queryClient);
+    }
+
+export const getAddStepsFromPatternUrl = (id: number,) => {
+
+
+
+
+  return `/api/projects/${id}/steps/from-pattern`
+}
+
+/**
+ * @summary Add the linked pattern's construction steps to the project.
+ */
+export const addStepsFromPattern = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<ProjectStep[]> => {
+
+  return customFetch<ProjectStep[]>(getAddStepsFromPatternUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAddStepsFromPatternMutationKey = () => ['addStepsFromPattern'] as const;
+
+export const getAddStepsFromPatternMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addStepsFromPattern>>, TError,AddStepsFromPatternMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addStepsFromPattern>>, TError,AddStepsFromPatternMutationVariables, TContext> => {
+
+const mutationKey = getAddStepsFromPatternMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addStepsFromPattern>>, AddStepsFromPatternMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  addStepsFromPattern(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddStepsFromPatternMutationResult = NonNullable<Awaited<ReturnType<typeof addStepsFromPattern>>>
+
+    export type AddStepsFromPatternMutationError = ErrorType<void>
+    export type AddStepsFromPatternMutationVariables = {id: number}
+
+    /**
+ * @summary Add the linked pattern's construction steps to the project.
+ */
+export const useAddStepsFromPattern = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addStepsFromPattern>>, TError,AddStepsFromPatternMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addStepsFromPattern>>,
+        TError,
+        AddStepsFromPatternMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddStepsFromPatternMutationOptions(options), queryClient);
     }
 
 export const getCreateProjectStepUrl = (projectId: number,) => {

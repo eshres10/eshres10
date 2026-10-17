@@ -51,7 +51,7 @@ const AUDIENCES: Array<{ value: Audience; label: string; help: string; icon: typ
 ];
 
 /** "Who can see this?" as three big radio cards. */
-export function AudienceCards({ value, onChange, labelledBy }: { value: Audience; onChange: (v: Audience) => void; labelledBy: string }) {
+export function AudienceCards({ value, onChange, labelledBy, helps }: { value: Audience | null; onChange: (v: Audience) => void; labelledBy: string; helps?: Partial<Record<Audience, string>> }) {
   const refs = useRef<Array<HTMLButtonElement | null>>([]);
   const onKey = (e: KeyboardEvent, i: number) => {
     const step = e.key === 'ArrowDown' || e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' || e.key === 'ArrowLeft' ? -1 : 0;
@@ -66,11 +66,11 @@ export function AudienceCards({ value, onChange, labelledBy }: { value: Audience
       {AUDIENCES.map((a, i) => {
         const on = value === a.value;
         return (
-          <button key={a.value} ref={el => { refs.current[i] = el; }} type="button" role="radio" aria-checked={on} tabIndex={on ? 0 : -1}
+          <button key={a.value} ref={el => { refs.current[i] = el; }} type="button" role="radio" aria-checked={on} tabIndex={on || (value === null && i === 0) ? 0 : -1}
             onClick={() => onChange(a.value)} onKeyDown={e => onKey(e, i)}
             className={`flex min-h-[64px] w-full items-center gap-4 rounded-[24px] border-2 px-4 py-2.5 text-left ${on ? 'border-ink bg-yellow' : 'border-line bg-white hover:border-ink'}`}>
             <a.icon size={22} aria-hidden="true" className="shrink-0" />
-            <span><span className="block text-[17px] font-bold">{a.label}</span><span className="block text-sm text-subtle">{a.help}</span></span>
+            <span><span className="block text-[17px] font-bold">{a.label}</span><span className="block text-sm text-subtle">{helps?.[a.value] ?? a.help}</span></span>
           </button>
         );
       })}
