@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type NextFunction, type Request, type Response } from "express";
 import {
   AddCatalogPatternToLibraryParams,
   AddCatalogPatternToLibraryResponse,
@@ -6,6 +6,8 @@ import {
   CreateCatalogEntryResponse,
   DeleteReviewParams,
   GetCatalogEntryParams,
+  GetCatalogMeParams,
+  GetCatalogMeResponse,
   GetCatalogEntryResponse,
   GetCatalogPageParams,
   GetCatalogPageResponse,
@@ -32,6 +34,7 @@ import {
 } from "@workspace/api-zod";
 import {
   addToLibrary,
+  catalogMe,
   createCatalogEntry,
   deleteReview,
   getCatalogEntry,
@@ -47,6 +50,7 @@ import {
   setHelpful,
   updateCatalogEntry,
 } from "../access";
+import { hourlyLimit } from "../lib/hourly";
 import { scoped, type Reply } from "../lib/scoped";
 import { viewerOf } from "../middlewares/auth";
 
@@ -158,8 +162,24 @@ router.delete("/catalog/:id/review", scoped(async (req, res, db): Promise<void> 
   res.sendStatus(204);
 }));
 
+// 120 an hour each for the write endpoints that don't keep a row to count.
+export const CATALOG_WRITES_PER_HOUR = 120;
+const helpfulLimit = hourlyLimit(CATALOG_WRITES_PER_HOUR);
+const libraryLimit = hourlyLimit(CATALOG_WRITES_PER_HOUR);
+const limited = (allow: (userId: string) => boolean, message: string) =>
+  (req: Request, res: Response, next: NextFunction) =>
+    allow(viewerOf(req).userId!) ? next() : void res.status(429).json({ error: message });
+
+// Your own extras: never cached anywhere but your browser's memory.
+router.get("/catalog/:id/me", (_req, res, next) => { res.set("Cache-Control", "private, no-store"); next(); }, scoped(async (req, res, db): Promise<void> => {
+  const params = GetCatalogMeParams.safeParse(req.params);
+  const me = params.success ? await catalogMe(db, viewerOf(req), params.data.id) : null;
+  if (!me) return void res.status(404).json({ error: "Page not found" });
+  res.json(GetCatalogMeResponse.parse(me));
+}));
+
 for (const on of [true, false]) {
-  router[on ? "put" : "delete"]("/reviews/:id/helpful", scoped(async (req, res, db): Promise<void> => {
+  router[on ? "put" : "delete"]("/reviews/:id/helpful", limited(helpfulLimit, "That's a lot of votes for one hour. Try again later."), scoped(async (req, res, db): Promise<void> => {
     const params = MarkReviewHelpfulParams.safeParse(req.params);
     const result = params.success ? await setHelpful(db, viewerOf(req), params.data.id, on) : { ok: false as const, error: "not_found" as const };
     if (!result.ok) {
@@ -194,7 +214,7 @@ for (const on of [true, false]) {
   }));
 }
 
-router.post("/catalog/:id/library", scoped(async (req, res, db): Promise<void> => {
+router.post("/catalog/:id/library", limited(libraryLimit, "That's a lot of patterns for one hour. Try again later."), scoped(async (req, res, db): Promise<void> => {
   const params = AddCatalogPatternToLibraryParams.safeParse(req.params);
   const result = params.success ? await addToLibrary(db, viewerOf(req), params.data.id) : { ok: false as const, error: "not_found" as const };
   if (!result.ok) {

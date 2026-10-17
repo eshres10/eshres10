@@ -371,7 +371,7 @@ export async function getCatalogPage(db: Tx, viewer: Viewer, kind: CatalogKind, 
 
 export interface CatalogSizeView { label: string; bustCm: number | null; waistCm: number | null; hipCm: number | null }
 
-async function sizeChart(db: Tx, catalogId: number): Promise<CatalogSizeView[]> {
+export async function sizeChart(db: Tx, catalogId: number): Promise<CatalogSizeView[]> {
   const rows = await db.select().from(catalogSizesTable).where(eq(catalogSizesTable.catalogId, catalogId)).orderBy(catalogSizesTable.position);
   return rows.map((r) => ({ label: r.label, bustCm: r.bustCm, waistCm: r.waistCm, hipCm: r.hipCm }));
 }

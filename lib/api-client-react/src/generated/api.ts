@@ -34,6 +34,7 @@ import type {
   CatalogLinkInput,
   CatalogLinkResult,
   CatalogList,
+  CatalogMe,
   CatalogPage,
   CatalogSaveState,
   CatalogSize,
@@ -3691,6 +3692,107 @@ export const useUnsaveCatalogEntry = <TError = ErrorType<void>,
       return useMutation(getUnsaveCatalogEntryMutationOptions(options), queryClient);
     }
 
+export const getGetCatalogMeUrl = (id: number,) => {
+
+
+
+
+  return `/api/catalog/${id}/me`
+}
+
+/**
+ * @summary Your own extras for a pattern page: stash matches, closest size, library, makes. Only you see these.
+ */
+export const getCatalogMe = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<CatalogMe> => {
+
+  return customFetch<CatalogMe>(getGetCatalogMeUrl(id),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetCatalogMeQueryKey = (id: number,) => {
+    return [
+    `/api/catalog/${id}/me`
+    ] as const;
+    }
+
+
+export const getGetCatalogMeQueryOptions = <TData = Awaited<ReturnType<typeof getCatalogMe>>, TError = ErrorType<void>>(id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogMe>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetCatalogMeQueryKey(id);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCatalogMe>>> = ({ signal }) => getCatalogMe(id, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getCatalogMe>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetCatalogMeQueryResult = NonNullable<Awaited<ReturnType<typeof getCatalogMe>>>
+export type GetCatalogMeQueryError = ErrorType<void>
+
+
+export function useGetCatalogMe<TData = Awaited<ReturnType<typeof getCatalogMe>>, TError = ErrorType<void>>(
+ id: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogMe>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogMe>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCatalogMe<TData = Awaited<ReturnType<typeof getCatalogMe>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogMe>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getCatalogMe>>,
+          TError,
+          Awaited<ReturnType<typeof getCatalogMe>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetCatalogMe<TData = Awaited<ReturnType<typeof getCatalogMe>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogMe>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Your own extras for a pattern page: stash matches, closest size, library, makes. Only you see these.
+ */
+
+export function useGetCatalogMe<TData = Awaited<ReturnType<typeof getCatalogMe>>, TError = ErrorType<void>>(
+ id: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getCatalogMe>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetCatalogMeQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getSaveReviewUrl = (id: number,) => {
 
 
@@ -3941,7 +4043,7 @@ export const unmarkReviewHelpful = async (id: number, options?: Parameters<typeo
 
 export const getUnmarkReviewHelpfulMutationKey = () => ['unmarkReviewHelpful'] as const;
 
-export const getUnmarkReviewHelpfulMutationOptions = <TError = ErrorType<unknown>,
+export const getUnmarkReviewHelpfulMutationOptions = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unmarkReviewHelpful>>, TError,UnmarkReviewHelpfulMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
 ): UseMutationOptions<Awaited<ReturnType<typeof unmarkReviewHelpful>>, TError,UnmarkReviewHelpfulMutationVariables, TContext> => {
 
@@ -3970,10 +4072,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
     export type UnmarkReviewHelpfulMutationResult = NonNullable<Awaited<ReturnType<typeof unmarkReviewHelpful>>>
 
-    export type UnmarkReviewHelpfulMutationError = ErrorType<unknown>
+    export type UnmarkReviewHelpfulMutationError = ErrorType<void>
     export type UnmarkReviewHelpfulMutationVariables = {id: number}
 
-    export const useUnmarkReviewHelpful = <TError = ErrorType<unknown>,
+    export const useUnmarkReviewHelpful = <TError = ErrorType<void>,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unmarkReviewHelpful>>, TError,UnmarkReviewHelpfulMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof unmarkReviewHelpful>>,

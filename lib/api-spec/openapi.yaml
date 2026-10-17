@@ -644,6 +644,20 @@ paths:
             application/json:
               schema: { $ref: "#/components/schemas/CatalogSaveState" }
         "429": { description: Too many saves this hour }
+  /catalog/{id}/me:
+    get:
+      operationId: getCatalogMe
+      tags: [catalog]
+      summary: "Your own extras for a pattern page: stash matches, closest size, library, makes. Only you see these."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Your extras
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CatalogMe" }
+        "404": { description: Not found }
   /catalog/{id}/review:
     put:
       operationId: saveReview
@@ -686,6 +700,7 @@ paths:
               schema: { $ref: "#/components/schemas/HelpfulState" }
         "400": { description: Not on your own review }
         "404": { description: Not found }
+        "429": { description: Too many helpful votes this hour }
     delete:
       operationId: unmarkReviewHelpful
       tags: [catalog]
@@ -697,6 +712,7 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/HelpfulState" }
+        "429": { description: Too many helpful votes this hour }
   /catalog/{id}/library:
     post:
       operationId: addCatalogPatternToLibrary
@@ -2587,6 +2603,51 @@ components:
         isNew: { type: boolean, description: Added in the last 30 days }
         savedByMe: { type: boolean }
       required: [id, kind, slug, name, maker, category, difficulty, sizes, fabricTypes, yardage, url, description, canEdit, stats, source, priceCents, currency, designer, coverImageUrl, isNew, savedByMe]
+    CatalogMe:
+      type: object
+      description: "The caller's own extras for a pattern page. Measurements never leave the server: only the closest size label is sent."
+      properties:
+        saved: { type: boolean }
+        owned: { type: boolean, description: Bought on Seams Club (always false until pattern sales open) }
+        libraryPatternId: { type: integer, nullable: true, description: Your library pattern linked to this page }
+        made:
+          type: array
+          items: { $ref: "#/components/schemas/CatalogMyMake" }
+        closestSize: { type: string, nullable: true, description: The size label closest to your latest saved measurements }
+        nearSizes:
+          type: array
+          description: The closest size and the sizes either side of it (for Near my size)
+          items: { type: string }
+        hasMeasurements: { type: boolean }
+        fabricNeeded:
+          type: object
+          nullable: true
+          description: Fabric needed read from the page (metres)
+          properties:
+            minMetres: { type: number }
+            maxMetres: { type: number }
+          required: [minMetres, maxMetres]
+        stash:
+          type: array
+          items: { $ref: "#/components/schemas/CatalogStashMatch" }
+      required: [saved, owned, libraryPatternId, made, closestSize, nearSizes, hasMeasurements, fabricNeeded, stash]
+    CatalogMyMake:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        status: { type: string }
+      required: [id, name, status]
+    CatalogStashMatch:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        type: { type: string }
+        imageUrl: { type: string, nullable: true }
+        metres: { type: number }
+        enough: { type: string, enum: [all, some], description: "all = enough for every size, some = enough for the smaller sizes" }
+      required: [id, name, type, imageUrl, metres, enough]
     CatalogSaveState:
       type: object
       properties:

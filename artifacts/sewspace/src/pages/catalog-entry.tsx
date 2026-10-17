@@ -6,14 +6,17 @@ import {
   markReviewHelpful,
   unmarkReviewHelpful,
   useAddCatalogPatternToLibrary,
+  getGetCatalogMeQueryKey,
+  useGetCatalogMe,
   useGetCatalogPage,
   useGetCatalogReviews,
   type CatalogEntry,
+  type CatalogMe,
   type CatalogPage,
   type Review,
 } from '@workspace/api-client-react';
 import { Bookmark, Check, ExternalLink, Loader2, Pencil, Scissors, ThumbsUp } from 'lucide-react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
 import { capitalise, EditEntryForm, ReviewForm, Stars } from '@/components/catalog/parts';
@@ -22,6 +25,7 @@ import { Loading } from '@/components/common';
 import { Discussions } from '@/components/forum/Discussions';
 import { SafetyMenu } from '@/components/social/SafetyMenu';
 import { Sheet } from '@/components/social/Sheet';
+import { FilterChips } from '@/components/studio/parts';
 import { timeAgo } from '@/lib/time';
 import NotFound from '@/pages/not-found';
 
@@ -140,32 +144,113 @@ function WriteReview({ page, label, className }: { page: CatalogPage; label: str
   );
 }
 
-function Actions({ page }: { page: CatalogPage }) {
+const BIG = 'inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-[15px] font-bold no-underline disabled:opacity-60';
+
+/**
+ * "I've made this": starts a new make with this pattern from your library
+ * (added first if needed). Once you have one, it links to it instead.
+ */
+function MadeIt({ entry: e, me }: { entry: CatalogEntry; me: CatalogMe | undefined }) {
+  const ask = useRequireSignIn();
+  const client = useQueryClient();
+  const [, navigate] = useLocation();
+  const library = useAddCatalogPatternToLibrary();
+  const mine = me?.made[0];
+  if (mine) {
+    return (
+      <Link href={`/projects/${mine.id}`} className={`${BIG} border-2 border-ink bg-ink text-white`}>
+        <Check size={16} aria-hidden="true" />{mine.status === 'finished' ? 'You made this' : "You're making this"}
+      </Link>
+    );
+  }
+  const start = async () => {
+    if (!ask({ title: 'Sign in to add your make', body: "Your make starts private in your studio. You'll come straight back here." })) return;
+    try {
+      const patternId = me?.libraryPatternId ?? (await library.mutateAsync({ id: e.id })).patternId;
+      client.invalidateQueries({ queryKey: getGetCatalogMeQueryKey(e.id) });
+      navigate(`/projects/new?pattern=${patternId}`);
+    } catch { /* the button stays; the person can try again */ }
+  };
+  return (
+    <button type="button" onClick={start} disabled={library.isPending} className={`${BIG} border-2 border-ink bg-white text-ink`}>
+      {library.isPending && <Loader2 size={16} className="animate-spin" aria-hidden="true" />}I've made this
+    </button>
+  );
+}
+
+function Actions({ page, me }: { page: CatalogPage; me: CatalogMe | undefined }) {
   const ask = useRequireSignIn();
   const client = useQueryClient();
   const save = useAddCatalogPatternToLibrary();
   const e = page.entry;
   const [editing, setEditing] = useState(false);
-  const big = 'inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-[15px] font-bold no-underline disabled:opacity-60';
+  const inLibrary = Boolean(me?.libraryPatternId) || page.inMyLibrary || save.isSuccess;
   return (
     <div className="flex flex-wrap gap-2">
-      <WriteReview page={page} className={`${big} border-2 border-ink bg-white text-ink`}
-        label={page.myReview ? 'Edit your review' : e.kind === 'pattern' ? "I've made this" : 'Write a review'} />
+      {e.kind === 'pattern'
+        ? <MadeIt entry={e} me={me} />
+        : <WriteReview page={page} className={`${BIG} border-2 border-ink bg-white text-ink`} label={page.myReview ? 'Edit your review' : 'Write a review'} />}
       {e.kind === 'pattern' && (
-        page.inMyLibrary || save.isSuccess
-          ? <Link href="/patterns" className={`${big} border border-ink bg-white text-ink`}><Check size={16} aria-hidden="true" />In your library</Link>
-          : <button type="button" disabled={save.isPending} className={`${big} bg-canvas text-ink`}
+        inLibrary
+          ? <Link href="/patterns" className={`${BIG} border border-ink bg-white text-ink`}><Check size={16} aria-hidden="true" />In your library</Link>
+          : <button type="button" disabled={save.isPending} className={`${BIG} bg-canvas text-ink`}
               onClick={() => { if (ask({ title: 'Sign in to save patterns', body: 'Saved patterns go in your private pattern library.' })) save.mutate({ id: e.id }, { onSuccess: () => client.invalidateQueries() }); }}>
               {save.isPending ? <Loader2 size={16} className="animate-spin" /> : <Bookmark size={16} aria-hidden="true" />}Add to my library
             </button>
       )}
-      {e.canEdit && <button type="button" onClick={() => setEditing(true)} className={`${big} text-ink underline underline-offset-4`}><Pencil size={15} aria-hidden="true" />Edit page</button>}
+      {e.canEdit && <button type="button" onClick={() => setEditing(true)} className={`${BIG} text-ink underline underline-offset-4`}><Pencil size={15} aria-hidden="true" />Edit page</button>}
       {editing && (
         <Sheet label={`Edit ${e.name}`} onClose={() => setEditing(false)}>
           <EditEntryForm entry={e} sizes={page.sizes} onDone={() => setEditing(false)} />
         </Sheet>
       )}
     </div>
+  );
+}
+
+/** "12", "Size 14", "14, graded to 16" → "12", "14", "14": the size a make was cut in. */
+const sizeKey = (size: string) => size.toLowerCase().replace(/^size\s*/, '').trim().split(/[\s,/]+/)[0] ?? '';
+
+/** Makes, newest first or near your size (worked out on the server from your measurements). */
+function Makes({ page, me }: { page: CatalogPage; me: CatalogMe | undefined }) {
+  const ask = useRequireSignIn();
+  const [sort, setSort] = useState<'new' | 'near'>('new');
+  const e = page.entry;
+  const near = new Set((me?.nearSizes ?? []).map(sizeKey));
+  const shown = sort === 'near' ? page.makes.filter(m => m.size && near.has(sizeKey(m.size))) : page.makes;
+  const pick = (v: 'new' | 'near') => {
+    if (v === 'near' && !ask({ title: 'Sign in to see makes near your size', body: 'Your measurements stay private: only you see which size is closest.' })) return;
+    setSort(v);
+  };
+  return (
+    <section aria-labelledby="makes-title">
+      <div className="mb-4 mt-8 flex flex-wrap items-center justify-between gap-3">
+        <h2 id="makes-title" className="font-display text-[32px] tracking-[-.05em] sm:text-[40px]">{e.stats.makes ? `${e.stats.makes} ${e.stats.makes === 1 ? 'make' : 'makes'}` : 'Makes'}</h2>
+        {e.kind === 'pattern' && page.makes.length > 0 && page.sizes.length > 0 && (
+          <FilterChips label="Show makes" value={sort} onChange={pick} options={[{ value: 'new', label: 'Newest' }, { value: 'near', label: 'Near my size' }]} />
+        )}
+      </div>
+      {sort === 'near' && me && !me.closestSize
+        ? <p className="rounded-[30px] bg-white px-6 py-8 text-sm text-subtle">{me.hasMeasurements ? "Your measurements don't match this size chart." : <><Link href="/measurements" className="font-semibold text-ink underline underline-offset-4">Save your measurements</Link> to see makes near your size. They stay private.</>}</p>
+        : shown.length
+          ? <>
+              {sort === 'near' && me?.closestSize && <p className="-mt-2 mb-3 text-[13px] text-subtle">Sizes {me.nearSizes.join(', ')}: around size {me.closestSize}, your closest. Only you see this.</p>}
+              <ul className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6">
+                {shown.map(m => (
+                  <li key={m.id} className="w-[58vw] max-w-[240px] shrink-0 snap-start sm:w-auto sm:max-w-none">
+                    <Link href={`/makes/${m.id}`} className="relative block aspect-[3/4] overflow-hidden rounded-[22px] bg-line text-ink no-underline">
+                      {m.coverImageUrl ? <img src={m.coverImageUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" /> : <span className="absolute inset-0 grid place-items-center bg-peach-soft" aria-hidden="true"><Scissors size={28} /></span>}
+                      <span className="absolute inset-x-2 bottom-2 rounded-[14px] bg-white px-3 py-2">
+                        <span className="block truncate text-[13px] font-bold">@{m.owner.handle}</span>
+                        <span className="block truncate text-xs text-subtle">{[m.size && `Size ${m.size}`, m.usedWith].filter(Boolean).join(' · ') || m.name}</span>
+                      </span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          : <p className="rounded-[30px] bg-white px-6 py-8 text-sm text-subtle">{sort === 'near' ? 'No shared makes near your size yet.' : `No shared makes yet. Link this ${e.kind} to one of yours from your studio, and share the make.`}</p>}
+    </section>
   );
 }
 
@@ -177,6 +262,9 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
   const valid = kind === 'pattern' || kind === 'product';
   const page = useGetCatalogPage(kind as 'pattern', slug, { query: { retry: false, enabled: valid } });
   const reviews = useGetCatalogReviews(kind as 'pattern', slug, { query: { retry: false, enabled: valid } });
+  const entryId = page.data?.entry.id ?? 0;
+  // Your own extras (stash, closest size, library, makes): signed in, patterns only.
+  const me = useGetCatalogMe(entryId, { query: { enabled: Boolean(isSignedIn) && kind === 'pattern' && entryId > 0, retry: false } });
   useEffect(() => {
     const e = page.data?.entry;
     if (e) document.title = `${e.name}${e.maker ? ` by ${e.maker}` : ''} · Seams Club`;
@@ -213,7 +301,7 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
           {pattern
             ? <GetIt entry={e} />
             : e.url && <p className="mt-5"><a href={e.url} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex items-center gap-1 text-ink underline underline-offset-4">Buy it from the shop<ExternalLink size={13} aria-hidden="true" /></a></p>}
-          <div className="mt-4"><Actions page={page.data} /></div>
+          <div className="mt-4"><Actions page={page.data} me={me.data} /></div>
           {pattern && <p className="mt-3 text-[13px] text-subtle">Pattern files are never shared on Seams Club.</p>}
         </div>
       </section>
@@ -222,30 +310,13 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
         <div className="grid items-start gap-4 md:grid-cols-2 lg:grid-cols-3">
           <HowItSews entry={e} />
           <Alterations page={page.data} />
-          <FabricsUsed page={page.data} />
+          <FabricsUsed page={page.data} me={me.data} />
         </div>
       )}
       {!pattern && <FabricsUsed page={page.data} />}
-      {pattern && <SizeChart page={page.data} />}
+      {pattern && <SizeChart page={page.data} me={me.data} />}
 
-      <section aria-labelledby="makes-title">
-        <h2 id="makes-title" className="mb-4 mt-8 font-display text-[32px] tracking-[-.05em] sm:text-[40px]">{e.stats.makes ? `${e.stats.makes} ${e.stats.makes === 1 ? 'make' : 'makes'}` : 'Makes'}</h2>
-        {makes.length
-          ? <ul className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6">
-              {makes.map(m => (
-                <li key={m.id} className="w-[58vw] max-w-[240px] shrink-0 snap-start sm:w-auto sm:max-w-none">
-                  <Link href={`/makes/${m.id}`} className="relative block aspect-[3/4] overflow-hidden rounded-[22px] bg-line text-ink no-underline">
-                    {m.coverImageUrl ? <img src={m.coverImageUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" /> : <span className="absolute inset-0 grid place-items-center bg-peach-soft" aria-hidden="true"><Scissors size={28} /></span>}
-                    <span className="absolute inset-x-2 bottom-2 rounded-[14px] bg-white px-3 py-2">
-                      <span className="block truncate text-[13px] font-bold">@{m.owner.handle}</span>
-                      <span className="block truncate text-xs text-subtle">{[m.size && `Size ${m.size}`, m.usedWith].filter(Boolean).join(' · ') || m.name}</span>
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          : <p className="rounded-[30px] bg-white px-6 py-8 text-sm text-subtle">No shared makes yet. Link this {e.kind} to one of yours from your studio, and share the make.</p>}
-      </section>
+      <Makes page={page.data} me={me.data} />
 
       <Discussions catalogId={e.id} />
 

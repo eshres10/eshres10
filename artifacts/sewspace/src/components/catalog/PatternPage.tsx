@@ -7,15 +7,17 @@ import {
   unfollowProfile,
   useGetProfile,
   type CatalogEntry,
+  type CatalogMe,
   type CatalogPage,
 } from '@workspace/api-client-react';
-import { AtSign, ExternalLink, Loader2, Star, Store } from 'lucide-react';
+import { AtSign, ExternalLink, Loader2, Lock, Star, Store } from 'lucide-react';
 import { Link } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
 import { Garment } from '@/components/brand/Garment';
 import { ALTERATION_LABEL, capitalise } from '@/components/catalog/parts';
 import { SaveHeart } from '@/components/catalog/Directory';
+import { formatLength } from '@/components/projects/setup';
 import { formatPrice } from '@/lib/currency';
 
 // The pattern page's public sections (docs/design/patterns d4–d5, m3–m6).
@@ -197,13 +199,43 @@ export function Alterations({ page }: { page: CatalogPage }) {
   );
 }
 
-export function FabricsUsed({ page }: { page: CatalogPage }) {
-  if (!page.fabricsUsed.length) return null;
+export function FabricsUsed({ page, me }: { page: CatalogPage; me?: CatalogMe | null }) {
+  if (!page.fabricsUsed.length && !me) return null;
   return (
     <section aria-labelledby="fabrics-title" className="rounded-[30px] bg-white p-6 sm:p-7">
       <h2 id="fabrics-title" className="font-display text-[22px] tracking-[-.04em]">Fabrics people used</h2>
-      <ul className="mt-4 flex flex-wrap gap-2">{page.fabricsUsed.map(f => <li key={f.name} className="rounded-full border border-line px-3.5 py-2 text-sm font-semibold">{capitalise(f.name)} <span className="font-normal text-subtle">{f.count}</span></li>)}</ul>
+      {page.fabricsUsed.length
+        ? <ul className="mt-4 flex flex-wrap gap-2">{page.fabricsUsed.map(f => <li key={f.name} className="rounded-full border border-line px-3.5 py-2 text-sm font-semibold">{capitalise(f.name)} <span className="font-normal text-subtle">{f.count}</span></li>)}</ul>
+        : <p className="mt-2 text-sm text-subtle">No public makes list their fabric yet.</p>}
+      {me && <InYourStash me={me} />}
     </section>
+  );
+}
+
+/** Your own fabric that's long enough. Worked out on the server for you only. */
+function InYourStash({ me }: { me: CatalogMe }) {
+  const profile = useGetProfile();
+  const units = profile.data?.units === 'imperial' ? 'imperial' : 'metric';
+  const need = me.fabricNeeded;
+  return (
+    <div className="mt-5 rounded-[20px] bg-canvas p-3">
+      <h3 className="flex items-center gap-1.5 text-xs font-bold"><Lock size={13} aria-hidden="true" />In your stash · only you see this</h3>
+      {!need
+        ? <p className="mt-2 px-1 text-[13px] text-subtle">This page doesn't say how much fabric it needs yet.</p>
+        : !me.stash.length
+          ? <p className="mt-2 px-1 text-[13px] text-subtle">Nothing in your stash is long enough. It needs {formatLength(need.minMetres, units)}{need.maxMetres > need.minMetres + 0.05 ? `–${formatLength(need.maxMetres, units)}` : ''}.</p>
+          : <ul className="mt-2 space-y-1.5">
+              {me.stash.map(f => (
+                <li key={f.id}>
+                  <Link href={`/stash/fabric/${f.id}/edit`} className="flex min-h-[46px] items-center gap-2.5 rounded-[14px] bg-white p-1.5 pr-3 text-ink no-underline">
+                    {f.imageUrl ? <img src={f.imageUrl} alt="" className="h-[34px] w-[34px] shrink-0 rounded-[10px] object-cover" /> : <span aria-hidden="true" className="h-[34px] w-[34px] shrink-0 rounded-[10px] bg-line" />}
+                    <span className="min-w-0 flex-1 truncate text-[13px]"><b>{f.name}</b> · {formatLength(f.metres, units)}</span>
+                    <span className="shrink-0 text-xs font-bold">{f.enough === 'all' ? 'Enough' : 'Smaller sizes'}</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>}
+    </div>
   );
 }
 
@@ -215,7 +247,8 @@ export function inches(cm: number): string {
 const cmText = (cm: number) => (Number.isInteger(cm) ? String(cm) : cm.toFixed(1));
 
 /** Body measurements per size, cm or inches (starting on the viewer's unit), scrolling sideways on phones. */
-export function SizeChart({ page, highlight }: { page: CatalogPage; highlight?: string | null }) {
+export function SizeChart({ page, me }: { page: CatalogPage; me?: CatalogMe | null }) {
+  const highlight = me?.closestSize ?? null;
   const { isSignedIn } = useAuth();
   const profile = useGetProfile({ query: { enabled: Boolean(isSignedIn) } });
   const [chosen, setChosen] = useState<'cm' | 'in' | null>(null);
@@ -256,7 +289,8 @@ export function SizeChart({ page, highlight }: { page: CatalogPage; highlight?: 
           </tbody>
         </table>
       </div>
-      {highlight && <p className="mt-3 flex items-center gap-2 text-[13px]"><span aria-hidden="true" className="h-3.5 w-3.5 rounded-[4px] bg-yellow" />Size {highlight} is closest to your saved measurements. Only you see this.</p>}
+      {highlight && <p className="mt-3 flex items-center gap-2 text-[13px]"><span aria-hidden="true" className="h-3.5 w-3.5 shrink-0 rounded-[4px] bg-yellow" />Size {highlight} is closest to your saved measurements. Only you see this.</p>}
+      {me && !me.hasMeasurements && <p className="mt-3 text-[13px] text-subtle"><Link href="/measurements" className="font-semibold text-ink underline underline-offset-4">Save your measurements</Link> to see which size is closest. They stay private.</p>}
     </section>
   );
 }

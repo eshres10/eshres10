@@ -1405,6 +1405,40 @@ export const UnsaveCatalogEntryResponse = zod.object({
 
 
 /**
+ * @summary Your own extras for a pattern page: stash matches, closest size, library, makes. Only you see these.
+ */
+export const GetCatalogMeParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetCatalogMeResponse = zod.object({
+  "saved": zod.boolean(),
+  "owned": zod.boolean().describe('Bought on Seams Club (always false until pattern sales open)'),
+  "libraryPatternId": zod.number().int().nullable().describe('Your library pattern linked to this page'),
+  "made": zod.array(zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "status": zod.string()
+})),
+  "closestSize": zod.string().nullable().describe('The size label closest to your latest saved measurements'),
+  "nearSizes": zod.array(zod.string()).describe('The closest size and the sizes either side of it (for Near my size)'),
+  "hasMeasurements": zod.boolean(),
+  "fabricNeeded": zod.object({
+  "minMetres": zod.number(),
+  "maxMetres": zod.number()
+}).nullable().describe('Fabric needed read from the page (metres)'),
+  "stash": zod.array(zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "type": zod.string(),
+  "imageUrl": zod.string().nullable(),
+  "metres": zod.number(),
+  "enough": zod.enum(['all', 'some']).describe('all = enough for every size, some = enough for the smaller sizes')
+}))
+}).describe('The caller\'s own extras for a pattern page. Measurements never leave the server: only the closest size label is sent.')
+
+
+/**
  * @summary Write or update your review.
  */
 export const SaveReviewParams = zod.object({

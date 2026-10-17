@@ -711,6 +711,72 @@ export interface CatalogEntry {
   savedByMe: boolean;
 }
 
+/**
+ * Fabric needed read from the page (metres)
+ * @nullable
+ */
+export type CatalogMeFabricNeeded = {
+  minMetres: number;
+  maxMetres: number;
+} | null;
+
+export interface CatalogMyMake {
+  id: number;
+  name: string;
+  status: string;
+}
+
+/**
+ * all = enough for every size, some = enough for the smaller sizes
+ */
+export type CatalogStashMatchEnough = typeof CatalogStashMatchEnough[keyof typeof CatalogStashMatchEnough];
+
+
+export const CatalogStashMatchEnough = {
+  all: 'all',
+  some: 'some',
+} as const;
+
+export interface CatalogStashMatch {
+  id: number;
+  name: string;
+  type: string;
+  /** @nullable */
+  imageUrl: string | null;
+  metres: number;
+  /** all = enough for every size, some = enough for the smaller sizes */
+  enough: CatalogStashMatchEnough;
+}
+
+/**
+ * The caller's own extras for a pattern page. Measurements never leave the server: only the closest size label is sent.
+ */
+export interface CatalogMe {
+  saved: boolean;
+  /** Bought on Seams Club (always false until pattern sales open) */
+  owned: boolean;
+  /**
+     * Your library pattern linked to this page
+     * @nullable
+     */
+  libraryPatternId: number | null;
+  made: CatalogMyMake[];
+  /**
+     * The size label closest to your latest saved measurements
+     * @nullable
+     */
+  closestSize: string | null;
+  /** The closest size and the sizes either side of it (for Near my size) */
+  nearSizes: string[];
+  hasMeasurements: boolean;
+  /**
+     * Fabric needed read from the page (metres)
+     * @nullable
+     */
+  fabricNeeded: CatalogMeFabricNeeded;
+  stash: CatalogStashMatch[];
+}
+
 export interface CatalogSaveState {
   saved: boolean;
 }
