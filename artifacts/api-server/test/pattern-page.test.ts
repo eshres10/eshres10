@@ -49,6 +49,10 @@ test("gallery and fabrics come from public data only", async () => {
     assert.equal(p.entry.stats.makes, 2, `${label}: public makes`);
   }
   assert.equal((await page(fol)).makes.length, 3, "the makes list still shows a follower the followers-only make");
+  for (const [label, user] of [["signed out", anon], ["someone who doesn't follow", oth]] as const) {
+    const names = (await page(user)).makes.map((m: { name: string }) => m.name).sort();
+    assert.deepEqual(names, ["Public linen", "Public secret silk"], `${label}: no followers-only make in the list`);
+  }
 });
 
 test("size chart: the page's creator or an admin, labels once each", async () => {

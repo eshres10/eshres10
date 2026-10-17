@@ -113,9 +113,9 @@ function ReviewCard({ review, entry }: { review: Review; entry: CatalogEntry }) 
       {details.length > 0 && <ul className="mt-2.5 flex flex-wrap gap-1.5">{details.map(d => <li key={d as string} className="rounded-full bg-canvas px-2.5 py-1 text-xs font-semibold">{d}</li>)}</ul>}
       {review.body && <p className="mt-3 whitespace-pre-line break-words text-[15px] leading-relaxed">{review.body}</p>}
       <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-4 text-[13px]">
-        {review.make ? <Link href={`/makes/${review.make.id}`} className="font-semibold text-ink underline underline-offset-4">See the make</Link> : <span />}
+        {review.make ? <Link href={`/makes/${review.make.id}`} className="inline-flex min-h-[44px] items-center font-semibold text-ink underline underline-offset-4">See the make</Link> : <span />}
         {!review.isMine
-          ? <button type="button" onClick={toggle} aria-pressed={helped} className={`inline-flex min-h-[40px] items-center gap-1.5 rounded-full border px-3 text-xs font-bold ${helped ? 'border-ink bg-yellow' : 'border-line'}`}>
+          ? <button type="button" onClick={toggle} aria-pressed={helped} className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full border px-3 text-xs font-bold ${helped ? 'border-ink bg-yellow' : 'border-line'}`}>
               <ThumbsUp size={14} aria-hidden="true" />Helpful{count > 0 && ` · ${count}`}
             </button>
           : count > 0 && <span className="text-subtle">{count} found this helpful</span>}
@@ -209,15 +209,20 @@ function Actions({ page, me }: { page: CatalogPage; me: CatalogMe | undefined })
 }
 
 /** "12", "Size 14", "14, graded to 16" → "12", "14", "14": the size a make was cut in. */
+const MAKES_FIRST = 6;
+
 const sizeKey = (size: string) => size.toLowerCase().replace(/^size\s*/, '').trim().split(/[\s,/]+/)[0] ?? '';
 
 /** Makes, newest first or near your size (worked out on the server from your measurements). */
 function Makes({ page, me }: { page: CatalogPage; me: CatalogMe | undefined }) {
   const ask = useRequireSignIn();
   const [sort, setSort] = useState<'new' | 'near'>('new');
+  const [all, setAll] = useState(false);
   const e = page.entry;
   const near = new Set((me?.nearSizes ?? []).map(sizeKey));
-  const shown = sort === 'near' ? page.makes.filter(m => m.size && near.has(sizeKey(m.size))) : page.makes;
+  const matching = sort === 'near' ? page.makes.filter(m => m.size && near.has(sizeKey(m.size))) : page.makes;
+  // Six at first (a sideways row on phones), the rest after "See all".
+  const shown = all ? matching : matching.slice(0, MAKES_FIRST);
   const pick = (v: 'new' | 'near') => {
     if (v === 'near' && !ask({ title: 'Sign in to see makes near your size', body: 'Your measurements stay private: only you see which size is closest.' })) return;
     setSort(v);
@@ -235,9 +240,11 @@ function Makes({ page, me }: { page: CatalogPage; me: CatalogMe | undefined }) {
         : shown.length
           ? <>
               {sort === 'near' && me?.closestSize && <p className="-mt-2 mb-3 text-[13px] text-subtle">Sizes {me.nearSizes.join(', ')}: around size {me.closestSize}, your closest. Only you see this.</p>}
-              <ul className="-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6">
+              <ul id="makes-list" className={all
+                ? 'grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6'
+                : '-mx-4 flex snap-x gap-2.5 overflow-x-auto px-4 pb-1 sm:mx-0 sm:grid sm:grid-cols-3 sm:overflow-visible sm:px-0 lg:grid-cols-6'}>
                 {shown.map(m => (
-                  <li key={m.id} className="w-[58vw] max-w-[240px] shrink-0 snap-start sm:w-auto sm:max-w-none">
+                  <li key={m.id} className={all ? 'min-w-0' : 'w-[58vw] max-w-[240px] shrink-0 snap-start sm:w-auto sm:max-w-none'}>
                     <Link href={`/makes/${m.id}`} className="relative block aspect-[3/4] overflow-hidden rounded-[22px] bg-line text-ink no-underline">
                       {m.coverImageUrl ? <img src={m.coverImageUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" /> : <span className="absolute inset-0 grid place-items-center bg-peach-soft" aria-hidden="true"><Scissors size={28} /></span>}
                       <span className="absolute inset-x-2 bottom-2 rounded-[14px] bg-white px-3 py-2">
@@ -248,6 +255,12 @@ function Makes({ page, me }: { page: CatalogPage; me: CatalogMe | undefined }) {
                   </li>
                 ))}
               </ul>
+              {matching.length > MAKES_FIRST && (
+                <button type="button" aria-expanded={all} aria-controls="makes-list" onClick={() => setAll(v => !v)}
+                  className="mt-3 inline-flex min-h-[44px] items-center rounded-full border border-ink bg-white px-5 text-[15px] font-bold">
+                  {all ? 'Show fewer' : `See all ${matching.length}`}
+                </button>
+              )}
             </>
           : <p className="rounded-[30px] bg-white px-6 py-8 text-sm text-subtle">{sort === 'near' ? 'No shared makes near your size yet.' : `No shared makes yet. Link this ${e.kind} to one of yours from your studio, and share the make.`}</p>}
     </section>
@@ -335,8 +348,8 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
 
       {pattern && (
         <div className={`fixed z-40 bg-white md:hidden ${isSignedIn
-          ? 'inset-x-3 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] rounded-[24px] border border-line px-4 py-3'
-          : 'inset-x-0 bottom-0 border-t border-line px-4 pb-[calc(.75rem+env(safe-area-inset-bottom))] pt-3'}`}>
+          ? 'inset-x-3 bottom-[calc(5.75rem+env(safe-area-inset-bottom))] rounded-[24px] border border-line px-4 py-2'
+          : 'inset-x-0 bottom-0 border-t border-line px-4 pb-[calc(.5rem+env(safe-area-inset-bottom))] pt-2'}`}>
           <GetIt entry={e} compact />
         </div>
       )}

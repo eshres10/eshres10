@@ -101,6 +101,25 @@ test("helpful: one vote per person, not your own, rate limited", async () => {
   assert.equal(last, 429, "120 an hour");
 });
 
+test("measurements are never in any pattern response, for anyone", async () => {
+  // As JSON values (":97.5,"), so timestamps like "12:29:36.512Z" don't match.
+  const secret = /[:[,]\s*(97\.5|79\.3|103\.1|36\.5|29\.5)\s*[,}\]]|"fullHip"|"bust"|measurementProfileId/;
+  const reads: Array<[string, ReturnType<typeof as>, string]> = [
+    ["page", sue, `/api/public/catalog/pattern/${page.slug}`],
+    ["page signed out", anon, `/api/public/catalog/pattern/${page.slug}`],
+    ["directory", sue, "/api/public/catalog?kind=pattern"],
+    ["reviews", sue, `/api/public/catalog/pattern/${page.slug}/reviews`],
+    ["your extras", sue, `/api/catalog/${page.id}/me`],
+    ["someone else's view", ian, `/api/catalog/${page.id}/me`],
+    ["profile", anon, "/api/public/profiles/sue.pm"],
+  ];
+  for (const [label, user, url] of reads) {
+    const r = await user("GET", url);
+    assert.equal(r.status, 200, `${label}: ${r.text}`);
+    assert.ok(!secret.test(r.text), `${label}: no measurement values or keys`);
+  }
+});
+
 test("helpers: fabric amounts need a unit; closest size uses the measurements both have", () => {
   assert.deepEqual(parseFabricNeeded("3 yards"), { minMetres: 3 * 0.9144, maxMetres: 3 * 0.9144 });
   assert.deepEqual(parseFabricNeeded("2,4 m"), { minMetres: 2.4, maxMetres: 2.4 });

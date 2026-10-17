@@ -115,8 +115,8 @@ export function DesignerRow({ page }: { page: CatalogPage }) {
       </div>
       {(info.shopUrl || info.instagram) && (
         <p className="mt-2 flex flex-wrap gap-2 pl-[52px] text-[13px]">
-          {info.shopUrl && <a href={info.shopUrl} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-canvas px-3 font-semibold text-ink no-underline"><Store size={14} aria-hidden="true" />Shop<span className="sr-only"> (opens the designer's shop)</span></a>}
-          {info.instagram && <a href={`https://www.instagram.com/${info.instagram}/`} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex min-h-[36px] items-center gap-1.5 rounded-full bg-canvas px-3 font-semibold text-ink no-underline"><AtSign size={14} aria-hidden="true" />{info.instagram}<span className="sr-only"> on Instagram</span></a>}
+          {info.shopUrl && <a href={info.shopUrl} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex min-h-[44px] md:min-h-[36px] items-center gap-1.5 rounded-full bg-canvas px-3 font-semibold text-ink no-underline"><Store size={14} aria-hidden="true" />Shop<span className="sr-only"> (opens the designer's shop)</span></a>}
+          {info.instagram && <a href={`https://www.instagram.com/${info.instagram}/`} target="_blank" rel="noopener noreferrer nofollow ugc" className="inline-flex min-h-[44px] md:min-h-[36px] items-center gap-1.5 rounded-full bg-canvas px-3 font-semibold text-ink no-underline"><AtSign size={14} aria-hidden="true" />{info.instagram}<span className="sr-only"> on Instagram</span></a>}
         </p>
       )}
     </div>
@@ -145,13 +145,13 @@ export function GetIt({ entry: e, compact = false }: { entry: CatalogEntry; comp
   const price = !free && e.priceCents !== null && e.currency ? formatPrice(e.priceCents, e.currency) : null;
   const label = free ? 'Download from the designer' : `Get it from ${e.designer?.name ?? (e.maker || 'the designer')}`;
   const button = e.url
-    ? <a href={e.url} target="_blank" rel="noopener noreferrer nofollow ugc" className={`inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full bg-yellow font-bold text-ink no-underline ${compact ? 'shrink-0 px-5 text-[15px]' : 'w-full px-6 text-[16px] sm:w-auto'}`}>{compact && !free ? 'Get it' : label}<ExternalLink size={15} aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>
+    ? <a href={e.url} target="_blank" rel="noopener noreferrer nofollow ugc" className={`inline-flex items-center justify-center gap-2 rounded-full bg-yellow font-bold text-ink no-underline ${compact ? 'min-h-[46px] shrink-0 px-5 text-[15px]' : 'min-h-[52px] w-full px-6 text-[16px] sm:w-auto'}`}>{compact && !free ? 'Get it' : label}<ExternalLink size={15} aria-hidden="true" /><span className="sr-only"> (opens in a new tab)</span></a>
     : null;
   if (compact) {
     return (
       <div className="flex items-center gap-3">
         <span className="min-w-0 flex-1">
-          <b className="block font-display text-[24px] leading-none">{free ? 'Free' : price ?? ''}</b>
+          <b className="block font-display text-[22px] leading-none">{free ? 'Free' : price ?? ''}</b>
           <span className="block truncate text-xs text-subtle">{free ? 'From the designer' : price ? `${e.currency} · designer's site` : "On the designer's site"}</span>
         </span>
         {button ?? <SaveHeart entry={e} className="border border-ink" />}
@@ -186,9 +186,9 @@ export function Alterations({ page }: { page: CatalogPage }) {
           const pct = Math.round((a.count / total) * 100);
           return (
             <li key={a.id} className="flex items-center gap-3">
-              <span className="relative min-h-[36px] flex-1 overflow-hidden rounded-[12px] bg-canvas">
+              <span className="relative min-h-[44px] md:min-h-[36px] flex-1 overflow-hidden rounded-[12px] bg-canvas">
                 <span aria-hidden="true" className="absolute inset-y-0 left-0 bg-peach" style={{ width: `${pct}%` }} />
-                <span className="relative flex min-h-[36px] items-center px-3 text-sm font-semibold">{ALTERATION_LABEL[a.id]}</span>
+                <span className="relative flex min-h-[44px] md:min-h-[36px] items-center px-3 text-sm font-semibold">{ALTERATION_LABEL[a.id]}</span>
               </span>
               <b className="w-11 text-right text-sm">{pct}%</b>
             </li>
@@ -261,7 +261,7 @@ export function SizeChart({ page, me }: { page: CatalogPage; me?: CatalogMe | nu
   return (
     <section aria-labelledby="size-title" className="rounded-[30px] bg-white p-6 sm:p-7">
       <div className="flex items-center justify-between gap-3">
-        <h2 id="size-title" className="font-display text-[22px] tracking-[-.04em]">Size chart <span className="font-sans text-sm font-normal tracking-normal text-subtle">body measurements</span></h2>
+        <h2 id="size-title" className="font-display text-[22px] tracking-[-.04em]">Size chart <span className="hidden font-sans text-sm font-normal tracking-normal text-subtle sm:inline">body measurements</span></h2>
         <div role="radiogroup" aria-label="Units" className="flex rounded-full bg-canvas p-1">
           {(['cm', 'in'] as const).map(u => (
             <label key={u} className={`grid h-9 min-w-[48px] cursor-pointer place-items-center rounded-full px-3 text-sm font-bold has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-ink ${unit === u ? 'bg-ink text-white' : ''}`}>

@@ -108,7 +108,8 @@ export function PatternCard({ entry, index = 0 }: { entry: CatalogEntry; index?:
           {entry.maker && <span className="block truncate text-[13px] text-subtle sm:text-sm">{entry.maker}</span>}
           <span className="mt-2 flex items-center gap-2 text-[13px] sm:text-sm">
             {s.rating !== null && <span className="inline-flex items-center gap-1 font-bold"><Star size={13} aria-hidden="true" className="fill-ink" />{s.rating.toFixed(1)}<span className="sr-only"> out of 5</span></span>}
-            <span className="min-w-0 flex-1 truncate text-subtle">{s.makes} {s.makes === 1 ? 'make' : 'makes'}</span>
+            {/* Phones beside a rating: "★ 4.6 · 214", as the design; the word is still read out. */}
+            <span className="min-w-0 flex-1 truncate text-subtle">{s.rating !== null && <span aria-hidden="true" className="sm:hidden">· </span>}{s.makes}<span className={s.rating !== null ? 'sr-only sm:not-sr-only' : ''}> {s.makes === 1 ? 'make' : 'makes'}</span></span>
             <PricePill entry={entry} />
           </span>
         </span>
@@ -216,7 +217,7 @@ export function PatternDirectory({ onAdd }: { onAdd: () => void }) {
         <label className="relative block">
           <span className="sr-only">Search patterns</span>
           <Search size={19} aria-hidden="true" className="absolute left-5 top-1/2 -translate-y-1/2" />
-          <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search by name, designer or garment"
+          <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search name, designer or garment"
             className="min-h-[52px] w-full rounded-full border-2 border-ink bg-white pl-12 pr-5 text-[16px] outline-none focus:ring-4 focus:ring-yellow lg:min-h-[60px]" />
         </label>
       </header>
