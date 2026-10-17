@@ -128,8 +128,8 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         <SidebarNav location={location} />
       </aside>
       {menuOpen && (
-        <div className="fixed inset-0 z-50 bg-ink/40 md:hidden" onClick={e => { if (e.target === e.currentTarget) setMenuOpen(false); }}>
-          <aside className="h-full w-[300px] max-w-[85vw] overflow-y-auto rounded-r-[30px] bg-yellow px-4 pb-[calc(1.4rem+env(safe-area-inset-bottom))] pt-[calc(1.4rem+env(safe-area-inset-top))]">
+         <div className="fixed inset-0 z-50 flex justify-end bg-ink/40 md:hidden" onClick={e => { if (e.target === e.currentTarget) setMenuOpen(false); }}>
+           <aside className="h-full w-[300px] max-w-[85vw] overflow-y-auto rounded-l-[30px] bg-yellow px-4 pb-[calc(1.4rem+env(safe-area-inset-bottom))] pt-[calc(1.4rem+env(safe-area-inset-top))]">
             <button type="button" onClick={() => setMenuOpen(false)} aria-label="Close menu" className="float-right grid h-11 w-11 place-items-center rounded-full bg-white"><X size={20} /></button>
             <SidebarNav location={location} onNavigate={() => setMenuOpen(false)} />
           </aside>
