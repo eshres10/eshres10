@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ProfileUpdateUnits } from './profileUpdateUnits';
+import type { Visibility } from './visibility';
 
 export interface ProfileUpdate {
   /**
@@ -29,4 +30,5 @@ export interface ProfileUpdate {
   experience?: string;
   favoriteGarments?: string[];
   units?: ProfileUpdateUnits;
+  defaultPostVisibility?: Visibility;
 }

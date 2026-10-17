@@ -101,6 +101,9 @@ import type {
   MediaInput,
   MembershipState,
   ModerateInput,
+  Onboarding,
+  OnboardingRecommendations,
+  OnboardingUpdate,
   Pattern,
   PatternInput,
   PatternPdfAnalysis,
@@ -7624,6 +7627,444 @@ export const useDeleteFabric = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeleteFabricMutationOptions(options), queryClient);
     }
+
+export const getGetOnboardingUrl = () => {
+
+
+
+
+  return `/api/onboarding`
+}
+
+/**
+ * @summary Your answers to Pip's questions and the step you got to. Private to you; defaults before you start.
+ */
+export const getOnboarding = async ( options?: Parameters<typeof customFetch>[1]): Promise<Onboarding> => {
+
+  return customFetch<Onboarding>(getGetOnboardingUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetOnboardingQueryKey = () => {
+    return [
+    `/api/onboarding`
+    ] as const;
+    }
+
+
+export const getGetOnboardingQueryOptions = <TData = Awaited<ReturnType<typeof getOnboarding>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboarding>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOnboardingQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOnboarding>>> = ({ signal }) => getOnboarding({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOnboarding>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetOnboardingQueryResult = NonNullable<Awaited<ReturnType<typeof getOnboarding>>>
+export type GetOnboardingQueryError = ErrorType<unknown>
+
+
+export function useGetOnboarding<TData = Awaited<ReturnType<typeof getOnboarding>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboarding>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOnboarding>>,
+          TError,
+          Awaited<ReturnType<typeof getOnboarding>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetOnboarding<TData = Awaited<ReturnType<typeof getOnboarding>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboarding>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOnboarding>>,
+          TError,
+          Awaited<ReturnType<typeof getOnboarding>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetOnboarding<TData = Awaited<ReturnType<typeof getOnboarding>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboarding>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Your answers to Pip's questions and the step you got to. Private to you; defaults before you start.
+ */
+
+export function useGetOnboarding<TData = Awaited<ReturnType<typeof getOnboarding>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboarding>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetOnboardingQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getUpdateOnboardingUrl = () => {
+
+
+
+
+  return `/api/onboarding`
+}
+
+/**
+ * @summary Save some answers and/or the current step. Only the fields sent change; null clears an answer. 120 writes an hour.
+ */
+export const updateOnboarding = async (onboardingUpdate: OnboardingUpdate, options?: Parameters<typeof customFetch>[1]): Promise<Onboarding> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Onboarding>(getUpdateOnboardingUrl(),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(onboardingUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateOnboardingMutationKey = () => ['updateOnboarding'] as const;
+
+export const getUpdateOnboardingMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateOnboarding>>, TError,UpdateOnboardingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateOnboarding>>, TError,UpdateOnboardingMutationVariables, TContext> => {
+
+const mutationKey = getUpdateOnboardingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateOnboarding>>, UpdateOnboardingMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  updateOnboarding(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateOnboardingMutationResult = NonNullable<Awaited<ReturnType<typeof updateOnboarding>>>
+    export type UpdateOnboardingMutationBody = BodyType<OnboardingUpdate>
+    export type UpdateOnboardingMutationError = ErrorType<void>
+    export type UpdateOnboardingMutationVariables = {data: BodyType<OnboardingUpdate>}
+
+    /**
+ * @summary Save some answers and/or the current step. Only the fields sent change; null clears an answer. 120 writes an hour.
+ */
+export const useUpdateOnboarding = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateOnboarding>>, TError,UpdateOnboardingMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateOnboarding>>,
+        TError,
+        UpdateOnboardingMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateOnboardingMutationOptions(options), queryClient);
+    }
+
+export const getCompleteOnboardingUrl = () => {
+
+
+
+
+  return `/api/onboarding/complete`
+}
+
+/**
+ * @summary Mark setup as finished (sets completedAt and step 8).
+ */
+export const completeOnboarding = async ( options?: Parameters<typeof customFetch>[1]): Promise<Onboarding> => {
+
+  return customFetch<Onboarding>(getCompleteOnboardingUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getCompleteOnboardingMutationKey = () => ['completeOnboarding'] as const;
+
+export const getCompleteOnboardingMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeOnboarding>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof completeOnboarding>>, TError,void, TContext> => {
+
+const mutationKey = getCompleteOnboardingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeOnboarding>>, void> = () => {
+
+
+          return  completeOnboarding(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CompleteOnboardingMutationResult = NonNullable<Awaited<ReturnType<typeof completeOnboarding>>>
+
+    export type CompleteOnboardingMutationError = ErrorType<void>
+
+
+    /**
+ * @summary Mark setup as finished (sets completedAt and step 8).
+ */
+export const useCompleteOnboarding = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeOnboarding>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof completeOnboarding>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getCompleteOnboardingMutationOptions(options), queryClient);
+    }
+
+export const getSkipOnboardingUrl = () => {
+
+
+
+
+  return `/api/onboarding/skip`
+}
+
+/**
+ * @summary Skip for now / Finish setup later (sets skippedAt; answers so far are kept).
+ */
+export const skipOnboarding = async ( options?: Parameters<typeof customFetch>[1]): Promise<Onboarding> => {
+
+  return customFetch<Onboarding>(getSkipOnboardingUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getSkipOnboardingMutationKey = () => ['skipOnboarding'] as const;
+
+export const getSkipOnboardingMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof skipOnboarding>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof skipOnboarding>>, TError,void, TContext> => {
+
+const mutationKey = getSkipOnboardingMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof skipOnboarding>>, void> = () => {
+
+
+          return  skipOnboarding(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SkipOnboardingMutationResult = NonNullable<Awaited<ReturnType<typeof skipOnboarding>>>
+
+    export type SkipOnboardingMutationError = ErrorType<void>
+
+
+    /**
+ * @summary Skip for now / Finish setup later (sets skippedAt; answers so far are kept).
+ */
+export const useSkipOnboarding = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof skipOnboarding>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof skipOnboarding>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getSkipOnboardingMutationOptions(options), queryClient);
+    }
+
+export const getGetOnboardingRecommendationsUrl = () => {
+
+
+
+
+  return `/api/onboarding/recommendations`
+}
+
+/**
+ * @summary The Ready screen: three first steps from your goals, up to three public catalog patterns and one running challenge. Uses only public content and your own answers.
+ */
+export const getOnboardingRecommendations = async ( options?: Parameters<typeof customFetch>[1]): Promise<OnboardingRecommendations> => {
+
+  return customFetch<OnboardingRecommendations>(getGetOnboardingRecommendationsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetOnboardingRecommendationsQueryKey = () => {
+    return [
+    `/api/onboarding/recommendations`
+    ] as const;
+    }
+
+
+export const getGetOnboardingRecommendationsQueryOptions = <TData = Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetOnboardingRecommendationsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOnboardingRecommendations>>> = ({ signal }) => getOnboardingRecommendations({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetOnboardingRecommendationsQueryResult = NonNullable<Awaited<ReturnType<typeof getOnboardingRecommendations>>>
+export type GetOnboardingRecommendationsQueryError = ErrorType<unknown>
+
+
+export function useGetOnboardingRecommendations<TData = Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOnboardingRecommendations>>,
+          TError,
+          Awaited<ReturnType<typeof getOnboardingRecommendations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetOnboardingRecommendations<TData = Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getOnboardingRecommendations>>,
+          TError,
+          Awaited<ReturnType<typeof getOnboardingRecommendations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetOnboardingRecommendations<TData = Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The Ready screen: three first steps from your goals, up to three public catalog patterns and one running challenge. Uses only public content and your own answers.
+ */
+
+export function useGetOnboardingRecommendations<TData = Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getOnboardingRecommendations>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetOnboardingRecommendationsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getListIdeasUrl = () => {
 

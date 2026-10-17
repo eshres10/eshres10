@@ -128,7 +128,7 @@ export interface CatalogStatsView {
 }
 export type CatalogEntryView = Omit<CatalogEntry, "createdBy" | "createdAt" | "updatedAt"> & { canEdit: boolean; stats: CatalogStatsView };
 
-async function entryViews(db: Tx, viewer: Viewer, rows: CatalogEntry[]): Promise<CatalogEntryView[]> {
+export async function entryViews(db: Tx, viewer: Viewer, rows: CatalogEntry[]): Promise<CatalogEntryView[]> {
   if (!rows.length) return [];
   const stats = await db.execute<{
     catalog_id: number; reviews: string; rating: string | null; fit: string | null; difficulty: string | null; instructions: string | null;

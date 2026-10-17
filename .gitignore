@@ -53,3 +53,6 @@ docs/design/flows/images/
 # Studio mobile mockups: screenshots and screen photos are mockup images, keep them local.
 docs/design/studio-mobile/images/
 docs/design/studio-mobile/screens/img/
+# Onboarding mockups: screenshots and screen snapshots contain mockup photos (keep locally).
+docs/design/onboarding/images/
+docs/design/onboarding/screens/img/

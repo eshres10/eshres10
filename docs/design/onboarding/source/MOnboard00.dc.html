@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seams Club onboarding — Join</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+input:focus{outline:3px solid #466cf3;outline-offset:2px}
+@keyframes pipbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.pip-bob{animation:pipbob 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.pip-bob{animation:none}}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; font-family: 'Inter', system-ui, sans-serif; color: #000; {{bg}}">
+
+  <!-- Join (create account) -->
+  <sc-if value="{{sJoin}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; padding: 50px 22px 30px">
+      <div style="display: flex; align-items: center; gap: 8px"><svg viewBox="0 0 100 100" width="34" height="34" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#000000"/><g transform="translate(50 50) scale(0.92) translate(-49 -50)"><path d="M66.89 23.06 L66.65 22.58 L66.39 22.08 L66.12 21.59 L65.86 21.10 L65.59 20.62 L65.31 20.15 L65.03 19.67 L64.75 19.21 L64.47 18.75 L64.18 18.29 L63.89 17.84 L63.59 17.40 L63.30 16.96 L63.00 16.53 L62.70 16.11 L62.40 15.70 L62.10 15.29 L61.79 14.89 L61.48 14.50 L61.09 14.01 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.27 9.43 L53.54 8.64 L51.74 7.99 L49.89 7.49 L47.99 7.14 L46.07 6.93 L44.14 6.87 L42.20 6.96 L40.27 7.20 L38.37 7.60 L36.50 8.17 L34.70 8.91 L32.96 9.82 L31.32 10.92 L29.79 12.20 L28.41 13.68 L27.19 15.35 L26.16 17.19 L25.34 19.21 L24.76 21.39 L24.41 23.72 L24.37 25.69 L24.53 27.56 L24.90 29.35 L25.46 31.06 L26.18 32.68 L27.06 34.20 L28.06 35.62 L29.18 36.96 L30.39 38.22 L31.68 39.39 L33.05 40.50 L34.47 41.54 L35.95 42.53 L37.47 43.46 L39.01 44.35 L40.58 45.19 L42.16 46.00 L43.74 46.77 L45.32 47.50 L46.87 48.21 L48.40 48.90 L49.89 49.56 L51.33 50.20 L52.70 50.81 L54.12 51.48 L55.47 52.17 L56.77 52.87 L58.00 53.58 L59.18 54.32 L60.29 55.07 L61.34 55.84 L62.32 56.63 L63.23 57.43 L64.07 58.26 L64.84 59.10 L65.54 59.95 L66.17 60.83 L66.73 61.72 L67.22 62.64 L67.65 63.58 L68.00 64.54 L68.29 65.54 L68.50 66.58 L68.65 67.66 L68.72 68.79 L68.71 69.97 L68.62 71.20 L68.45 72.45 L68.17 73.70 L67.76 74.80 L67.20 75.86 L66.50 76.86 L65.64 77.83 L64.65 78.75 L63.51 79.61 L62.24 80.41 L60.86 81.14 L59.37 81.80 L57.79 82.38 L56.13 82.88 L54.42 83.29 L52.65 83.61 L50.86 83.84 L49.05 83.98 L47.24 84.02 L45.45 83.97 L43.68 83.82 L41.96 83.58 L40.31 83.24 L38.72 82.82 L37.23 82.30 L35.77 81.67 L35.08 81.34 L34.39 80.98 L33.72 80.61 L33.08 80.21 L32.46 79.81 L31.86 79.39 L31.30 78.96 L30.75 78.51 L30.24 78.06 L29.76 77.59 L29.30 77.11 L28.87 76.63 L28.47 76.13 L28.11 75.63 L27.77 75.12 L27.46 74.61 L27.18 74.09 L26.93 73.56 L26.72 73.02 L26.53 72.48 L26.37 71.93 L26.25 71.38 L26.15 70.81 L26.08 70.16 L19.92 70.84 L20.01 71.67 L20.17 72.58 L20.37 73.47 L20.62 74.34 L20.91 75.20 L21.25 76.04 L21.64 76.85 L22.06 77.65 L22.52 78.43 L23.02 79.18 L23.56 79.91 L24.13 80.62 L24.73 81.31 L25.37 81.97 L26.03 82.61 L26.73 83.23 L27.45 83.82 L28.20 84.39 L28.97 84.94 L29.77 85.46 L30.60 85.96 L31.44 86.44 L32.31 86.89 L33.23 87.33 L34.99 88.09 L36.91 88.75 L38.89 89.28 L40.92 89.69 L42.99 89.98 L45.10 90.16 L47.22 90.22 L49.36 90.17 L51.49 90.01 L53.60 89.74 L55.69 89.36 L57.74 88.87 L59.75 88.27 L61.69 87.55 L63.56 86.72 L65.35 85.77 L67.04 84.70 L68.62 83.50 L70.07 82.17 L71.37 80.70 L72.49 79.09 L73.42 77.34 L74.12 75.46 L74.55 73.55 L74.78 71.85 L74.90 70.22 L74.91 68.62 L74.82 67.06 L74.61 65.54 L74.31 64.06 L73.90 62.63 L73.39 61.24 L72.79 59.90 L72.09 58.61 L71.32 57.36 L70.46 56.17 L69.52 55.03 L68.52 53.94 L67.45 52.89 L66.31 51.89 L65.12 50.93 L63.87 50.01 L62.56 49.12 L61.20 48.27 L59.79 47.46 L58.34 46.67 L56.84 45.91 L55.30 45.19 L53.86 44.54 L52.41 43.89 L50.92 43.23 L49.42 42.56 L47.92 41.88 L46.41 41.17 L44.92 40.45 L43.46 39.70 L42.02 38.93 L40.63 38.13 L39.30 37.31 L38.03 36.46 L36.83 35.58 L35.72 34.68 L34.70 33.76 L33.79 32.82 L32.98 31.85 L32.29 30.86 L31.71 29.86 L31.24 28.83 L30.90 27.77 L30.67 26.66 L30.56 25.49 L30.59 24.28 L30.83 22.64 L31.22 21.18 L31.75 19.86 L32.41 18.69 L33.18 17.64 L34.06 16.70 L35.05 15.87 L36.13 15.15 L37.31 14.53 L38.58 14.01 L39.91 13.61 L41.30 13.32 L42.73 13.14 L44.18 13.07 L45.64 13.11 L47.09 13.27 L48.51 13.54 L49.89 13.91 L51.21 14.38 L52.45 14.95 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.45 18.13 L56.62 18.35 L56.88 18.68 L57.14 19.02 L57.40 19.37 L57.67 19.73 L57.93 20.10 L58.19 20.47 L58.44 20.85 L58.70 21.24 L58.96 21.63 L59.21 22.03 L59.46 22.44 L59.71 22.85 L59.95 23.27 L60.20 23.69 L60.44 24.12 L60.67 24.55 L60.91 24.98 L61.13 25.42 L61.36 25.87 Z" fill="#f34646"/><circle cx="64.13" cy="24.47" r="3.10" fill="#f34646"/><circle cx="23.00" cy="70.50" r="3.10" fill="#f34646"/><path d="M37.50 93.00 L47.65 65.61 L62.88 11.32 Q63.71 8.33 61.11 7.61 Q58.51 6.89 57.68 9.88 L42.86 64.29 Z M58.41 21.29 L61.15 11.40 A1.05 1.05 0 0 0 59.12 10.84 L56.39 20.73 A1.05 1.05 0 0 0 58.41 21.29 Z" fill="#ffffff" fill-rule="evenodd" stroke="#000000" stroke-width="2" paint-order="stroke"/><path d="M61.06 13.98 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.40 9.49 L52.32 14.88 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.48 18.16 Z" fill="#f34646"/></g></svg><b style="font-family: 'Poppins', sans-serif; font-size: 19px; letter-spacing: -0.04em">seams club</b></div>
+      <div style="flex: 1; display: grid; place-items: center"><svg viewBox="0 0 120 120" width="140" height="140" role="img" aria-label="Pip, a tomato pincushion, looking {{pipMood}}" style="display: block; overflow: visible">
+  <g opacity="{{pip.conf}}">
+    <rect x="6" y="20" width="6" height="6" rx="1.5" fill="#466cf3" transform="rotate(20 9 23)"></rect>
+    <circle cx="104" cy="16" r="3.5" fill="#ff8562"></circle>
+    <rect x="98" y="96" width="7" height="4" rx="2" fill="#e6e51e" transform="rotate(-25 101 98)"></rect>
+    <circle cx="16" cy="100" r="3" fill="#f34646"></circle>
+    <path d="M24 6 l2 5 5 1 -4 3 1 5 -4-3 -4 3 1-5 -4-3 5-1z" fill="#e6e51e" stroke="#000" stroke-width="1.2" stroke-linejoin="round"></path>
+  </g>
+  <ellipse cx="60" cy="112" rx="30" ry="4" fill="rgba(0,0,0,.12)"></ellipse>
+  <g transform="{{pip.tilt}}">
+    <ellipse cx="49" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <ellipse cx="71" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <path d="M47 46 L37 19" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M61 42 L63 13" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M74 46 L89 22" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <circle cx="37" cy="18" r="5.2" fill="#466cf3" stroke="#000" stroke-width="2"></circle>
+    <circle cx="63" cy="12" r="5.2" fill="#ff8562" stroke="#000" stroke-width="2"></circle>
+    <circle cx="89.5" cy="21" r="5.2" fill="#fff" stroke="#000" stroke-width="2"></circle>
+    <path d="{{pip.al}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <path d="{{pip.ar}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <circle cx="{{pip.alx}}" cy="{{pip.aly}}" r="3.6" fill="#000"></circle>
+    <circle cx="{{pip.arx}}" cy="{{pip.ary}}" r="3.6" fill="#000"></circle>
+    <path d="M60 38 C84 36 104 50 104 72 C104 92 86 106 60 106 C34 106 16 92 16 72 C16 50 36 36 60 38 Z" fill="#f34646" stroke="#000" stroke-width="3"></path>
+    <path d="M42 44 C30 60 32 90 45 103 M78 44 C90 60 88 90 75 103" stroke="#c42a2a" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55"></path>
+    <path d="M60 33 L64.5 39 L72.5 37.5 L67.5 43.5 L72.5 49.5 L63.5 46.5 L60 52.5 L56.5 46.5 L47.5 49.5 L52.5 43.5 L47.5 37.5 L55.5 39 Z" fill="#e6e51e" stroke="#000" stroke-width="2.2" stroke-linejoin="round"></path>
+    <ellipse cx="36" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <ellipse cx="84" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <path d="{{pip.el}}" fill="{{pip.elf}}" stroke="#000" stroke-width="{{pip.elw}}" stroke-linecap="round"></path>
+    <path d="{{pip.er}}" fill="{{pip.erf}}" stroke="#000" stroke-width="{{pip.erw}}" stroke-linecap="round"></path>
+    <circle cx="48.6" cy="{{pip.hly}}" r="{{pip.hll}}" fill="#fff"></circle>
+    <circle cx="74.6" cy="{{pip.hly}}" r="{{pip.hlr}}" fill="#fff"></circle>
+    <path d="{{pip.m}}" fill="{{pip.mf}}" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+    <g opacity="{{pip.front}}"><path d="M97 82 Q96 93 80 90" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path><circle cx="79" cy="89.5" r="3.6" fill="#000"></circle></g>
+  </g>
+</svg></div>
+      <h1 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 36px; letter-spacing: -0.055em; line-height: 1">Join Seams Club</h1>
+      <p style="margin: 8px 0 0; font-size: 16px; line-height: 1.45">Free for everyone. No ads, and your stash stays private.</p>
+      <sc-if value="{{noEmail}}" hint-placeholder-val="{{true}}">
+        <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 10px">
+          <button onClick="{{joined}}" style="min-height: 56px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 16px; font-weight: 700">Continue with Google</button>
+          <button onClick="{{joined}}" style="min-height: 56px; border: 2px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 16px; font-weight: 700">Continue with Apple</button>
+          <button onClick="{{showEmail}}" style="min-height: 56px; border: 2px solid #000; border-radius: 3000px; background: transparent; font: inherit; font-size: 16px; font-weight: 700">Continue with email</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{withEmail}}" hint-placeholder-val="{{false}}">
+        <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 10px">
+          <label><span style="display: block; font-size: 13px; font-weight: 700">Email</span><input type="text" inputmode="email" value="{{email}}" onChange="{{onEmail}}" autocomplete="email" placeholder="you@example.com" style="margin-top: 6px; width: 100%; min-height: 56px; border: 2px solid #000; border-radius: 18px; padding: 0 16px; font: inherit; font-size: 16px; background: #fff"></label>
+          <sc-if value="{{emailErr}}" hint-placeholder-val="{{false}}"><p role="alert" style="margin: 0; font-size: 13px; font-weight: 600; color: #c42a2a">Enter an email like name@example.com.</p></sc-if>
+          <sc-if value="{{notSent}}" hint-placeholder-val="{{true}}"><button onClick="{{sendLink}}" style="min-height: 56px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 16px; font-weight: 700">Send me a sign-in link</button></sc-if>
+          <sc-if value="{{sent}}" hint-placeholder-val="{{false}}">
+            <p role="status" style="margin: 0; border-radius: 16px; background: #fff; padding: 12px 14px; font-size: 14px; line-height: 1.4"><b>Check your inbox.</b> We sent a link to {{email}}. Open it to carry on.</p>
+            <button onClick="{{joined}}" style="min-height: 44px; border: 2px dashed #000; border-radius: 3000px; background: transparent; font: inherit; font-size: 13px; font-weight: 700">Mockup only: pretend I opened the link</button>
+          </sc-if>
+        </div>
+      </sc-if>
+      <p style="margin: 14px 0 0; text-align: center; font-size: 13px">Already a member? <a href="MSignIn.dc.html" style="font-weight: 700">Log in</a></p>
+      <p style="margin: 6px 0 0; text-align: center; font-size: 11px; line-height: 1.4">By joining you agree to the <a href="#">Terms</a> and <a href="#">Privacy policy</a>.</p>
+    </div>
+  </sc-if>
+
+  <!-- Meet Pip (after the account exists) -->
+  <sc-if value="{{sIntro}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; padding: 56px 24px 30px">
+      <div style="flex: 1; display: grid; place-items: center"><div class="pip-bob"><svg viewBox="0 0 120 120" width="210" height="210" role="img" aria-label="Pip, a tomato pincushion, looking {{pipMood}}" style="display: block; overflow: visible">
+  <g opacity="{{pip.conf}}">
+    <rect x="6" y="20" width="6" height="6" rx="1.5" fill="#466cf3" transform="rotate(20 9 23)"></rect>
+    <circle cx="104" cy="16" r="3.5" fill="#ff8562"></circle>
+    <rect x="98" y="96" width="7" height="4" rx="2" fill="#e6e51e" transform="rotate(-25 101 98)"></rect>
+    <circle cx="16" cy="100" r="3" fill="#f34646"></circle>
+    <path d="M24 6 l2 5 5 1 -4 3 1 5 -4-3 -4 3 1-5 -4-3 5-1z" fill="#e6e51e" stroke="#000" stroke-width="1.2" stroke-linejoin="round"></path>
+  </g>
+  <ellipse cx="60" cy="112" rx="30" ry="4" fill="rgba(0,0,0,.12)"></ellipse>
+  <g transform="{{pip.tilt}}">
+    <ellipse cx="49" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <ellipse cx="71" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <path d="M47 46 L37 19" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M61 42 L63 13" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M74 46 L89 22" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <circle cx="37" cy="18" r="5.2" fill="#466cf3" stroke="#000" stroke-width="2"></circle>
+    <circle cx="63" cy="12" r="5.2" fill="#ff8562" stroke="#000" stroke-width="2"></circle>
+    <circle cx="89.5" cy="21" r="5.2" fill="#fff" stroke="#000" stroke-width="2"></circle>
+    <path d="{{pip.al}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <path d="{{pip.ar}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <circle cx="{{pip.alx}}" cy="{{pip.aly}}" r="3.6" fill="#000"></circle>
+    <circle cx="{{pip.arx}}" cy="{{pip.ary}}" r="3.6" fill="#000"></circle>
+    <path d="M60 38 C84 36 104 50 104 72 C104 92 86 106 60 106 C34 106 16 92 16 72 C16 50 36 36 60 38 Z" fill="#f34646" stroke="#000" stroke-width="3"></path>
+    <path d="M42 44 C30 60 32 90 45 103 M78 44 C90 60 88 90 75 103" stroke="#c42a2a" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55"></path>
+    <path d="M60 33 L64.5 39 L72.5 37.5 L67.5 43.5 L72.5 49.5 L63.5 46.5 L60 52.5 L56.5 46.5 L47.5 49.5 L52.5 43.5 L47.5 37.5 L55.5 39 Z" fill="#e6e51e" stroke="#000" stroke-width="2.2" stroke-linejoin="round"></path>
+    <ellipse cx="36" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <ellipse cx="84" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <path d="{{pip.el}}" fill="{{pip.elf}}" stroke="#000" stroke-width="{{pip.elw}}" stroke-linecap="round"></path>
+    <path d="{{pip.er}}" fill="{{pip.erf}}" stroke="#000" stroke-width="{{pip.erw}}" stroke-linecap="round"></path>
+    <circle cx="48.6" cy="{{pip.hly}}" r="{{pip.hll}}" fill="#fff"></circle>
+    <circle cx="74.6" cy="{{pip.hly}}" r="{{pip.hlr}}" fill="#fff"></circle>
+    <path d="{{pip.m}}" fill="{{pip.mf}}" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+    <g opacity="{{pip.front}}"><path d="M97 82 Q96 93 80 90" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path><circle cx="79" cy="89.5" r="3.6" fill="#000"></circle></g>
+  </g>
+</svg></div></div>
+      <h1 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 40px; letter-spacing: -0.055em; line-height: 1">Welcome! I'm Pip.</h1>
+      <p style="margin: 10px 0 0; font-size: 17px; line-height: 1.45">I live in the Seams Club sewing kit. Answer a few quick questions and I'll set up your studio.</p>
+      <button onClick="{{start}}" style="margin-top: 22px; min-height: 58px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 17px; font-weight: 700">Let's go</button>
+      <p style="margin: 10px 0 0; text-align: center; font-size: 13px">Takes about a minute · <a href="MFeed.dc.html" style="font-weight: 700">Skip for now</a></p>
+    </div>
+  </sc-if>
+
+  <!-- Question screens -->
+  <sc-if value="{{sQuestion}}" hint-placeholder-val="{{true}}">
+    <header style="position: absolute; left: 0; right: 0; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 50px 12px 0 8px">
+      <button onClick="{{back}}" aria-label="Back" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+      <div role="progressbar" aria-label="Setup progress" aria-valuemin="1" aria-valuemax="7" aria-valuenow="{{qNum}}" aria-valuetext="{{qText}}" style="flex: 1; display: flex; gap: 4px">
+        <sc-for list="{{segs}}" as="g" hint-placeholder-count="7"><span style="flex: 1; height: 6px; border-radius: 3000px; background: {{g.c}}"></span></sc-for>
+      </div>
+      <sc-if value="{{canSkip}}" hint-placeholder-val="{{true}}"><button onClick="{{skip}}" style="min-height: 44px; padding: 0 10px; border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 700; color: #555">Skip</button></sc-if>
+      <sc-if value="{{noSkip}}" hint-placeholder-val="{{false}}"><span style="width: 52px"></span></sc-if>
+    </header>
+
+    <main style="position: absolute; left: 0; right: 0; top: 102px; bottom: 0; overflow-y: auto; padding: 0 20px 130px">
+      <div style="display: flex; align-items: flex-end; gap: 6px">
+        <div style="flex-shrink: 0; margin-left: -6px"><svg viewBox="0 0 120 120" width="92" height="92" role="img" aria-label="Pip, a tomato pincushion, looking {{pipMood}}" style="display: block; overflow: visible">
+  <g opacity="{{pip.conf}}">
+    <rect x="6" y="20" width="6" height="6" rx="1.5" fill="#466cf3" transform="rotate(20 9 23)"></rect>
+    <circle cx="104" cy="16" r="3.5" fill="#ff8562"></circle>
+    <rect x="98" y="96" width="7" height="4" rx="2" fill="#e6e51e" transform="rotate(-25 101 98)"></rect>
+    <circle cx="16" cy="100" r="3" fill="#f34646"></circle>
+    <path d="M24 6 l2 5 5 1 -4 3 1 5 -4-3 -4 3 1-5 -4-3 5-1z" fill="#e6e51e" stroke="#000" stroke-width="1.2" stroke-linejoin="round"></path>
+  </g>
+  <ellipse cx="60" cy="112" rx="30" ry="4" fill="rgba(0,0,0,.12)"></ellipse>
+  <g transform="{{pip.tilt}}">
+    <ellipse cx="49" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <ellipse cx="71" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <path d="M47 46 L37 19" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M61 42 L63 13" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M74 46 L89 22" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <circle cx="37" cy="18" r="5.2" fill="#466cf3" stroke="#000" stroke-width="2"></circle>
+    <circle cx="63" cy="12" r="5.2" fill="#ff8562" stroke="#000" stroke-width="2"></circle>
+    <circle cx="89.5" cy="21" r="5.2" fill="#fff" stroke="#000" stroke-width="2"></circle>
+    <path d="{{pip.al}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <path d="{{pip.ar}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <circle cx="{{pip.alx}}" cy="{{pip.aly}}" r="3.6" fill="#000"></circle>
+    <circle cx="{{pip.arx}}" cy="{{pip.ary}}" r="3.6" fill="#000"></circle>
+    <path d="M60 38 C84 36 104 50 104 72 C104 92 86 106 60 106 C34 106 16 92 16 72 C16 50 36 36 60 38 Z" fill="#f34646" stroke="#000" stroke-width="3"></path>
+    <path d="M42 44 C30 60 32 90 45 103 M78 44 C90 60 88 90 75 103" stroke="#c42a2a" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55"></path>
+    <path d="M60 33 L64.5 39 L72.5 37.5 L67.5 43.5 L72.5 49.5 L63.5 46.5 L60 52.5 L56.5 46.5 L47.5 49.5 L52.5 43.5 L47.5 37.5 L55.5 39 Z" fill="#e6e51e" stroke="#000" stroke-width="2.2" stroke-linejoin="round"></path>
+    <ellipse cx="36" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <ellipse cx="84" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <path d="{{pip.el}}" fill="{{pip.elf}}" stroke="#000" stroke-width="{{pip.elw}}" stroke-linecap="round"></path>
+    <path d="{{pip.er}}" fill="{{pip.erf}}" stroke="#000" stroke-width="{{pip.erw}}" stroke-linecap="round"></path>
+    <circle cx="48.6" cy="{{pip.hly}}" r="{{pip.hll}}" fill="#fff"></circle>
+    <circle cx="74.6" cy="{{pip.hly}}" r="{{pip.hlr}}" fill="#fff"></circle>
+    <path d="{{pip.m}}" fill="{{pip.mf}}" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+    <g opacity="{{pip.front}}"><path d="M97 82 Q96 93 80 90" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path><circle cx="79" cy="89.5" r="3.6" fill="#000"></circle></g>
+  </g>
+</svg></div>
+        <p aria-live="polite" style="position: relative; margin: 0 0 30px; background: #fff; border-radius: 20px 20px 20px 6px; padding: 10px 14px; font-size: 14px; line-height: 1.4; font-weight: 600; box-shadow: rgba(0,0,0,.06) 0 6px 14px -6px">{{lead}}</p>
+      </div>
+      <h1 style="margin: 6px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.05em; line-height: 1.05">{{question}}</h1>
+      <sc-if value="{{hasHelp}}" hint-placeholder-val="{{true}}"><p style="margin: 8px 0 0; font-size: 14px; line-height: 1.45; color: #444">{{help}}</p></sc-if>
+
+      <!-- name -->
+      <sc-if value="{{qName}}" hint-placeholder-val="{{false}}">
+        <label style="display: block; margin-top: 22px"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Your first name</span>
+          <input value="{{name}}" onChange="{{onName}}" autofocus placeholder="Your first name" autocomplete="given-name" style="width: 100%; min-height: 62px; border: 2px solid #000; border-radius: 20px; padding: 0 18px; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 22px; letter-spacing: -0.03em; background: #fff"></label>
+      </sc-if>
+
+      <!-- list options (single or multi) -->
+      <sc-if value="{{qList}}" hint-placeholder-val="{{true}}">
+        <div role="{{groupRole}}" aria-label="{{question}}" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px">
+          <sc-for list="{{opts}}" as="o" hint-placeholder-count="5">
+            <button role="{{o.role}}" aria-checked="{{o.on}}" onClick="{{o.pick}}" style="display: flex; align-items: center; gap: 14px; min-height: 66px; padding: 10px 14px; border-radius: 22px; font: inherit; text-align: left; {{o.style}}">
+              <span style="width: 42px; height: 42px; flex-shrink: 0; border-radius: 14px; display: grid; place-items: center; background: {{o.tile}}"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{o.icon}}"></path></svg></span>
+              <span style="flex: 1; min-width: 0"><b style="display: block; font-size: 16px">{{o.label}}</b><sc-if value="{{o.hasSub}}" hint-placeholder-val="{{false}}"><span style="display: block; margin-top: 1px; font-size: 13px; color: #444">{{o.sub}}</span></sc-if></span>
+              <span aria-hidden="true" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: {{o.markShape}}; display: grid; place-items: center; {{o.mark}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{o.tick}}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <!-- photo tiles (multi) -->
+      <sc-if value="{{qTiles}}" hint-placeholder-val="{{false}}">
+        <div role="group" aria-label="{{question}}" style="margin-top: 20px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+          <sc-for list="{{tiles}}" as="t" hint-placeholder-count="9">
+            <button role="checkbox" aria-checked="{{t.on}}" onClick="{{t.pick}}" style="position: relative; padding: 0; border-radius: 20px; overflow: hidden; background: #fff; font: inherit; text-align: left; {{t.ring}}">
+              <img src="{{t.src}}" alt="" style="display: block; width: 100%; height: 104px; object-fit: cover">
+              <span style="display: block; padding: 6px 8px 8px; font-size: 13px; font-weight: 700">{{t.label}}</span>
+              <span aria-hidden="true" style="position: absolute; right: 6px; top: 6px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; {{t.mark}}"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="{{t.tick}}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{qPrivacy}}" hint-placeholder-val="{{false}}">
+        <p style="margin: 14px 2px 0; display: flex; gap: 8px; font-size: 13px; line-height: 1.45; color: #333"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex-shrink: 0; margin-top: 1px"><path d="M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4"></path></svg>You can change this on any post, any time.</p>
+      </sc-if>
+    </main>
+
+    <sc-if value="{{showContinue}}" hint-placeholder-val="{{true}}">
+      <div style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 30px 20px 34px; background: linear-gradient(to top, {{fade}} 70%, transparent)">
+        <button onClick="{{next}}" disabled="{{nextOff}}" style="width: 100%; min-height: 58px; border: 0; border-radius: 3000px; font: inherit; font-size: 17px; font-weight: 700; {{nextStyle}}">{{nextLabel}}</button>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <!-- Building -->
+  <sc-if value="{{sBuild}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; padding: 120px 28px 40px; text-align: center">
+      <div class="pip-bob"><svg viewBox="0 0 120 120" width="140" height="140" role="img" aria-label="Pip, a tomato pincushion, looking {{pipMood}}" style="display: block; overflow: visible">
+  <g opacity="{{pip.conf}}">
+    <rect x="6" y="20" width="6" height="6" rx="1.5" fill="#466cf3" transform="rotate(20 9 23)"></rect>
+    <circle cx="104" cy="16" r="3.5" fill="#ff8562"></circle>
+    <rect x="98" y="96" width="7" height="4" rx="2" fill="#e6e51e" transform="rotate(-25 101 98)"></rect>
+    <circle cx="16" cy="100" r="3" fill="#f34646"></circle>
+    <path d="M24 6 l2 5 5 1 -4 3 1 5 -4-3 -4 3 1-5 -4-3 5-1z" fill="#e6e51e" stroke="#000" stroke-width="1.2" stroke-linejoin="round"></path>
+  </g>
+  <ellipse cx="60" cy="112" rx="30" ry="4" fill="rgba(0,0,0,.12)"></ellipse>
+  <g transform="{{pip.tilt}}">
+    <ellipse cx="49" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <ellipse cx="71" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <path d="M47 46 L37 19" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M61 42 L63 13" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M74 46 L89 22" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <circle cx="37" cy="18" r="5.2" fill="#466cf3" stroke="#000" stroke-width="2"></circle>
+    <circle cx="63" cy="12" r="5.2" fill="#ff8562" stroke="#000" stroke-width="2"></circle>
+    <circle cx="89.5" cy="21" r="5.2" fill="#fff" stroke="#000" stroke-width="2"></circle>
+    <path d="{{pip.al}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <path d="{{pip.ar}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <circle cx="{{pip.alx}}" cy="{{pip.aly}}" r="3.6" fill="#000"></circle>
+    <circle cx="{{pip.arx}}" cy="{{pip.ary}}" r="3.6" fill="#000"></circle>
+    <path d="M60 38 C84 36 104 50 104 72 C104 92 86 106 60 106 C34 106 16 92 16 72 C16 50 36 36 60 38 Z" fill="#f34646" stroke="#000" stroke-width="3"></path>
+    <path d="M42 44 C30 60 32 90 45 103 M78 44 C90 60 88 90 75 103" stroke="#c42a2a" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55"></path>
+    <path d="M60 33 L64.5 39 L72.5 37.5 L67.5 43.5 L72.5 49.5 L63.5 46.5 L60 52.5 L56.5 46.5 L47.5 49.5 L52.5 43.5 L47.5 37.5 L55.5 39 Z" fill="#e6e51e" stroke="#000" stroke-width="2.2" stroke-linejoin="round"></path>
+    <ellipse cx="36" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <ellipse cx="84" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <path d="{{pip.el}}" fill="{{pip.elf}}" stroke="#000" stroke-width="{{pip.elw}}" stroke-linecap="round"></path>
+    <path d="{{pip.er}}" fill="{{pip.erf}}" stroke="#000" stroke-width="{{pip.erw}}" stroke-linecap="round"></path>
+    <circle cx="48.6" cy="{{pip.hly}}" r="{{pip.hll}}" fill="#fff"></circle>
+    <circle cx="74.6" cy="{{pip.hly}}" r="{{pip.hlr}}" fill="#fff"></circle>
+    <path d="{{pip.m}}" fill="{{pip.mf}}" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+    <g opacity="{{pip.front}}"><path d="M97 82 Q96 93 80 90" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path><circle cx="79" cy="89.5" r="3.6" fill="#000"></circle></g>
+  </g>
+</svg></div>
+      <h1 style="margin: 22px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.05em; line-height: 1.05">Threading your studio…</h1>
+      <div role="progressbar" aria-label="Setting up" aria-valuemin="0" aria-valuemax="3" aria-valuenow="{{tick}}" style="margin-top: 22px; width: 100%; height: 10px; border-radius: 3000px; background: #fff; overflow: hidden"><span style="display: block; height: 100%; border-radius: 3000px; background: #000; width: {{buildPct}}; transition: width .5s"></span></div>
+      <ul style="margin: 22px 0 0; padding: 0; list-style: none; width: 100%; display: flex; flex-direction: column; gap: 10px; text-align: left">
+        <sc-for list="{{buildRows}}" as="r" hint-placeholder-count="3"><li style="display: flex; align-items: center; gap: 12px; min-height: 54px; background: #fff; border-radius: 18px; padding: 0 14px; font-size: 15px; font-weight: 600; {{r.dim}}"><span style="width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; {{r.mark}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="{{r.tick}}" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>{{r.label}}</li></sc-for>
+      </ul>
+      <button onClick="{{toReady}}" style="margin-top: auto; min-height: 44px; border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 700; text-decoration: underline">Skip ahead</button>
+    </div>
+  </sc-if>
+
+  <!-- Ready -->
+  <sc-if value="{{sReady}}" hint-placeholder-val="{{false}}">
+    <main style="position: absolute; left: 0; right: 0; top: 0; bottom: 0; overflow-y: auto; padding: 54px 16px 130px">
+      <div style="display: flex; flex-direction: column; align-items: center; text-align: center">
+        <svg viewBox="0 0 120 120" width="140" height="140" role="img" aria-label="Pip, a tomato pincushion, looking {{pipMood}}" style="display: block; overflow: visible">
+  <g opacity="{{pip.conf}}">
+    <rect x="6" y="20" width="6" height="6" rx="1.5" fill="#466cf3" transform="rotate(20 9 23)"></rect>
+    <circle cx="104" cy="16" r="3.5" fill="#ff8562"></circle>
+    <rect x="98" y="96" width="7" height="4" rx="2" fill="#e6e51e" transform="rotate(-25 101 98)"></rect>
+    <circle cx="16" cy="100" r="3" fill="#f34646"></circle>
+    <path d="M24 6 l2 5 5 1 -4 3 1 5 -4-3 -4 3 1-5 -4-3 5-1z" fill="#e6e51e" stroke="#000" stroke-width="1.2" stroke-linejoin="round"></path>
+  </g>
+  <ellipse cx="60" cy="112" rx="30" ry="4" fill="rgba(0,0,0,.12)"></ellipse>
+  <g transform="{{pip.tilt}}">
+    <ellipse cx="49" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <ellipse cx="71" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <path d="M47 46 L37 19" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M61 42 L63 13" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M74 46 L89 22" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <circle cx="37" cy="18" r="5.2" fill="#466cf3" stroke="#000" stroke-width="2"></circle>
+    <circle cx="63" cy="12" r="5.2" fill="#ff8562" stroke="#000" stroke-width="2"></circle>
+    <circle cx="89.5" cy="21" r="5.2" fill="#fff" stroke="#000" stroke-width="2"></circle>
+    <path d="{{pip.al}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <path d="{{pip.ar}}" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <circle cx="{{pip.alx}}" cy="{{pip.aly}}" r="3.6" fill="#000"></circle>
+    <circle cx="{{pip.arx}}" cy="{{pip.ary}}" r="3.6" fill="#000"></circle>
+    <path d="M60 38 C84 36 104 50 104 72 C104 92 86 106 60 106 C34 106 16 92 16 72 C16 50 36 36 60 38 Z" fill="#f34646" stroke="#000" stroke-width="3"></path>
+    <path d="M42 44 C30 60 32 90 45 103 M78 44 C90 60 88 90 75 103" stroke="#c42a2a" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55"></path>
+    <path d="M60 33 L64.5 39 L72.5 37.5 L67.5 43.5 L72.5 49.5 L63.5 46.5 L60 52.5 L56.5 46.5 L47.5 49.5 L52.5 43.5 L47.5 37.5 L55.5 39 Z" fill="#e6e51e" stroke="#000" stroke-width="2.2" stroke-linejoin="round"></path>
+    <ellipse cx="36" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <ellipse cx="84" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <path d="{{pip.el}}" fill="{{pip.elf}}" stroke="#000" stroke-width="{{pip.elw}}" stroke-linecap="round"></path>
+    <path d="{{pip.er}}" fill="{{pip.erf}}" stroke="#000" stroke-width="{{pip.erw}}" stroke-linecap="round"></path>
+    <circle cx="48.6" cy="{{pip.hly}}" r="{{pip.hll}}" fill="#fff"></circle>
+    <circle cx="74.6" cy="{{pip.hly}}" r="{{pip.hlr}}" fill="#fff"></circle>
+    <path d="{{pip.m}}" fill="{{pip.mf}}" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+    <g opacity="{{pip.front}}"><path d="M97 82 Q96 93 80 90" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path><circle cx="79" cy="89.5" r="3.6" fill="#000"></circle></g>
+  </g>
+</svg>
+        <h1 style="margin: 10px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; letter-spacing: -0.05em; line-height: 1.05">{{readyTitle}}</h1>
+        <p style="margin: 8px 0 0; font-size: 15px; line-height: 1.45">{{readySub}}</p>
+      </div>
+      <section style="margin-top: 18px; background: #fff; border-radius: 26px; padding: 16px">
+        <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">Start here</h2>
+        <ol style="margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px">
+          <sc-for list="{{firstSteps}}" as="f" hint-placeholder-count="3"><li style="display: flex; align-items: center; gap: 12px; min-height: 56px; border-radius: 18px; background: #f2f2f2; padding: 0 12px"><span style="width: 32px; height: 32px; border-radius: 50%; background: {{f.c}}; display: grid; place-items: center; font-weight: 700; font-size: 14px; color: {{f.tc}}">{{f.n}}</span><span style="flex: 1; font-size: 14px; font-weight: 600; line-height: 1.3">{{f.label}}</span></li></sc-for>
+        </ol>
+      </section>
+      <section style="margin-top: 10px; background: #fff; border-radius: 26px; padding: 16px">
+        <h2 style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.03em">{{picksTitle}}</h2>
+        <div style="margin-top: 10px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px">
+          <sc-for list="{{picks}}" as="p" hint-placeholder-count="3"><span style="display: block"><img src="{{p.src}}" alt="" style="display: block; width: 100%; height: 130px; border-radius: 16px; object-fit: cover"><b style="display: block; margin-top: 5px; font-size: 12px; line-height: 1.25">{{p.name}}</b><span style="font-size: 11px; color: #555">{{p.meta}}</span></span></sc-for>
+        </div>
+      </section>
+      <section style="margin-top: 10px; display: flex; align-items: center; gap: 12px; background: #000; color: #fff; border-radius: 22px; padding: 12px 14px">
+        <img src="{{chal.src}}" alt="" style="width: 52px; height: 52px; border-radius: 14px; object-fit: cover">
+        <span style="flex: 1"><span style="display: block; font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: #e6e51e">A challenge for you</span><b style="display: block; font-size: 15px">{{chal.name}}</b><span style="font-size: 12px; color: #c9c9c9">{{chal.meta}}</span></span>
+      </section>
+    </main>
+    <div style="position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: 30px 20px 34px; background: linear-gradient(to top, #e6e51e 70%, rgba(230,229,30,0))">
+      <a href="MStudio.dc.html" style="width: 100%; min-height: 58px; border-radius: 3000px; background: #000; color: #fff; display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 17px; font-weight: 700">Go to my studio</a>
+    </div>
+  </sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    var START = 0;
+    var filled = START > 1;
+    this.state = {
+      step: START, tick: START === 9 ? 2 : 0,
+      name: filled ? 'Ena' : '',
+      goals: filled ? ['stash', 'idea', 'share'] : [],
+      exp: filled ? 'couple' : '',
+      makes: filled ? ['Dresses', 'Tops', 'Skirts'] : [],
+      tools: filled ? ['machine', 'overlocker'] : [],
+      stash: filled ? 'secret' : '',
+      vis: filled ? 'followers' : '',
+      emailMode: false, email: '', tried: false, sent: false
+    };
+  }
+  go(n) {
+    var self = this;
+    this.setState({ step: n, tick: 0 });
+    if (n === 9) {
+      [1, 2, 3].forEach(function (t) { setTimeout(function () { if (self.state.step === 9) self.setState({ tick: t }); }, 650 * t); });
+      setTimeout(function () { if (self.state.step === 9) self.setState({ step: 10 }); }, 2600);
+    }
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var POSES = {"wave": {"el": "M43 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "er": "M69 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "elf": "#000", "erf": "#000", "elw": "0", "erw": "0", "hll": 1.6, "hlr": 1.6, "hly": 66.8, "m": "M52.5 79 Q60 92 67.5 79 Z", "mf": "#000", "al": "M19 77 Q11 83 13 91", "ar": "M101 72 Q113 62 110 48", "alx": 13, "aly": 91, "arx": 110, "ary": 48, "tilt": "rotate(0 60 74)", "conf": 0, "front": 0}, "curious": {"el": "M43 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "er": "M69 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "elf": "#000", "erf": "#000", "elw": "0", "erw": "0", "hll": 1.6, "hlr": 1.6, "hly": 66.8, "m": "M57 82.5 a3 3.6 0 1 0 6 0 a3 3.6 0 1 0 -6 0", "mf": "#000", "al": "M19 77 Q11 83 13 91", "ar": "M101 77 Q109 83 107 91", "alx": 13, "aly": 91, "arx": 107, "ary": 91, "tilt": "rotate(-7 60 74)", "conf": 0, "front": 0}, "excited": {"el": "M42 72 Q47 64.5 52 72", "er": "M68 72 Q73 64.5 78 72", "elf": "none", "erf": "none", "elw": "3", "erw": "3", "hll": 0, "hlr": 0, "hly": 66.8, "m": "M52.5 79 Q60 92 67.5 79 Z", "mf": "#000", "al": "M19 71 Q8 58 12 45", "ar": "M101 71 Q112 58 108 45", "alx": 12, "aly": 45, "arx": 108, "ary": 45, "tilt": "rotate(0 60 74)", "conf": 0, "front": 0}, "thinking": {"el": "M43 67 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "er": "M69 67 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "elf": "#000", "erf": "#000", "elw": "0", "erw": "0", "hll": 1.6, "hlr": 1.6, "hly": 63.8, "m": "M56 82 Q60 83 64 82", "mf": "none", "al": "M19 77 Q11 83 13 91", "ar": "M90 80 Q92 82 94 84", "alx": 13, "aly": 91, "arx": 60, "ary": 74, "tilt": "rotate(5 60 74)", "conf": 0, "front": 1}, "happy": {"el": "M43 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "er": "M69 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "elf": "#000", "erf": "#000", "elw": "0", "erw": "0", "hll": 1.6, "hlr": 1.6, "hly": 66.8, "m": "M54 80 Q60 86.5 66 80", "mf": "none", "al": "M19 77 Q11 83 13 91", "ar": "M101 77 Q109 83 107 91", "alx": 13, "aly": 91, "arx": 107, "ary": 91, "tilt": "rotate(0 60 74)", "conf": 0, "front": 0}, "laugh": {"el": "M42 72 Q47 64.5 52 72", "er": "M68 72 Q73 64.5 78 72", "elf": "none", "erf": "none", "elw": "3", "erw": "3", "hll": 0, "hlr": 0, "hly": 66.8, "m": "M52.5 79 Q60 92 67.5 79 Z", "mf": "#000", "al": "M19 77 Q11 83 13 91", "ar": "M101 77 Q109 83 107 91", "alx": 13, "aly": 91, "arx": 107, "ary": 91, "tilt": "rotate(-6 60 74)", "conf": 0, "front": 0}, "wink": {"el": "M43 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "er": "M68 72 Q73 64.5 78 72", "elf": "#000", "erf": "none", "elw": "0", "erw": "3", "hll": 1.6, "hlr": 0, "hly": 66.8, "m": "M54 80 Q60 86.5 66 80", "mf": "none", "al": "M19 77 Q11 83 13 91", "ar": "M101 72 Q113 62 110 48", "alx": 13, "aly": 91, "arx": 110, "ary": 48, "tilt": "rotate(4 60 74)", "conf": 0, "front": 0}, "focus": {"el": "M43 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "er": "M69 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0", "elf": "#000", "erf": "#000", "elw": "0", "erw": "0", "hll": 1.6, "hlr": 1.6, "hly": 66.8, "m": "M56 82 Q60 83 64 82", "mf": "none", "al": "M19 77 Q11 83 13 91", "ar": "M101 77 Q109 83 107 91", "alx": 13, "aly": 91, "arx": 107, "ary": 91, "tilt": "rotate(0 60 74)", "conf": 0, "front": 0}, "cheer": {"el": "M42 72 Q47 64.5 52 72", "er": "M68 72 Q73 64.5 78 72", "elf": "none", "erf": "none", "elw": "3", "erw": "3", "hll": 0, "hlr": 0, "hly": 66.8, "m": "M52.5 79 Q60 92 67.5 79 Z", "mf": "#000", "al": "M19 71 Q8 58 12 45", "ar": "M101 71 Q112 58 108 45", "alx": 12, "aly": 45, "arx": 108, "ary": 45, "tilt": "rotate(0 60 74)", "conf": 1, "front": 0}};
+    var I = {
+      box: 'M21 8l-9-5-9 5v8l9 5 9-5z M3 8l9 5 9-5 M12 13v8',
+      sparkle: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z',
+      book: 'M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z M4 19.5V21h16',
+      camera: 'M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8z',
+      trophy: 'M8 21h8 M12 17v4 M7 4h10v5a5 5 0 0 1-10 0z M17 5h3v2a3 3 0 0 1-3 3 M7 5H4v2a3 3 0 0 0 3 3',
+      store: 'M3 9l1.5-5h15L21 9 M3 9v11h18V9 M3 9h18 M9 20v-6h6v6',
+      seed: 'M12 22V12 M12 12C12 7 8 4 3 4c0 5 4 8 9 8z M12 12c0-4 3-7 8-7 0 4-3 7-8 7z',
+      spool: 'M6 3h12 M6 21h12 M8 3v18 M16 3v18 M8 8h8 M8 12h8 M8 16h8',
+      star: 'M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z',
+      cap: 'M22 10 12 5 2 10l10 5 10-5z M6 12v5c3 2 9 2 12 0v-5',
+      machine: 'M3 20h18 M5 20V8a3 3 0 0 1 3-3h10a2 2 0 0 1 2 2v3h-6v10 M14 10v3',
+      loops: 'M3 12c2-4 4-4 6 0s4 4 6 0 4-4 6 0',
+      dashes: 'M3 9h4 M10 9h4 M17 9h4 M3 15h4 M10 15h4 M17 15h4',
+      hoop: 'M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z',
+      needle: 'M19 5 5 19 M15.5 4.5a2.5 2.5 0 1 1 4 4',
+      small: 'M7 13h10v7H7z',
+      drawer: 'M3 4h18v16H3z M3 12h18 M10 8h4 M10 16h4',
+      cupboard: 'M4 2h16v20H4z M12 2v20 M9 11v2 M15 11v2',
+      mountain: 'M2 20 9 6l4 7 3-4 6 11z',
+      globe: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M2 12h20 M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z',
+      users: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 3a4 4 0 1 0 0 8 4 4 0 0 0 0-8z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75',
+      lock: 'M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4'
+    };
+    var TILE = ['#e6e51e', '#d6defd', '#ffd5c8', '#ececec', '#e6e51e', '#d6defd'];
+    var GOALS = [
+      { v: 'stash', label: 'Keep track of my stash', sub: 'Fabric, thread and patterns in one place', icon: I.box },
+      { v: 'idea', label: 'Find my next project', icon: I.sparkle },
+      { v: 'learn', label: 'Learn to sew', icon: I.book },
+      { v: 'share', label: 'Share what I make', icon: I.camera },
+      { v: 'challenges', label: 'Join sewing challenges', icon: I.trophy },
+      { v: 'sell', label: 'Sell my own patterns', icon: I.store }
+    ];
+    var EXP = [
+      { v: 'start', label: 'Just starting out', sub: 'Threading the machine is still an adventure', icon: I.seed },
+      { v: 'couple', label: 'A year or two', sub: 'I can follow most patterns', icon: I.spool },
+      { v: 'years', label: 'Five years or more', sub: 'I alter patterns to fit me', icon: I.star },
+      { v: 'pro', label: 'I teach or sew for a living', icon: I.cap }
+    ];
+    var MAKES = [
+      { v: 'Dresses', src: '/_blob/188ffd136f4c0ada8a70caa52d09ec3b' }, { v: 'Tops', src: '/_blob/378fd54e9a610caf64290fbec065ccf9' },
+      { v: 'Skirts', src: '/_blob/3fb41ae12053aadbcaf96b90bd6f28ea' }, { v: 'Trousers', src: '/_blob/c974cd96842b2dd8418f09777861290e' },
+      { v: 'Outerwear', src: '/_blob/b15aceab26480c18148934a44710873a' }, { v: 'Knits', src: '/_blob/cedd8232af110501083827e498f729f6' },
+      { v: 'Bags', src: '/_blob/5bf905114ac1edcca363e2d2dc675860' }, { v: 'Costume', src: '/_blob/1f26346581fa5b1d2b3ba2642b997bb1' },
+      { v: 'Mending', src: '/_blob/a93207f7db6c002a302477269ae8ce59' }
+    ];
+    var TOOLS = [
+      { v: 'machine', label: 'Sewing machine', icon: I.machine }, { v: 'overlocker', label: 'Overlocker or serger', icon: I.loops },
+      { v: 'cover', label: 'Coverstitch machine', icon: I.dashes }, { v: 'embroidery', label: 'Embroidery machine', icon: I.hoop },
+      { v: 'hand', label: 'Needle and thread', sub: 'Hand sewing counts!', icon: I.needle }
+    ];
+    var STASH = [
+      { v: 'start', label: 'Just getting started', icon: I.small }, { v: 'drawer', label: 'A tidy drawer', icon: I.drawer },
+      { v: 'cupboard', label: 'A whole cupboard', icon: I.cupboard }, { v: 'secret', label: "We don't talk about it", icon: I.mountain }
+    ];
+    var VIS = [
+      { v: 'public', label: 'Everyone', sub: 'Anyone can see and be inspired', icon: I.globe },
+      { v: 'followers', label: 'My followers', sub: 'People who follow you', icon: I.users },
+      { v: 'me', label: 'Only me', sub: 'A private sewing diary', icon: I.lock }
+    ];
+    var PATS = [
+      { name: 'Willa Dress', cat: 'Dresses', lv: 'Beginner', src: '/_blob/188ffd136f4c0ada8a70caa52d09ec3b' },
+      { name: 'Tiered Maxi Skirt', cat: 'Skirts', lv: 'Beginner', src: '/_blob/c14805936ea42c8a216102adbfceffbc' },
+      { name: 'Bayside Sailor Top', cat: 'Tops', lv: 'Intermediate', src: '/_blob/e9b9124af50eb749d99a9f4a4477d928' },
+      { name: 'Colour-block Jumper', cat: 'Knits', lv: 'Beginner', src: '/_blob/cedd8232af110501083827e498f729f6' },
+      { name: 'Bow Blouse', cat: 'Tops', lv: 'Intermediate', src: '/_blob/378fd54e9a610caf64290fbec065ccf9' },
+      { name: 'Wrap Vest', cat: 'Outerwear', lv: 'Advanced', src: '/_blob/a93207f7db6c002a302477269ae8ce59' },
+      { name: 'Chore Jacket', cat: 'Outerwear', lv: 'Intermediate', src: '/_blob/b15aceab26480c18148934a44710873a' },
+      { name: 'Shirred Sundress', cat: 'Dresses', lv: 'Intermediate', src: '/_blob/e551a46b8280f8ecc8ee3ab17952c2bf' },
+      { name: 'Harbour Pinafore', cat: 'Dresses', lv: 'Beginner', src: '/_blob/1192463bd0067b49a26194ff1b40ec1c' }
+    ];
+
+    var step = s.step, name = s.name.trim();
+    function has(list, v) { return list.indexOf(v) >= 0; }
+    function toggle(key, v) { var l = s[key].slice(); var k = l.indexOf(v); if (k >= 0) l.splice(k, 1); else l.push(v); var o = {}; o[key] = l; self.setState(o); }
+    function pickOne(key, v, auto) { var o = {}; o[key] = v; self.setState(o); if (auto) setTimeout(function () { if (self.state.step === step) self.go(step + 1); }, 380); }
+    function rowStyle(on) { return on ? 'border:2px solid #000;background:#e6e51e' : 'border:2px solid #fff;background:#fff'; }
+    function list(items, key, multi, auto) {
+      return items.map(function (o, n) {
+        var on = multi ? has(s[key], o.v) : s[key] === o.v;
+        return { label: o.label, sub: o.sub || '', hasSub: !!o.sub, icon: o.icon, tile: TILE[n % TILE.length], role: multi ? 'checkbox' : 'radio', on: on ? 'true' : 'false',
+          style: rowStyle(on), deskBorder: on ? '' : 'border-color:#e6e6e6', markShape: multi ? '8px' : '50%', mark: on ? 'background:#000;border:2px solid #000' : 'background:#fff;border:2px solid #c4c4c4', tick: on ? '#fff' : 'transparent',
+          pick: function () { if (multi) toggle(key, o.v); else pickOne(key, o.v, auto); } };
+      });
+    }
+    var goalLead = { learn: 'Learning to sew? You’re in good hands.', stash: 'A stash organiser! My favourite kind of sewist.', sell: 'A pattern designer? Ooh, fancy.', share: 'I can’t wait to see what you make.', challenges: 'Challenges are the best motivation.', idea: 'Let’s find your next make.' };
+    var expLead = { start: 'Everyone starts with a wonky seam. Even me.', couple: 'Just enough to be dangerous. The fun part!', years: 'A seasoned sewist. I’ll try to keep up.', pro: 'A pro! I’ll stay out of your way.' };
+    var stashLead = { start: 'A fresh start. Love it.', drawer: 'Neat and tidy. Respect.', cupboard: 'A whole cupboard! Fabric dreams.', secret: 'Ha! Your secret’s safe with me.' };
+    var makesLead = s.makes.length === 0 ? 'Keeping your options open. Smart.' : s.makes.length === 1 ? s.makes[0] + '? Great choice.' : s.makes[0] + ' and ' + s.makes[1].toLowerCase() + '? Great taste.';
+
+    var Q = {
+      1: { lead: 'Every sewist needs a name tag.', q: 'First, what should I call you?', pose: 'curious', ok: name.length > 0 },
+      2: { lead: name ? 'Nice to meet you, ' + name + '!' : 'Nice to meet you!', q: 'What brings you to Seams Club?', help: 'Pick as many as you like.', pose: 'wave', ok: s.goals.length > 0 },
+      3: { lead: s.goals.length ? goalLead[s.goals[0]] : 'No worries. Let’s keep going.', q: 'How long have you been sewing?', pose: 'thinking', ok: !!s.exp },
+      4: { lead: s.exp ? expLead[s.exp] : 'Okay!', q: 'What do you love to make?', help: 'Pick a few and I’ll find patterns to match.', pose: 'happy', ok: s.makes.length > 0 },
+      5: { lead: makesLead, q: 'What do you sew with?', help: 'So I only suggest things you can make.', pose: 'curious', ok: s.tools.length > 0 },
+      6: { lead: 'Okay, a personal question…', q: 'How big is your fabric stash?', pose: s.stash === 'secret' ? 'laugh' : 'curious', ok: !!s.stash },
+      7: { lead: s.stash ? stashLead[s.stash] : 'Last one, promise.', q: 'Who should see your posts?', help: 'Your stash, patterns and measurements are always private. This is only for things you post.', pose: 'wink', ok: !!s.vis }
+    };
+    var cur = Q[step - 1] || {};
+    var poseName = step <= 1 ? 'wave' : step === 9 ? 'focus' : step === 10 ? 'cheer' : cur.pose;
+    var MOODS = { wave: 'friendly and waving', curious: 'curious', excited: 'excited', thinking: 'thoughtful', happy: 'happy', laugh: 'laughing', wink: 'cheeky, with a wink', focus: 'focused', cheer: 'delighted' };
+
+    // results
+    var beginner = s.exp === 'start' || !s.exp;
+    var wantCats = s.makes.length ? s.makes : ['Dresses', 'Tops', 'Skirts'];
+    var picks = PATS.filter(function (p) { return has(wantCats, p.cat) && (!beginner || p.lv === 'Beginner'); });
+    PATS.forEach(function (p) { if (picks.length < 3 && picks.indexOf(p) < 0 && (!beginner || p.lv === 'Beginner')) picks.push(p); });
+    PATS.forEach(function (p) { if (picks.length < 3 && picks.indexOf(p) < 0) picks.push(p); });
+    picks = picks.slice(0, 3);
+    var STEPS = { stash: 'Add your first 3 fabrics to your stash', idea: 'Save a pattern you’d love to make', learn: 'Pick a beginner pattern and start a project', share: 'Post your latest make', challenges: 'Join this month’s challenge', sell: 'Set up your pattern shop' };
+    var fs = s.goals.map(function (g) { return STEPS[g]; });
+    ['Follow 3 sewists you like', 'Post your latest make', 'Add your first 3 fabrics to your stash'].forEach(function (x) { if (fs.indexOf(x) < 0) fs.push(x); });
+    var FC = [['#e6e51e', '#000'], ['#466cf3', '#fff'], ['#ff8562', '#000']];
+    var chal = has(s.makes, 'Mending') ? { name: 'Make It Mend', meta: '3 days left · 211 joined', src: '/_blob/a93207f7db6c002a302477269ae8ce59' }
+      : has(s.goals, 'stash') ? { name: 'Sew From Your Stash', meta: 'Starts in 9 days', src: '/_blob/623f53848a0fba7bb103667b6cd6d996' }
+      : { name: '#OctoberDenim', meta: '12 days left · 486 joined', src: '/_blob/1192463bd0067b49a26194ff1b40ec1c' };
+    var BG = { 0: '#f2f2f2', 1: '#e6e51e', 9: '#ff8562', 10: '#e6e51e' };
+    var bg = BG[step] || '#f2f2f2';
+    var emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.email.trim());
+
+    return {
+      bg: 'background:' + bg, fade: bg,
+      pip: POSES[poseName], pipMood: MOODS[poseName],
+      sJoin: step === 0, sIntro: step === 1, sQuestion: step >= 2 && step <= 8, sBuild: step === 9, sReady: step === 10,
+      start: function () { self.go(2); },
+      joined: function () { self.go(1); },
+      back: function () { self.go(Math.max(1, step - 1)); },
+      segs: [1, 2, 3, 4, 5, 6, 7].map(function (n) { return { c: n <= step - 1 ? '#000' : '#d4d4d4' }; }),
+      qNum: step - 1, qText: 'Question ' + (step - 1) + ' of 7',
+      canSkip: step >= 3 && step <= 7, noSkip: !(step >= 3 && step <= 7),
+      skip: function () { self.go(step + 1); },
+      lead: cur.lead, question: cur.q, help: cur.help || '', hasHelp: !!cur.help,
+      qName: step === 2, qTiles: step === 5, qPrivacy: step === 8,
+      qList: step === 3 || step === 4 || step === 6 || step === 7 || step === 8,
+      groupRole: (step === 3 || step === 6) ? 'group' : 'radiogroup',
+      opts: step === 3 ? list(GOALS, 'goals', true) : step === 4 ? list(EXP, 'exp', false, true) : step === 6 ? list(TOOLS, 'tools', true)
+        : step === 7 ? list(STASH, 'stash', false, true) : step === 8 ? list(VIS, 'vis', false, false) : [],
+      tiles: MAKES.map(function (t) { var on = has(s.makes, t.v); return { label: t.v, src: t.src, on: on ? 'true' : 'false', ring: on ? 'border:3px solid #000' : 'border:3px solid #fff', deskBorder: on ? '' : 'border-color:#e6e6e6',
+        mark: on ? 'background:#000;border:2px solid #fff' : 'background:rgba(255,255,255,.85);border:2px solid #fff', tick: on ? '#fff' : 'transparent', pick: function () { toggle('makes', t.v); } }; }),
+      name: s.name, onName: function (e) { self.setState({ name: e.target.value.slice(0, 30) }); },
+      showContinue: true,
+      nextOff: !cur.ok, nextStyle: cur.ok ? 'background:#000;color:#fff' : 'background:#d4d4d4;color:#666',
+      nextLabel: step === 8 ? 'Finish' : 'Continue',
+      next: function () { if (cur.ok) self.go(step + 1); },
+
+      tick: s.tick, buildPct: Math.round(s.tick / 3 * 100) + '%',
+      buildRows: [beginner ? 'Finding beginner-friendly patterns' : 'Finding patterns for you', 'Picking a challenge you’ll like', 'Locking your stash so only you see it'].map(function (l, n) {
+        var done = n < s.tick; return { label: l, dim: done ? '' : 'opacity:.55', mark: done ? 'background:#000' : 'background:#fff;border:2px solid #000', tick: done ? '#fff' : 'transparent' };
+      }),
+      toReady: function () { self.setState({ step: 10 }); },
+
+      readyTitle: name ? 'You’re all set, ' + name + '!' : 'You’re all set!',
+      readySub: 'Here’s where I’d start. You can change any of this later.',
+      firstSteps: fs.slice(0, 3).map(function (l, n) { return { n: n + 1, label: l, c: FC[n][0], tc: FC[n][1] }; }),
+      picksTitle: beginner ? 'Beginner-friendly patterns' : 'Patterns for you',
+      picks: picks.map(function (p) { return { name: p.name, meta: p.cat + ' · ' + p.lv, src: p.src }; }),
+      chal: chal,
+
+      noEmail: !s.emailMode, withEmail: s.emailMode,
+      showEmail: function () { self.setState({ emailMode: true }); },
+      email: s.email, onEmail: function (e) { self.setState({ email: e.target.value.slice(0, 120), sent: false }); },
+      emailErr: s.tried && !emailOk,
+      sent: s.sent, notSent: !s.sent,
+      sendLink: function (e) { if (e && e.preventDefault) e.preventDefault(); if (!emailOk) { self.setState({ tried: true }); return; } self.setState({ sent: true, tried: false }); }
+    };
+  }
+}
+</script>
+</body>
+</html>

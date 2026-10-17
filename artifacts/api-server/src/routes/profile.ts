@@ -35,6 +35,7 @@ function profileResponse(row: typeof profilesTable.$inferSelect, isAdmin: boolea
     units: row.units,
     needsHandle: row.handle === null,
     isAdmin,
+    defaultPostVisibility: row.defaultPostVisibility as "public" | "followers" | "private",
   };
 }
 

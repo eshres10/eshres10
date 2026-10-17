@@ -32,6 +32,8 @@ tags:
     description: Boards, topics, replies, votes and polls
   - name: drafts
     description: One private draft per flow (post, project, stash, topic)
+  - name: onboarding
+    description: Pip's setup questions (private to you)
 paths:
   /public/profiles/{handle}:
     get:
@@ -1345,6 +1347,69 @@ paths:
       responses:
         "204":
           description: Deleted
+  /onboarding:
+    get:
+      operationId: getOnboarding
+      tags: [onboarding]
+      summary: "Your answers to Pip's questions and the step you got to. Private to you; defaults before you start."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Onboarding" }
+    patch:
+      operationId: updateOnboarding
+      tags: [onboarding]
+      summary: "Save some answers and/or the current step. Only the fields sent change; null clears an answer. 120 writes an hour."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/OnboardingUpdate" }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Onboarding" }
+        "400": { description: A value that isn't one of the options }
+        "429": { description: Too many writes this hour }
+  /onboarding/complete:
+    post:
+      operationId: completeOnboarding
+      tags: [onboarding]
+      summary: Mark setup as finished (sets completedAt and step 8).
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Onboarding" }
+        "429": { description: Too many writes this hour }
+  /onboarding/skip:
+    post:
+      operationId: skipOnboarding
+      tags: [onboarding]
+      summary: "Skip for now / Finish setup later (sets skippedAt; answers so far are kept)."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Onboarding" }
+        "429": { description: Too many writes this hour }
+  /onboarding/recommendations:
+    get:
+      operationId: getOnboardingRecommendations
+      tags: [onboarding]
+      summary: "The Ready screen: three first steps from your goals, up to three public catalog patterns and one running challenge. Uses only public content and your own answers."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OnboardingRecommendations" }
   /ideas:
     get:
       operationId: listIdeas
@@ -2001,7 +2066,8 @@ components:
         units: { type: string, enum: [metric, imperial] }
         needsHandle: { type: boolean, description: True until the user has chosen a handle }
         isAdmin: { type: boolean, description: True for ADMIN_USER_IDS (shows report review) }
-      required: [id, name, handle, bio, avatarUrl, joinedAt, experience, favoriteGarments, units, needsHandle, isAdmin]
+        defaultPostVisibility: { $ref: "#/components/schemas/Visibility" }
+      required: [id, name, handle, bio, avatarUrl, joinedAt, experience, favoriteGarments, units, needsHandle, isAdmin, defaultPostVisibility]
     PublicProfile:
       type: object
       description: Fields of a profile that anyone may see. Never includes units, experience or other private data.
@@ -2791,6 +2857,77 @@ components:
               type: array
               items: { $ref: "#/components/schemas/ForumReplyChild" }
           required: [accepted, replies]
+    OnboardingGoal:
+      type: string
+      enum: [stash, idea, learn, share, challenges, sell]
+    OnboardingExperience:
+      type: string
+      enum: [start, couple, years, pro]
+      description: "start: just starting out. couple: a year or two. years: five years or more. pro: teaches or sews for a living."
+    OnboardingTool:
+      type: string
+      enum: [machine, overlocker, cover, embroidery, hand]
+    OnboardingStashSize:
+      type: string
+      enum: [start, drawer, cupboard, secret]
+    Onboarding:
+      type: object
+      properties:
+        currentStep: { type: integer, minimum: 0, maximum: 8, description: "0 = Meet Pip, 1-7 = the questions, 8 = finished" }
+        goals:
+          type: array
+          items: { $ref: "#/components/schemas/OnboardingGoal" }
+        experience:
+          allOf: [{ $ref: "#/components/schemas/OnboardingExperience" }]
+          nullable: true
+        tools:
+          type: array
+          items: { $ref: "#/components/schemas/OnboardingTool" }
+        stashSize:
+          allOf: [{ $ref: "#/components/schemas/OnboardingStashSize" }]
+          nullable: true
+        completedAt: { type: string, format: date-time, nullable: true }
+        skippedAt: { type: string, format: date-time, nullable: true }
+      required: [currentStep, goals, experience, tools, stashSize, completedAt, skippedAt]
+    OnboardingUpdate:
+      type: object
+      properties:
+        currentStep: { type: integer, minimum: 0, maximum: 8 }
+        goals:
+          type: array
+          maxItems: 6
+          items: { $ref: "#/components/schemas/OnboardingGoal" }
+        experience:
+          allOf: [{ $ref: "#/components/schemas/OnboardingExperience" }]
+          nullable: true
+        tools:
+          type: array
+          maxItems: 5
+          items: { $ref: "#/components/schemas/OnboardingTool" }
+        stashSize:
+          allOf: [{ $ref: "#/components/schemas/OnboardingStashSize" }]
+          nullable: true
+    OnboardingStep:
+      type: object
+      properties:
+        id: { type: string, enum: [stash, idea, learn, share, challenges, sell, follow] }
+        label: { type: string }
+        href: { type: string, description: App path the step links to }
+      required: [id, label, href]
+    OnboardingRecommendations:
+      type: object
+      properties:
+        firstSteps:
+          type: array
+          items: { $ref: "#/components/schemas/OnboardingStep" }
+        patternsTitle: { type: string, description: "Beginner-friendly patterns, or Patterns for you" }
+        patterns:
+          type: array
+          items: { $ref: "#/components/schemas/CatalogEntry" }
+        challenge:
+          allOf: [{ $ref: "#/components/schemas/ChallengeSummary" }]
+          nullable: true
+      required: [firstSteps, patternsTitle, patterns, challenge]
     IdeaItem:
       type: object
       properties:
@@ -2899,6 +3036,7 @@ components:
           type: array
           items: { type: string }
         units: { type: string, enum: [metric, imperial] }
+        defaultPostVisibility: { $ref: "#/components/schemas/Visibility" }
     Fabric:
       type: object
       properties:

@@ -19,3 +19,4 @@ export * from "./drafts";
 export * from "./hashtags";
 export * from "./ideas";
 export * from "./search";
+export * from "./onboarding";

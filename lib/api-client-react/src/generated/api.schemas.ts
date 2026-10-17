@@ -45,6 +45,18 @@ export const ProfileUnits = {
   imperial: 'imperial',
 } as const;
 
+/**
+ * public: anyone, signed out included. followers: your followers. private: only you.
+ */
+export type Visibility = typeof Visibility[keyof typeof Visibility];
+
+
+export const Visibility = {
+  public: 'public',
+  followers: 'followers',
+  private: 'private',
+} as const;
+
 export interface Profile {
   id: number;
   name: string;
@@ -61,6 +73,7 @@ export interface Profile {
   needsHandle: boolean;
   /** True for ADMIN_USER_IDS (shows report review) */
   isAdmin: boolean;
+  defaultPostVisibility: Visibility;
 }
 
 /**
@@ -93,18 +106,6 @@ export interface PublicProfile {
   /** True when the signed-in viewer follows this person */
   followedByMe: boolean;
 }
-
-/**
- * public: anyone, signed out included. followers: your followers. private: only you.
- */
-export type Visibility = typeof Visibility[keyof typeof Visibility];
-
-
-export const Visibility = {
-  public: 'public',
-  followers: 'followers',
-  private: 'private',
-} as const;
 
 export type PublicMaterialKind = typeof PublicMaterialKind[keyof typeof PublicMaterialKind];
 
@@ -1181,6 +1182,111 @@ export type ForumReply = ForumReplyChild & {
   replies: ForumReplyChild[];
 };
 
+export type OnboardingGoal = typeof OnboardingGoal[keyof typeof OnboardingGoal];
+
+
+export const OnboardingGoal = {
+  stash: 'stash',
+  idea: 'idea',
+  learn: 'learn',
+  share: 'share',
+  challenges: 'challenges',
+  sell: 'sell',
+} as const;
+
+/**
+ * start: just starting out. couple: a year or two. years: five years or more. pro: teaches or sews for a living.
+ */
+export type OnboardingExperience = typeof OnboardingExperience[keyof typeof OnboardingExperience];
+
+
+export const OnboardingExperience = {
+  start: 'start',
+  couple: 'couple',
+  years: 'years',
+  pro: 'pro',
+} as const;
+
+export type OnboardingTool = typeof OnboardingTool[keyof typeof OnboardingTool];
+
+
+export const OnboardingTool = {
+  machine: 'machine',
+  overlocker: 'overlocker',
+  cover: 'cover',
+  embroidery: 'embroidery',
+  hand: 'hand',
+} as const;
+
+export type OnboardingStashSize = typeof OnboardingStashSize[keyof typeof OnboardingStashSize];
+
+
+export const OnboardingStashSize = {
+  start: 'start',
+  drawer: 'drawer',
+  cupboard: 'cupboard',
+  secret: 'secret',
+} as const;
+
+export interface Onboarding {
+  /**
+     * 0 = Meet Pip, 1-7 = the questions, 8 = finished
+     * @minimum 0
+     * @maximum 8
+     */
+  currentStep: number;
+  goals: OnboardingGoal[];
+  experience: OnboardingExperience | null;
+  tools: OnboardingTool[];
+  stashSize: OnboardingStashSize | null;
+  /** @nullable */
+  completedAt: string | null;
+  /** @nullable */
+  skippedAt: string | null;
+}
+
+export interface OnboardingUpdate {
+  /**
+     * @minimum 0
+     * @maximum 8
+     */
+  currentStep?: number;
+  /** @maxItems 6 */
+  goals?: OnboardingGoal[];
+  experience?: OnboardingExperience | null;
+  /** @maxItems 5 */
+  tools?: OnboardingTool[];
+  stashSize?: OnboardingStashSize | null;
+}
+
+export type OnboardingStepId = typeof OnboardingStepId[keyof typeof OnboardingStepId];
+
+
+export const OnboardingStepId = {
+  stash: 'stash',
+  idea: 'idea',
+  learn: 'learn',
+  share: 'share',
+  challenges: 'challenges',
+  sell: 'sell',
+  follow: 'follow',
+} as const;
+
+export interface OnboardingStep {
+  id: OnboardingStepId;
+  label: string;
+  /** App path the step links to */
+  href: string;
+}
+
+export interface OnboardingRecommendations {
+  firstSteps: OnboardingStep[];
+  /** Beginner-friendly patterns, or Patterns for you */
+  patternsTitle: string;
+  patterns: CatalogEntry[];
+  challenge: ChallengeSummary | null;
+}
+
 export interface IdeaItem {
   id: number;
   name: string;
@@ -1336,6 +1442,7 @@ export interface ProfileUpdate {
   experience?: string;
   favoriteGarments?: string[];
   units?: ProfileUpdateUnits;
+  defaultPostVisibility?: Visibility;
 }
 
 export interface Fabric {

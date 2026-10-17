@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seams Club onboarding — Desktop — Goals</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap">
+<style>
+body{margin:0;}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+@keyframes pipbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.pip-bob{animation:pipbob 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.pip-bob{animation:none}}
+</style>
+</head>
+<body>
+<!-- Static snapshot of the mockup for reference. Interactive states are in ../images and ../source. -->
+<div style="">
+
+<div style="position: relative; min-height: 100vh; font-family: Inter, system-ui, sans-serif; color: rgb(0, 0, 0); background: rgb(242, 242, 242); display: flex; flex-direction: column;">
+
+  <header style="display: flex; align-items: center; gap: 10px; padding: 28px 40px 0px;">
+    <a href="Main.dc.html" style="display: flex; align-items: center; gap: 10px; text-decoration: none;"><svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#000000"></circle><g transform="translate(50 50) scale(0.92) translate(-49 -50)"><path d="M66.89 23.06 L66.65 22.58 L66.39 22.08 L66.12 21.59 L65.86 21.10 L65.59 20.62 L65.31 20.15 L65.03 19.67 L64.75 19.21 L64.47 18.75 L64.18 18.29 L63.89 17.84 L63.59 17.40 L63.30 16.96 L63.00 16.53 L62.70 16.11 L62.40 15.70 L62.10 15.29 L61.79 14.89 L61.48 14.50 L61.09 14.01 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.27 9.43 L53.54 8.64 L51.74 7.99 L49.89 7.49 L47.99 7.14 L46.07 6.93 L44.14 6.87 L42.20 6.96 L40.27 7.20 L38.37 7.60 L36.50 8.17 L34.70 8.91 L32.96 9.82 L31.32 10.92 L29.79 12.20 L28.41 13.68 L27.19 15.35 L26.16 17.19 L25.34 19.21 L24.76 21.39 L24.41 23.72 L24.37 25.69 L24.53 27.56 L24.90 29.35 L25.46 31.06 L26.18 32.68 L27.06 34.20 L28.06 35.62 L29.18 36.96 L30.39 38.22 L31.68 39.39 L33.05 40.50 L34.47 41.54 L35.95 42.53 L37.47 43.46 L39.01 44.35 L40.58 45.19 L42.16 46.00 L43.74 46.77 L45.32 47.50 L46.87 48.21 L48.40 48.90 L49.89 49.56 L51.33 50.20 L52.70 50.81 L54.12 51.48 L55.47 52.17 L56.77 52.87 L58.00 53.58 L59.18 54.32 L60.29 55.07 L61.34 55.84 L62.32 56.63 L63.23 57.43 L64.07 58.26 L64.84 59.10 L65.54 59.95 L66.17 60.83 L66.73 61.72 L67.22 62.64 L67.65 63.58 L68.00 64.54 L68.29 65.54 L68.50 66.58 L68.65 67.66 L68.72 68.79 L68.71 69.97 L68.62 71.20 L68.45 72.45 L68.17 73.70 L67.76 74.80 L67.20 75.86 L66.50 76.86 L65.64 77.83 L64.65 78.75 L63.51 79.61 L62.24 80.41 L60.86 81.14 L59.37 81.80 L57.79 82.38 L56.13 82.88 L54.42 83.29 L52.65 83.61 L50.86 83.84 L49.05 83.98 L47.24 84.02 L45.45 83.97 L43.68 83.82 L41.96 83.58 L40.31 83.24 L38.72 82.82 L37.23 82.30 L35.77 81.67 L35.08 81.34 L34.39 80.98 L33.72 80.61 L33.08 80.21 L32.46 79.81 L31.86 79.39 L31.30 78.96 L30.75 78.51 L30.24 78.06 L29.76 77.59 L29.30 77.11 L28.87 76.63 L28.47 76.13 L28.11 75.63 L27.77 75.12 L27.46 74.61 L27.18 74.09 L26.93 73.56 L26.72 73.02 L26.53 72.48 L26.37 71.93 L26.25 71.38 L26.15 70.81 L26.08 70.16 L19.92 70.84 L20.01 71.67 L20.17 72.58 L20.37 73.47 L20.62 74.34 L20.91 75.20 L21.25 76.04 L21.64 76.85 L22.06 77.65 L22.52 78.43 L23.02 79.18 L23.56 79.91 L24.13 80.62 L24.73 81.31 L25.37 81.97 L26.03 82.61 L26.73 83.23 L27.45 83.82 L28.20 84.39 L28.97 84.94 L29.77 85.46 L30.60 85.96 L31.44 86.44 L32.31 86.89 L33.23 87.33 L34.99 88.09 L36.91 88.75 L38.89 89.28 L40.92 89.69 L42.99 89.98 L45.10 90.16 L47.22 90.22 L49.36 90.17 L51.49 90.01 L53.60 89.74 L55.69 89.36 L57.74 88.87 L59.75 88.27 L61.69 87.55 L63.56 86.72 L65.35 85.77 L67.04 84.70 L68.62 83.50 L70.07 82.17 L71.37 80.70 L72.49 79.09 L73.42 77.34 L74.12 75.46 L74.55 73.55 L74.78 71.85 L74.90 70.22 L74.91 68.62 L74.82 67.06 L74.61 65.54 L74.31 64.06 L73.90 62.63 L73.39 61.24 L72.79 59.90 L72.09 58.61 L71.32 57.36 L70.46 56.17 L69.52 55.03 L68.52 53.94 L67.45 52.89 L66.31 51.89 L65.12 50.93 L63.87 50.01 L62.56 49.12 L61.20 48.27 L59.79 47.46 L58.34 46.67 L56.84 45.91 L55.30 45.19 L53.86 44.54 L52.41 43.89 L50.92 43.23 L49.42 42.56 L47.92 41.88 L46.41 41.17 L44.92 40.45 L43.46 39.70 L42.02 38.93 L40.63 38.13 L39.30 37.31 L38.03 36.46 L36.83 35.58 L35.72 34.68 L34.70 33.76 L33.79 32.82 L32.98 31.85 L32.29 30.86 L31.71 29.86 L31.24 28.83 L30.90 27.77 L30.67 26.66 L30.56 25.49 L30.59 24.28 L30.83 22.64 L31.22 21.18 L31.75 19.86 L32.41 18.69 L33.18 17.64 L34.06 16.70 L35.05 15.87 L36.13 15.15 L37.31 14.53 L38.58 14.01 L39.91 13.61 L41.30 13.32 L42.73 13.14 L44.18 13.07 L45.64 13.11 L47.09 13.27 L48.51 13.54 L49.89 13.91 L51.21 14.38 L52.45 14.95 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.45 18.13 L56.62 18.35 L56.88 18.68 L57.14 19.02 L57.40 19.37 L57.67 19.73 L57.93 20.10 L58.19 20.47 L58.44 20.85 L58.70 21.24 L58.96 21.63 L59.21 22.03 L59.46 22.44 L59.71 22.85 L59.95 23.27 L60.20 23.69 L60.44 24.12 L60.67 24.55 L60.91 24.98 L61.13 25.42 L61.36 25.87 Z" fill="#f34646"></path><circle cx="64.13" cy="24.47" r="3.10" fill="#f34646"></circle><circle cx="23.00" cy="70.50" r="3.10" fill="#f34646"></circle><path d="M37.50 93.00 L47.65 65.61 L62.88 11.32 Q63.71 8.33 61.11 7.61 Q58.51 6.89 57.68 9.88 L42.86 64.29 Z M58.41 21.29 L61.15 11.40 A1.05 1.05 0 0 0 59.12 10.84 L56.39 20.73 A1.05 1.05 0 0 0 58.41 21.29 Z" fill="#ffffff" fill-rule="evenodd" stroke="#000000" stroke-width="2" paint-order="stroke"></path><path d="M61.06 13.98 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.40 9.49 L52.32 14.88 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.48 18.16 Z" fill="#f34646"></path></g></svg><b style="font-family: Poppins, sans-serif; font-size: 22px; letter-spacing: -0.04em;">seams club</b></a>
+    <span style="flex: 1 1 0%;"></span>
+    
+    <a href="AppFeed.dc.html" style="font-size: 15px; font-weight: 700;">Finish setup later</a>
+  </header>
+
+  <div style="flex: 1 1 0%; display: grid; place-items: center; padding: 30px 40px 50px;">
+
+    
+    
+
+    
+    
+
+    
+    
+      <div style="width: 1080px; display: grid; grid-template-columns: 300px 1fr; gap: 36px; align-items: start;">
+        <div style="position: sticky; top: 40px; display: flex; flex-direction: column; align-items: center; gap: 4px; padding-top: 30px;">
+          <svg viewBox="0 0 120 120" width="180" height="180" role="img" aria-label="Pip, a tomato pincushion, looking friendly and waving" style="display: block; overflow: visible;">
+  <g opacity="0">
+    <rect x="6" y="20" width="6" height="6" rx="1.5" fill="#466cf3" transform="rotate(20 9 23)"></rect>
+    <circle cx="104" cy="16" r="3.5" fill="#ff8562"></circle>
+    <rect x="98" y="96" width="7" height="4" rx="2" fill="#e6e51e" transform="rotate(-25 101 98)"></rect>
+    <circle cx="16" cy="100" r="3" fill="#f34646"></circle>
+    <path d="M24 6 l2 5 5 1 -4 3 1 5 -4-3 -4 3 1-5 -4-3 5-1z" fill="#e6e51e" stroke="#000" stroke-width="1.2" stroke-linejoin="round"></path>
+  </g>
+  <ellipse cx="60" cy="112" rx="30" ry="4" fill="rgba(0,0,0,.12)"></ellipse>
+  <g transform="rotate(0 60 74)">
+    <ellipse cx="49" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <ellipse cx="71" cy="105" rx="7.5" ry="4.5" fill="#000"></ellipse>
+    <path d="M47 46 L37 19" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M61 42 L63 13" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <path d="M74 46 L89 22" stroke="#8a8a8a" stroke-width="2.4" stroke-linecap="round"></path>
+    <circle cx="37" cy="18" r="5.2" fill="#466cf3" stroke="#000" stroke-width="2"></circle>
+    <circle cx="63" cy="12" r="5.2" fill="#ff8562" stroke="#000" stroke-width="2"></circle>
+    <circle cx="89.5" cy="21" r="5.2" fill="#fff" stroke="#000" stroke-width="2"></circle>
+    <path d="M19 77 Q11 83 13 91" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <path d="M101 72 Q113 62 110 48" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path>
+    <circle cx="13" cy="91" r="3.6" fill="#000"></circle>
+    <circle cx="110" cy="48" r="3.6" fill="#000"></circle>
+    <path d="M60 38 C84 36 104 50 104 72 C104 92 86 106 60 106 C34 106 16 92 16 72 C16 50 36 36 60 38 Z" fill="#f34646" stroke="#000" stroke-width="3"></path>
+    <path d="M42 44 C30 60 32 90 45 103 M78 44 C90 60 88 90 75 103" stroke="#c42a2a" stroke-width="2" fill="none" stroke-linecap="round" opacity=".55"></path>
+    <path d="M60 33 L64.5 39 L72.5 37.5 L67.5 43.5 L72.5 49.5 L63.5 46.5 L60 52.5 L56.5 46.5 L47.5 49.5 L52.5 43.5 L47.5 37.5 L55.5 39 Z" fill="#e6e51e" stroke="#000" stroke-width="2.2" stroke-linejoin="round"></path>
+    <ellipse cx="36" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <ellipse cx="84" cy="81" rx="6" ry="3.6" fill="#ff8562" opacity=".85"></ellipse>
+    <path d="M43 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0" fill="#000" stroke="#000" stroke-width="0" stroke-linecap="round"></path>
+    <path d="M69 70 a4 5.2 0 1 0 8 0 a4 5.2 0 1 0 -8 0" fill="#000" stroke="#000" stroke-width="0" stroke-linecap="round"></path>
+    <circle cx="48.6" cy="66.8" r="1.6" fill="#fff"></circle>
+    <circle cx="74.6" cy="66.8" r="1.6" fill="#fff"></circle>
+    <path d="M52.5 79 Q60 92 67.5 79 Z" fill="#000" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></path>
+    <g opacity="0"><path d="M97 82 Q96 93 80 90" stroke="#000" stroke-width="3.4" stroke-linecap="round" fill="none"></path><circle cx="79" cy="89.5" r="3.6" fill="#000"></circle></g>
+  </g>
+</svg>
+          <p aria-live="polite" style="position: relative; margin: 6px 0px 0px; background: rgb(255, 255, 255); border-radius: 22px; padding: 14px 18px; font-size: 16px; line-height: 1.4; font-weight: 600; text-align: center; box-shadow: rgba(0, 0, 0, 0.06) 0px 8px 18px -8px;">Nice to meet you, Ena!</p>
+        </div>
+        <section style="background: rgb(255, 255, 255); border-radius: 32px; padding: 28px 36px 32px;">
+          <div style="display: flex; align-items: center; gap: 12px;">
+            <button aria-label="Back" style="width: 44px; height: 44px; margin-left: -10px; border: 0px; border-radius: 50%; background: transparent; display: grid; place-items: center;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+            <div role="progressbar" aria-label="Setup progress" aria-valuemin="1" aria-valuemax="7" aria-valuenow="2" aria-valuetext="Question 2 of 7" style="flex: 1 1 0%; display: flex; gap: 5px;">
+              <span style="flex: 1 1 0%; height: 6px; border-radius: 3000px; background: rgb(0, 0, 0);"></span><span style="flex: 1 1 0%; height: 6px; border-radius: 3000px; background: rgb(0, 0, 0);"></span><span style="flex: 1 1 0%; height: 6px; border-radius: 3000px; background: rgb(212, 212, 212);"></span><span style="flex: 1 1 0%; height: 6px; border-radius: 3000px; background: rgb(212, 212, 212);"></span><span style="flex: 1 1 0%; height: 6px; border-radius: 3000px; background: rgb(212, 212, 212);"></span><span style="flex: 1 1 0%; height: 6px; border-radius: 3000px; background: rgb(212, 212, 212);"></span><span style="flex: 1 1 0%; height: 6px; border-radius: 3000px; background: rgb(212, 212, 212);"></span>
+            </div>
+            <span style="font-size: 13px; font-weight: 700; color: rgb(85, 85, 85);">Question 2 of 7</span>
+          </div>
+          <h1 style="margin: 22px 0px 0px; font-family: Poppins, sans-serif; font-weight: 700; font-size: 38px; letter-spacing: -0.05em; line-height: 1.05;">What brings you to Seams Club?</h1>
+          <p style="margin: 8px 0px 0px; font-size: 15px; line-height: 1.45; color: rgb(68, 68, 68);">Pick as many as you like.</p>
+
+          
+
+          
+            <div role="group" aria-label="What brings you to Seams Club?" style="margin-top: 22px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+              
+                <button role="checkbox" aria-checked="true" style="display: flex; align-items: center; gap: 14px; min-height: 72px; padding: 10px 14px; border-radius: 22px; font: inherit; text-align: left; border: 2px solid rgb(0, 0, 0); background: rgb(230, 229, 30);">
+                  <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; display: grid; place-items: center; background: rgb(230, 229, 30);"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5v8l9 5 9-5z M3 8l9 5 9-5 M12 13v8"></path></svg></span>
+                  <span style="flex: 1 1 0%; min-width: 0px;"><b style="display: block; font-size: 16px;">Keep track of my stash</b><span style="display: block; margin-top: 1px; font-size: 13px; color: rgb(68, 68, 68);">Fabric, thread and patterns in one place</span></span>
+                  <span aria-hidden="true" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center; background: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                </button>
+              
+                <button role="checkbox" aria-checked="true" style="display: flex; align-items: center; gap: 14px; min-height: 72px; padding: 10px 14px; border-radius: 22px; font: inherit; text-align: left; border: 2px solid rgb(0, 0, 0); background: rgb(230, 229, 30);">
+                  <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; display: grid; place-items: center; background: rgb(214, 222, 253);"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"></path></svg></span>
+                  <span style="flex: 1 1 0%; min-width: 0px;"><b style="display: block; font-size: 16px;">Find my next project</b></span>
+                  <span aria-hidden="true" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center; background: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                </button>
+              
+                <button role="checkbox" aria-checked="false" style="display: flex; align-items: center; gap: 14px; min-height: 72px; padding: 10px 14px; border-radius: 22px; font: inherit; text-align: left; border: 2px solid rgb(230, 230, 230); background: rgb(255, 255, 255);">
+                  <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; display: grid; place-items: center; background: rgb(255, 213, 200);"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V3H6.5A2.5 2.5 0 0 0 4 5.5z M4 19.5V21h16"></path></svg></span>
+                  <span style="flex: 1 1 0%; min-width: 0px;"><b style="display: block; font-size: 16px;">Learn to sew</b></span>
+                  <span aria-hidden="true" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center; background: rgb(255, 255, 255); border: 2px solid rgb(196, 196, 196);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="transparent" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                </button>
+              
+                <button role="checkbox" aria-checked="true" style="display: flex; align-items: center; gap: 14px; min-height: 72px; padding: 10px 14px; border-radius: 22px; font: inherit; text-align: left; border: 2px solid rgb(0, 0, 0); background: rgb(230, 229, 30);">
+                  <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; display: grid; place-items: center; background: rgb(236, 236, 236);"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z M12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"></path></svg></span>
+                  <span style="flex: 1 1 0%; min-width: 0px;"><b style="display: block; font-size: 16px;">Share what I make</b></span>
+                  <span aria-hidden="true" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center; background: rgb(0, 0, 0); border: 2px solid rgb(0, 0, 0);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                </button>
+              
+                <button role="checkbox" aria-checked="false" style="display: flex; align-items: center; gap: 14px; min-height: 72px; padding: 10px 14px; border-radius: 22px; font: inherit; text-align: left; border: 2px solid rgb(230, 230, 230); background: rgb(255, 255, 255);">
+                  <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; display: grid; place-items: center; background: rgb(230, 229, 30);"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8 M12 17v4 M7 4h10v5a5 5 0 0 1-10 0z M17 5h3v2a3 3 0 0 1-3 3 M7 5H4v2a3 3 0 0 0 3 3"></path></svg></span>
+                  <span style="flex: 1 1 0%; min-width: 0px;"><b style="display: block; font-size: 16px;">Join sewing challenges</b></span>
+                  <span aria-hidden="true" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center; background: rgb(255, 255, 255); border: 2px solid rgb(196, 196, 196);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="transparent" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                </button>
+              
+                <button role="checkbox" aria-checked="false" style="display: flex; align-items: center; gap: 14px; min-height: 72px; padding: 10px 14px; border-radius: 22px; font: inherit; text-align: left; border: 2px solid rgb(230, 230, 230); background: rgb(255, 255, 255);">
+                  <span style="width: 44px; height: 44px; flex-shrink: 0; border-radius: 14px; display: grid; place-items: center; background: rgb(214, 222, 253);"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1.5-5h15L21 9 M3 9v11h18V9 M3 9h18 M9 20v-6h6v6"></path></svg></span>
+                  <span style="flex: 1 1 0%; min-width: 0px;"><b style="display: block; font-size: 16px;">Sell my own patterns</b></span>
+                  <span aria-hidden="true" style="width: 26px; height: 26px; flex-shrink: 0; border-radius: 8px; display: grid; place-items: center; background: rgb(255, 255, 255); border: 2px solid rgb(196, 196, 196);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="transparent" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></span>
+                </button>
+              
+            </div>
+          
+
+          
+
+          
+
+          <div style="margin-top: 26px; display: flex; align-items: center; gap: 16px;">
+            <button style="min-height: 48px; padding: 0px 6px; border: 0px; background: transparent; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 15px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; color: rgb(85, 85, 85);">Skip this one</button>
+            <span style="flex: 1 1 0%;"></span>
+            <button style="min-height: 56px; padding: 0px 44px; border: 0px; border-radius: 3000px; font-style: inherit; font-variant: inherit; font-weight: 700; font-stretch: inherit; font-size: 17px; line-height: inherit; font-family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; font-kerning: inherit; font-feature-settings: inherit; font-variation-settings: inherit; background: rgb(0, 0, 0); color: rgb(255, 255, 255);">Continue</button>
+          </div>
+        </section>
+      </div>
+    
+
+    
+    
+
+    
+    
+  </div>
+</div>
+</div>
+</body>
+</html>

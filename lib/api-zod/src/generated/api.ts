@@ -2959,7 +2959,8 @@ export const GetProfileResponse = zod.object({
   "favoriteGarments": zod.array(zod.string()),
   "units": zod.enum(['metric', 'imperial']),
   "needsHandle": zod.boolean().describe('True until the user has chosen a handle'),
-  "isAdmin": zod.boolean().describe('True for ADMIN_USER_IDS (shows report review)')
+  "isAdmin": zod.boolean().describe('True for ADMIN_USER_IDS (shows report review)'),
+  "defaultPostVisibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.')
 })
 
 
@@ -2984,7 +2985,8 @@ export const UpdateProfileBody = zod.object({
   "avatarUrl": zod.string().nullish().describe('/api/storage/objects/... path of an avatar the user uploaded, or null to remove'),
   "experience": zod.string().optional(),
   "favoriteGarments": zod.array(zod.string()).optional(),
-  "units": zod.enum(['metric', 'imperial']).optional()
+  "units": zod.enum(['metric', 'imperial']).optional(),
+  "defaultPostVisibility": zod.enum(['public', 'followers', 'private']).optional().describe('public: anyone, signed out included. followers: your followers. private: only you.')
 })
 
 export const UpdateProfileResponse = zod.object({
@@ -2998,7 +3000,8 @@ export const UpdateProfileResponse = zod.object({
   "favoriteGarments": zod.array(zod.string()),
   "units": zod.enum(['metric', 'imperial']),
   "needsHandle": zod.boolean().describe('True until the user has chosen a handle'),
-  "isAdmin": zod.boolean().describe('True for ADMIN_USER_IDS (shows report review)')
+  "isAdmin": zod.boolean().describe('True for ADMIN_USER_IDS (shows report review)'),
+  "defaultPostVisibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.')
 })
 
 
@@ -3215,6 +3218,155 @@ export const DeleteFabricParams = zod.object({
 })
 
 export const DeleteFabricResponse = zod.void()
+
+
+/**
+ * @summary Your answers to Pip's questions and the step you got to. Private to you; defaults before you start.
+ */
+export const getOnboardingResponseCurrentStepMin = 0;
+export const getOnboardingResponseCurrentStepMax = 8;
+
+
+
+export const GetOnboardingResponse = zod.object({
+  "currentStep": zod.number().int().min(getOnboardingResponseCurrentStepMin).max(getOnboardingResponseCurrentStepMax).describe('0 = Meet Pip, 1-7 = the questions, 8 = finished'),
+  "goals": zod.array(zod.enum(['stash', 'idea', 'learn', 'share', 'challenges', 'sell'])),
+  "experience": zod.union([zod.enum(['start', 'couple', 'years', 'pro']).describe('start: just starting out. couple: a year or two. years: five years or more. pro: teaches or sews for a living.'),zod.null()]),
+  "tools": zod.array(zod.enum(['machine', 'overlocker', 'cover', 'embroidery', 'hand'])),
+  "stashSize": zod.union([zod.enum(['start', 'drawer', 'cupboard', 'secret']),zod.null()]),
+  "completedAt": zod.coerce.date().nullable(),
+  "skippedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Save some answers and/or the current step. Only the fields sent change; null clears an answer. 120 writes an hour.
+ */
+export const updateOnboardingBodyCurrentStepMin = 0;
+export const updateOnboardingBodyCurrentStepMax = 8;
+
+export const updateOnboardingBodyGoalsMax = 6;
+
+export const updateOnboardingBodyToolsMax = 5;
+
+
+
+export const UpdateOnboardingBody = zod.object({
+  "currentStep": zod.number().int().min(updateOnboardingBodyCurrentStepMin).max(updateOnboardingBodyCurrentStepMax).optional(),
+  "goals": zod.array(zod.enum(['stash', 'idea', 'learn', 'share', 'challenges', 'sell'])).max(updateOnboardingBodyGoalsMax).optional(),
+  "experience": zod.union([zod.enum(['start', 'couple', 'years', 'pro']).describe('start: just starting out. couple: a year or two. years: five years or more. pro: teaches or sews for a living.'),zod.null()]).optional(),
+  "tools": zod.array(zod.enum(['machine', 'overlocker', 'cover', 'embroidery', 'hand'])).max(updateOnboardingBodyToolsMax).optional(),
+  "stashSize": zod.union([zod.enum(['start', 'drawer', 'cupboard', 'secret']),zod.null()]).optional()
+})
+
+export const updateOnboardingResponseCurrentStepMin = 0;
+export const updateOnboardingResponseCurrentStepMax = 8;
+
+
+
+export const UpdateOnboardingResponse = zod.object({
+  "currentStep": zod.number().int().min(updateOnboardingResponseCurrentStepMin).max(updateOnboardingResponseCurrentStepMax).describe('0 = Meet Pip, 1-7 = the questions, 8 = finished'),
+  "goals": zod.array(zod.enum(['stash', 'idea', 'learn', 'share', 'challenges', 'sell'])),
+  "experience": zod.union([zod.enum(['start', 'couple', 'years', 'pro']).describe('start: just starting out. couple: a year or two. years: five years or more. pro: teaches or sews for a living.'),zod.null()]),
+  "tools": zod.array(zod.enum(['machine', 'overlocker', 'cover', 'embroidery', 'hand'])),
+  "stashSize": zod.union([zod.enum(['start', 'drawer', 'cupboard', 'secret']),zod.null()]),
+  "completedAt": zod.coerce.date().nullable(),
+  "skippedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Mark setup as finished (sets completedAt and step 8).
+ */
+export const completeOnboardingResponseCurrentStepMin = 0;
+export const completeOnboardingResponseCurrentStepMax = 8;
+
+
+
+export const CompleteOnboardingResponse = zod.object({
+  "currentStep": zod.number().int().min(completeOnboardingResponseCurrentStepMin).max(completeOnboardingResponseCurrentStepMax).describe('0 = Meet Pip, 1-7 = the questions, 8 = finished'),
+  "goals": zod.array(zod.enum(['stash', 'idea', 'learn', 'share', 'challenges', 'sell'])),
+  "experience": zod.union([zod.enum(['start', 'couple', 'years', 'pro']).describe('start: just starting out. couple: a year or two. years: five years or more. pro: teaches or sews for a living.'),zod.null()]),
+  "tools": zod.array(zod.enum(['machine', 'overlocker', 'cover', 'embroidery', 'hand'])),
+  "stashSize": zod.union([zod.enum(['start', 'drawer', 'cupboard', 'secret']),zod.null()]),
+  "completedAt": zod.coerce.date().nullable(),
+  "skippedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary Skip for now / Finish setup later (sets skippedAt; answers so far are kept).
+ */
+export const skipOnboardingResponseCurrentStepMin = 0;
+export const skipOnboardingResponseCurrentStepMax = 8;
+
+
+
+export const SkipOnboardingResponse = zod.object({
+  "currentStep": zod.number().int().min(skipOnboardingResponseCurrentStepMin).max(skipOnboardingResponseCurrentStepMax).describe('0 = Meet Pip, 1-7 = the questions, 8 = finished'),
+  "goals": zod.array(zod.enum(['stash', 'idea', 'learn', 'share', 'challenges', 'sell'])),
+  "experience": zod.union([zod.enum(['start', 'couple', 'years', 'pro']).describe('start: just starting out. couple: a year or two. years: five years or more. pro: teaches or sews for a living.'),zod.null()]),
+  "tools": zod.array(zod.enum(['machine', 'overlocker', 'cover', 'embroidery', 'hand'])),
+  "stashSize": zod.union([zod.enum(['start', 'drawer', 'cupboard', 'secret']),zod.null()]),
+  "completedAt": zod.coerce.date().nullable(),
+  "skippedAt": zod.coerce.date().nullable()
+})
+
+
+/**
+ * @summary The Ready screen: three first steps from your goals, up to three public catalog patterns and one running challenge. Uses only public content and your own answers.
+ */
+export const GetOnboardingRecommendationsResponse = zod.object({
+  "firstSteps": zod.array(zod.object({
+  "id": zod.enum(['stash', 'idea', 'learn', 'share', 'challenges', 'sell', 'follow']),
+  "label": zod.string(),
+  "href": zod.string().describe('App path the step links to')
+})),
+  "patternsTitle": zod.string().describe('Beginner-friendly patterns, or Patterns for you'),
+  "patterns": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string(),
+  "maker": zod.string().describe('Designer (patterns) or brand (products)'),
+  "category": zod.string(),
+  "difficulty": zod.union([zod.literal('beginner'),zod.literal('intermediate'),zod.literal('advanced'),zod.literal(null)]).nullable(),
+  "sizes": zod.string().nullable(),
+  "fabricTypes": zod.string().nullable(),
+  "yardage": zod.string().nullable(),
+  "url": zod.string().nullable().describe('Where to buy it (designer or shop)'),
+  "description": zod.string(),
+  "canEdit": zod.boolean(),
+  "stats": zod.object({
+  "reviews": zod.number().int(),
+  "rating": zod.number().nullable(),
+  "fit": zod.number().nullable(),
+  "difficulty": zod.number().nullable(),
+  "instructions": zod.number().nullable(),
+  "runsSmall": zod.number().int(),
+  "runsTrue": zod.number().int(),
+  "runsLarge": zod.number().int(),
+  "makes": zod.number().int()
+}).describe('Review numbers count every review; makes counts what this viewer may see.')
+})),
+  "challenge": zod.union([zod.object({
+  "slug": zod.string(),
+  "tag": zod.string(),
+  "title": zod.string(),
+  "description": zod.string(),
+  "startsAt": zod.coerce.date(),
+  "endsAt": zod.coerce.date(),
+  "status": zod.enum(['upcoming', 'active', 'ended']),
+  "host": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "members": zod.number().int(),
+  "entries": zod.number().int(),
+  "joinedByMe": zod.boolean()
+}),zod.null()])
+})
 
 
 /**

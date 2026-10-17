@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { ProfileUnits } from './profileUnits';
+import type { Visibility } from './visibility';
 
 export interface Profile {
   id: number;
@@ -23,4 +24,5 @@ export interface Profile {
   needsHandle: boolean;
   /** True for ADMIN_USER_IDS (shows report review) */
   isAdmin: boolean;
+  defaultPostVisibility: Visibility;
 }

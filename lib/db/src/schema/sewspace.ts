@@ -41,6 +41,8 @@ export const profilesTable = pgTable("sewspace_profiles", {
   handle: text("handle"),
   bio: text("bio").notNull().default(""),
   avatarUrl: text("avatar_url"),
+  // Who new posts are shared with by default (migration 0015; Pip's question 7).
+  defaultPostVisibility: text("default_post_visibility").notNull().default("public"),
   ...timestamps,
 });
 
@@ -488,6 +490,24 @@ export const ideasTable = pgTable("sewspace_ideas", {
 });
 
 export type Idea = typeof ideasTable.$inferSelect;
+
+// Phase O (migration 0015): answers to Pip's onboarding questions. Private to
+// the owner (owner_all only); allowed values are CHECKed in SQL.
+export const onboardingTable = pgTable("sewspace_onboarding", {
+  userId: varchar("user_id", { length: 255 }).primaryKey().references(() => profilesTable.userId, { onDelete: "cascade" }),
+  currentStep: smallint("current_step").notNull().default(0),
+  goals: text("goals").array().notNull().default([]),
+  experience: text("experience"),
+  tools: text("tools").array().notNull().default([]),
+  stashSize: text("stash_size"),
+  completedAt: timestamp("completed_at", { withTimezone: true }),
+  skippedAt: timestamp("skipped_at", { withTimezone: true }),
+  writeCount: integer("write_count").notNull().default(0),
+  writeWindowAt: timestamp("write_window_at", { withTimezone: true }).notNull().defaultNow(),
+  ...timestamps,
+});
+
+export type Onboarding = typeof onboardingTable.$inferSelect;
 
 export type ForumTopic = typeof forumTopicsTable.$inferSelect;
 export type ForumReply = typeof forumRepliesTable.$inferSelect;
