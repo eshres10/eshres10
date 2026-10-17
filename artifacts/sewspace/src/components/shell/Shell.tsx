@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useGetProfile } from '@workspace/api-client-react';
-import { Bookmark, BookMarked, BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, Menu, MessageCircle, MessagesSquare, Plus, Ruler, Scissors, Sparkles, Spool, Store, Trophy, X } from 'lucide-react';
+import { Bookmark, BookMarked, BookOpen, Compass, KanbanSquare, Flag, FolderKanban, LayoutGrid, Home, House, Layers, Menu, MessageCircle, MessagesSquare, Plus, Ruler, Sparkles, Spool, Store, Trophy, X } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
 import { useAuth } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
@@ -9,6 +9,7 @@ import { UserAvatar } from '@/components/avatar';
 import { Logo } from '@/components/brand/Logo';
 import { currentAppPath } from '@/lib/navigation';
 import { inCommunity } from '@/components/shell/CommunityTabs';
+import { inStudio, StudioMobileHeader, studioSection } from '@/components/shell/StudioMobile';
 
 type NavItem = { href: string; label: string; icon: typeof Home };
 
@@ -83,25 +84,29 @@ function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: (
   );
 }
 
-function MobileTabBar({ location }: { location: string }) {
+/**
+ * Phone tab bar. Floating everywhere except the studio, which uses the
+ * full-width style from the studio mockups (Phase S; elsewhere stays floating
+ * until the owner decides).
+ */
+function MobileTabBar({ location, full = false }: { location: string; full?: boolean }) {
   const me = useMyProfile();
   const meHref = me?.handle ? `/@${me.handle}` : '/settings';
-  const tab = (href: string, label: string, Icon: typeof Home) => {
-    // Explore is the door to all community sections (forum, challenges, patterns).
-    const active = href === '/explore' ? inCommunity(location) : isActive(location, href);
-    return (
-      <Link href={href} aria-label={label} aria-current={active ? 'page' : undefined}
-        className={`grid h-12 w-[52px] place-items-center rounded-[18px] ${active ? 'bg-ink text-white' : 'text-ink'}`}>
-        <Icon size={22} aria-hidden="true" />
-      </Link>
-    );
-  };
+  const tab = (href: string, label: string, Icon: typeof Home, active: boolean) => (
+    <Link href={href} aria-label={label} aria-current={active ? 'page' : undefined}
+      className={`grid h-12 w-[52px] place-items-center rounded-[18px] ${active ? 'bg-ink text-white' : 'text-ink'}`}>
+      <Icon size={22} aria-hidden="true" />
+    </Link>
+  );
   return (
-    <nav aria-label="App" className="fixed inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between rounded-[30px] bg-white px-3 py-2 shadow-float md:hidden">
-      {tab('/feed', 'Home', House)}
-      {tab('/explore', 'Explore', Compass)}
+    <nav aria-label="App" className={full
+      ? 'fixed inset-x-0 bottom-0 z-40 flex items-center justify-between border-t border-line bg-white px-4 pb-[calc(.5rem+env(safe-area-inset-bottom))] pt-2 md:hidden'
+      : 'fixed inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between rounded-[30px] bg-white px-3 py-2 shadow-float md:hidden'}>
+      {tab('/feed', 'Home', House, isActive(location, '/feed'))}
+      {/* Explore is the door to all community sections (forum, challenges, patterns). */}
+      {tab('/explore', 'Explore', Compass, inCommunity(location))}
       <Link href="/new" aria-label="New post" className="grid h-[52px] w-[58px] place-items-center rounded-[20px] bg-yellow text-ink"><Plus size={26} aria-hidden="true" /></Link>
-      {tab('/studio', 'Studio', Scissors)}
+      {tab('/studio', 'My studio', KanbanSquare, inStudio(location))}
       <Link href={meHref} aria-label="My profile" aria-current={location === meHref ? 'page' : undefined} className="grid h-12 w-[52px] place-items-center rounded-[18px]">
         <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} size={28} />
       </Link>
@@ -120,6 +125,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
     return <Redirect to={`/welcome?next=${encodeURIComponent(currentAppPath())}`} replace />;
   }
 
+  const studio = studioSection(location);
   const title = allItems.find(item => isActive(location, item.href))?.label
     ?? ({ '/settings': 'Profile & settings', '/new': 'New post' } as Record<string, string>)[location]
     ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'SewSpace');
@@ -137,15 +143,16 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <header className="sticky top-[calc(.75rem+env(safe-area-inset-top))] z-30 mx-3 mt-3 flex items-center gap-3 rounded-[30px] bg-white py-2.5 pl-[22px] pr-3 shadow-float md:static md:mx-0 md:mt-0">
+        {studio && <StudioMobileHeader key={studio.href} section={studio} />}
+        <header className={`sticky top-[calc(.75rem+env(safe-area-inset-top))] z-30 mx-3 mt-3 items-center ${studio ? 'hidden md:flex' : 'flex'} gap-3 rounded-[30px] bg-white py-2.5 pl-[22px] pr-3 shadow-float md:static md:mx-0 md:mt-0`}>
           <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="-ml-2 grid h-11 w-11 place-items-center rounded-full bg-canvas md:hidden"><Menu size={20} /></button>
           <h1 className="min-w-0 flex-1 truncate font-display text-[22px] tracking-[-.04em]">{title}</h1>
           {location !== '/new' && <Link href="/new" className="hidden min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white no-underline md:inline-flex"><Plus size={16} aria-hidden="true" />New post</Link>}
           <Link href="/settings" aria-label="Profile & settings" className="hidden md:block"><UserAvatar name={profile.data?.name} avatarUrl={profile.data?.avatarUrl} size={40} /></Link>
         </header>
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8">{children}</main>
+        <main className={`mx-auto w-full max-w-7xl px-4 md:px-2 md:py-8 ${studio ? 'pb-6 pt-4' : 'py-6'}`}>{children}</main>
       </div>
-      <MobileTabBar location={location} />
+      <MobileTabBar location={location} full={Boolean(studio)} />
     </div>
   );
 }
