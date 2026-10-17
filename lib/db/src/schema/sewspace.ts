@@ -11,6 +11,7 @@ import {
   smallint,
   text,
   timestamp,
+  uniqueIndex,
   varchar,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
@@ -57,6 +58,8 @@ export const fabricsTable = pgTable("sewspace_fabrics", {
   weight: text("weight"),
   notes: text("notes"),
   imageUrl: text("image_url"),
+  // Phase F3 (migration 0012): the swatch colour, #rrggbb.
+  colorHex: text("color_hex"),
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   // Phase 5: the shared catalog page this item is (migration 0006).
   catalogId: integer("catalog_id"),
@@ -99,6 +102,10 @@ export const patternsTable = pgTable("sewspace_patterns", {
   coverImageUrl: text("cover_image_url"),
   pdfUrl: text("pdf_url"),
   pdfFileName: text("pdf_file_name"),
+  // Phase F2 (migration 0011): construction steps as short phrases. Never public.
+  steps: jsonb("steps").$type<string[] | null>(),
+  // Phase F3 (migration 0012): pdf | paper | traced.
+  format: text("format").$type<"pdf" | "paper" | "traced" | null>(),
   status: text("status").notNull().default("want_to_make"),
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   // Phase 5: the shared catalog page this item is (migration 0006).
@@ -119,6 +126,12 @@ export const measurementProfilesTable = pgTable("sewspace_measurement_profiles",
     .default({}),
   ...timestamps,
 });
+
+export interface ProjectSetup {
+  dismissed?: boolean;
+  visibilityChosen?: boolean;
+  stepsChoice?: "pattern" | "own" | "none" | null;
+}
 
 export const projectsTable = pgTable("sewspace_projects", {
   id: serial("id").primaryKey(),
@@ -150,6 +163,9 @@ export const projectsTable = pgTable("sewspace_projects", {
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   size: text("size"),
   publishedAt: timestamp("published_at", { withTimezone: true }),
+  // Phase F2 (migration 0011): garment chip and the setup checklist state.
+  garment: text("garment"),
+  setup: jsonb("setup").$type<ProjectSetup>().notNull().default({}),
   isDemo: boolean("is_demo").notNull().default(false),
   ...timestamps,
 });
@@ -214,11 +230,15 @@ export const mediaTable = pgTable("sewspace_media", {
   width: integer("width").notNull(),
   height: integer("height").notNull(),
   color: text("color"),
+  // Phase F1 (migration 0010): read aloud by screen readers; at most 500 characters.
+  altText: text("alt_text").notNull().default(""),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
 export const POST_KINDS = ["status", "photo"] as const;
 export type PostKind = (typeof POST_KINDS)[number];
+export const POST_ASPECTS = ["4:5", "1:1", "original"] as const;
+export type PostAspect = (typeof POST_ASPECTS)[number];
 
 export const postsTable = pgTable("sewspace_posts", {
   id: serial("id").primaryKey(),
@@ -229,6 +249,8 @@ export const postsTable = pgTable("sewspace_posts", {
   projectId: integer("project_id").references(() => projectsTable.id, { onDelete: "set null" }),
   patternId: integer("pattern_id").references(() => patternsTable.id, { onDelete: "set null" }),
   fabricId: integer("fabric_id").references(() => fabricsTable.id, { onDelete: "set null" }),
+  // Phase F1: display crop for the photos (object-fit: cover). Older posts are 'original'.
+  aspect: text("aspect").$type<PostAspect>().notNull().default("4:5"),
   ...timestamps,
 });
 
@@ -241,6 +263,20 @@ export const postMediaTable = pgTable("sewspace_post_media", {
 
 export type Media = typeof mediaTable.$inferSelect;
 export type Post = typeof postsTable.$inferSelect;
+
+// Phase F1 (migration 0010): hashtags. Tags are created only through
+// sewspace_hashtag_ids(); post tags follow their post.
+export const hashtagsTable = pgTable("sewspace_hashtags", {
+  id: serial("id").primaryKey(),
+  tag: text("tag").notNull().unique(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const postHashtagsTable = pgTable("sewspace_post_hashtags", {
+  postId: integer("post_id").notNull().references(() => postsTable.id, { onDelete: "cascade" }),
+  hashtagId: integer("hashtag_id").notNull().references(() => hashtagsTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+}, (t) => [primaryKey({ columns: [t.postId, t.hashtagId] })]);
 
 // Phase 4: likes, comments (one level of replies), saves and reports (migration 0005).
 export const likesTable = pgTable("sewspace_likes", {
@@ -405,6 +441,14 @@ export const forumVotesTable = pgTable("sewspace_forum_votes", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.targetKind, t.targetId, t.userId] })]);
 
+// Show & tell photos on a topic (migration 0013); they follow their topic.
+export const forumTopicMediaTable = pgTable("sewspace_forum_topic_media", {
+  topicId: integer("topic_id").notNull().references(() => forumTopicsTable.id, { onDelete: "cascade" }),
+  mediaId: integer("media_id").notNull().references(() => mediaTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  position: smallint("position").notNull(),
+}, (t) => [primaryKey({ columns: [t.topicId, t.mediaId] })]);
+
 export const forumPollOptionsTable = pgTable("sewspace_forum_poll_options", {
   id: serial("id").primaryKey(),
   topicId: integer("topic_id").notNull().references(() => forumTopicsTable.id, { onDelete: "cascade" }),
@@ -418,6 +462,20 @@ export const forumPollVotesTable = pgTable("sewspace_forum_poll_votes", {
   optionId: integer("option_id").notNull().references(() => forumPollOptionsTable.id, { onDelete: "cascade" }),
   votedAt: timestamp("voted_at", { withTimezone: true }).notNull().defaultNow(),
 }, (t) => [primaryKey({ columns: [t.topicId, t.userId] })]);
+
+// Phase F0: one draft per person per flow (owner-only, migration 0009).
+export const DRAFT_KINDS = ["post", "project", "stash", "topic"] as const;
+export type DraftKind = (typeof DRAFT_KINDS)[number];
+
+export const draftsTable = pgTable("sewspace_drafts", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  kind: text("kind").$type<DraftKind>().notNull(),
+  payload: jsonb("payload").$type<Record<string, unknown>>().notNull().default({}),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [uniqueIndex("sewspace_drafts_user_kind_idx").on(t.userId, t.kind)]);
+
+export type Draft = typeof draftsTable.$inferSelect;
 
 export type ForumTopic = typeof forumTopicsTable.$inferSelect;
 export type ForumReply = typeof forumRepliesTable.$inferSelect;

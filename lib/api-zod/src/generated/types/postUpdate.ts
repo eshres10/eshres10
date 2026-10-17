@@ -5,6 +5,8 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { AltTextInput } from './altTextInput';
+import type { PostAspect } from './postAspect';
 import type { Visibility } from './visibility';
 
 export interface PostUpdate {
@@ -17,4 +19,12 @@ export interface PostUpdate {
   patternId?: number | null;
   /** @nullable */
   fabricId?: number | null;
+  /**
+     * Photo posts: the photos in order (1 to 10). Leave out to keep them as they are.
+     * @maxItems 10
+     */
+  mediaIds?: number[];
+  aspect?: PostAspect;
+  /** @maxItems 10 */
+  altTexts?: AltTextInput[];
 }

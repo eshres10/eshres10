@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { updateProjectFields, type ProjectDetail as ProjectDetailData } from '@workspace/api-client-react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useRoute } from 'wouter';
 import { ChevronLeft, Pencil, BookOpen, Palette, Package, Ruler, FolderKanban, Loader2 } from 'lucide-react';
@@ -8,7 +9,6 @@ import {
   useListFabrics,
   useListThreads,
   useListMeasurementProfiles,
-  useUpdateProject,
   getGetProjectQueryKey,
   getListProjectsQueryKey
 } from '@workspace/api-client-react';
@@ -16,12 +16,13 @@ import { ProjectFormModal } from './ProjectForm';
 import { ProjectSteps } from './ProjectSteps';
 import { ProjectPhotos } from './ProjectPhotos';
 import { ProjectSharing } from './ProjectSharing';
+import { Journal } from './Journal';
+import { SetupChecklist } from './SetupChecklist';
 
 export function ProjectDetail() {
   const [, params] = useRoute('/projects/:id');
   const id = Number(params?.id);
   const client = useQueryClient();
-  const update = useUpdateProject();
 
   const { data: project, isLoading, isError, refetch } = useGetProject(id, { query: { enabled: !!id, queryKey: getGetProjectQueryKey(id) } });
 
@@ -31,6 +32,8 @@ export function ProjectDetail() {
   const { data: measurements = [] } = useListMeasurementProfiles();
 
   const [formOpen, setFormOpen] = useState(false);
+  const [addSignal, setAddSignal] = useState(0);
+  const [stageError, setStageError] = useState(false);
 
   if (isLoading) {
     return (
@@ -60,188 +63,91 @@ export function ProjectDetail() {
   const thread = threads.find((t: any) => t.id === project.threadId);
   const measurement = measurements.find((m: any) => m.id === project.measurementProfileId);
 
-  const statusColors: Record<string, string> = {
-    planning: 'bg-canvas text-subtle',
-    cutting: 'bg-peach text-subtle',
-    sewing: 'bg-peach text-ink',
-    fitting: 'bg-ink text-white',
-    finished: 'bg-yellow text-ink',
+  const stages = ['planning', 'cutting', 'sewing', 'fitting', 'finished'] as const;
+  const stepsList = project.steps ?? [];
+  const doneSteps = stepsList.filter(st => st.completed).length;
+  const changeStage = async (status: (typeof stages)[number]) => {
+    setStageError(false);
+    try {
+      const row = await updateProjectFields(project.id, { status });
+      client.setQueryData(getGetProjectQueryKey(project.id), (old: ProjectDetailData | undefined) => (old ? { ...old, ...row, steps: old.steps, photos: old.photos } : old));
+      client.invalidateQueries({ queryKey: getListProjectsQueryKey() });
+    } catch {
+      setStageError(true);
+    }
   };
 
-  const handleUpdateNotes = (field: string, value: string) => {
-    update.mutate(
-      { id: project.id, data: { name: project.name, [field]: value || null } },
-      {
-        onSuccess: () => {
-          client.setQueryData(getGetProjectQueryKey(project.id), (old: any) =>
-            old ? { ...old, [field]: value || null } : old
-          );
-        }
-      }
-    );
-  };
-
+  // Phones: one column in reading order. Desktop: the setup list, sharing
+  // and materials in the right column. (Columns use display: contents on
+  // phones so their cards can be ordered together.)
   return (
-    <div data-testid="project-detail">
-      <div className="mb-6 flex items-center justify-between">
-        <Link href="/projects" className="inline-flex min-h-[44px] items-center gap-2 text-sm font-semibold text-subtle hover:text-ink">
-          <ChevronLeft size={16} /> <span className="hidden sm:inline">Back to notebook</span><span className="sm:hidden">Back</span>
-        </Link>
-        <button
-          onClick={() => setFormOpen(true)}
-          data-testid="button-edit-project"
-          className="btn btn-line min-h-[44px] px-3 py-1.5 text-xs sm:min-h-[auto]"
-        >
-          <Pencil size={14} /> <span className="hidden sm:inline">Edit project details</span><span className="sm:hidden">Edit</span>
+    <div data-testid="project-detail" className="mx-auto max-w-[1232px]">
+      <div className="mb-4 flex items-center justify-between">
+        <nav aria-label="Breadcrumb" className="flex min-h-[44px] items-center gap-1.5 text-sm">
+          <Link href="/projects" className="inline-flex items-center gap-1 text-subtle underline-offset-2 hover:underline"><ChevronLeft size={16} className="lg:hidden" aria-hidden="true" />Projects</Link>
+          <span className="hidden text-subtle lg:inline" aria-hidden="true">›</span>
+          <span className="hidden font-bold lg:inline">{project.name}</span>
+        </nav>
+        <button onClick={() => setFormOpen(true)} data-testid="button-edit-project" className="btn btn-line min-h-[44px] px-3 text-xs">
+          <Pencil size={14} aria-hidden="true" /> Edit details
         </button>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_350px] xl:grid-cols-[1fr_400px]">
-        {/* Main Content Column */}
-        <div className="space-y-6">
-          {/* Header Card */}
-          <div className="studio-card overflow-hidden rounded-xl">
-            {project.coverImageUrl && (
-              <div className="h-64 w-full bg-peach">
-                <img src={project.coverImageUrl} alt={project.name} className="h-full w-full object-cover" />
-              </div>
-            )}
-            <div className="p-6 md:p-8">
-              <div className="mb-4 flex flex-wrap items-center gap-3">
-                <span className={`rounded-full px-2.5 py-1 font-mono-custom text-[.6rem] uppercase tracking-wider ${statusColors[project.status] || 'bg-canvas text-subtle'}`}>
-                  {project.status.replace('_', ' ')}
-                </span>
-                {project.completedAt && (
-                  <span className="font-mono-custom text-[.6rem] uppercase text-subtle">
-                    Finished {new Date(project.completedAt).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-
-              <h1 className="font-display text-4xl leading-tight text-ink md:text-5xl">{project.name}</h1>
-              {project.description && (
-                <p className="mt-4 max-w-2xl text-lg leading-relaxed text-subtle">{project.description}</p>
+      <div className="flex flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start">
+        <div className="contents lg:block lg:space-y-4">
+          <section className="order-1 flex items-center gap-4 rounded-[30px] bg-white p-4 lg:p-6" aria-labelledby="project-title">
+            {project.coverImageUrl && <img src={project.coverImageUrl} alt="" className="h-[150px] w-[120px] shrink-0 rounded-[22px] object-cover lg:h-[175px] lg:w-[140px]" />}
+            <div className="min-w-0">
+              <label className="sr-only" htmlFor="project-stage">Stage</label>
+              <select id="project-stage" value={project.status} onChange={e => changeStage(e.target.value as (typeof stages)[number])}
+                className="min-h-[36px] rounded-full bg-canvas px-3 text-sm font-bold">
+                {stages.map(st => <option key={st} value={st}>{st[0].toUpperCase() + st.slice(1)}{st === project.status && stepsList.length ? ` · ${project.progress}%` : ''}</option>)}
+              </select>
+              {stageError && <p role="alert" className="mt-1 text-xs font-semibold text-red-ink">The stage didn't change. Try again.</p>}
+              <h1 id="project-title" className="mt-2 font-display text-[30px] leading-tight tracking-[-.05em] lg:text-[44px]">{project.name}</h1>
+              <p className="mt-1 text-sm text-subtle">{[project.garment, pattern?.name, project.size ? `Size ${project.size}` : null].filter(Boolean).join(' · ') || 'Add a pattern and size in the setup list.'}</p>
+              {stepsList.length > 0 && (
+                <div className="mt-3 max-w-[320px]">
+                  <div className="h-2 overflow-hidden rounded-full bg-canvas" role="progressbar" aria-label="Progress" aria-valuemin={0} aria-valuemax={100} aria-valuenow={project.progress}>
+                    <div className="h-full rounded-full bg-yellow transition-all" style={{ width: `${project.progress}%` }} />
+                  </div>
+                  <p className="mt-1 text-xs text-subtle">{doneSteps} of {stepsList.length} steps done</p>
+                </div>
               )}
-
-              {/* Progress Bar inside Header */}
-              <div className="mt-8 rounded-lg bg-white p-4">
-                <div className="mb-2 flex justify-between font-mono-custom text-xs text-subtle">
-                  <span className="uppercase tracking-widest">Overall Progress</span>
-                  <span>{project.progress || 0}%</span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-canvas">
-                  <div
-                    className="h-full rounded-full bg-yellow transition-all duration-500 ease-out"
-                    style={{ width: `${Math.min(100, project.progress || 0)}%` }}
-                  />
-                </div>
-              </div>
+              {project.completedAt && <p className="mt-2 text-xs text-subtle">Finished {new Date(project.completedAt).toLocaleDateString()}</p>}
             </div>
-          </div>
-
-          <ProjectSteps project={project} />
-
-          <ProjectPhotos project={project} />
-
+          </section>
+          <div className="order-3"><ProjectSteps project={project} addSignal={addSignal} /></div>
+          <div className="order-4"><Journal project={project} /></div>
+          <div className="order-5"><ProjectPhotos project={project} /></div>
         </div>
 
-        {/* Sidebar Column */}
-        <div className="space-y-6">
-          <ProjectSharing project={project} />
-          {/* Materials Card */}
-          <div className="studio-card rounded-xl p-6">
-            <h3 className="font-display text-2xl text-ink">Materials</h3>
-            <div className="mt-5 space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-canvas text-subtle">
-                  <BookOpen size={16} />
+        <div className="contents lg:block lg:space-y-4">
+          <div className="order-2"><SetupChecklist project={project} onAddOwnStep={() => setAddSignal(n => n + 1)} /></div>
+          <div className="order-6"><ProjectSharing project={project} /></div>
+          <section className="order-7 rounded-[30px] bg-white p-6" aria-labelledby="materials-title">
+            <h2 id="materials-title" className="font-display text-2xl tracking-[-.04em]">Materials</h2>
+            <dl className="mt-4 space-y-3">
+              {[
+                { icon: BookOpen, label: 'Pattern', value: pattern?.name, href: '/patterns' },
+                { icon: Palette, label: 'Fabric', value: fabric ? `${fabric.name} (${fabric.color})` : null, href: '/stash/fabrics' },
+                { icon: Package, label: 'Thread', value: thread ? `${thread.colorName} (${thread.brand})` : null, href: '/stash/threads' },
+                { icon: Ruler, label: 'Measurements', value: measurement?.name, href: '/measurements' },
+              ].map(m => (
+                <div key={m.label} className="flex items-start gap-3">
+                  <span className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-canvas" aria-hidden="true"><m.icon size={16} /></span>
+                  <div>
+                    <dt className="text-xs font-semibold text-subtle">{m.label}</dt>
+                    <dd>{m.value ? <Link href={m.href} className="text-sm font-semibold text-blue-ink hover:underline">{m.value}</Link> : <span className="text-sm">None yet</span>}</dd>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-xs font-semibold text-subtle">Pattern</p>
-                  {pattern ? (
-                    <Link href="/patterns" className="text-sm font-medium text-red-ink hover:underline">{pattern.name}</Link>
-                  ) : (
-                    <p className="text-sm text-ink">None selected</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-canvas text-subtle">
-                  <Palette size={16} />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-subtle">Fabric</p>
-                  {fabric ? (
-                    <Link href="/stash/fabrics" className="text-sm font-medium text-red-ink hover:underline">{fabric.name} ({fabric.color})</Link>
-                  ) : (
-                    <p className="text-sm text-ink">None selected</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-canvas text-subtle">
-                  <Package size={16} />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-subtle">Thread</p>
-                  {thread ? (
-                    <Link href="/stash/threads" className="text-sm font-medium text-red-ink hover:underline">{thread.colorName} ({thread.brand})</Link>
-                  ) : (
-                    <p className="text-sm text-ink">None selected</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3">
-                <div className="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded bg-canvas text-subtle">
-                  <Ruler size={16} />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold text-subtle">Measurements</p>
-                  {measurement ? (
-                    <Link href="/measurements" className="text-sm font-medium text-red-ink hover:underline">{measurement.name}</Link>
-                  ) : (
-                    <p className="text-sm text-ink">None selected</p>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Journal Cards */}
-          <div className="space-y-4">
-            {[
-              { id: 'notes', title: 'Notes', placeholder: 'General project notes, things to remember...' },
-              { id: 'alterations', title: 'Alterations', placeholder: 'Adjustments made to the pattern...' },
-              { id: 'problems', title: 'Problems', placeholder: 'Issues encountered...' },
-              { id: 'solutions', title: 'Solutions', placeholder: 'How you fixed them...' }
-            ].map((section) => (
-              <div key={section.id} className="studio-card rounded-xl p-5">
-                <h3 className="font-mono-custom text-[.7rem] uppercase tracking-widest text-subtle">{section.title}</h3>
-                <textarea
-                  defaultValue={String((project as any)[section.id] || '')}
-                  onBlur={(e) => {
-                    if (e.target.value !== (project as any)[section.id]) {
-                      handleUpdateNotes(section.id, e.target.value);
-                    }
-                  }}
-                  placeholder={section.placeholder}
-                  data-testid={`textarea-${section.id}`}
-                  className="mt-3 w-full resize-none bg-transparent text-sm leading-relaxed text-ink outline-none placeholder:text-subtle"
-                  rows={Math.max(3, String((project as any)[section.id] || '').split('\n').length)}
-                />
-              </div>
-            ))}
-          </div>
-
+              ))}
+            </dl>
+          </section>
         </div>
       </div>
 
-      {formOpen && (
-        <ProjectFormModal project={project} close={() => setFormOpen(false)} />
-      )}
+      {formOpen && <ProjectFormModal project={project} close={() => setFormOpen(false)} />}
     </div>
   );
 }

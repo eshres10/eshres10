@@ -47,3 +47,6 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Flow design screenshots contain mockup photos: keep them local (docs/design/flows/images/), never commit.
+docs/design/flows/images/

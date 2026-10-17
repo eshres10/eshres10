@@ -29,4 +29,9 @@ export interface FabricInput {
   notes?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  /**
+     * @nullable
+     * @pattern ^#[0-9a-f]{6}$
+     */
+  colorHex?: string | null;
 }

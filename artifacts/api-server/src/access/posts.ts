@@ -28,10 +28,11 @@ export interface MediaView {
   width: number;
   height: number;
   color: string | null;
+  altText: string;
 }
 
 export function mediaView(m: typeof mediaTable.$inferSelect): MediaView {
-  return { id: m.id, url: urlForObjectPath(m.fullPath), thumbUrl: urlForObjectPath(m.thumbPath), width: m.width, height: m.height, color: m.color };
+  return { id: m.id, url: urlForObjectPath(m.fullPath), thumbUrl: urlForObjectPath(m.thumbPath), width: m.width, height: m.height, color: m.color, altText: m.altText };
 }
 
 export interface FeedPostView {
@@ -49,7 +50,8 @@ export interface FeedPostView {
   commentCount: number;
   likedByMe: boolean;
   savedByMe: boolean;
-  challenges: Array<{ slug: string; tag: string }>;
+  challenges: Array<{ slug: string; tag: string; entryId: number }>;
+  aspect: Post["aspect"];
 }
 
 // Cursors are opaque to clients: "<created_at ISO>|<id>" in base64url.
@@ -111,7 +113,7 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
     : [];
   // Challenges each post is a live entry in (the challenge must be visible too).
   const entries = await db
-    .select({ postId: challengeEntriesTable.postId, slug: challengesTable.slug, tag: challengesTable.tag })
+    .select({ postId: challengeEntriesTable.postId, entryId: challengeEntriesTable.id, slug: challengesTable.slug, tag: challengesTable.tag })
     .from(challengeEntriesTable)
     .innerJoin(challengesTable, eq(challengesTable.id, challengeEntriesTable.challengeId))
     .where(and(inArray(challengeEntriesTable.postId, ids), isNull(challengeEntriesTable.removedAt), viewer.userId ? sql`NOT sewspace_blocked_with(${challengesTable.createdBy})` : undefined));
@@ -146,7 +148,8 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
       commentCount: Number(countMap.get(post.id)?.comments ?? 0),
       likedByMe: likedSet.has(post.id),
       savedByMe: savedSet.has(post.id),
-      challenges: entries.filter((e) => e.postId === post.id).map(({ slug, tag }) => ({ slug, tag })),
+      challenges: entries.filter((e) => e.postId === post.id).map(({ slug, tag, entryId }) => ({ slug, tag, entryId })),
+      aspect: post.aspect,
     }];
   });
 }

@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { PatternInputFormat } from './patternInputFormat';
 import type { PatternInputStatus } from './patternInputStatus';
 import type { Visibility } from './visibility';
 
@@ -37,4 +38,13 @@ export interface PatternInput {
   /** @nullable */
   pdfFileName?: string | null;
   status?: PatternInputStatus;
+  /**
+     * @maxItems 60
+     * @nullable
+     * @items.minLength 1
+     * @items.maxLength 200
+     */
+  steps?: string[] | null;
+  /** @nullable */
+  format?: PatternInputFormat;
 }

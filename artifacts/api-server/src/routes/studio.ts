@@ -69,6 +69,13 @@ import {
   UpdateProfileBody,
   UpdateProfileResponse,
   UpdateProjectBody,
+  ExtractColoursBody,
+  ExtractColoursResponse,
+  UpdateProjectFieldsBody,
+  UpdateProjectFieldsParams,
+  UpdateProjectFieldsResponse,
+  AddStepsFromPatternParams,
+  AddStepsFromPatternResponse,
   UpdateProjectParams,
   UpdateProjectResponse,
   UpdateProjectPhotoBody,
@@ -88,6 +95,8 @@ import { ensureProfile } from "./profile";
 import { findForeignObjectField, IMAGE_FIELD, PDF_FIELD, publishedAtFor, type UploadPurpose } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { ObjectNotFoundError, ObjectStorageService } from "../lib/objectStorage";
+import { dominantColours, UnreadableColourImageError } from "../lib/colours";
+import { storageFor } from "./storage";
 
 const router: IRouter = Router();
 const objectStorageService = new ObjectStorageService();
@@ -137,6 +146,7 @@ function fabricResponse(row: typeof fabricsTable.$inferSelect) {
     weight: row.weight,
     notes: row.notes,
     imageUrl: row.imageUrl,
+    colorHex: row.colorHex,
     visibility: row.visibility,
     isDemo: row.isDemo,
     catalogId: row.catalogId,
@@ -181,6 +191,8 @@ function patternResponse(row: typeof patternsTable.$inferSelect) {
     visibility: row.visibility,
     isDemo: row.isDemo,
     catalogId: row.catalogId,
+    steps: row.steps ?? null,
+    format: row.format ?? null,
   };
 }
 
@@ -205,6 +217,12 @@ function projectResponse(row: typeof projectsTable.$inferSelect) {
     size: row.size,
     publishedAt: row.publishedAt,
     isDemo: row.isDemo,
+    garment: row.garment,
+    setup: {
+      dismissed: row.setup?.dismissed ?? false,
+      visibilityChosen: row.setup?.visibilityChosen ?? false,
+      stepsChoice: row.setup?.stepsChoice ?? null,
+    },
   };
 }
 
@@ -238,7 +256,11 @@ async function recalculateProjectProgress(db: Tx, projectId: number, uid: string
     .select({ completed: projectStepsTable.completed })
     .from(projectStepsTable)
     .where(and(eq(projectStepsTable.projectId, projectId), eq(projectStepsTable.userId, uid)));
-  if (steps.length === 0) return;
+  // Progress is derived from steps: completed ÷ total (0 with no steps).
+  if (steps.length === 0) {
+    await db.update(projectsTable).set({ progress: 0 }).where(and(eq(projectsTable.id, projectId), eq(projectsTable.userId, uid)));
+    return;
+  }
 
   const progress = Math.round((steps.filter((step) => step.completed).length / steps.length) * 100);
   const values: {
@@ -416,6 +438,38 @@ router.get("/patterns", scoped(async (req, res, db): Promise<void> => {
   res.json(ListPatternsResponse.parse(rows.map(patternResponse)));
 }));
 
+// Four main colours of one of your photos, for swatches when adding fabric or
+// thread. No AI; see lib/colours.ts.
+router.post("/stash/colours", async (req, res): Promise<void> => {
+  const parsed = ExtractColoursBody.safeParse(req.body);
+  const objectPath = parsed.success ? /^\/api\/storage(\/objects\/[A-Za-z0-9._\-/]+)$/.exec(parsed.data.imageUrl)?.[1] : undefined;
+  if (!parsed.success || !objectPath || objectPath.includes("..")) {
+    res.status(400).json({ error: "Upload a photo first." });
+    return;
+  }
+  const foreign = await withUser(userId(req), (db) =>
+    findForeignObjectField(db, viewerOf(req), { imageUrl: parsed.data.imageUrl }, { imageUrl: IMAGE_FIELD }),
+  );
+  if (foreign) {
+    res.status(404).json({ error: "Photo not found" });
+    return;
+  }
+  try {
+    const image = await storageFor(req).readObjectEntity(objectPath);
+    res.json(ExtractColoursResponse.parse({ colours: await dominantColours(image) }));
+  } catch (error) {
+    if (error instanceof ObjectNotFoundError) {
+      res.status(404).json({ error: "Photo not found" });
+      return;
+    }
+    if (error instanceof UnreadableColourImageError) {
+      res.status(400).json({ error: "That file isn't a photo we can read." });
+      return;
+    }
+    throw error;
+  }
+});
+
 router.post("/patterns/analyze-pdf", async (req, res): Promise<void> => {
   const parsed = AnalyzePatternPdfBody.safeParse(req.body);
   if (!parsed.success) {
@@ -472,6 +526,7 @@ Rules:
 - difficulty must be beginner, intermediate, advanced, or null. Infer it from the construction techniques only when the PDF does not state it.
 - yardage must be one representative numeric amount when clear, otherwise null. Preserve the complete multi-size yardage information in requiredFabric or notes.
 - Keep instructions concise: summarize major construction stages rather than reproducing copyrighted instructions.
+- steps: when the PDF has construction instructions, list the main stages in order as short imperative phrases in your own words (at most 20, each under 80 characters, e.g. "Staystitch the neckline"); otherwise null.
 - Return null for details that cannot be determined.`,
             },
           ],
@@ -500,11 +555,12 @@ Rules:
               seamAllowance: { type: ["string", "null"] },
               instructions: { type: ["string", "null"] },
               notes: { type: ["string", "null"] },
+              steps: { type: ["array", "null"], items: { type: "string" } },
             },
             required: [
               "name", "designer", "garmentType", "difficulty", "sizes",
               "requiredFabric", "yardage", "recommendedFabrics",
-              "seamAllowance", "instructions", "notes",
+              "seamAllowance", "instructions", "notes", "steps",
             ],
           },
         },
@@ -515,6 +571,11 @@ Rules:
       throw new Error("OpenAI returned no pattern details");
     }
     const details = JSON.parse(response.output_text);
+    // Keep steps short and few, whatever the model returned.
+    details.steps = Array.isArray(details.steps)
+      ? details.steps.map((x: unknown) => String(x).trim().slice(0, 120)).filter(Boolean).slice(0, 20)
+      : null;
+    if (details.steps && !details.steps.length) details.steps = null;
     res.json(AnalyzePatternPdfResponse.parse(details));
   } catch (error) {
     if (error instanceof ObjectNotFoundError) {
@@ -621,6 +682,81 @@ router.patch("/projects/:id", scoped(async (req, res, db): Promise<void> => {
     return;
   }
   res.json(UpdateProjectResponse.parse(projectResponse(row)));
+}));
+
+// The parts of a project the setup checklist, journal and stage picker
+// change, one or a few at a time. Linked items must be the caller's own (RLS
+// WITH CHECK says the same); setup flags merge into what's stored.
+const LINKS = { patternId: patternsTable, fabricId: fabricsTable, threadId: threadsTable, measurementProfileId: measurementProfilesTable } as const;
+
+router.patch("/projects/:id/fields", scoped(async (req, res, db): Promise<void> => {
+  const params = UpdateProjectFieldsParams.safeParse(req.params);
+  const body = UpdateProjectFieldsBody.safeParse(req.body);
+  if (!params.success || !body.success) {
+    res.status(400).json({ error: "Check the project details and try again." });
+    return;
+  }
+  const uid = userId(req);
+  const [existing] = await db.select().from(projectsTable).where(and(eq(projectsTable.id, params.data.id), eq(projectsTable.userId, uid)));
+  if (!existing) {
+    res.status(404).json({ error: "Project not found" });
+    return;
+  }
+  const { setup, ...fields } = body.data;
+  for (const [key, table] of Object.entries(LINKS) as Array<[keyof typeof LINKS, (typeof LINKS)[keyof typeof LINKS]]>) {
+    const id = fields[key];
+    if (id === undefined || id === null) continue;
+    const [mine] = await db.select({ id: table.id }).from(table).where(and(eq(table.id, id), eq(table.userId, uid)));
+    if (!mine) {
+      res.status(400).json({ error: "You can only link your own patterns, fabrics, threads and measurements." });
+      return;
+    }
+  }
+  const values: Partial<typeof projectsTable.$inferInsert> = { ...fields, updatedAt: new Date() };
+  for (const key of ["size", "garment", "notes", "alterations", "problems", "solutions"] as const) {
+    const v = fields[key];
+    if (typeof v === "string") values[key] = v.trim() === "" ? null : key === "size" || key === "garment" ? v.trim() : v;
+  }
+  if (fields.name !== undefined) values.name = fields.name.trim() || existing.name;
+  if (fields.status === "finished" && !existing.completedAt) values.completedAt = new Date().toISOString().slice(0, 10);
+  if (setup) values.setup = { ...existing.setup, ...Object.fromEntries(Object.entries(setup).filter(([, v]) => v !== undefined)) };
+  const [row] = await db.update(projectsTable).set(values).where(and(eq(projectsTable.id, existing.id), eq(projectsTable.userId, uid))).returning();
+  res.json(UpdateProjectFieldsResponse.parse(projectResponse(row)));
+}));
+
+// "Use the pattern's steps": copies the linked pattern's steps to the end of
+// the project's list and records the choice.
+router.post("/projects/:id/steps/from-pattern", scoped(async (req, res, db): Promise<void> => {
+  const params = AddStepsFromPatternParams.safeParse(req.params);
+  if (!params.success) {
+    res.status(404).json({ error: "Project not found" });
+    return;
+  }
+  const uid = userId(req);
+  const [project] = await db.select().from(projectsTable).where(and(eq(projectsTable.id, params.data.id), eq(projectsTable.userId, uid)));
+  if (!project) {
+    res.status(404).json({ error: "Project not found" });
+    return;
+  }
+  const [pattern] = project.patternId
+    ? await db.select({ steps: patternsTable.steps }).from(patternsTable).where(and(eq(patternsTable.id, project.patternId), eq(patternsTable.userId, uid)))
+    : [];
+  const titles = (pattern?.steps ?? []).map((t) => String(t).trim()).filter(Boolean);
+  if (!titles.length) {
+    res.status(400).json({ error: "This project's pattern has no steps yet." });
+    return;
+  }
+  const [last] = await db.select({ position: projectStepsTable.position }).from(projectStepsTable)
+    .where(and(eq(projectStepsTable.projectId, project.id), eq(projectStepsTable.userId, uid)))
+    .orderBy(desc(projectStepsTable.position)).limit(1);
+  const start = (last?.position ?? -1) + 1;
+  const rows = await db.insert(projectStepsTable)
+    .values(titles.map((title, i) => ({ projectId: project.id, userId: uid, title: title.slice(0, 200), position: start + i })))
+    .returning();
+  await db.update(projectsTable).set({ setup: { ...project.setup, stepsChoice: "pattern" } })
+    .where(and(eq(projectsTable.id, project.id), eq(projectsTable.userId, uid)));
+  await recalculateProjectProgress(db, project.id, uid);
+  res.status(201).json(AddStepsFromPatternResponse.parse(rows.map(projectStepResponse)));
 }));
 
 router.delete("/projects/:id", scoped(async (req, res, db): Promise<void> => {

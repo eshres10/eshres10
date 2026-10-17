@@ -20,11 +20,13 @@ import {
   DeletePostParams,
   GetHomeFeedQueryParams,
   GetHomeFeedResponse,
+  SuggestHashtagsQueryParams,
+  SuggestHashtagsResponse,
   UpdatePostBody,
   UpdatePostParams,
   UpdatePostResponse,
 } from "@workspace/api-zod";
-import { getPostForViewer, homeFeed, mediaView, own, type Viewer } from "../access";
+import { getPostForViewer, homeFeed, MAX_HASHTAGS, mediaView, own, parseHashtags, suggestHashtags, syncPostHashtags, type Viewer } from "../access";
 import { processImage, UnreadableImageError } from "../lib/images";
 import { ObjectNotFoundError } from "../lib/objectStorage";
 import { scoped, type Reply } from "../lib/scoped";
@@ -103,6 +105,35 @@ router.post("/media", async (req: Request, res: Response): Promise<void> => {
 });
 
 type Tags = { projectId?: number | null; patternId?: number | null; fabricId?: number | null };
+type AltText = { mediaId: number; text: string };
+
+function tooManyHashtags(caption: string, res: Reply): boolean {
+  if (parseHashtags(caption).length <= MAX_HASHTAGS) return false;
+  res.status(400).json({ error: `Use up to ${MAX_HASHTAGS} hashtags.` });
+  return true;
+}
+
+// Every photo must be one of the author's processed photos.
+async function rejectsForeignMedia(db: Tx, viewer: Viewer, mediaIds: number[], res: Reply): Promise<boolean> {
+  if (!mediaIds.length) return false;
+  const mine = await db.select({ id: mediaTable.id }).from(mediaTable).where(and(inArray(mediaTable.id, mediaIds), own(mediaTable, viewer)));
+  if (mine.length === mediaIds.length) return false;
+  res.status(400).json({ error: "Some photos aren't yours. Add them again." });
+  return true;
+}
+
+// Alt text may only be set on the post's own photos.
+function rejectsStrayAltText(altTexts: AltText[] | undefined, mediaIds: number[], res: Reply): boolean {
+  if (!altTexts?.some((a) => !mediaIds.includes(a.mediaId))) return false;
+  res.status(400).json({ error: "Alt text must be for one of this post's photos." });
+  return true;
+}
+
+async function saveAltTexts(db: Tx, viewer: Viewer, altTexts: AltText[] | undefined): Promise<void> {
+  for (const a of altTexts ?? []) {
+    await db.update(mediaTable).set({ altText: a.text.trim().slice(0, 500) }).where(and(eq(mediaTable.id, a.mediaId), own(mediaTable, viewer)));
+  }
+}
 
 // A post may only tag the author's own make, pattern or fabric.
 async function rejectsForeignTags(db: Tx, viewer: Viewer, tags: Tags, res: Reply): Promise<boolean> {
@@ -142,6 +173,7 @@ router.post("/posts", scoped(async (req, res, db): Promise<void> => {
     res.status(400).json({ error: mediaIds.length ? "A status post has no photos." : "Write something to post." });
     return;
   }
+  if (tooManyHashtags(caption, res) || rejectsStrayAltText(body.altTexts, mediaIds, res)) return;
 
   const [profile] = await db.select({ handle: profilesTable.handle }).from(profilesTable).where(eq(profilesTable.userId, uid));
   if (!profile?.handle) {
@@ -156,13 +188,7 @@ router.post("/posts", scoped(async (req, res, db): Promise<void> => {
     res.status(429).json({ error: "You're posting very fast. Take a break and try again in a little while." });
     return;
   }
-  if (mediaIds.length) {
-    const mine = await db.select({ id: mediaTable.id }).from(mediaTable).where(and(inArray(mediaTable.id, mediaIds), own(mediaTable, viewer)));
-    if (mine.length !== mediaIds.length) {
-      res.status(400).json({ error: "Some photos aren't yours. Add them again." });
-      return;
-    }
-  }
+  if (await rejectsForeignMedia(db, viewer, mediaIds, res)) return;
   if (await rejectsForeignTags(db, viewer, body, res)) return;
 
   const [post] = await db
@@ -175,11 +201,14 @@ router.post("/posts", scoped(async (req, res, db): Promise<void> => {
       projectId: body.projectId ?? null,
       patternId: body.patternId ?? null,
       fabricId: body.fabricId ?? null,
+      ...(body.aspect ? { aspect: body.aspect } : {}),
     })
     .returning();
   if (mediaIds.length) {
     await db.insert(postMediaTable).values(mediaIds.map((mediaId, position) => ({ postId: post.id, mediaId, userId: uid, position })));
   }
+  await saveAltTexts(db, viewer, body.altTexts);
+  await syncPostHashtags(db, viewer, post.id, caption);
   const view = await getPostForViewer(db, viewer, post.id);
   res.status(201).json(CreatePostResponse.parse(view));
 }));
@@ -203,6 +232,20 @@ router.patch("/posts/:id", scoped(async (req, res, db): Promise<void> => {
     res.status(400).json({ error: "Write something to post." });
     return;
   }
+  if (caption !== undefined && tooManyHashtags(caption, res)) return;
+  const mediaIds = body.mediaIds ? [...new Set(body.mediaIds)] : undefined;
+  if (mediaIds && existing.kind === "status" && mediaIds.length) {
+    res.status(400).json({ error: "A status post has no photos." });
+    return;
+  }
+  if (mediaIds && existing.kind === "photo" && (mediaIds.length < 1 || mediaIds.length > MAX_PHOTOS)) {
+    res.status(400).json({ error: `Keep between 1 and ${MAX_PHOTOS} photos.` });
+    return;
+  }
+  const finalMedia = mediaIds ?? (await db.select({ id: postMediaTable.mediaId }).from(postMediaTable)
+    .where(and(eq(postMediaTable.postId, existing.id), own(postMediaTable, viewer)))).map((m) => m.id);
+  if (rejectsStrayAltText(body.altTexts, finalMedia, res)) return;
+  if (mediaIds && await rejectsForeignMedia(db, viewer, mediaIds, res)) return;
   if (await rejectsForeignTags(db, viewer, body, res)) return;
   await db
     .update(postsTable)
@@ -212,9 +255,16 @@ router.patch("/posts/:id", scoped(async (req, res, db): Promise<void> => {
       projectId: body.projectId,
       patternId: body.patternId,
       fabricId: body.fabricId,
+      aspect: body.aspect,
       updatedAt: new Date(),
     })
     .where(and(eq(postsTable.id, existing.id), own(postsTable, viewer)));
+  if (mediaIds && existing.kind === "photo") {
+    await db.delete(postMediaTable).where(and(eq(postMediaTable.postId, existing.id), own(postMediaTable, viewer)));
+    await db.insert(postMediaTable).values(mediaIds.map((mediaId, position) => ({ postId: existing.id, mediaId, userId: existing.userId, position })));
+  }
+  await saveAltTexts(db, viewer, body.altTexts);
+  if (caption !== undefined) await syncPostHashtags(db, viewer, existing.id, caption);
   res.json(UpdatePostResponse.parse(await getPostForViewer(db, viewer, existing.id)));
 }));
 
@@ -233,6 +283,15 @@ router.delete("/posts/:id", scoped(async (req, res, db): Promise<void> => {
     return;
   }
   res.sendStatus(204);
+}));
+
+router.get("/hashtags/suggest", scoped(async (req, res, db): Promise<void> => {
+  const parsed = SuggestHashtagsQueryParams.safeParse(req.query);
+  if (!parsed.success) {
+    res.json([]);
+    return;
+  }
+  res.json(SuggestHashtagsResponse.parse(await suggestHashtags(db, viewerOf(req), parsed.data)));
 }));
 
 router.get("/feed", scoped(async (req, res, db): Promise<void> => {

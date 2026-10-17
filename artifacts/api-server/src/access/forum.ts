@@ -5,6 +5,7 @@ import {
   FORUM_KINDS,
   forumPollOptionsTable,
   forumPollVotesTable,
+  forumTopicMediaTable,
   forumRepliesTable,
   forumTopicsTable,
   forumVotesTable,
@@ -21,7 +22,7 @@ import {
   type Tx,
 } from "@workspace/db";
 import { catalogRefs, type CatalogRef } from "./catalog-refs";
-import { hydratePosts, type FeedPostView } from "./posts";
+import { hydratePosts, mediaView, type FeedPostView, type MediaView } from "./posts";
 import type { Viewer } from "./viewer";
 import { visibleTo } from "./visibility";
 
@@ -119,6 +120,7 @@ export interface TopicSummaryView {
   poll: PollView | null;
   acceptedAnswer: { author: string; excerpt: string } | null;
   topRecommendations: Array<{ catalog: CatalogRef; count: number }>;
+  photos: MediaView[];
 }
 
 async function topicSummaries(db: Tx, viewer: Viewer, rows: ForumTopic[]): Promise<TopicSummaryView[]> {
@@ -149,6 +151,15 @@ async function topicSummaries(db: Tx, viewer: Viewer, rows: ForumTopic[]): Promi
     : [];
   const refs = await catalogRefs(db, recs.map((r) => r.catalogId));
 
+  // Show & tell photos (RLS: they follow their topic).
+  const showIds = rows.filter((t) => t.kind === "show_tell").map((t) => t.id);
+  const photos = showIds.length
+    ? await db.select({ topicId: forumTopicMediaTable.topicId, media: mediaTable }).from(forumTopicMediaTable)
+        .innerJoin(mediaTable, eq(mediaTable.id, forumTopicMediaTable.mediaId))
+        .where(and(inArray(forumTopicMediaTable.topicId, showIds), eq(mediaTable.userId, forumTopicMediaTable.userId)))
+        .orderBy(asc(forumTopicMediaTable.position))
+    : [];
+
   const out: TopicSummaryView[] = [];
   for (const t of rows) {
     const author = authors.get(t.userId);
@@ -178,6 +189,7 @@ async function topicSummaries(db: Tx, viewer: Viewer, rows: ForumTopic[]): Promi
         .sort((x, y) => y.n - x.n)
         .slice(0, 3)
         .map((r) => ({ catalog: refs.get(r.catalogId!)!, count: r.n })),
+      photos: photos.filter((p) => p.topicId === t.id && p.media.userId === t.userId).map((p) => mediaView(p.media)),
     });
   }
   return out;
@@ -212,6 +224,20 @@ export async function listTopics(db: Tx, viewer: Viewer, options: { filter?: Top
     items: await topicSummaries(db, viewer, rows.slice(0, PAGE)),
     nextCursor: rows.length > PAGE ? Buffer.from(`o:${offset + PAGE}`).toString("base64url") : null,
   };
+}
+
+const STOPWORDS = new Set("the and for with what which how does any can you your are was this that from have has into when where who why use using best should would about there their them they not but out get got just like".split(" "));
+
+/** "Already asked?": questions whose titles share the most words with q (at least 2, or the only one). */
+export async function similarQuestions(db: Tx, viewer: Viewer, q: string): Promise<TopicSummaryView[]> {
+  const words = [...new Set(q.toLowerCase().match(/[a-z0-9]+/g) ?? [])].filter((w) => w.length >= 3 && !STOPWORDS.has(w)).slice(0, 8);
+  if (!words.length) return [];
+  const score = sql<number>`(${sql.join(words.map((w) => sql`(${forumTopicsTable.title} ILIKE ${`%${escapeLike(w)}%`})::int`), sql` + `)})`;
+  const rows = await db.select().from(forumTopicsTable)
+    .where(and(notBlockedTopic(viewer), eq(forumTopicsTable.kind, "question"), sql`${score} >= ${Math.min(2, words.length)}`))
+    .orderBy(desc(score), desc(isNotNull(forumTopicsTable.acceptedReplyId)), desc(forumTopicsTable.voteCount), desc(forumTopicsTable.id))
+    .limit(3);
+  return topicSummaries(db, viewer, rows);
 }
 
 /** Counts for the filter chips and boards (what this viewer can see). */
@@ -366,7 +392,7 @@ export interface TopicInput {
   shareToFeed?: boolean;
   mediaIds?: number[];
 }
-type TopicError = "no_handle" | "rate_limited" | "bad_title" | "bad_tags" | "bad_poll" | "bad_make" | "bad_catalog" | "bad_media";
+type TopicError = "no_handle" | "rate_limited" | "bad_title" | "bad_tags" | "bad_poll" | "bad_make" | "bad_catalog" | "bad_media" | "no_photo";
 
 /** "#Linen Cutting" → ["linen-cutting"]; at most 5, each a-z 0-9 and dashes. */
 export function normaliseTags(tags: string[] = []): string[] | null {
@@ -401,21 +427,23 @@ export async function createTopic(db: Tx, viewer: Viewer, input: TopicInput): Pr
     if (!entry) return { ok: false, error: "bad_catalog" };
   }
 
-  // Show & tell can also be a public post in the author's feed (with photos).
+  // Show & tell needs at least one photo; the photos belong to the topic and,
+  // when shared, also to a public post in the author's feed.
   let postId: number | null = null;
   const mediaIds = [...new Set(input.mediaIds ?? [])];
-  if (mediaIds.length && !(input.kind === "show_tell" && input.shareToFeed)) return { ok: false, error: "bad_media" };
-  if (input.kind === "show_tell" && input.shareToFeed) {
+  if (mediaIds.length && input.kind !== "show_tell") return { ok: false, error: "bad_media" };
+  if (input.kind === "show_tell") {
+    if (!mediaIds.length) return { ok: false, error: "no_photo" };
     if (mediaIds.length > 10) return { ok: false, error: "bad_media" };
-    const media = mediaIds.length
-      ? await db.select({ id: mediaTable.id }).from(mediaTable).where(and(inArray(mediaTable.id, mediaIds), eq(mediaTable.userId, me)))
-      : [];
+    const media = await db.select({ id: mediaTable.id }).from(mediaTable).where(and(inArray(mediaTable.id, mediaIds), eq(mediaTable.userId, me)));
     if (media.length !== mediaIds.length) return { ok: false, error: "bad_media" };
+  }
+  if (input.kind === "show_tell" && input.shareToFeed) {
     const caption = (body ? `${title}\n\n${body}` : title).slice(0, 2200);
     const [post] = await db.insert(postsTable).values({
-      userId: me, kind: mediaIds.length ? "photo" : "status", caption, visibility: "public", projectId: input.makeId ?? null,
+      userId: me, kind: "photo", caption, visibility: "public", projectId: input.makeId ?? null,
     }).returning({ id: postsTable.id });
-    if (mediaIds.length) await db.insert(postMediaTable).values(mediaIds.map((mediaId, position) => ({ postId: post.id, mediaId, userId: me, position })));
+    await db.insert(postMediaTable).values(mediaIds.map((mediaId, position) => ({ postId: post.id, mediaId, userId: me, position })));
     postId = post.id;
   }
 
@@ -431,6 +459,9 @@ export async function createTopic(db: Tx, viewer: Viewer, input: TopicInput): Pr
     postId,
     pollClosesAt: input.kind === "poll" ? new Date(Date.now() + (input.pollDays ?? 3) * 86400_000) : null,
   }).returning();
+  if (mediaIds.length) {
+    await db.insert(forumTopicMediaTable).values(mediaIds.map((mediaId, position) => ({ topicId: topic.id, mediaId, userId: me, position })));
+  }
   if (options.length) {
     await db.insert(forumPollOptionsTable).values(options.map((label, i) => ({ topicId: topic.id, position: i + 1, label })));
   }

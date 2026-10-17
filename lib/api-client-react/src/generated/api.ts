@@ -45,9 +45,15 @@ import type {
   ChallengeUpdate,
   CheckHandleAvailability200,
   CheckHandleAvailabilityParams,
+  ColourRequest,
+  ColourResult,
   Comment,
   CommentInput,
   Dashboard,
+  Draft,
+  DraftEnvelope,
+  DraftInput,
+  DraftKind,
   EntryInput,
   ErrorResponse,
   Fabric,
@@ -73,6 +79,8 @@ import type {
   GetHomeFeedParams,
   GetProfilePostsParams,
   GetSavedPostsParams,
+  GetTagPostsParams,
+  HashtagCount,
   HealthStatus,
   HelpfulState,
   LibraryResult,
@@ -83,6 +91,7 @@ import type {
   ListForumTopicsParams,
   ListPatternsParams,
   ListReportsParams,
+  ListSimilarQuestionsParams,
   ListThreadsParams,
   MeasurementProfile,
   MeasurementProfileInput,
@@ -105,6 +114,7 @@ import type {
   ProfileUsed,
   Project,
   ProjectDetail,
+  ProjectFieldsInput,
   ProjectInput,
   ProjectPhoto,
   ProjectPhotoInput,
@@ -123,6 +133,8 @@ import type {
   Review,
   ReviewInput,
   SaveState,
+  SuggestHashtagsParams,
+  TagPage,
   Thread,
   ThreadInput,
   ThreadUpdate,
@@ -862,6 +874,230 @@ export function useGetPublicPost<TData = Awaited<ReturnType<typeof getPublicPost
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetPublicPostQueryOptions(id,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetTagPostsUrl = (tag: string,
+    params?: GetTagPostsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/tags/${tag}?${stringifiedParams}` : `/api/public/tags/${tag}`
+}
+
+/**
+ * @summary Public posts with a hashtag, newest first. Works signed out; blocks apply.
+ */
+export const getTagPosts = async (tag: string,
+    params?: GetTagPostsParams, options?: Parameters<typeof customFetch>[1]): Promise<TagPage> => {
+
+  return customFetch<TagPage>(getGetTagPostsUrl(tag,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetTagPostsQueryKey = (tag: string,
+    params?: GetTagPostsParams,) => {
+    return [
+    `/api/public/tags/${tag}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetTagPostsQueryOptions = <TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(tag: string,
+    params?: GetTagPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetTagPostsQueryKey(tag,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTagPosts>>> = ({ signal }) => getTagPosts(tag,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: tag !== null && tag !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetTagPostsQueryResult = NonNullable<Awaited<ReturnType<typeof getTagPosts>>>
+export type GetTagPostsQueryError = ErrorType<void>
+
+
+export function useGetTagPosts<TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(
+ tag: string,
+    params: undefined |  GetTagPostsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTagPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getTagPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTagPosts<TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(
+ tag: string,
+    params?: GetTagPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getTagPosts>>,
+          TError,
+          Awaited<ReturnType<typeof getTagPosts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetTagPosts<TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(
+ tag: string,
+    params?: GetTagPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Public posts with a hashtag, newest first. Works signed out; blocks apply.
+ */
+
+export function useGetTagPosts<TData = Awaited<ReturnType<typeof getTagPosts>>, TError = ErrorType<void>>(
+ tag: string,
+    params?: GetTagPostsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTagPosts>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetTagPostsQueryOptions(tag,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSuggestHashtagsUrl = (params?: SuggestHashtagsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/hashtags/suggest?${stringifiedParams}` : `/api/hashtags/suggest`
+}
+
+/**
+ * @summary Up to 6 hashtags: by prefix (q), or with no q from the tagged make, pattern, fabric, challenge and your recent tags.
+ */
+export const suggestHashtags = async (params?: SuggestHashtagsParams, options?: Parameters<typeof customFetch>[1]): Promise<HashtagCount[]> => {
+
+  return customFetch<HashtagCount[]>(getSuggestHashtagsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getSuggestHashtagsQueryKey = (params?: SuggestHashtagsParams,) => {
+    return [
+    `/api/hashtags/suggest`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getSuggestHashtagsQueryOptions = <TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(params?: SuggestHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getSuggestHashtagsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof suggestHashtags>>> = ({ signal }) => suggestHashtags(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type SuggestHashtagsQueryResult = NonNullable<Awaited<ReturnType<typeof suggestHashtags>>>
+export type SuggestHashtagsQueryError = ErrorType<unknown>
+
+
+export function useSuggestHashtags<TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(
+ params: undefined |  SuggestHashtagsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof suggestHashtags>>,
+          TError,
+          Awaited<ReturnType<typeof suggestHashtags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSuggestHashtags<TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(
+ params?: SuggestHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof suggestHashtags>>,
+          TError,
+          Awaited<ReturnType<typeof suggestHashtags>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useSuggestHashtags<TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(
+ params?: SuggestHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Up to 6 hashtags: by prefix (q), or with no q from the tagged make, pattern, fabric, challenge and your recent tags.
+ */
+
+export function useSuggestHashtags<TData = Awaited<ReturnType<typeof suggestHashtags>>, TError = ErrorType<unknown>>(
+ params?: SuggestHashtagsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof suggestHashtags>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getSuggestHashtagsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -4344,6 +4580,114 @@ export function useListForumTopics<TData = Awaited<ReturnType<typeof listForumTo
 
 
 
+export const getListSimilarQuestionsUrl = (params: ListSimilarQuestionsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/forum/similar?${stringifiedParams}` : `/api/public/forum/similar`
+}
+
+/**
+ * @summary Up to 3 questions whose titles share the most words with q (Already asked?). Works signed out.
+ */
+export const listSimilarQuestions = async (params: ListSimilarQuestionsParams, options?: Parameters<typeof customFetch>[1]): Promise<ForumTopicSummary[]> => {
+
+  return customFetch<ForumTopicSummary[]>(getListSimilarQuestionsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListSimilarQuestionsQueryKey = (params?: ListSimilarQuestionsParams,) => {
+    return [
+    `/api/public/forum/similar`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListSimilarQuestionsQueryOptions = <TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(params: ListSimilarQuestionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSimilarQuestionsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSimilarQuestions>>> = ({ signal }) => listSimilarQuestions(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListSimilarQuestionsQueryResult = NonNullable<Awaited<ReturnType<typeof listSimilarQuestions>>>
+export type ListSimilarQuestionsQueryError = ErrorType<unknown>
+
+
+export function useListSimilarQuestions<TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(
+ params: ListSimilarQuestionsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSimilarQuestions>>,
+          TError,
+          Awaited<ReturnType<typeof listSimilarQuestions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSimilarQuestions<TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(
+ params: ListSimilarQuestionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSimilarQuestions>>,
+          TError,
+          Awaited<ReturnType<typeof listSimilarQuestions>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSimilarQuestions<TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(
+ params: ListSimilarQuestionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Up to 3 questions whose titles share the most words with q (Already asked?). Works signed out.
+ */
+
+export function useListSimilarQuestions<TData = Awaited<ReturnType<typeof listSimilarQuestions>>, TError = ErrorType<unknown>>(
+ params: ListSimilarQuestionsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSimilarQuestions>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListSimilarQuestionsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getGetForumOverviewUrl = () => {
 
 
@@ -7670,6 +8014,94 @@ export const useDeletePattern = <TError = ErrorType<unknown>,
       return useMutation(getDeletePatternMutationOptions(options), queryClient);
     }
 
+export const getExtractColoursUrl = () => {
+
+
+
+
+  return `/api/stash/colours`
+}
+
+/**
+ * @summary Four main colours of one of your photo uploads (no AI: resized and grouped on the server).
+ */
+export const extractColours = async (colourRequest: ColourRequest, options?: Parameters<typeof customFetch>[1]): Promise<ColourResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ColourResult>(getExtractColoursUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(colourRequest)
+  }
+);}
+
+
+
+
+
+export const getExtractColoursMutationKey = () => ['extractColours'] as const;
+
+export const getExtractColoursMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof extractColours>>, TError,ExtractColoursMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof extractColours>>, TError,ExtractColoursMutationVariables, TContext> => {
+
+const mutationKey = getExtractColoursMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof extractColours>>, ExtractColoursMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  extractColours(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ExtractColoursMutationResult = NonNullable<Awaited<ReturnType<typeof extractColours>>>
+    export type ExtractColoursMutationBody = BodyType<ColourRequest>
+    export type ExtractColoursMutationError = ErrorType<void>
+    export type ExtractColoursMutationVariables = {data: BodyType<ColourRequest>}
+
+    /**
+ * @summary Four main colours of one of your photo uploads (no AI: resized and grouped on the server).
+ */
+export const useExtractColours = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof extractColours>>, TError,ExtractColoursMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof extractColours>>,
+        TError,
+        ExtractColoursMutationVariables,
+        TContext
+      > => {
+      return useMutation(getExtractColoursMutationOptions(options), queryClient);
+    }
+
 export const getAnalyzePatternPdfUrl = () => {
 
 
@@ -8209,6 +8641,169 @@ export const useDeleteProject = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteProjectMutationOptions(options), queryClient);
+    }
+
+export const getUpdateProjectFieldsUrl = (id: number,) => {
+
+
+
+
+  return `/api/projects/${id}/fields`
+}
+
+/**
+ * @summary Change some fields of your project (setup checklist answers, journal notes, stage).
+ */
+export const updateProjectFields = async (id: number,
+    projectFieldsInput: ProjectFieldsInput, options?: Parameters<typeof customFetch>[1]): Promise<Project> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Project>(getUpdateProjectFieldsUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(projectFieldsInput)
+  }
+);}
+
+
+
+
+
+export const getUpdateProjectFieldsMutationKey = () => ['updateProjectFields'] as const;
+
+export const getUpdateProjectFieldsMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProjectFields>>, TError,UpdateProjectFieldsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateProjectFields>>, TError,UpdateProjectFieldsMutationVariables, TContext> => {
+
+const mutationKey = getUpdateProjectFieldsMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateProjectFields>>, UpdateProjectFieldsMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateProjectFields(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateProjectFieldsMutationResult = NonNullable<Awaited<ReturnType<typeof updateProjectFields>>>
+    export type UpdateProjectFieldsMutationBody = BodyType<ProjectFieldsInput>
+    export type UpdateProjectFieldsMutationError = ErrorType<void>
+    export type UpdateProjectFieldsMutationVariables = {id: number;data: BodyType<ProjectFieldsInput>}
+
+    /**
+ * @summary Change some fields of your project (setup checklist answers, journal notes, stage).
+ */
+export const useUpdateProjectFields = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateProjectFields>>, TError,UpdateProjectFieldsMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateProjectFields>>,
+        TError,
+        UpdateProjectFieldsMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateProjectFieldsMutationOptions(options), queryClient);
+    }
+
+export const getAddStepsFromPatternUrl = (id: number,) => {
+
+
+
+
+  return `/api/projects/${id}/steps/from-pattern`
+}
+
+/**
+ * @summary Add the linked pattern's construction steps to the project.
+ */
+export const addStepsFromPattern = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<ProjectStep[]> => {
+
+  return customFetch<ProjectStep[]>(getAddStepsFromPatternUrl(id),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getAddStepsFromPatternMutationKey = () => ['addStepsFromPattern'] as const;
+
+export const getAddStepsFromPatternMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addStepsFromPattern>>, TError,AddStepsFromPatternMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addStepsFromPattern>>, TError,AddStepsFromPatternMutationVariables, TContext> => {
+
+const mutationKey = getAddStepsFromPatternMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addStepsFromPattern>>, AddStepsFromPatternMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  addStepsFromPattern(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddStepsFromPatternMutationResult = NonNullable<Awaited<ReturnType<typeof addStepsFromPattern>>>
+
+    export type AddStepsFromPatternMutationError = ErrorType<void>
+    export type AddStepsFromPatternMutationVariables = {id: number}
+
+    /**
+ * @summary Add the linked pattern's construction steps to the project.
+ */
+export const useAddStepsFromPattern = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addStepsFromPattern>>, TError,AddStepsFromPatternMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addStepsFromPattern>>,
+        TError,
+        AddStepsFromPatternMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddStepsFromPatternMutationOptions(options), queryClient);
     }
 
 export const getCreateProjectStepUrl = (projectId: number,) => {
@@ -9438,5 +10033,263 @@ export const useRequestUploadUrl = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getRequestUploadUrlMutationOptions(options), queryClient);
+    }
+
+export const getGetDraftUrl = (kind: DraftKind,) => {
+
+
+
+
+  return `/api/drafts/${kind}`
+}
+
+/**
+ * @summary Your draft for a flow, or null. Drafts are never readable by anyone else.
+ */
+export const getDraft = async (kind: DraftKind, options?: Parameters<typeof customFetch>[1]): Promise<DraftEnvelope> => {
+
+  return customFetch<DraftEnvelope>(getGetDraftUrl(kind),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetDraftQueryKey = (kind: DraftKind,) => {
+    return [
+    `/api/drafts/${kind}`
+    ] as const;
+    }
+
+
+export const getGetDraftQueryOptions = <TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(kind: DraftKind, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetDraftQueryKey(kind);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDraft>>> = ({ signal }) => getDraft(kind, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: kind !== null && kind !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetDraftQueryResult = NonNullable<Awaited<ReturnType<typeof getDraft>>>
+export type GetDraftQueryError = ErrorType<unknown>
+
+
+export function useGetDraft<TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(
+ kind: DraftKind, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDraft>>,
+          TError,
+          Awaited<ReturnType<typeof getDraft>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDraft<TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(
+ kind: DraftKind, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getDraft>>,
+          TError,
+          Awaited<ReturnType<typeof getDraft>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetDraft<TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(
+ kind: DraftKind, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Your draft for a flow, or null. Drafts are never readable by anyone else.
+ */
+
+export function useGetDraft<TData = Awaited<ReturnType<typeof getDraft>>, TError = ErrorType<unknown>>(
+ kind: DraftKind, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDraft>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetDraftQueryOptions(kind,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getSaveDraftUrl = (kind: DraftKind,) => {
+
+
+
+
+  return `/api/drafts/${kind}`
+}
+
+/**
+ * @summary Save (replace) your draft for a flow. At most 64 KB; files in it must be your own uploads.
+ */
+export const saveDraft = async (kind: DraftKind,
+    draftInput: DraftInput, options?: Parameters<typeof customFetch>[1]): Promise<Draft> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Draft>(getSaveDraftUrl(kind),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(draftInput)
+  }
+);}
+
+
+
+
+
+export const getSaveDraftMutationKey = () => ['saveDraft'] as const;
+
+export const getSaveDraftMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveDraft>>, TError,SaveDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof saveDraft>>, TError,SaveDraftMutationVariables, TContext> => {
+
+const mutationKey = getSaveDraftMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof saveDraft>>, SaveDraftMutationVariables> = (props) => {
+          const {kind,data} = props ?? {};
+
+          return  saveDraft(kind,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SaveDraftMutationResult = NonNullable<Awaited<ReturnType<typeof saveDraft>>>
+    export type SaveDraftMutationBody = BodyType<DraftInput>
+    export type SaveDraftMutationError = ErrorType<void>
+    export type SaveDraftMutationVariables = {kind: DraftKind;data: BodyType<DraftInput>}
+
+    /**
+ * @summary Save (replace) your draft for a flow. At most 64 KB; files in it must be your own uploads.
+ */
+export const useSaveDraft = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof saveDraft>>, TError,SaveDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof saveDraft>>,
+        TError,
+        SaveDraftMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSaveDraftMutationOptions(options), queryClient);
+    }
+
+export const getDeleteDraftUrl = (kind: DraftKind,) => {
+
+
+
+
+  return `/api/drafts/${kind}`
+}
+
+export const deleteDraft = async (kind: DraftKind, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteDraftUrl(kind),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteDraftMutationKey = () => ['deleteDraft'] as const;
+
+export const getDeleteDraftMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDraft>>, TError,DeleteDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDraft>>, TError,DeleteDraftMutationVariables, TContext> => {
+
+const mutationKey = getDeleteDraftMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDraft>>, DeleteDraftMutationVariables> = (props) => {
+          const {kind} = props ?? {};
+
+          return  deleteDraft(kind,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteDraftMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDraft>>>
+
+    export type DeleteDraftMutationError = ErrorType<unknown>
+    export type DeleteDraftMutationVariables = {kind: DraftKind}
+
+    export const useDeleteDraft = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDraft>>, TError,DeleteDraftMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteDraft>>,
+        TError,
+        DeleteDraftMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteDraftMutationOptions(options), queryClient);
     }
 

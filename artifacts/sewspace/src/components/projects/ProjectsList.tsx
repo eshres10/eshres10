@@ -62,13 +62,13 @@ export function ProjectsList() {
           </p>
         </div>
         <div className="mt-2 md:mt-0">
-          <button
-            onClick={() => { setEditingProject(null); setFormOpen(true); }}
+          <Link
+            href="/projects/new"
             data-testid="button-create-project"
-            className="btn btn-primary min-h-[44px] w-full md:w-auto"
+            className="btn btn-primary min-h-[44px] w-full no-underline md:w-auto"
           >
             <Plus size={16} /> Start a project
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -104,9 +104,9 @@ export function ProjectsList() {
           <Scissors className="mx-auto text-red-ink" size={32} />
           <h2 className="mt-5 font-display text-2xl text-ink">A blank page</h2>
           <p className="mt-2 text-sm text-subtle">Your notebook is waiting for its first make.</p>
-          <button onClick={() => { setEditingProject(null); setFormOpen(true); }} data-testid="button-empty-add" className="btn btn-primary mt-5">
+          <Link href="/projects/new" data-testid="button-empty-add" className="btn btn-primary mt-5 no-underline">
             <Plus size={15} /> Start a project
-          </button>
+          </Link>
         </div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">

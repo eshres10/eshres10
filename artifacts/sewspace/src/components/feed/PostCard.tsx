@@ -1,13 +1,16 @@
 import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { getGetPublicPostQueryKey, useDeletePost, useUpdatePost, type FeedPost } from '@workspace/api-client-react';
+import { getGetPublicPostQueryKey, useDeletePost, type FeedPost } from '@workspace/api-client-react';
 import { BookOpen, ChevronLeft, ChevronRight, Layers, Loader2, MoreHorizontal, Pencil, Scissors, Trash2, Trophy, X } from 'lucide-react';
-import { Link } from 'wouter';
+import { Link, useLocation } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
-import { VisibilityBadge, VisibilityPicker, type Visibility } from '@/components/visibility';
+import { VisibilityBadge } from '@/components/visibility';
+import { CaptionText } from '@/components/feed/CaptionText';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { PostActions } from '@/components/feed/PostActions';
 import { SafetyMenu } from '@/components/social/SafetyMenu';
+import { Sheet, SheetButton } from '@/components/social/Sheet';
+import { aspectRatio } from '@/lib/hashtags';
 import { timeAgo } from '@/lib/time';
 
 const TAG_ICON = { make: Scissors, pattern: BookOpen, fabric: Layers } as const;
@@ -16,9 +19,9 @@ const TAG_LABEL = { make: 'Make', pattern: 'Pattern', fabric: 'Fabric' } as cons
 function Photos({ post }: { post: FeedPost }) {
   const strip = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
-  const first = post.media[0];
-  // Keep feed photos between 4:5 portrait and 1.91:1 landscape, like the design.
-  const ratio = Math.min(1.91, Math.max(0.8, first.width / first.height));
+  // The shape chosen when posting (4:5, 1:1, or the first photo's own, kept
+  // between 4:5 and 1.91:1). Photos are cropped with object-fit, never re-cut.
+  const ratio = aspectRatio(post.aspect, post.media[0]);
   const go = (next: number) => {
     const el = strip.current;
     if (!el) return;
@@ -29,7 +32,7 @@ function Photos({ post }: { post: FeedPost }) {
       <div ref={strip} onScroll={e => setIndex(Math.round(e.currentTarget.scrollLeft / e.currentTarget.clientWidth))}
         className="flex h-full snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {post.media.map((m, i) => (
-          <img key={m.id} src={m.url} alt={i === 0 && post.caption ? post.caption.slice(0, 120) : ''} width={m.width} height={m.height}
+          <img key={m.id} src={m.url} alt={m.altText || (i === 0 && post.caption ? post.caption.slice(0, 120) : '')} width={m.width} height={m.height}
             loading={i === 0 ? 'eager' : 'lazy'} decoding="async" style={{ backgroundColor: m.color ?? undefined }}
             className="h-full w-full shrink-0 snap-center object-cover" />
         ))}
@@ -53,7 +56,7 @@ function Caption({ post, full }: { post: FeedPost; full: boolean }) {
   if (!post.caption) return null;
   return (
     <p className="mt-1.5 whitespace-pre-line break-words text-[15px] leading-relaxed">
-      <Link href={`/@${post.author.handle}`} className="mr-1.5 font-bold text-ink no-underline">{post.author.handle}</Link>{text}
+      <Link href={`/@${post.author.handle}`} className="mr-1.5 font-bold text-ink no-underline">{post.author.handle}</Link><CaptionText text={text} />
       {long && !open && <button type="button" onClick={() => setOpen(true)} className="ml-1 font-semibold text-subtle">more</button>}
     </p>
   );
@@ -61,13 +64,11 @@ function Caption({ post, full }: { post: FeedPost; full: boolean }) {
 
 function OwnerMenu({ post, onDeleted }: { post: FeedPost; onDeleted?: () => void }) {
   const client = useQueryClient();
+  const [, setLocation] = useLocation();
   const [open, setOpen] = useState(false);
-  const [editing, setEditing] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [caption, setCaption] = useState(post.caption);
-  const [visibility, setVisibility] = useState(post.visibility as Visibility);
-  const update = useUpdatePost();
   const remove = useDeletePost();
+  const close = () => { setOpen(false); setConfirmDelete(false); };
   const refresh = () => {
     client.invalidateQueries({ queryKey: FEED_KEYS.all });
     client.invalidateQueries({ queryKey: getGetPublicPostQueryKey(post.id) });
@@ -76,39 +77,25 @@ function OwnerMenu({ post, onDeleted }: { post: FeedPost; onDeleted?: () => void
     <>
       <button type="button" onClick={() => setOpen(true)} aria-label="Post options" className="grid h-11 w-11 place-items-center rounded-full hover:bg-canvas"><MoreHorizontal size={20} /></button>
       {open && (
-        <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/45 p-2 sm:items-center" onClick={e => { if (e.target === e.currentTarget) { setOpen(false); setEditing(false); setConfirmDelete(false); } }}>
-          <div role="dialog" aria-modal="true" aria-label="Post options" className="w-full max-w-[440px] rounded-[32px] bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
-            {editing ? (
-              <form onSubmit={e => { e.preventDefault(); update.mutate({ id: post.id, data: { caption, visibility } }, { onSuccess: () => { refresh(); setOpen(false); setEditing(false); } }); }} className="space-y-4">
-                <h2 className="font-display text-2xl">Edit post</h2>
-                <label className="block text-xs font-semibold">Caption
-                  <textarea value={caption} onChange={e => setCaption(e.target.value.slice(0, 2200))} rows={4} className="field mt-1.5 resize-y" />
-                </label>
-                <VisibilityPicker value={visibility} onChange={setVisibility} legend="Who can see this post" />
-                {update.isError && <p role="alert" className="text-sm font-semibold text-red-ink">That didn't save. Try again.</p>}
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => setEditing(false)} className="btn btn-line flex-1">Cancel</button>
-                  <button type="submit" disabled={update.isPending || (post.kind === 'status' && !caption.trim())} className="btn btn-primary flex-1 disabled:opacity-50">{update.isPending && <Loader2 size={15} className="animate-spin" />}Save</button>
-                </div>
-              </form>
-            ) : confirmDelete ? (
-              <div className="space-y-4">
-                <h2 className="font-display text-2xl">Delete this post?</h2>
-                <p className="text-sm text-subtle">It disappears for everyone. Your photos and makes in the studio aren't affected.</p>
-                <div className="flex gap-2">
-                  <button type="button" onClick={() => setConfirmDelete(false)} className="btn btn-line flex-1">Keep it</button>
-                  <button type="button" disabled={remove.isPending} onClick={() => remove.mutate({ id: post.id }, { onSuccess: () => { refresh(); setOpen(false); onDeleted?.(); } })} className="btn flex-1 bg-red text-white">{remove.isPending && <Loader2 size={15} className="animate-spin" />}Delete</button>
-                </div>
+        <Sheet label="Post options" onClose={close}>
+          {confirmDelete ? (
+            <div className="space-y-4">
+              <h2 className="font-display text-2xl">Delete this post?</h2>
+              <p className="text-sm text-subtle">It disappears for everyone. Your photos and makes in the studio aren't affected.</p>
+              {remove.isError && <p role="alert" className="text-sm font-semibold text-red-ink">That didn't delete. Try again.</p>}
+              <div className="flex gap-2">
+                <button type="button" onClick={() => setConfirmDelete(false)} className="btn btn-line flex-1">Keep it</button>
+                <button type="button" disabled={remove.isPending} onClick={() => remove.mutate({ id: post.id }, { onSuccess: () => { refresh(); close(); onDeleted?.(); } })} className="btn flex-1 bg-red text-white">{remove.isPending && <Loader2 size={15} className="animate-spin" />}Delete</button>
               </div>
-            ) : (
-              <div className="flex flex-col gap-1">
-                <button type="button" onClick={() => setEditing(true)} className="flex min-h-[52px] items-center gap-3 rounded-[18px] px-3 text-left font-semibold hover:bg-canvas"><Pencil size={18} />Edit caption or visibility</button>
-                <button type="button" onClick={() => setConfirmDelete(true)} className="flex min-h-[52px] items-center gap-3 rounded-[18px] px-3 text-left font-semibold text-red-ink hover:bg-canvas"><Trash2 size={18} />Delete post</button>
-                <button type="button" onClick={() => setOpen(false)} className="flex min-h-[52px] items-center gap-3 rounded-[18px] px-3 text-left font-semibold hover:bg-canvas"><X size={18} />Cancel</button>
-              </div>
-            )}
-          </div>
-        </div>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-1">
+              <SheetButton icon={Pencil} onClick={() => { close(); setLocation(`/posts/${post.id}/edit`); }}>Edit post</SheetButton>
+              <SheetButton icon={Trash2} danger onClick={() => setConfirmDelete(true)}>Delete post</SheetButton>
+              <SheetButton icon={X} onClick={close}>Cancel</SheetButton>
+            </div>
+          )}
+        </Sheet>
       )}
     </>
   );
@@ -170,7 +157,7 @@ export function PostCard({ post, full = false, mobileCompact = false, onDeleted,
       {post.kind === 'photo' && post.media.length > 0 && <><Photos post={post} /><PostActions post={post} onComment={onComment} /></>}
       <div className={post.kind === 'status' ? 'px-3.5 pb-2 md:px-[18px]' : 'px-3.5 pb-4 pt-1 md:px-[18px] md:pb-[18px]'}>
         {post.kind === 'status'
-          ? <p className={`whitespace-pre-line break-words ${post.caption.length < 140 ? 'font-display text-[22px] leading-snug tracking-[-.03em]' : 'text-[15px] leading-relaxed'}`}>{post.caption}</p>
+          ? <p className={`whitespace-pre-line break-words ${post.caption.length < 140 ? 'font-display text-[22px] leading-snug tracking-[-.03em]' : 'text-[15px] leading-relaxed'}`}><CaptionText text={post.caption} /></p>
           : <Caption post={post} full={full} />}
         {post.challenges.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">

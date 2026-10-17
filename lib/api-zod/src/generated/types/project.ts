@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { ProjectSetup } from './projectSetup';
 import type { ProjectStatus } from './projectStatus';
 import type { Visibility } from './visibility';
 
@@ -48,4 +49,7 @@ export interface Project {
      */
   publishedAt: Date | null;
   isDemo: boolean;
+  /** @nullable */
+  garment: string | null;
+  setup: ProjectSetup;
 }

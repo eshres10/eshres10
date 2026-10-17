@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSheetDirty } from '@/components/social/Sheet';
 import { useCreateChallenge, type Challenge, type ChallengeSummary } from '@workspace/api-client-react';
 import { Loader2, Trophy, Users } from 'lucide-react';
 import { Link } from 'wouter';
@@ -52,6 +53,7 @@ export function NewChallengeForm({ onCreated, onCancel }: { onCreated: (c: Chall
     start: toInputDate(today), end: toInputDate(new Date(today.getTime() + 30 * 86400000)),
   });
   const set = (key: keyof typeof form, value: string) => setForm(f => ({ ...f, [key]: value }));
+  useSheetDirty(Boolean(form.tag.trim() || form.title.trim() || form.description.trim() || form.rules.trim()));
   return (
     <form className="space-y-4" onSubmit={e => {
       e.preventDefault();

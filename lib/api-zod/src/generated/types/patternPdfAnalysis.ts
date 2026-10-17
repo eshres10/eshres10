@@ -30,4 +30,9 @@ export interface PatternPdfAnalysis {
   instructions: string | null;
   /** @nullable */
   notes: string | null;
+  /**
+     * Main construction stages as short phrases, when the PDF has them
+     * @nullable
+     */
+  steps: string[] | null;
 }

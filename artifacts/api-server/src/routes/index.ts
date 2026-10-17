@@ -10,6 +10,7 @@ import adminRouter from "./admin";
 import catalogRouter, { catalogPublicRouter } from "./catalog";
 import challengesRouter, { challengesPublicRouter } from "./challenges";
 import forumRouter, { forumPublicRouter } from "./forum";
+import draftsRouter from "./drafts";
 import storageRouter, { objectReadRouter } from "./storage";
 import { requireAuth } from "../middlewares/auth";
 
@@ -34,6 +35,7 @@ router.use(adminRouter);
 router.use(catalogRouter);
 router.use(challengesRouter);
 router.use(forumRouter);
+router.use(draftsRouter);
 router.use(storageRouter);
 
 export default router;

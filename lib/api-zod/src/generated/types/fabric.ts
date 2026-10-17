@@ -34,4 +34,9 @@ export interface Fabric {
      * @nullable
      */
   catalogId: number | null;
+  /**
+     * Swatch colour as #rrggbb
+     * @nullable
+     */
+  colorHex: string | null;
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSheetDirty } from '@/components/social/Sheet';
 import { useQueryClient } from '@tanstack/react-query';
 import {
   useCreateCatalogEntry,
@@ -73,6 +74,7 @@ export function ReviewForm({ entry, current, onDone }: { entry: CatalogEntry; cu
   const [body, setBody] = useState(current?.body ?? '');
   const [makeId, setMakeId] = useState<number | null>(current?.make?.id ?? null);
   const done = () => { client.invalidateQueries(); onDone(); };
+  useSheetDirty(rating !== (current?.rating ?? null) || body !== (current?.body ?? '') || sizeMade !== (current?.sizeMade ?? ''));
   return (
     <form className="space-y-4" onSubmit={e => {
       e.preventDefault();
@@ -136,12 +138,14 @@ export function NewEntryForm({ kind, initial, onCreated, onCancel }: {
   const [form, setForm] = useState({
     name: initial?.name ?? '',
     maker: initial?.maker ?? '',
-    category: categories.includes(initial?.category as never) ? initial!.category! : categories[0],
+    // No silent default: the person picks a category (unless it came from their own item).
+    category: categories.includes(initial?.category as never) ? initial!.category! : '',
     url: '',
     difficulty: '' as '' | 'beginner' | 'intermediate' | 'advanced',
     sizes: '',
   });
   const set = (key: keyof typeof form, value: string) => setForm(f => ({ ...f, [key]: value }));
+  useSheetDirty(Boolean(form.name.trim() || form.maker.trim() || form.url.trim() || form.sizes.trim()));
   return (
     <form className="space-y-4" onSubmit={e => {
       e.preventDefault();
@@ -162,7 +166,8 @@ export function NewEntryForm({ kind, initial, onCreated, onCancel }: {
         <input value={form.maker} onChange={e => set('maker', e.target.value)} maxLength={120} className="field mt-1.5" placeholder={kind === 'pattern' ? 'Fernhill Patterns' : 'Gütermann'} />
       </label>
       <label className="block text-xs font-semibold">Category
-        <select value={form.category} onChange={e => set('category', e.target.value)} className="field mt-1.5">
+        <select value={form.category} onChange={e => set('category', e.target.value)} required className="field mt-1.5">
+          <option value="" disabled>Choose a category</option>
           {categories.map(c => <option key={c} value={c}>{capitalise(c)}</option>)}
         </select>
       </label>
@@ -185,7 +190,7 @@ export function NewEntryForm({ kind, initial, onCreated, onCancel }: {
       {create.isError && <p role="alert" className="text-sm font-semibold text-red-ink">{errorText(create.error, "That didn't save. Try again.")}</p>}
       <div className="flex gap-2">
         <button type="button" onClick={onCancel} className="btn btn-line flex-1">Cancel</button>
-        <button type="submit" disabled={!form.name.trim() || create.isPending} className="btn btn-primary flex-1 disabled:opacity-50">{create.isPending && <Loader2 size={15} className="animate-spin" />}Add page</button>
+        <button type="submit" disabled={create.isPending} className="btn btn-primary flex-1 disabled:opacity-50">{create.isPending && <Loader2 size={15} className="animate-spin" />}{create.isPending ? 'Adding…' : 'Add page'}</button>
       </div>
     </form>
   );

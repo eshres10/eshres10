@@ -5,6 +5,7 @@ import { Loader2, Images } from 'lucide-react';
 import { Link } from 'wouter';
 import { ErrorState } from '@/components/common';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
+import { CaptionText } from '@/components/feed/CaptionText';
 
 const KINDS = [
   { id: 'all', label: 'All' },
@@ -19,12 +20,13 @@ const SORTS = [
 ] as const;
 type Sort = (typeof SORTS)[number]['id'];
 
-function Tile({ post }: { post: FeedPost }) {
+/** A post as a grid tile (Explore, hashtag pages). */
+export function PostTile({ post }: { post: FeedPost }) {
   const cover = post.media[0];
   if (!cover) {
     return (
       <Link href={`/posts/${post.id}`} className="mb-2.5 block break-inside-avoid rounded-[22px] bg-white p-5 text-ink no-underline hover:bg-yellow">
-        <p className="line-clamp-6 font-display text-lg leading-snug tracking-[-.03em]">{post.caption}</p>
+        <p className="line-clamp-6 font-display text-lg leading-snug tracking-[-.03em]"><CaptionText text={post.caption} linked={false} /></p>
         <p className="mt-3 text-xs font-semibold text-subtle">@{post.author.handle}</p>
       </Link>
     );
@@ -80,7 +82,7 @@ export function ExplorePage() {
         {feed.isLoading ? <div className="grid place-items-center py-16" role="status" aria-label="Loading"><Loader2 className="animate-spin" /></div>
           : feed.isError ? <ErrorState retry={() => feed.refetch()} />
           : posts.length === 0 ? <div className="rounded-[30px] bg-white px-6 py-14 text-center text-sm text-subtle">Nothing here yet.</div>
-          : <div className="columns-2 gap-2.5 sm:columns-3 lg:columns-4">{posts.map(post => <Tile key={post.id} post={post} />)}</div>}
+          : <div className="columns-2 gap-2.5 sm:columns-3 lg:columns-4">{posts.map(post => <PostTile key={post.id} post={post} />)}</div>}
         {feed.hasNextPage && (
           <div className="mt-4 flex justify-center">
             <button type="button" onClick={() => feed.fetchNextPage()} disabled={feed.isFetchingNextPage} className="btn btn-line">

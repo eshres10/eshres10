@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seams Club mobile — new discussion flow</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+input:focus,textarea:focus{outline:2px solid #e6e51e;outline-offset:1px}
+</style>
+</helmet>
+<div style="position: relative; width: 390px; height: 844px; overflow: hidden; background: #f2f2f2; font-family: 'Inter', system-ui, sans-serif; color: #000">
+
+  <header style="position: absolute; left: 12px; right: 12px; top: 12px; z-index: 3; display: flex; align-items: center; gap: 6px; background: #fff; border-radius: 24px; padding: 6px; box-shadow: rgba(0,0,0,.2) 0 10px 10px -5px">
+    <sc-if value="{{atStart}}" hint-placeholder-val="{{true}}">
+      <a href="MForum.dc.html" aria-label="Close" style="width: 44px; height: 44px; display: grid; place-items: center; border-radius: 50%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></a>
+    </sc-if>
+    <sc-if value="{{notStart}}" hint-placeholder-val="{{false}}">
+      <button onClick="{{back}}" aria-label="Back" style="width: 44px; height: 44px; border: 0; background: transparent; display: grid; place-items: center; border-radius: 50%"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button>
+    </sc-if>
+    <span style="flex: 1; min-width: 0"><span style="display: block; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; letter-spacing: -0.04em">{{title}}</span><span style="display: block; font-size: 11px; color: #555">{{sub}}</span></span>
+    <sc-if value="{{hasKind}}" hint-placeholder-val="{{false}}"><span style="border-radius: 3000px; padding: 6px 12px; font-size: 12px; font-weight: 700; {{kind.style}}">{{kind.label}}</span></sc-if>
+  </header>
+
+  <sc-if value="{{showSteps}}" hint-placeholder-val="{{false}}">
+    <ol aria-label="Steps" style="position: absolute; left: 24px; right: 24px; top: 78px; z-index: 2; margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px">
+      <sc-for list="{{steps}}" as="st" hint-placeholder-count="4">
+        <li aria-current="{{st.cur}}"><span style="display: block; height: 4px; border-radius: 3000px; {{st.bar}}"></span><span style="display: block; margin-top: 4px; font-size: 11px; font-weight: 700; {{st.text}}">{{st.label}}</span></li>
+      </sc-for>
+    </ol>
+  </sc-if>
+
+  <main style="position: absolute; left: 0; right: 0; top: {{mainTop}}; bottom: {{mainBottom}}; overflow-y: auto; padding: 0 12px 20px">
+
+    <!-- 1. Type -->
+    <sc-if value="{{sType}}" hint-placeholder-val="{{true}}">
+      <div style="display: flex; flex-direction: column; gap: 8px">
+        <h1 style="margin: 6px 8px 4px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 30px; line-height: 1.05; letter-spacing: -0.05em">What kind of post?</h1>
+        <sc-for list="{{kinds}}" as="k" hint-placeholder-count="5">
+          <button onClick="{{k.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 84px; padding: 12px 14px; border: 0; border-radius: 24px; font: inherit; text-align: left; {{k.style}}">
+            <span style="width: 44px; height: 44px; border-radius: 14px; display: grid; place-items: center; flex-shrink: 0; background: rgba(255,255,255,.6)"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{k.icon}}"></path></svg></span>
+            <span style="flex: 1"><b style="display: block; font-family: 'Poppins', sans-serif; font-size: 17px; letter-spacing: -0.03em">{{k.label}}</b><span style="display: block; margin-top: 2px; font-size: 12px; line-height: 1.4; opacity: .85">{{k.note}}</span></span>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18l6-6-6-6"></path></svg>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- 2. Write -->
+    <sc-if value="{{sWrite}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <sc-if value="{{isShow}}" hint-placeholder-val="{{false}}">
+          <div style="background: #fff; border-radius: 24px; padding: 12px">
+            <div style="display: flex; gap: 8px">
+              <img src="/_blob/188ffd136f4c0ada8a70caa52d09ec3b" alt="Lavender sundress" style="width: 84px; height: 105px; border-radius: 16px; object-fit: cover">
+              <img src="/_blob/31f9090e0f46023c17a2689be64e6db3" alt="Pink floral detail" style="width: 84px; height: 105px; border-radius: 16px; object-fit: cover">
+              <button aria-label="Add photos" style="width: 84px; height: 105px; border-radius: 16px; border: 2px dashed #bbb; background: #fafafa; display: grid; place-items: center; font: inherit; font-size: 20px; font-weight: 700">+</button>
+            </div>
+            <p style="margin: 8px 0 0; font-size: 12px; color: #555">2 of 10 photos</p>
+          </div>
+        </sc-if>
+        <label style="display: block; background: #fff; border-radius: 24px; padding: 12px 14px; {{titleRing}}">
+          <span style="display: flex; font-size: 12px; font-weight: 700; color: #555"><span style="flex: 1">{{titleLabel}}</span><span>{{titleCount}} / 140</span></span>
+          <input value="{{titleText}}" onChange="{{onTitle}}" placeholder="{{titlePh}}" aria-invalid="{{titleInvalid}}" style="margin-top: 4px; width: 100%; min-height: 40px; border: 0; padding: 0; font-family: 'Poppins', sans-serif; font-weight: 600; font-size: 18px; letter-spacing: -0.03em">
+          <sc-if value="{{titleErr}}" hint-placeholder-val="{{false}}"><span role="alert" style="display: block; margin-top: 4px; font-size: 13px; font-weight: 600; color: #c42a2a">Add a title of at least 3 characters.</span></sc-if>
+        </label>
+        <sc-if value="{{showSimilar}}" hint-placeholder-val="{{false}}">
+          <div style="background: #000; color: #fff; border-radius: 24px; padding: 12px 14px">
+            <b style="font-size: 13px">Already asked? These might help</b>
+            <ul style="margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+              <li><a href="ForumThread.dc.html" style="display: flex; gap: 8px; align-items: center; min-height: 40px; color: #fff; text-decoration: none; font-size: 13px"><span style="border-radius: 3000px; padding: 2px 8px; background: #e6e51e; color: #000; font-size: 10px; font-weight: 700">Solved</span><span style="flex: 1">Which interfacing for a linen collar?</span><span style="color: #c9c9c9; font-size: 12px">14</span></a></li>
+              <li><a href="ForumThread.dc.html" style="display: flex; gap: 8px; align-items: center; min-height: 40px; color: #fff; text-decoration: none; font-size: 13px"><span style="border-radius: 3000px; padding: 2px 8px; background: #fff; color: #000; font-size: 10px; font-weight: 700">Open</span><span style="flex: 1">Fusible vs sew-in on lightweight fabric</span><span style="color: #c9c9c9; font-size: 12px">6</span></a></li>
+            </ul>
+          </div>
+        </sc-if>
+        <sc-if value="{{isPoll}}" hint-placeholder-val="{{false}}">
+          <div style="background: #fff; border-radius: 24px; padding: 12px 14px; {{pollRing}}">
+            <div style="display: flex; font-size: 12px; font-weight: 700; color: #555"><span style="flex: 1">Options</span><span>{{optCount}} of 6</span></div>
+            <ol style="margin: 8px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+              <sc-for list="{{opts}}" as="o" hint-placeholder-count="3">
+                <li style="display: flex; gap: 6px; align-items: center">
+                  <label style="flex: 1"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Option {{o.n}}</span><input value="{{o.text}}" onChange="{{o.onText}}" placeholder="{{o.ph}}" style="width: 100%; min-height: 44px; border: 1px solid #000; border-radius: 14px; padding: 0 12px; font: inherit; font-size: 14px"></label>
+                  <button onClick="{{o.remove}}" disabled="{{o.fixed}}" aria-label="{{o.removeLabel}}" style="width: 40px; height: 40px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center; {{o.dim}}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button>
+                </li>
+              </sc-for>
+            </ol>
+            <button onClick="{{addOpt}}" disabled="{{optFull}}" style="margin-top: 8px; min-height: 40px; padding: 0 14px; border: 2px dashed #bbb; border-radius: 3000px; background: #fafafa; font: inherit; font-size: 13px; font-weight: 700; {{addOptDim}}">+ Add option</button>
+            <sc-if value="{{pollErr}}" hint-placeholder-val="{{false}}"><span role="alert" style="display: block; margin-top: 8px; font-size: 13px; font-weight: 600; color: #c42a2a">Fill in at least 2 options.</span></sc-if>
+            <div style="margin-top: 12px; font-size: 12px; font-weight: 700; color: #555">Poll closes after</div>
+            <div role="radiogroup" aria-label="Poll length" style="margin-top: 6px; display: flex; gap: 4px; background: #f2f2f2; border-radius: 3000px; padding: 4px">
+              <sc-for list="{{lengths}}" as="l" hint-placeholder-count="3"><button role="radio" aria-checked="{{l.on}}" onClick="{{l.pick}}" style="flex: 1; min-height: 38px; border: 0; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{l.style}}">{{l.label}}</button></sc-for>
+            </div>
+            <p style="margin: 8px 0 0; font-size: 12px; color: #555">People see results after they vote.</p>
+          </div>
+        </sc-if>
+        <label style="display: block; background: #fff; border-radius: 24px; padding: 12px 14px">
+          <span style="display: flex; font-size: 12px; font-weight: 700; color: #555"><span style="flex: 1">{{bodyLabel}}</span><span>optional</span></span>
+          <textarea rows="{{bodyRows}}" placeholder="{{bodyPh}}" style="margin-top: 4px; width: 100%; border: 0; resize: none; font: inherit; font-size: 14px; line-height: 1.5"></textarea>
+        </label>
+        <sc-if value="{{isShow}}" hint-placeholder-val="{{false}}">
+          <div style="background: #fff; border-radius: 24px; padding: 12px 14px; display: flex; align-items: center; gap: 12px">
+            <span style="flex: 1"><b style="display: block; font-size: 14px">Also share to my feed</b><span style="font-size: 12px; color: #555">As a public post with the same photos</span></span>
+            <button role="switch" aria-checked="{{feedOn}}" onClick="{{toggleFeed}}" aria-label="Also share to my feed" style="width: 52px; height: 32px; border: 0; padding: 0; border-radius: 3000px; position: relative; {{feedTrack}}"><span style="position: absolute; top: 4px; width: 24px; height: 24px; border-radius: 50%; background: #fff; {{feedKnob}}"></span></button>
+          </div>
+        </sc-if>
+        <p style="margin: 0 8px; font-size: 12px; color: #555">{{tip}}</p>
+      </div>
+    </sc-if>
+
+    <!-- 3. Where -->
+    <sc-if value="{{sWhere}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <div style="background: #fff; border-radius: 24px; padding: 12px 14px">
+          <div style="font-size: 12px; font-weight: 700; color: #555">Board</div>
+          <div role="radiogroup" aria-label="Board" style="margin-top: 8px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px">
+            <sc-for list="{{boards}}" as="b" hint-placeholder-count="7">
+              <button role="radio" aria-checked="{{b.on}}" onClick="{{b.pick}}" style="position: relative; min-height: 48px; padding: 6px 10px; border-radius: 16px; font: inherit; font-size: 13px; font-weight: 700; text-align: left; {{b.style}}">{{b.label}}<sc-if value="{{b.sug}}" hint-placeholder-val="{{false}}"><span style="display: block; font-size: 10px; font-weight: 700; color: #2f55d4">Suggested</span></sc-if></button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="background: #fff; border-radius: 24px; padding: 12px 14px">
+          <div style="display: flex; font-size: 12px; font-weight: 700; color: #555"><span style="flex: 1">Tags</span><span style="{{tagCountStyle}}">{{tagCount}} of 5</span></div>
+          <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px">
+            <sc-for list="{{tags}}" as="t" hint-placeholder-count="2">
+              <span style="display: inline-flex; align-items: center; gap: 6px; border-radius: 3000px; padding: 4px 4px 4px 12px; background: #000; color: #fff; font-size: 13px; font-weight: 700">{{t.label}}<button onClick="{{t.remove}}" aria-label="{{t.removeLabel}}" style="width: 26px; height: 26px; border: 0; border-radius: 50%; background: #444; display: grid; place-items: center"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button></span>
+            </sc-for>
+          </div>
+          <sc-if value="{{canTag}}" hint-placeholder-val="{{true}}">
+            <div style="margin-top: 8px; display: flex; gap: 6px">
+              <label style="flex: 1"><span style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">Add a tag</span><input value="{{tagDraft}}" onChange="{{onTagDraft}}" onKeyDown="{{onTagKey}}" placeholder="Add a tag and press Enter" style="width: 100%; min-height: 44px; border: 1px solid #000; border-radius: 14px; padding: 0 12px; font: inherit; font-size: 14px"></label>
+              <button onClick="{{addTag}}" style="min-height: 44px; padding: 0 16px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 13px; font-weight: 700">Add</button>
+            </div>
+            <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px">
+              <sc-for list="{{tagSugs}}" as="g" hint-placeholder-count="3"><button onClick="{{g.use}}" style="min-height: 34px; padding: 0 12px; border: 0; border-radius: 3000px; background: #f2f2f2; font: inherit; font-size: 12px; font-weight: 700">+ {{g.label}}</button></sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{tagFull}}" hint-placeholder-val="{{false}}"><p style="margin: 8px 0 0; font-size: 12px; font-weight: 600; color: #555">That's the limit. Remove one to add another.</p></sc-if>
+        </div>
+        <div style="background: #fff; border-radius: 24px; padding: 12px 14px">
+          <div style="display: flex; font-size: 12px; font-weight: 700; color: #555"><span style="flex: 1">Link a pattern or product</span><span>optional</span></div>
+          <button onClick="{{toggleLink}}" aria-pressed="{{linkOn}}" style="margin-top: 8px; width: 100%; display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 18px; background: #fff; font: inherit; text-align: left; {{linkRing}}"><img src="/_blob/188ffd136f4c0ada8a70caa52d09ec3b" alt="" style="width: 44px; height: 44px; border-radius: 12px; object-fit: cover"><span style="flex: 1"><b style="display: block; font-size: 13px">Willa Dress</b><span style="font-size: 12px; color: #555">Pattern page · 312 makes</span></span><span style="font-size: 12px; font-weight: 700">{{linkLabel}}</span></button>
+          <p style="margin: 8px 0 0; font-size: 12px; color: #555">Linked threads show under "Discussions" on that page.</p>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- 4. Preview -->
+    <sc-if value="{{sPreview}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 10px">
+        <article style="background: #fff; border-radius: 24px; padding: 14px">
+          <div style="display: flex; flex-wrap: wrap; gap: 6px; align-items: center">
+            <span style="border-radius: 3000px; padding: 3px 10px; font-size: 11px; font-weight: 700; {{kind.style}}">{{kind.label}}</span>
+            <span style="font-size: 12px; color: #555">in {{boardName}} · @ena.sews · now</span>
+          </div>
+          <h2 style="margin: 8px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; line-height: 1.2; letter-spacing: -0.03em">{{titleShown}}</h2>
+          <sc-if value="{{isPoll}}" hint-placeholder-val="{{false}}">
+            <ul style="margin: 10px 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px">
+              <sc-for list="{{filledOpts}}" as="fo" hint-placeholder-count="3"><li style="min-height: 42px; display: flex; align-items: center; padding: 0 12px; border: 2px solid #000; border-radius: 14px; font-size: 14px; font-weight: 600">{{fo}}</li></sc-for>
+            </ul>
+            <p style="margin: 6px 0 0; font-size: 12px; color: #555">Closes in {{lengthLabel}}</p>
+          </sc-if>
+          <sc-if value="{{isShow}}" hint-placeholder-val="{{false}}"><div style="margin-top: 10px; display: flex; gap: 6px"><img src="/_blob/188ffd136f4c0ada8a70caa52d09ec3b" alt="" style="width: 50%; height: 140px; border-radius: 14px; object-fit: cover"><img src="/_blob/31f9090e0f46023c17a2689be64e6db3" alt="" style="width: 50%; height: 140px; border-radius: 14px; object-fit: cover"></div></sc-if>
+          <div style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px">
+            <sc-for list="{{tags}}" as="t" hint-placeholder-count="2"><span style="border-radius: 3000px; padding: 3px 10px; background: #f2f2f2; font-size: 12px; font-weight: 700">{{t.label}}</span></sc-for>
+            <sc-if value="{{linkBool}}" hint-placeholder-val="{{false}}"><span style="border-radius: 3000px; padding: 3px 10px; background: #e6e51e; font-size: 12px; font-weight: 700">Willa Dress</span></sc-if>
+          </div>
+        </article>
+        <p style="margin: 0 8px; font-size: 12px; line-height: 1.5; color: #555">Forum posts are public, like Reddit. Anyone can read them; people need an account to reply. {{feedNote}}</p>
+      </div>
+    </sc-if>
+
+    <!-- Done -->
+    <sc-if value="{{sDone}}" hint-placeholder-val="{{false}}">
+      <div style="display: flex; flex-direction: column; gap: 10px; padding-top: 20px">
+        <div style="background: #e6e51e; border-radius: 34px; padding: 26px 22px; text-align: center">
+          <span style="display: inline-grid; place-items: center; width: 56px; height: 56px; border-radius: 50%; background: #000"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#e6e51e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"></path></svg></span>
+          <h1 style="margin: 12px 0 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: -0.05em">Posted in {{boardName}}</h1>
+          <p style="margin: 6px 0 0; font-size: 14px">{{doneNote}}</p>
+        </div>
+        <a href="ForumThread.dc.html" style="display: flex; align-items: center; justify-content: center; min-height: 52px; border-radius: 3000px; background: #000; color: #fff; text-decoration: none; font-weight: 700">View your thread</a>
+        <button onClick="{{restart}}" style="min-height: 52px; border: 1px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 15px; font-weight: 700">Start another</button>
+      </div>
+    </sc-if>
+  </main>
+
+  <sc-if value="{{showFoot}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; left: 12px; right: 12px; bottom: 16px; z-index: 3">
+      <button onClick="{{next}}" style="width: 100%; min-height: 54px; border: 0; border-radius: 3000px; font: inherit; font-size: 15px; font-weight: 700; {{nextStyle}}">{{nextLabel}}</button>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = this.fresh(); }
+  fresh() { return { step: 0, kind: null, titleText: '', tried: false, opts: ['', ''], len: 1, feed: true, board: -1, tags: [], tagDraft: '', link: false }; }
+  renderVals() {
+    var self = this, s = this.state;
+    var I = {
+      show: "M3 5h18v14H3z M3 15l5-5 4 4 3-3 6 6 M15 9h.01",
+      question: "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3 M12 17h.01",
+      rec: "M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z",
+      info: "M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5v15z M8 7h8 M8 11h6",
+      poll: "M4 20V10 M10 20V4 M16 20v-7 M22 20H2"
+    };
+    var KINDS = [
+      { id: 'show', label: 'Show & tell', note: 'Share a make, ask for feedback, celebrate a finish.', style: 'background:#e6e51e;color:#000', icon: I.show, board: 2,
+        titleLabel: 'Title', titlePh: 'e.g. My first Willa Dress', bodyLabel: 'Tell the story', bodyPh: 'Pattern, fabric, what you changed…', tip: 'Show & tell needs at least one photo.', post: 'Post' },
+      { id: 'question', label: 'Question', note: 'Get answers. Mark the one that worked so it shows as Solved.', style: 'background:#466cf3;color:#fff', icon: I.question, board: 0,
+        titleLabel: "What's your question?", titlePh: 'e.g. Which interfacing for a linen collar?', bodyLabel: 'Details', bodyPh: 'Your pattern, fabric, and what you’ve tried so far', tip: 'Tip: questions with the pattern and fabric get answered faster.', post: 'Ask' },
+      { id: 'rec', label: 'Recommendation', note: 'Ask for or suggest a pattern, fabric, tool or shop.', style: 'background:#ff8562;color:#000', icon: I.rec, board: 1,
+        titleLabel: 'What are you looking for?', titlePh: 'e.g. A beginner-friendly jumpsuit pattern', bodyLabel: 'What matters to you', bodyPh: 'Budget, size range, fabric you have…', tip: 'Replies can link a pattern or product page.', post: 'Post' },
+      { id: 'info', label: 'Info & guide', note: 'Tutorials, tips and things you’ve learned.', style: 'background:#000;color:#fff', icon: I.info, board: 4,
+        titleLabel: 'Title', titlePh: 'e.g. How I grade between sizes', bodyLabel: 'Your guide', bodyPh: 'Steps, photos, sources…', tip: 'Guides can be long. Add photos to any step.', post: 'Post' },
+      { id: 'poll', label: 'Poll', note: 'Let people vote between 2 to 6 options.', style: 'background:#fff;color:#000', icon: I.poll, board: 1,
+        titleLabel: 'Poll question', titlePh: 'e.g. Which collar for the sailor top?', bodyLabel: 'Context', bodyPh: 'Why you’re asking', tip: 'Results stay hidden until someone votes.', post: 'Post poll' }
+    ];
+    var BOARDS = ['Fitting', 'Fabric', 'Patterns', 'Machines', 'Beginners', 'Mending', 'Meetups'];
+    var kind = null; for (var n = 0; n < KINDS.length; n++) if (KINDS[n].id === s.kind) kind = KINDS[n];
+    var isPoll = s.kind === 'poll', isShow = s.kind === 'show';
+    var t = s.titleText, titleOk = t.trim().length >= 3;
+    var filled = s.opts.filter(function (o) { return o.trim(); });
+    var pollOk = !isPoll || filled.length >= 2;
+    var labels = ['Type', 'Write', 'Where', 'Preview'];
+    var sugBoard = kind ? (s.kind === 'question' && /interfac|collar|fit/i.test(t) ? 0 : kind.board) : 0;
+    var boardIdx = s.board >= 0 ? s.board : sugBoard;
+    var addTag = function (raw) {
+      var v = (raw || '').trim().toLowerCase().replace(/[^a-z0-9 -]/g, '');
+      if (!v || s.tags.length >= 5 || s.tags.indexOf(v) >= 0) { self.setState({ tagDraft: '' }); return; }
+      self.setState({ tags: s.tags.concat([v]), tagDraft: '' });
+    };
+    var SUG = ['linen', 'collars', 'interfacing', 'beginner', 'fit', 'willa dress'].filter(function (x) { return s.tags.indexOf(x) < 0; }).slice(0, 4);
+    var inBody = s.step > 0 && s.step < 4;
+    return {
+      title: s.step === 4 ? 'Posted' : 'New discussion',
+      sub: s.step === 0 ? 'Pick a type to start' : (s.step === 4 ? '' : 'Draft kept if you leave'),
+      atStart: s.step === 0 || s.step === 4, notStart: inBody,
+      hasKind: !!kind && inBody, kind: kind || KINDS[0],
+      showSteps: inBody, mainTop: inBody ? '112px' : '80px', mainBottom: inBody ? '86px' : '0',
+      steps: labels.map(function (l, n) { var cur = s.step === n, done = s.step > n; return { label: l, cur: cur ? 'step' : 'false', bar: cur ? 'background:#000' : (done ? 'background:#e6e51e' : 'background:#d4d4d4'), text: cur ? 'color:#000' : 'color:#555' }; }),
+      back: function () { self.setState({ step: s.step - 1, tried: false }); },
+      sType: s.step === 0, sWrite: s.step === 1, sWhere: s.step === 2, sPreview: s.step === 3, sDone: s.step === 4,
+      kinds: KINDS.map(function (k) { return { label: k.label, note: k.note, icon: k.icon, style: k.style + (k.id === 'poll' ? ';border:2px solid #000' : ''), pick: function () { self.setState({ kind: k.id, step: 1 }); } }; }),
+      isPoll: isPoll, isShow: isShow,
+      titleLabel: kind ? kind.titleLabel : '', titlePh: kind ? kind.titlePh : '',
+      titleText: t, titleCount: t.length, onTitle: function (e) { self.setState({ titleText: e.target.value.slice(0, 140) }); },
+      titleErr: s.tried && !titleOk, titleInvalid: s.tried && !titleOk ? 'true' : 'false',
+      titleRing: s.tried && !titleOk ? 'border: 2px solid #c42a2a' : 'border: 2px solid transparent',
+      showSimilar: s.kind === 'question' && /interfac|collar/i.test(t),
+      opts: s.opts.map(function (o, n) {
+        return { n: n + 1, text: o, ph: 'Option ' + (n + 1), fixed: s.opts.length <= 2, dim: s.opts.length <= 2 ? 'opacity:.35' : '', removeLabel: 'Remove option ' + (n + 1),
+          onText: function (e) { var a = s.opts.slice(); a[n] = e.target.value.slice(0, 80); self.setState({ opts: a }); },
+          remove: function () { if (s.opts.length > 2) { var a = s.opts.slice(); a.splice(n, 1); self.setState({ opts: a }); } } };
+      }),
+      optCount: s.opts.length, optFull: s.opts.length >= 6, addOptDim: s.opts.length >= 6 ? 'opacity:.4' : '',
+      addOpt: function () { if (s.opts.length < 6) self.setState({ opts: s.opts.concat(['']) }); },
+      pollErr: s.tried && !pollOk, pollRing: s.tried && !pollOk ? 'border: 2px solid #c42a2a' : 'border: 2px solid transparent',
+      lengths: ['1 day', '3 days', '1 week'].map(function (l, n) { var on = s.len === n; return { label: l, on: on ? 'true' : 'false', style: on ? 'background:#000;color:#fff' : 'background:transparent;color:#000', pick: function () { self.setState({ len: n }); } }; }),
+      lengthLabel: ['1 day', '3 days', '1 week'][s.len],
+      bodyLabel: kind ? kind.bodyLabel : '', bodyPh: kind ? kind.bodyPh : '', bodyRows: s.kind === 'info' ? 8 : 4,
+      feedOn: s.feed ? 'true' : 'false', feedTrack: s.feed ? 'background:#000' : 'background:#8a8a8a', feedKnob: s.feed ? 'left:24px;background:#e6e51e' : 'left:4px',
+      toggleFeed: function () { self.setState({ feed: !s.feed }); },
+      tip: kind ? kind.tip : '',
+      boards: BOARDS.map(function (b, n) { var on = boardIdx === n; return { label: b, sug: n === sugBoard, on: on ? 'true' : 'false', style: on ? 'border:2px solid #000;background:#e6e51e;color:#000' : 'border:2px solid #e6e6e6;background:#fff;color:#000', pick: function () { self.setState({ board: n }); } }; }),
+      boardName: BOARDS[boardIdx],
+      tags: s.tags.map(function (x) { return { label: x, removeLabel: 'Remove tag ' + x, remove: function () { self.setState({ tags: s.tags.filter(function (y) { return y !== x; }) }); } }; }),
+      tagCount: s.tags.length, tagCountStyle: s.tags.length >= 5 ? 'color:#000' : '',
+      canTag: s.tags.length < 5, tagFull: s.tags.length >= 5,
+      tagDraft: s.tagDraft, onTagDraft: function (e) { self.setState({ tagDraft: e.target.value.slice(0, 30) }); },
+      onTagKey: function (e) { if (e.key === 'Enter' || e.key === ',') { e.preventDefault(); addTag(s.tagDraft); } },
+      addTag: function () { addTag(s.tagDraft); },
+      tagSugs: SUG.map(function (x) { return { label: x, use: function () { addTag(x); } }; }),
+      linkOn: s.link ? 'true' : 'false', linkBool: s.link, linkLabel: s.link ? 'Linked' : 'Link',
+      linkRing: s.link ? 'border:2px solid #000;background:#fffde0' : 'border:2px solid #e6e6e6',
+      toggleLink: function () { self.setState({ link: !s.link }); },
+      titleShown: t || 'Untitled',
+      filledOpts: filled,
+      feedNote: isShow && s.feed ? 'It will also appear on your feed as a public post.' : '',
+      showFoot: inBody,
+      nextLabel: s.step === 3 ? (kind ? kind.post : 'Post') : 'Next',
+      nextStyle: s.step === 3 ? 'background:#000;color:#fff' : (s.step === 1 && s.tried && !(titleOk && pollOk) ? 'background:#e6e6e6;color:#555' : 'background:#e6e51e;color:#000'),
+      next: function () {
+        if (s.step === 1 && !(titleOk && pollOk)) { self.setState({ tried: true }); return; }
+        self.setState({ step: s.step + 1, tried: false, board: s.step === 1 && s.board < 0 ? sugBoard : s.board });
+      },
+      doneNote: s.kind === 'question' ? 'We’ll let you know when someone answers. Mark the answer that worked.' : 'We’ll let you know about replies.',
+      restart: function () { self.setState(self.fresh()); }
+    };
+  }
+}
+</script>
+</body>
+</html>

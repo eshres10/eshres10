@@ -14,16 +14,20 @@ import { Landing } from '@/pages/landing';
 import { Marketplace } from '@/pages/marketplace';
 import { MeasurementsPage } from '@/pages/measurements';
 import { FabricPage, PatternsPage, ThreadPage } from '@/pages/stash';
+import { EditStashPage, NewStashPage } from '@/pages/stash-flow';
 import { Studio } from '@/pages/studio';
 import { ProjectsList, ProjectDetail } from '@/components/projects';
+import { QuickStart } from '@/components/projects/QuickStart';
 import { SignInPromptProvider } from '@/components/auth/SignInPrompt';
 import { PublicMakePage } from '@/pages/public-make';
-import { ComposePage } from '@/pages/compose';
+import { EditPostPage, NewPostPage } from '@/pages/post-flow';
+import { TagPage } from '@/pages/tag';
 import { SavedPage } from '@/pages/saved';
 import { CatalogPage } from '@/pages/catalog';
 import { ChallengesPage } from '@/pages/challenges';
 import { ForumPage } from '@/pages/forum';
 import { ForumTopicPage } from '@/pages/forum-topic';
+import { NewTopicPage } from '@/pages/forum-flow';
 import { ChallengePage } from '@/pages/challenge';
 import { CatalogEntryPage } from '@/pages/catalog-entry';
 import { AdminReportsPage } from '@/pages/admin-reports';
@@ -40,14 +44,16 @@ const queryClient = new QueryClient();
 const studio = (Page: React.ComponentType) => () => <Shell><Page /></Shell>;
 const InShellStudio = studio(Studio);
 const InShellFeedPage = studio(FeedPage);
-const InShellComposePage = studio(ComposePage);
+const InShellNewPostPage = studio(NewPostPage);
 const InShellSavedPage = studio(SavedPage);
 const InShellAdminReports = studio(AdminReportsPage);
 const InShellFabricPage = studio(FabricPage);
 const InShellThreadPage = studio(ThreadPage);
 const InShellPatternsPage = studio(PatternsPage);
+const InShellNewStashPage = studio(NewStashPage);
 const InShellProjectsList = studio(ProjectsList);
 const InShellProjectDetail = studio(ProjectDetail);
+const InShellQuickStart = studio(QuickStart);
 const InShellMeasurementsPage = studio(MeasurementsPage);
 const InShellAIStudio = studio(AIStudio);
 const InShellAssistant = studio(Assistant);
@@ -68,8 +74,11 @@ function Router() {
     <Route path="/studio" component={InShellStudio} />
     <Route path="/stash/fabrics" component={InShellFabricPage} />
     <Route path="/stash/threads" component={InShellThreadPage} />
+    <Route path="/stash/new" component={InShellNewStashPage} />
+    <Route path="/stash/:kind/:id/edit">{(params: { kind: string; id: string }) => <Shell><EditStashPage kind={params.kind} id={Number(params.id)} /></Shell>}</Route>
     <Route path="/patterns" component={InShellPatternsPage} />
     <Route path="/projects" component={InShellProjectsList} />
+    <Route path="/projects/new" component={InShellQuickStart} />
     <Route path="/projects/:id" component={InShellProjectDetail} />
     <Route path="/measurements" component={InShellMeasurementsPage} />
     <Route path="/ai-studio" component={InShellAIStudio} />
@@ -77,16 +86,19 @@ function Router() {
     <Route path="/marketplace" component={InShellMarketplace} />
     <Route path="/settings" component={InShellSettingsPage} />
     <Route path="/feed" component={InShellFeedPage} />
-    <Route path="/new" component={InShellComposePage} />
+    <Route path="/new" component={InShellNewPostPage} />
     <Route path="/saved" component={InShellSavedPage} />
     <Route path="/admin/reports" component={InShellAdminReports} />
     <Route path="/forum">{() => <AdaptiveLayout><ForumPage /></AdaptiveLayout>}</Route>
+    <Route path="/forum/new">{() => <Shell><NewTopicPage /></Shell>}</Route>
     <Route path="/forum/topics/:id">{(params: { id: string }) => <AdaptiveLayout><ForumTopicPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
     <Route path="/challenges">{() => <AdaptiveLayout><ChallengesPage /></AdaptiveLayout>}</Route>
     <Route path="/challenges/:slug">{(params: { slug: string }) => <AdaptiveLayout><ChallengePage slug={params.slug} /></AdaptiveLayout>}</Route>
     <Route path="/catalog">{() => <AdaptiveLayout><CatalogPage /></AdaptiveLayout>}</Route>
     <Route path="/catalog/:kind/:slug">{(params: { kind: string; slug: string }) => <AdaptiveLayout><CatalogEntryPage kind={params.kind} slug={params.slug} /></AdaptiveLayout>}</Route>
     <Route path="/explore">{() => <AdaptiveLayout><ExplorePage /></AdaptiveLayout>}</Route>
+    <Route path="/posts/:id/edit">{(params: { id: string }) => <Shell><EditPostPage id={Number(params.id)} /></Shell>}</Route>
+    <Route path="/tags/:tag">{(params: { tag: string }) => <AdaptiveLayout><TagPage tag={decodeURIComponent(params.tag)} /></AdaptiveLayout>}</Route>
     <Route path="/posts/:id">{(params: { id: string }) => <AdaptiveLayout><PostPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
     <Route path="/welcome" component={WelcomePage} />
     <Route path="/makes/:id">{(params: { id: string }) => <PublicMakePage id={Number(params.id)} />}</Route>

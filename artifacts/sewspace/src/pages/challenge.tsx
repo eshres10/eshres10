@@ -21,8 +21,9 @@ import { ErrorState, Loading } from '@/components/common';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { shareLink } from '@/components/feed/PostActions';
 import { SafetyMenu } from '@/components/social/SafetyMenu';
-import { Sheet } from '@/components/social/Sheet';
+import { Sheet, useSheetDirty } from '@/components/social/Sheet';
 import NotFound from '@/pages/not-found';
+import { CaptionText } from '@/components/feed/CaptionText';
 
 const SORTS = [
   { id: 'liked', label: 'Most liked' },
@@ -62,7 +63,7 @@ function EntryTile({ entry, onChanged }: { entry: ChallengeEntry; onChanged: () 
         className="relative block aspect-square overflow-hidden rounded-[22px] bg-line text-ink no-underline" style={cover?.color ? { backgroundColor: cover.color } : undefined}>
         {cover
           ? <img src={cover.thumbUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-          : <span className="absolute inset-0 flex items-center bg-white p-4 font-display text-[clamp(14px,2vw,18px)] font-semibold leading-snug tracking-[-.03em]"><span className="line-clamp-5">{p.caption}</span></span>}
+          : <span className="absolute inset-0 flex items-center bg-white p-4 font-display text-[clamp(14px,2vw,18px)] font-semibold leading-snug tracking-[-.03em]"><span className="line-clamp-5"><CaptionText text={p.caption} linked={false} /></span></span>}
         <span className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-ink/70 to-transparent px-3 pb-2.5 pt-8 text-xs font-semibold text-white">
           <span className="min-w-0 flex-1 truncate">@{p.author.handle}</span>
           <span className="inline-flex items-center gap-1"><Heart size={13} aria-hidden="true" />{p.likeCount}</span>
@@ -130,6 +131,7 @@ function EditChallenge({ challenge, onDone }: { challenge: Challenge; onDone: ()
   const client = useQueryClient();
   const update = useUpdateChallenge();
   const [form, setForm] = useState({ title: challenge.title, description: challenge.description, rules: challenge.rules });
+  useSheetDirty(form.title !== challenge.title || form.description !== challenge.description || form.rules !== challenge.rules);
   return (
     <form className="space-y-4" onSubmit={e => { e.preventDefault(); update.mutate({ slug: challenge.slug, data: form }, { onSuccess: () => { client.invalidateQueries(); onDone(); } }); }}>
       <h2 className="font-display text-2xl">Edit #{challenge.tag}</h2>

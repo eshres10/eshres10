@@ -4,7 +4,7 @@ import { useBlockProfile, useCreateReport, type ReportInputTargetKind, type Repo
 import { Ban, Check, Flag, Loader2, MoreHorizontal, X } from 'lucide-react';
 import { useLocation } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
-import { Sheet, SheetButton } from '@/components/social/Sheet';
+import { Sheet, SheetButton, useSheetDirty } from '@/components/social/Sheet';
 
 const REASONS: Array<{ value: ReportReason; label: string }> = [
   { value: 'spam', label: 'Spam or scam' },
@@ -23,6 +23,7 @@ function errorText(error: unknown, fallback: string): string {
 export function ReportForm({ kind, targetId, what, onDone }: { kind: ReportInputTargetKind; targetId: string; what: string; onDone: () => void }) {
   const [reason, setReason] = useState<ReportReason | null>(null);
   const [details, setDetails] = useState('');
+  useSheetDirty(Boolean(reason || details.trim()));
   const report = useCreateReport();
   if (report.isSuccess) {
     return (

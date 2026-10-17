@@ -1,6 +1,6 @@
 # Seams Club
 
-A social space for the sewing community built on a private sewing studio. **Read `CLAUDE.md` first**: it has the stack, the agreed decisions, access rules and gotchas.
+A social space for the sewing community built on a private sewing studio. The product name is **Seams Club**; internal names keep the `sewspace` prefix. **Read `CLAUDE.md` first**: it has the stack, the agreed decisions, access rules and gotchas.
 
 ## Run & Operate
 
@@ -22,7 +22,7 @@ A social space for the sewing community built on a private sewing studio. **Read
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+See "Where things live" in `CLAUDE.md`. Step-by-step forms (Phase F) are built from the shared pieces in `artifacts/sewspace/src/components/flow/` (New post / Edit post: `components/post-flow/`; Create a project: `/projects/new` and the "Finish setting up" list on project pages; Add to stash: `/stash/new` and `/stash/:kind/:id/edit`; Start a discussion: `/forum/new`; hashtag pages: `/tags/:tag`, served by the API for meta tags); their designs are in `docs/design/flows/` (the step screenshots in `images/` are kept out of git).
 
 ## Architecture decisions
 
@@ -38,7 +38,7 @@ _Populate as you build — explicit user instructions worth remembering across s
 
 ## Gotchas
 
-_Populate as you build — sharp edges, "always run X before Y" rules._
+See "Gotchas" in `CLAUDE.md`. In short: migrations are additive SQL files (never `drizzle-kit push`), route handlers use the `db` from `scoped()`, and drafts/measurements/pattern PDFs are never visible to anyone but their owner.
 
 ## Pointers
 

@@ -33,6 +33,12 @@ const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     res.status(404).json({ error: "Not found" });
     return;
   }
+  // Body parser refusals (too large, bad JSON) keep their own 4xx status.
+  const status = (err as { status?: number; type?: string }).status;
+  if ((err as { type?: string }).type && status && status >= 400 && status < 500) {
+    res.status(status).json({ error: status === 413 ? "That's too large to send." : "That request couldn't be read." });
+    return;
+  }
   req.log?.error({ err }, "Unhandled error");
   if (!res.headersSent) res.status(500).json({ error: "Something went wrong" });
 };

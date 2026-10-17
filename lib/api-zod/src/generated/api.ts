@@ -66,7 +66,8 @@ export const GetProfilePostsResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -79,8 +80,10 @@ export const GetProfilePostsResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -275,7 +278,8 @@ export const GetPublicPostResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -288,9 +292,85 @@ export const GetPublicPostResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })
+
+
+/**
+ * @summary Public posts with a hashtag, newest first. Works signed out; blocks apply.
+ */
+export const GetTagPostsParams = zod.object({
+  "tag": zod.coerce.string()
+})
+
+export const GetTagPostsQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional()
+})
+
+export const GetTagPostsResponse = zod.object({
+  "tag": zod.string(),
+  "posts": zod.number().int().describe('Public posts with this tag that you may see'),
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['status', 'photo']),
+  "caption": zod.string(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "createdAt": zod.coerce.date(),
+  "updatedAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "isOwner": zod.boolean(),
+  "media": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})),
+  "tags": zod.array(zod.object({
+  "kind": zod.enum(['make', 'pattern', 'fabric']),
+  "id": zod.number().int(),
+  "name": zod.string()
+})).describe('Tagged make, pattern or fabric, only when the viewer may see it.'),
+  "likeCount": zod.number().int(),
+  "commentCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "savedByMe": zod.boolean(),
+  "challenges": zod.array(zod.object({
+  "slug": zod.string(),
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
+})),
+  "nextCursor": zod.string().nullable()
+})
+
+
+/**
+ * @summary Up to 6 hashtags: by prefix (q), or with no q from the tagged make, pattern, fabric, challenge and your recent tags.
+ */
+export const SuggestHashtagsQueryParams = zod.object({
+  "q": zod.coerce.string().optional(),
+  "projectId": zod.coerce.number().int().optional(),
+  "patternId": zod.coerce.number().int().optional(),
+  "fabricId": zod.coerce.number().int().optional(),
+  "challenge": zod.coerce.string().optional()
+})
+
+export const SuggestHashtagsResponseItem = zod.object({
+  "tag": zod.string().describe('Lower case, without the hash sign'),
+  "posts": zod.number().int().describe('Public posts using it (followers-only and private posts are never counted)')
+})
+export const SuggestHashtagsResponse = zod.array(SuggestHashtagsResponseItem)
 
 
 /**
@@ -325,7 +405,8 @@ export const GetExploreFeedResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -338,8 +419,10 @@ export const GetExploreFeedResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -500,7 +583,8 @@ export const GetSavedPostsResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -513,8 +597,10 @@ export const GetSavedPostsResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -1192,7 +1278,8 @@ export const GetChallengeEntriesResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1205,8 +1292,10 @@ export const GetChallengeEntriesResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),
   "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
   "isMine": zod.boolean()
@@ -1380,7 +1469,8 @@ export const EnterChallengeResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1393,8 +1483,10 @@ export const EnterChallengeResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),
   "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
   "isMine": zod.boolean()
@@ -1472,10 +1564,87 @@ export const ListForumTopicsResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 })),
   "nextCursor": zod.string().nullable()
 })
+
+
+/**
+ * @summary Up to 3 questions whose titles share the most words with q (Already asked?). Works signed out.
+ */
+export const listSimilarQuestionsQueryQMax = 140;
+
+
+
+export const ListSimilarQuestionsQueryParams = zod.object({
+  "q": zod.coerce.string().max(listSimilarQuestionsQueryQMax)
+})
+
+export const ListSimilarQuestionsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "board": zod.enum(['fitting', 'fabric', 'machines', 'patterns', 'beginners', 'mending', 'meetups']),
+  "kind": zod.enum(['show_tell', 'question', 'recommendation', 'info', 'poll']),
+  "title": zod.string(),
+  "excerpt": zod.string(),
+  "tags": zod.array(zod.string()),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date(),
+  "lastActivityAt": zod.coerce.date(),
+  "votes": zod.number().int(),
+  "replies": zod.number().int(),
+  "votedByMe": zod.boolean(),
+  "solved": zod.boolean(),
+  "pinned": zod.boolean(),
+  "locked": zod.boolean(),
+  "poll": zod.union([zod.object({
+  "closesAt": zod.coerce.date(),
+  "open": zod.boolean(),
+  "total": zod.number().int(),
+  "revealed": zod.boolean(),
+  "myOptionId": zod.number().int().nullable(),
+  "options": zod.array(zod.object({
+  "id": zod.number().int(),
+  "label": zod.string(),
+  "votes": zod.number().int().nullable()
+}))
+}).describe('Option votes are null until you vote, unless you wrote the poll or it has closed.'),zod.null()]),
+  "acceptedAnswer": zod.object({
+  "author": zod.string(),
+  "excerpt": zod.string()
+}).nullable(),
+  "topRecommendations": zod.array(zod.object({
+  "catalog": zod.object({
+  "kind": zod.enum(['pattern', 'product']),
+  "slug": zod.string(),
+  "name": zod.string()
+}),
+  "count": zod.number().int()
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
+})
+export const ListSimilarQuestionsResponse = zod.array(ListSimilarQuestionsResponseItem)
 
 
 /**
@@ -1560,7 +1729,16 @@ export const GetForumDiscussionsResponseItem = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 })
 export const GetForumDiscussionsResponse = zod.array(GetForumDiscussionsResponseItem)
 
@@ -1612,7 +1790,16 @@ export const GetForumTopicResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({
@@ -1644,7 +1831,8 @@ export const GetForumTopicResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1657,8 +1845,10 @@ export const GetForumTopicResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -1744,8 +1934,8 @@ export const CreateForumTopicBody = zod.object({
   "makeId": zod.number().int().nullish(),
   "pollOptions": zod.array(zod.string().max(createForumTopicBodyPollOptionsItemMax)).max(createForumTopicBodyPollOptionsMax).optional(),
   "pollDays": zod.union([zod.literal(1),zod.literal(3),zod.literal(7)]).optional(),
-  "shareToFeed": zod.boolean().optional().describe('Show & tell only - also post it publicly to your feed'),
-  "mediaIds": zod.array(zod.number().int()).max(createForumTopicBodyMediaIdsMax).optional()
+  "shareToFeed": zod.boolean().optional().describe('Show & tell only - also post it publicly to your feed with the same photos'),
+  "mediaIds": zod.array(zod.number().int()).max(createForumTopicBodyMediaIdsMax).optional().describe('Show & tell photos (1 to 10 of your own processed media)')
 })
 
 export const CreateForumTopicResponse = zod.object({
@@ -1791,7 +1981,16 @@ export const CreateForumTopicResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({
@@ -1823,7 +2022,8 @@ export const CreateForumTopicResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1836,8 +2036,10 @@ export const CreateForumTopicResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -1909,7 +2111,16 @@ export const UpdateForumTopicResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({
@@ -1941,7 +2152,8 @@ export const UpdateForumTopicResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -1954,8 +2166,10 @@ export const UpdateForumTopicResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2024,7 +2238,16 @@ export const SetAcceptedAnswerResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({
@@ -2056,7 +2279,8 @@ export const SetAcceptedAnswerResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2069,8 +2293,10 @@ export const SetAcceptedAnswerResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2133,7 +2359,16 @@ export const ModerateForumTopicResponse = zod.object({
   "name": zod.string()
 }),
   "count": zod.number().int()
-})).describe('Pages most recommended in replies (recommendation topics)')
+})).describe('Pages most recommended in replies (recommendation topics)'),
+  "photos": zod.array(zod.object({
+  "id": zod.number().int(),
+  "url": zod.string().describe('Full image'),
+  "thumbUrl": zod.string().describe('Thumbnail'),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
+})).describe('Show & tell photos, in order (they follow the topic)')
 }).and(zod.object({
   "body": zod.string(),
   "catalog": zod.union([zod.object({
@@ -2165,7 +2400,8 @@ export const ModerateForumTopicResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2178,8 +2414,10 @@ export const ModerateForumTopicResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2322,7 +2560,8 @@ export const GetHomeFeedResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2335,8 +2574,10 @@ export const GetHomeFeedResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -2355,7 +2596,8 @@ export const CreateMediaResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })
 
 
@@ -2366,6 +2608,10 @@ export const createPostBodyCaptionMax = 2200;
 
 export const createPostBodyMediaIdsMax = 10;
 
+export const createPostBodyAltTextsItemTextMax = 500;
+
+export const createPostBodyAltTextsMax = 10;
+
 
 
 export const CreatePostBody = zod.object({
@@ -2375,7 +2621,12 @@ export const CreatePostBody = zod.object({
   "mediaIds": zod.array(zod.number().int()).max(createPostBodyMediaIdsMax).optional(),
   "projectId": zod.number().int().nullish(),
   "patternId": zod.number().int().nullish(),
-  "fabricId": zod.number().int().nullish()
+  "fabricId": zod.number().int().nullish(),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "altTexts": zod.array(zod.object({
+  "mediaId": zod.number().int(),
+  "text": zod.string().max(createPostBodyAltTextsItemTextMax)
+})).max(createPostBodyAltTextsMax).optional()
 })
 
 export const CreatePostResponse = zod.object({
@@ -2397,7 +2648,8 @@ export const CreatePostResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2410,8 +2662,10 @@ export const CreatePostResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })
 
 
@@ -2424,6 +2678,12 @@ export const UpdatePostParams = zod.object({
 
 export const updatePostBodyCaptionMax = 2200;
 
+export const updatePostBodyMediaIdsMax = 10;
+
+export const updatePostBodyAltTextsItemTextMax = 500;
+
+export const updatePostBodyAltTextsMax = 10;
+
 
 
 export const UpdatePostBody = zod.object({
@@ -2431,7 +2691,13 @@ export const UpdatePostBody = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "projectId": zod.number().int().nullish(),
   "patternId": zod.number().int().nullish(),
-  "fabricId": zod.number().int().nullish()
+  "fabricId": zod.number().int().nullish(),
+  "mediaIds": zod.array(zod.number().int()).max(updatePostBodyMediaIdsMax).optional().describe('Photo posts: the photos in order (1 to 10). Leave out to keep them as they are.'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
+  "altTexts": zod.array(zod.object({
+  "mediaId": zod.number().int(),
+  "text": zod.string().max(updatePostBodyAltTextsItemTextMax)
+})).max(updatePostBodyAltTextsMax).optional()
 })
 
 export const UpdatePostResponse = zod.object({
@@ -2453,7 +2719,8 @@ export const UpdatePostResponse = zod.object({
   "thumbUrl": zod.string().describe('Thumbnail'),
   "width": zod.number().int(),
   "height": zod.number().int(),
-  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading')
+  "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
+  "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
 })),
   "tags": zod.array(zod.object({
   "kind": zod.enum(['make', 'pattern', 'fabric']),
@@ -2466,8 +2733,10 @@ export const UpdatePostResponse = zod.object({
   "savedByMe": zod.boolean(),
   "challenges": zod.array(zod.object({
   "slug": zod.string(),
-  "tag": zod.string()
-})).describe('Challenges this post is a (not removed) entry in')
+  "tag": zod.string(),
+  "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
+})).describe('Challenges this post is a (not removed) entry in'),
+  "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape')
 })
 
 
@@ -2594,7 +2863,13 @@ export const GetDashboardResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 }),zod.null()]),
   "recentFabrics": zod.array(zod.object({
   "id": zod.number().int(),
@@ -2611,7 +2886,8 @@ export const GetDashboardResponse = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 })),
   "recentPatterns": zod.array(zod.object({
   "id": zod.number().int(),
@@ -2632,7 +2908,9 @@ export const GetDashboardResponse = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 }))
 })
 
@@ -2659,7 +2937,8 @@ export const ListFabricsResponseItem = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 })
 export const ListFabricsResponse = zod.array(ListFabricsResponseItem)
 
@@ -2668,6 +2947,7 @@ export const ListFabricsResponse = zod.array(ListFabricsResponseItem)
  * @summary Add a fabric to the stash
  */
 
+export const createFabricBodyColorHexRegExp = new RegExp('^#[0-9a-f]{6}$');
 
 
 export const CreateFabricBody = zod.object({
@@ -2682,7 +2962,8 @@ export const CreateFabricBody = zod.object({
   "stretch": zod.string().nullish(),
   "weight": zod.string().nullish(),
   "notes": zod.string().nullish(),
-  "imageUrl": zod.string().nullish()
+  "imageUrl": zod.string().nullish(),
+  "colorHex": zod.string().regex(createFabricBodyColorHexRegExp).nullish()
 })
 
 export const CreateFabricResponse = zod.object({
@@ -2700,7 +2981,8 @@ export const CreateFabricResponse = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 })
 
 
@@ -2712,6 +2994,7 @@ export const UpdateFabricParams = zod.object({
 })
 
 
+export const updateFabricBodyOneColorHexRegExp = new RegExp('^#[0-9a-f]{6}$');
 
 
 export const UpdateFabricBody = zod.object({
@@ -2726,7 +3009,8 @@ export const UpdateFabricBody = zod.object({
   "stretch": zod.string().nullish(),
   "weight": zod.string().nullish(),
   "notes": zod.string().nullish(),
-  "imageUrl": zod.string().nullish()
+  "imageUrl": zod.string().nullish(),
+  "colorHex": zod.string().regex(updateFabricBodyOneColorHexRegExp).nullish()
 })
 
 export const UpdateFabricResponse = zod.object({
@@ -2744,7 +3028,8 @@ export const UpdateFabricResponse = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 })
 
 
@@ -2884,7 +3169,9 @@ export const ListPatternsResponseItem = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 })
 export const ListPatternsResponse = zod.array(ListPatternsResponseItem)
 
@@ -2892,6 +3179,12 @@ export const ListPatternsResponse = zod.array(ListPatternsResponseItem)
 /**
  * @summary Add a sewing pattern
  */
+export const createPatternBodyStepsItemMax = 200;
+
+export const createPatternBodyStepsMax = 60;
+
+
+
 export const CreatePatternBody = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
   "name": zod.string(),
@@ -2908,7 +3201,9 @@ export const CreatePatternBody = zod.object({
   "coverImageUrl": zod.string().nullish(),
   "pdfUrl": zod.string().nullish(),
   "pdfFileName": zod.string().nullish(),
-  "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional()
+  "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional(),
+  "steps": zod.array(zod.string().min(1).max(createPatternBodyStepsItemMax)).max(createPatternBodyStepsMax).nullish(),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullish()
 })
 
 export const CreatePatternResponse = zod.object({
@@ -2930,7 +3225,9 @@ export const CreatePatternResponse = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 })
 
 
@@ -2940,6 +3237,12 @@ export const CreatePatternResponse = zod.object({
 export const UpdatePatternParams = zod.object({
   "id": zod.coerce.number().int()
 })
+
+export const updatePatternBodyOneStepsItemMax = 200;
+
+export const updatePatternBodyOneStepsMax = 60;
+
+
 
 export const UpdatePatternBody = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).optional().describe('Defaults to private'),
@@ -2957,7 +3260,9 @@ export const UpdatePatternBody = zod.object({
   "coverImageUrl": zod.string().nullish(),
   "pdfUrl": zod.string().nullish(),
   "pdfFileName": zod.string().nullish(),
-  "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional()
+  "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional(),
+  "steps": zod.array(zod.string().min(1).max(updatePatternBodyOneStepsItemMax)).max(updatePatternBodyOneStepsMax).nullish(),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullish()
 })
 
 export const UpdatePatternResponse = zod.object({
@@ -2979,7 +3284,9 @@ export const UpdatePatternResponse = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 })
 
 
@@ -2991,6 +3298,18 @@ export const DeletePatternParams = zod.object({
 })
 
 export const DeletePatternResponse = zod.void()
+
+
+/**
+ * @summary Four main colours of one of your photo uploads (no AI: resized and grouped on the server).
+ */
+export const ExtractColoursBody = zod.object({
+  "imageUrl": zod.string().describe('/api/storage/objects/... of your own image upload')
+})
+
+export const ExtractColoursResponse = zod.object({
+  "colours": zod.array(zod.string()).describe('Most common first, as #rrggbb')
+})
 
 
 /**
@@ -3014,7 +3333,8 @@ export const AnalyzePatternPdfResponse = zod.object({
   "recommendedFabrics": zod.string().nullable(),
   "seamAllowance": zod.string().nullable(),
   "instructions": zod.string().nullable(),
-  "notes": zod.string().nullable()
+  "notes": zod.string().nullable(),
+  "steps": zod.array(zod.string()).nullable().describe('Main construction stages as short phrases, when the PDF has them')
 })
 
 
@@ -3045,7 +3365,13 @@ export const ListProjectsResponseItem = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 })
 export const ListProjectsResponse = zod.array(ListProjectsResponseItem)
 
@@ -3055,6 +3381,8 @@ export const ListProjectsResponse = zod.array(ListProjectsResponseItem)
  */
 export const createProjectBodyProgressMin = 0;
 export const createProjectBodyProgressMax = 100;
+
+export const createProjectBodyGarmentMax = 40;
 
 
 
@@ -3074,6 +3402,7 @@ export const CreateProjectBody = zod.object({
   "problems": zod.string().nullish(),
   "solutions": zod.string().nullish(),
   "size": zod.string().nullish(),
+  "garment": zod.string().max(createProjectBodyGarmentMax).nullish(),
   "completedAt": zod.coerce.date().nullish()
 })
 
@@ -3101,7 +3430,13 @@ export const CreateProjectResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 })
 
 
@@ -3136,7 +3471,13 @@ export const GetProjectResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 }).and(zod.object({
   "steps": zod.array(zod.object({
   "id": zod.number().int(),
@@ -3170,6 +3511,8 @@ export const UpdateProjectParams = zod.object({
 export const updateProjectBodyOneProgressMin = 0;
 export const updateProjectBodyOneProgressMax = 100;
 
+export const updateProjectBodyOneGarmentMax = 40;
+
 
 
 export const UpdateProjectBody = zod.object({
@@ -3188,6 +3531,7 @@ export const UpdateProjectBody = zod.object({
   "problems": zod.string().nullish(),
   "solutions": zod.string().nullish(),
   "size": zod.string().nullish(),
+  "garment": zod.string().max(updateProjectBodyOneGarmentMax).nullish(),
   "completedAt": zod.coerce.date().nullish()
 })
 
@@ -3215,7 +3559,13 @@ export const UpdateProjectResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "size": zod.string().nullable(),
   "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
-  "isDemo": zod.boolean()
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
 })
 
 
@@ -3227,6 +3577,103 @@ export const DeleteProjectParams = zod.object({
 })
 
 export const DeleteProjectResponse = zod.void()
+
+
+/**
+ * @summary Change some fields of your project (setup checklist answers, journal notes, stage).
+ */
+export const UpdateProjectFieldsParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateProjectFieldsBodyNameMax = 120;
+
+export const updateProjectFieldsBodySizeMax = 60;
+
+export const updateProjectFieldsBodyGarmentMax = 40;
+
+export const updateProjectFieldsBodyNotesMax = 20000;
+
+export const updateProjectFieldsBodyAlterationsMax = 20000;
+
+export const updateProjectFieldsBodyProblemsMax = 20000;
+
+export const updateProjectFieldsBodySolutionsMax = 20000;
+
+
+
+export const UpdateProjectFieldsBody = zod.object({
+  "name": zod.string().min(1).max(updateProjectFieldsBodyNameMax).optional(),
+  "status": zod.enum(['planning', 'cutting', 'sewing', 'fitting', 'finished']).optional(),
+  "patternId": zod.number().int().nullish(),
+  "fabricId": zod.number().int().nullish(),
+  "threadId": zod.number().int().nullish(),
+  "measurementProfileId": zod.number().int().nullish(),
+  "size": zod.string().max(updateProjectFieldsBodySizeMax).nullish(),
+  "garment": zod.string().max(updateProjectFieldsBodyGarmentMax).nullish(),
+  "notes": zod.string().max(updateProjectFieldsBodyNotesMax).nullish(),
+  "alterations": zod.string().max(updateProjectFieldsBodyAlterationsMax).nullish(),
+  "problems": zod.string().max(updateProjectFieldsBodyProblemsMax).nullish(),
+  "solutions": zod.string().max(updateProjectFieldsBodySolutionsMax).nullish(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).optional().describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
+}).describe('Change some fields of your project. Leave a field out to keep it; null clears it.')
+
+export const updateProjectFieldsResponseProgressMin = 0;
+export const updateProjectFieldsResponseProgressMax = 100;
+
+
+
+export const UpdateProjectFieldsResponse = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "status": zod.enum(['planning', 'cutting', 'sewing', 'fitting', 'finished']),
+  "progress": zod.number().int().min(updateProjectFieldsResponseProgressMin).max(updateProjectFieldsResponseProgressMax),
+  "patternId": zod.number().int().nullable(),
+  "fabricId": zod.number().int().nullable(),
+  "threadId": zod.number().int().nullable(),
+  "measurementProfileId": zod.number().int().nullable(),
+  "coverImageUrl": zod.string().nullable(),
+  "description": zod.string().nullish(),
+  "notes": zod.string().nullable(),
+  "alterations": zod.string().nullable(),
+  "problems": zod.string().nullable(),
+  "solutions": zod.string().nullable(),
+  "completedAt": zod.coerce.date().nullable(),
+  "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
+  "size": zod.string().nullable(),
+  "publishedAt": zod.coerce.date().nullable().describe('First time the make was shared beyond private'),
+  "isDemo": zod.boolean(),
+  "garment": zod.string().nullable(),
+  "setup": zod.object({
+  "dismissed": zod.boolean().optional(),
+  "visibilityChosen": zod.boolean().optional().describe('Who can see it counts as answered only once chosen on purpose'),
+  "stepsChoice": zod.union([zod.literal('pattern'),zod.literal('own'),zod.literal('none'),zod.literal(null)]).nullish()
+}).describe('The Finish setting up checklist: hidden once dismissed or all seven rows are answered')
+})
+
+
+/**
+ * @summary Add the linked pattern's construction steps to the project.
+ */
+export const AddStepsFromPatternParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const AddStepsFromPatternResponseItem = zod.object({
+  "id": zod.number().int(),
+  "projectId": zod.number().int(),
+  "title": zod.string(),
+  "description": zod.string().nullable(),
+  "notes": zod.string().nullable(),
+  "position": zod.number().int(),
+  "completed": zod.boolean(),
+  "completedAt": zod.coerce.date().nullable()
+})
+export const AddStepsFromPatternResponse = zod.array(AddStepsFromPatternResponseItem)
 
 
 /**
@@ -3574,7 +4021,9 @@ export const GetRecommendationsResponseItem = zod.object({
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 }),
   "fabric": zod.object({
   "id": zod.number().int(),
@@ -3591,7 +4040,8 @@ export const GetRecommendationsResponseItem = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 }),
   "suitability": zod.number().int(),
   "reason": zod.string()
@@ -3613,5 +4063,46 @@ export const RequestUploadUrlResponse = zod.object({
   "uploadURL": zod.string(),
   "objectPath": zod.string()
 })
+
+
+/**
+ * @summary Your draft for a flow, or null. Drafts are never readable by anyone else.
+ */
+export const GetDraftParams = zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic'])
+})
+
+export const GetDraftResponse = zod.object({
+  "draft": zod.union([zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic']),
+  "payload": zod.record(zod.string(), zod.unknown()),
+  "updatedAt": zod.coerce.date()
+}),zod.null()])
+})
+
+
+/**
+ * @summary Save (replace) your draft for a flow. At most 64 KB; files in it must be your own uploads.
+ */
+export const SaveDraftParams = zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic'])
+})
+
+export const SaveDraftBody = zod.object({
+  "payload": zod.record(zod.string(), zod.unknown())
+})
+
+export const SaveDraftResponse = zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic']),
+  "payload": zod.record(zod.string(), zod.unknown()),
+  "updatedAt": zod.coerce.date()
+})
+
+
+export const DeleteDraftParams = zod.object({
+  "kind": zod.enum(['post', 'project', 'stash', 'topic'])
+})
+
+export const DeleteDraftResponse = zod.void()
 
 

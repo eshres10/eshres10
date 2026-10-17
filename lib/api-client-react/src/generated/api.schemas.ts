@@ -5,6 +5,44 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+export interface ColourRequest {
+  /** /api/storage/objects/... of your own image upload */
+  imageUrl: string;
+}
+
+export interface ColourResult {
+  /** Most common first, as #rrggbb */
+  colours: string[];
+}
+
+export type DraftKind = typeof DraftKind[keyof typeof DraftKind];
+
+
+export const DraftKind = {
+  post: 'post',
+  project: 'project',
+  stash: 'stash',
+  topic: 'topic',
+} as const;
+
+export type DraftPayload = { [key: string]: unknown };
+
+export interface Draft {
+  kind: DraftKind;
+  payload: DraftPayload;
+  updatedAt: string;
+}
+
+export interface DraftEnvelope {
+  draft: Draft | null;
+}
+
+export type DraftInputPayload = { [key: string]: unknown };
+
+export interface DraftInput {
+  payload: DraftInputPayload;
+}
+
 export interface HealthStatus {
   status: string;
 }
@@ -247,6 +285,8 @@ export interface Media {
      * @nullable
      */
   color: string | null;
+  /** Read aloud by screen readers; empty when not given */
+  altText: string;
 }
 
 export type PostTagKind = typeof PostTagKind[keyof typeof PostTagKind];
@@ -275,7 +315,21 @@ export const FeedPostKind = {
 export interface ChallengeRef {
   slug: string;
   tag: string;
+  /** On posts: the entry, so its author can withdraw it */
+  entryId?: number;
 }
+
+/**
+ * How photos are cropped for display: 4:5, 1:1 or the first photo's own shape
+ */
+export type PostAspect = typeof PostAspect[keyof typeof PostAspect];
+
+
+export const PostAspect = {
+  '4:5': '4:5',
+  '1:1': '1:1',
+  original: 'original',
+} as const;
 
 export interface FeedPost {
   id: number;
@@ -295,6 +349,29 @@ export interface FeedPost {
   savedByMe: boolean;
   /** Challenges this post is a (not removed) entry in */
   challenges: ChallengeRef[];
+  aspect: PostAspect;
+}
+
+export interface AltTextInput {
+  mediaId: number;
+  /** @maxLength 500 */
+  text: string;
+}
+
+export interface HashtagCount {
+  /** Lower case, without the hash sign */
+  tag: string;
+  /** Public posts using it (followers-only and private posts are never counted) */
+  posts: number;
+}
+
+export interface TagPage {
+  tag: string;
+  /** Public posts with this tag that you may see */
+  posts: number;
+  items: FeedPost[];
+  /** @nullable */
+  nextCursor: string | null;
 }
 
 export interface FeedPage {
@@ -327,6 +404,9 @@ export interface PostInput {
   patternId?: number | null;
   /** @nullable */
   fabricId?: number | null;
+  aspect?: PostAspect;
+  /** @maxItems 10 */
+  altTexts?: AltTextInput[];
 }
 
 export interface PostUpdate {
@@ -339,6 +419,14 @@ export interface PostUpdate {
   patternId?: number | null;
   /** @nullable */
   fabricId?: number | null;
+  /**
+     * Photo posts: the photos in order (1 to 10). Leave out to keep them as they are.
+     * @maxItems 10
+     */
+  mediaIds?: number[];
+  aspect?: PostAspect;
+  /** @maxItems 10 */
+  altTexts?: AltTextInput[];
 }
 
 export interface LikeState {
@@ -1013,6 +1101,8 @@ export interface ForumTopicSummary {
   acceptedAnswer: ForumTopicSummaryAcceptedAnswer;
   /** Pages most recommended in replies (recommendation topics) */
   topRecommendations: ForumTopicSummaryTopRecommendationsItem[];
+  /** Show & tell photos, in order (they follow the topic) */
+  photos: Media[];
 }
 
 /**
@@ -1120,9 +1210,12 @@ export interface ForumTopicInput {
      */
   pollOptions?: string[];
   pollDays?: ForumTopicInputPollDays;
-  /** Show & tell only - also post it publicly to your feed */
+  /** Show & tell only - also post it publicly to your feed with the same photos */
   shareToFeed?: boolean;
-  /** @maxItems 10 */
+  /**
+     * Show & tell photos (1 to 10 of your own processed media)
+     * @maxItems 10
+     */
   mediaIds?: number[];
 }
 
@@ -1238,6 +1331,11 @@ export interface Fabric {
      * @nullable
      */
   catalogId: number | null;
+  /**
+     * Swatch colour as #rrggbb
+     * @nullable
+     */
+  colorHex: string | null;
 }
 
 export interface FabricInput {
@@ -1262,6 +1360,11 @@ export interface FabricInput {
   notes?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  /**
+     * @nullable
+     * @pattern ^#[0-9a-f]{6}$
+     */
+  colorHex?: string | null;
 }
 
 export type FabricUpdate = FabricInput;
@@ -1318,6 +1421,18 @@ export const PatternStatus = {
   favorite: 'favorite',
 } as const;
 
+/**
+ * @nullable
+ */
+export type PatternFormat = typeof PatternFormat[keyof typeof PatternFormat] | null;
+
+
+export const PatternFormat = {
+  pdf: 'pdf',
+  paper: 'paper',
+  traced: 'traced',
+} as const;
+
 export interface Pattern {
   id: number;
   name: string;
@@ -1353,6 +1468,13 @@ export interface Pattern {
      * @nullable
      */
   catalogId: number | null;
+  /**
+     * Construction steps as short phrases (private)
+     * @nullable
+     */
+  steps: string[] | null;
+  /** @nullable */
+  format: PatternFormat;
 }
 
 export type PatternInputStatus = typeof PatternInputStatus[keyof typeof PatternInputStatus];
@@ -1363,6 +1485,18 @@ export const PatternInputStatus = {
   purchased: 'purchased',
   made: 'made',
   favorite: 'favorite',
+} as const;
+
+/**
+ * @nullable
+ */
+export type PatternInputFormat = typeof PatternInputFormat[keyof typeof PatternInputFormat] | null;
+
+
+export const PatternInputFormat = {
+  pdf: 'pdf',
+  paper: 'paper',
+  traced: 'traced',
 } as const;
 
 export interface PatternInput {
@@ -1394,6 +1528,15 @@ export interface PatternInput {
   /** @nullable */
   pdfFileName?: string | null;
   status?: PatternInputStatus;
+  /**
+     * @maxItems 60
+     * @nullable
+     * @items.minLength 1
+     * @items.maxLength 200
+     */
+  steps?: string[] | null;
+  /** @nullable */
+  format?: PatternInputFormat;
 }
 
 export type PatternUpdate = PatternInput;
@@ -1438,6 +1581,11 @@ export interface PatternPdfAnalysis {
   instructions: string | null;
   /** @nullable */
   notes: string | null;
+  /**
+     * Main construction stages as short phrases, when the PDF has them
+     * @nullable
+     */
+  steps: string[] | null;
 }
 
 export type ProjectStatus = typeof ProjectStatus[keyof typeof ProjectStatus];
@@ -1450,6 +1598,29 @@ export const ProjectStatus = {
   fitting: 'fitting',
   finished: 'finished',
 } as const;
+
+/**
+ * @nullable
+ */
+export type ProjectSetupStepsChoice = typeof ProjectSetupStepsChoice[keyof typeof ProjectSetupStepsChoice] | null;
+
+
+export const ProjectSetupStepsChoice = {
+  pattern: 'pattern',
+  own: 'own',
+  none: 'none',
+} as const;
+
+/**
+ * The Finish setting up checklist: hidden once dismissed or all seven rows are answered
+ */
+export interface ProjectSetup {
+  dismissed?: boolean;
+  /** Who can see it counts as answered only once chosen on purpose */
+  visibilityChosen?: boolean;
+  /** @nullable */
+  stepsChoice?: ProjectSetupStepsChoice;
+}
 
 export interface Project {
   id: number;
@@ -1491,6 +1662,71 @@ export interface Project {
      */
   publishedAt: string | null;
   isDemo: boolean;
+  /** @nullable */
+  garment: string | null;
+  setup: ProjectSetup;
+}
+
+export type ProjectFieldsInputStatus = typeof ProjectFieldsInputStatus[keyof typeof ProjectFieldsInputStatus];
+
+
+export const ProjectFieldsInputStatus = {
+  planning: 'planning',
+  cutting: 'cutting',
+  sewing: 'sewing',
+  fitting: 'fitting',
+  finished: 'finished',
+} as const;
+
+/**
+ * Change some fields of your project. Leave a field out to keep it; null clears it.
+ */
+export interface ProjectFieldsInput {
+  /**
+     * @minLength 1
+     * @maxLength 120
+     */
+  name?: string;
+  status?: ProjectFieldsInputStatus;
+  /** @nullable */
+  patternId?: number | null;
+  /** @nullable */
+  fabricId?: number | null;
+  /** @nullable */
+  threadId?: number | null;
+  /** @nullable */
+  measurementProfileId?: number | null;
+  /**
+     * @maxLength 60
+     * @nullable
+     */
+  size?: string | null;
+  /**
+     * @maxLength 40
+     * @nullable
+     */
+  garment?: string | null;
+  /**
+     * @maxLength 20000
+     * @nullable
+     */
+  notes?: string | null;
+  /**
+     * @maxLength 20000
+     * @nullable
+     */
+  alterations?: string | null;
+  /**
+     * @maxLength 20000
+     * @nullable
+     */
+  problems?: string | null;
+  /**
+     * @maxLength 20000
+     * @nullable
+     */
+  solutions?: string | null;
+  setup?: ProjectSetup;
 }
 
 export type ProjectInputStatus = typeof ProjectInputStatus[keyof typeof ProjectInputStatus];
@@ -1536,6 +1772,11 @@ export interface ProjectInput {
   solutions?: string | null;
   /** @nullable */
   size?: string | null;
+  /**
+     * @maxLength 40
+     * @nullable
+     */
+  garment?: string | null;
   /** @nullable */
   completedAt?: string | null;
 }
@@ -1749,6 +1990,18 @@ export type GetProfilePostsParams = {
 cursor?: string;
 };
 
+export type GetTagPostsParams = {
+cursor?: string;
+};
+
+export type SuggestHashtagsParams = {
+q?: string;
+projectId?: number;
+patternId?: number;
+fabricId?: number;
+challenge?: string;
+};
+
 export type GetExploreFeedParams = {
 cursor?: string;
 kind?: GetExploreFeedKind;
@@ -1881,6 +2134,13 @@ export const ListForumTopicsSort = {
   new: 'new',
   unanswered: 'unanswered',
 } as const;
+
+export type ListSimilarQuestionsParams = {
+/**
+ * @maxLength 140
+ */
+q: string;
+};
 
 export type GetForumDiscussionsParams = {
 catalogId?: number;
