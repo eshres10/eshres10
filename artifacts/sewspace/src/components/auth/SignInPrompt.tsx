@@ -52,8 +52,8 @@ function SignInSheet({ reason, close }: { reason: SignInReason; close: () => voi
     return () => window.removeEventListener('keydown', onKey);
   }, [close]);
   return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/45 p-2 sm:items-center" onClick={e => { if (e.target === e.currentTarget) close(); }}>
-      <div role="dialog" aria-modal="true" aria-labelledby="sign-in-title" className="w-full max-w-[440px] rounded-[32px] bg-white px-5 pb-[calc(1.4rem+env(safe-area-inset-bottom))] pt-3 sm:p-7">
+      <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/50 p-0 sm:items-center sm:p-3" onClick={e => { if (e.target === e.currentTarget) close(); }}>
+      <div role="dialog" aria-modal="true" aria-labelledby="sign-in-title" className="w-full max-w-[440px] rounded-t-[30px] bg-white px-5 pb-[calc(1.4rem+env(safe-area-inset-bottom))] pt-3 shadow-float sm:rounded-[32px] sm:p-7">
         <span className="mx-auto mb-4 block h-[5px] w-11 rounded-full bg-line sm:hidden" aria-hidden="true" />
         <span className="grid h-14 w-14 place-items-center rounded-[18px] bg-red" aria-hidden="true"><Heart size={28} className="fill-white text-white" /></span>
         <h2 id="sign-in-title" className="mt-4 font-display text-[28px] leading-[1.05]">{reason.title}</h2>

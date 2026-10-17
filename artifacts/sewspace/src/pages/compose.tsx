@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { enterChallenge, useCreatePost, useListFabrics, useListJoinedChallenges, useListPatterns, useListProjects, type Media } from '@workspace/api-client-react';
 import { ArrowLeft, ArrowRight, BookOpen, ImagePlus, Layers, Loader2, Scissors, Trophy, X } from 'lucide-react';
-import { useLocation, useSearch } from 'wouter';
+import { Link, useLocation, useSearch } from 'wouter';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { VisibilityPicker, type Visibility } from '@/components/visibility';
 import { processPhoto } from '@/lib/photos';
@@ -117,7 +117,14 @@ export function ComposePage() {
   );
 
   return (
-    <form onSubmit={submit} className="mx-auto max-w-[620px] space-y-3">
+    <form onSubmit={submit} className="mx-auto min-h-[100dvh] max-w-[620px] space-y-3.5 px-3 pb-6 md:min-h-0 md:space-y-3 md:px-0 md:pb-0">
+      <header className="sticky top-0 z-30 -mx-3 flex h-[58px] items-center gap-3 bg-canvas px-3 md:hidden">
+        <Link href="/feed" aria-label="Close new post" className="grid h-10 w-10 place-items-center rounded-full bg-white text-ink no-underline"><X size={20} aria-hidden="true" /></Link>
+        <h1 className="flex-1 font-display text-[19px] tracking-[-.035em]">New post</h1>
+        <button type="submit" disabled={!canPost} className="btn btn-primary min-h-[42px] min-w-[78px] px-5 disabled:opacity-50" data-testid="button-post-mobile">
+          {create.isPending && <Loader2 size={15} className="animate-spin" aria-hidden="true" />}Post
+        </button>
+      </header>
       <div className="flex items-center gap-2">
         <div role="tablist" aria-label="Post type" className="flex flex-1 gap-1 rounded-full bg-white p-1">
           {(['photo', 'status'] as const).map(k => (
@@ -125,16 +132,16 @@ export function ComposePage() {
               className={`min-h-[44px] flex-1 rounded-full text-sm font-bold ${kind === k ? 'bg-ink text-white' : 'text-ink'}`}>{k === 'photo' ? 'Photos' : 'Status'}</button>
           ))}
         </div>
-        <button type="submit" disabled={!canPost} className="btn btn-primary min-w-[96px] disabled:opacity-50" data-testid="button-post">
+        <button type="submit" disabled={!canPost} className="btn btn-primary hidden min-w-[96px] disabled:opacity-50 md:inline-flex" data-testid="button-post">
           {create.isPending && <Loader2 size={15} className="animate-spin" aria-hidden="true" />}Post
         </button>
       </div>
 
       {kind === 'photo' && (
-        <section className="rounded-[24px] bg-white p-3" aria-label="Photos">
+        <section className="rounded-[24px] bg-white p-2.5 md:p-3" aria-label="Photos">
           <div className="flex gap-2 overflow-x-auto pb-1">
             {photos.map((p, i) => (
-              <div key={p.key} className="relative h-[130px] w-[104px] shrink-0 overflow-hidden rounded-[16px] bg-line">
+              <div key={p.key} className="relative h-[118px] w-[92px] shrink-0 overflow-hidden rounded-[16px] bg-line sm:h-[130px] sm:w-[104px]">
                 <img src={p.preview} alt={`Photo ${i + 1}`} className={`h-full w-full object-cover ${p.status === 'uploading' ? 'opacity-60' : ''}`} />
                 {i === 0 && <span className="absolute left-1.5 top-1.5 rounded-full bg-yellow px-2 text-[10px] font-bold">Cover</span>}
                 <button type="button" onClick={() => remove(p.key)} aria-label={`Remove photo ${i + 1}`} className="absolute right-1 top-1 grid h-8 w-8 place-items-center rounded-full bg-ink/75 text-white"><X size={14} /></button>
@@ -149,7 +156,7 @@ export function ComposePage() {
               </div>
             ))}
             {photos.length < MAX_PHOTOS && (
-              <button type="button" onClick={() => fileInput.current?.click()} aria-label="Add photos" className="grid h-[130px] w-[104px] shrink-0 place-items-center rounded-[16px] border-2 border-dashed border-subtle/40 bg-canvas" data-testid="button-add-photos">
+              <button type="button" onClick={() => fileInput.current?.click()} aria-label="Add photos" className="grid h-[118px] w-[92px] shrink-0 place-items-center rounded-[16px] border-2 border-dashed border-subtle/40 bg-canvas sm:h-[130px] sm:w-[104px]" data-testid="button-add-photos">
                 <ImagePlus size={24} aria-hidden="true" />
               </button>
             )}

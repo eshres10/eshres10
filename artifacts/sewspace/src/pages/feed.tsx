@@ -9,10 +9,10 @@ import { FeedList } from '@/components/feed/FeedList';
 function Composer() {
   const me = useGetProfile();
   return (
-    <div className="flex flex-wrap items-center gap-3 rounded-[30px] bg-white px-[18px] py-4">
+    <div className="flex flex-wrap items-center gap-3 rounded-[25px] bg-white px-3.5 py-3 md:rounded-[30px] md:px-[18px] md:py-4">
       <UserAvatar name={me.data?.name} avatarUrl={me.data?.avatarUrl} size={42} />
-      <Link href="/new?type=status" className="flex min-h-[46px] flex-[1_1_240px] items-center rounded-full border border-line bg-canvas px-[18px] text-[15px] text-subtle no-underline">Share a make, a question or a work in progress…</Link>
-      <div className="flex gap-1.5">
+      <Link href="/new?type=status" className="flex min-h-[46px] min-w-[180px] flex-[1_1_180px] items-center rounded-full border border-line bg-canvas px-4 text-[14px] text-subtle no-underline md:flex-[1_1_240px] md:px-[18px] md:text-[15px]">Share a make, a question or a work in progress…</Link>
+      <div className="flex w-full gap-1.5 pl-[54px] sm:w-auto sm:pl-0">
         <Link href="/new" className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-peach px-3.5 text-[13px] font-semibold text-ink no-underline"><Camera size={16} aria-hidden="true" />Photos</Link>
         <Link href="/projects" className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-yellow px-3.5 text-[13px] font-semibold text-ink no-underline"><Scissors size={16} aria-hidden="true" />Share a make</Link>
       </div>
@@ -41,13 +41,13 @@ function CurrentProject() {
 export function FeedPage() {
   const [tab, setTab] = useState<'following' | 'discover'>('following');
   return (
-    <div className="mx-auto grid max-w-[920px] justify-center gap-5 lg:grid-cols-[minmax(0,600px)_300px]">
-      <div className="flex min-w-0 flex-col gap-4">
+    <div className="mx-auto grid max-w-[920px] justify-center gap-4 lg:grid-cols-[minmax(0,600px)_300px] lg:gap-5">
+      <div className="flex min-w-0 flex-col gap-3.5 md:gap-4">
         <Composer />
-        <div role="tablist" aria-label="Feed" className="flex w-fit gap-1 rounded-full bg-white p-1">
+        <div role="tablist" aria-label="Feed" className="flex w-full gap-1 rounded-full bg-white p-1 md:w-fit">
           {(['following', 'discover'] as const).map(t => (
             <button key={t} type="button" role="tab" aria-selected={tab === t} onClick={() => setTab(t)}
-              className={`min-h-[44px] rounded-full px-[18px] text-sm font-semibold ${tab === t ? 'bg-ink text-white' : 'text-ink'}`}>{t === 'following' ? 'Following' : 'Discover'}</button>
+              className={`min-h-[42px] flex-1 rounded-full px-[18px] text-sm font-semibold md:flex-none ${tab === t ? 'bg-ink text-white' : 'text-ink'}`}>{t === 'following' ? 'Following' : 'Discover'}</button>
           ))}
         </div>
         <div role="tabpanel">

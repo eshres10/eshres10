@@ -103,7 +103,7 @@ function Stats({ stats }: { stats: ProfileStats }) {
     <span className="rounded-[20px] bg-canvas px-[18px] py-3"><b className="font-display text-xl">{compact(n)}</b> <span className="text-sm text-subtle">{label}</span></span>
   );
   return (
-    <div className="flex flex-[1_1_100%] flex-wrap gap-2.5">
+    <div className="grid w-full grid-cols-2 gap-2.5 sm:flex sm:flex-[1_1_100%] sm:flex-wrap">
       {chip(stats.posts, stats.posts === 1 ? 'post' : 'posts')}
       {chip(stats.makes, stats.makes === 1 ? 'make' : 'makes')}
       {chip(stats.followers, stats.followers === 1 ? 'follower' : 'followers')}
@@ -342,16 +342,16 @@ export function PublicProfilePage({ handle }: { handle: string }) {
 
   return (
     <AdaptiveLayout>
-      <section className="overflow-hidden rounded-[40px] bg-white">
-        <div className="flex flex-wrap items-end gap-x-8 gap-y-6 px-5 pb-9 pt-6 sm:px-11 sm:pt-10">
+      <section className="overflow-hidden rounded-[28px] bg-white md:rounded-[40px]">
+        <div className="flex flex-wrap items-end gap-x-8 gap-y-4 px-4 pb-5 pt-5 sm:px-11 sm:pb-9 sm:pt-10">
           {p.avatarUrl
-            ? <img src={p.avatarUrl} alt="" className="h-24 w-24 rounded-full object-cover sm:h-32 sm:w-32" />
-            : <span aria-hidden="true" className="grid h-24 w-24 place-items-center rounded-full bg-yellow font-display text-[40px] tracking-[-.04em] sm:h-32 sm:w-32 sm:text-[52px]">{p.name.charAt(0).toUpperCase()}</span>}
-          <div className="min-w-0 flex-[1_1_320px]">
+            ? <img src={p.avatarUrl} alt="" className="h-[76px] w-[76px] rounded-full object-cover sm:h-32 sm:w-32" />
+            : <span aria-hidden="true" className="grid h-[76px] w-[76px] place-items-center rounded-full bg-ink font-display text-[34px] tracking-[-.04em] text-yellow sm:h-32 sm:w-32 sm:bg-yellow sm:text-[52px] sm:text-ink">{p.name.charAt(0).toUpperCase()}</span>}
+          <div className="min-w-0 flex-[1_1_180px]">
             <h1 className="font-display text-[clamp(30px,3.6vw,44px)] leading-[1.05] tracking-[-.05em]">{p.name}</h1>
             <p className="mt-1 text-[15px] text-subtle">@{p.handle} · Joined {monthYear(p.joinedAt)}</p>
           </div>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex w-full flex-wrap gap-2 sm:w-auto">
             {p.isMe
               ? <Link href="/settings" className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-yellow px-[26px] text-[15px] font-bold text-ink no-underline"><Pencil size={16} aria-hidden="true" />Edit profile</Link>
               : <FollowButton handle={p.handle} name={p.name} following={p.followedByMe} />}
@@ -362,12 +362,12 @@ export function PublicProfilePage({ handle }: { handle: string }) {
               </span>
             )}
           </div>
-          {p.bio && <p className="max-w-[680px] flex-[1_1_100%] whitespace-pre-line text-base leading-relaxed">{p.bio}</p>}
+          {p.bio && <p className="max-w-[680px] flex-[1_1_100%] whitespace-pre-line text-[14px] leading-relaxed sm:text-base">{p.bio}</p>}
           <Stats stats={p.stats} />
         </div>
       </section>
 
-      <div role="tablist" aria-label="Profile sections" className="mt-[22px] flex max-w-[520px] gap-1 rounded-full bg-white p-[5px]">
+      <div role="tablist" aria-label="Profile sections" className="mt-3 flex w-full max-w-[520px] gap-1 rounded-full bg-white p-[5px] sm:mt-[22px]">
         {TABS.map(t => (
           <button key={t.id} type="button" role="tab" id={`tab-${t.id}`} aria-selected={tab === t.id} aria-controls="profile-panel" onClick={() => setTab(t.id)}
             className={`min-h-[44px] flex-1 rounded-full text-[15px] font-bold ${tab === t.id ? 'bg-ink text-white' : 'text-ink'}`}>{t.label}</button>

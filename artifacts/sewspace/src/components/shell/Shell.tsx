@@ -121,8 +121,9 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   const title = allItems.find(item => isActive(location, item.href))?.label
     ?? ({ '/settings': 'Profile & settings', '/new': 'New post' } as Record<string, string>)[location]
     ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'Seams Club');
+  const mobileFocus = location === '/new' || location.startsWith('/posts/');
   return (
-    <div className="min-h-[100dvh] pb-28 md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]">
+    <div className={`${mobileFocus ? 'min-h-[100dvh] pb-0' : 'min-h-[100dvh] pb-[calc(6rem+env(safe-area-inset-bottom))]'} md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]`}>
       <aside className="sticky top-[18px] hidden h-[calc(100dvh-36px)] w-[260px] shrink-0 overflow-y-auto rounded-[30px] bg-yellow px-4 py-[22px] md:block">
         <SidebarNav location={location} />
       </aside>
@@ -135,15 +136,18 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <header className="sticky top-[calc(.75rem+env(safe-area-inset-top))] z-30 mx-3 mt-3 flex items-center gap-3 rounded-[30px] bg-white py-2.5 pl-[22px] pr-3 shadow-float md:static md:mx-0 md:mt-0">
-          <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="-ml-2 grid h-11 w-11 place-items-center rounded-full bg-canvas md:hidden"><Menu size={20} /></button>
-          <h1 className="min-w-0 flex-1 truncate font-display text-[22px] tracking-[-.04em]">{title}</h1>
+        <header className={`${mobileFocus ? 'hidden md:flex' : 'sticky top-[calc(.5rem+env(safe-area-inset-top))] mx-3 mt-3 flex'} relative z-30 items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:static md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3`}>
+          <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-canvas md:hidden"><Menu size={19} /></button>
+          {location === '/feed'
+            ? <div className="min-w-0 flex-1 md:hidden"><Logo href="/feed" /></div>
+            : <h1 className="min-w-0 flex-1 truncate font-display text-[20px] tracking-[-.04em] md:text-[22px]">{title}</h1>}
+          <h1 className={location === '/feed' ? 'sr-only md:not-sr-only md:min-w-0 md:flex-1 md:truncate md:font-display md:text-[22px] md:tracking-[-.04em]' : 'hidden'}>{title}</h1>
           {location !== '/new' && <Link href="/new" className="hidden min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white no-underline md:inline-flex"><Plus size={16} aria-hidden="true" />New post</Link>}
           <Link href="/settings" aria-label="Profile & settings" className="hidden md:block"><UserAvatar name={profile.data?.name} avatarUrl={profile.data?.avatarUrl} size={40} /></Link>
         </header>
-        <main className="mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8">{children}</main>
+        <main className={`${location === '/new' ? 'mx-auto w-full max-w-7xl px-0 py-0 md:px-2 md:py-8' : location.startsWith('/posts/') ? 'mx-auto flex h-[100dvh] min-h-0 w-full max-w-7xl flex-col overflow-hidden px-3 py-0 md:block md:h-auto md:overflow-visible md:px-2 md:py-8' : 'mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8'}`}>{children}</main>
       </div>
-      <MobileTabBar location={location} />
+      {!mobileFocus && <MobileTabBar location={location} />}
     </div>
   );
 }
@@ -154,11 +158,13 @@ export function ShellFrame({ children }: { children: ReactNode }) {
  */
 export function AdaptiveLayout({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
+  const [location] = useLocation();
+  const postDetail = location.startsWith('/posts/');
   if (isLoaded && isSignedIn) return <ShellFrame>{children}</ShellFrame>;
   return (
-    <div className="min-h-[100dvh] pb-14">
-      <PublicHeader />
-      <main className="mx-auto max-w-[1232px] px-4 pt-7">{children}</main>
+    <div className={`${postDetail ? 'h-[100dvh] overflow-hidden pb-0' : 'min-h-[100dvh] pb-14'}`}>
+      <div className={postDetail ? 'hidden md:block' : ''}><PublicHeader /></div>
+      <main className={postDetail ? 'mx-auto h-[100dvh] max-w-[1232px] px-3 pt-0 md:h-auto md:px-4 md:pt-7' : 'mx-auto max-w-[1232px] px-4 pt-7'}>{children}</main>
     </div>
   );
 }

@@ -115,10 +115,46 @@ function OwnerMenu({ post, onDeleted }: { post: FeedPost; onDeleted?: () => void
 }
 
 /** A post in a feed or on its own page. */
-export function PostCard({ post, full = false, onDeleted, onComment }: { post: FeedPost; full?: boolean; onDeleted?: () => void; onComment?: () => void }) {
+export function PostCard({ post, full = false, mobileCompact = false, onDeleted, onComment }: { post: FeedPost; full?: boolean; mobileCompact?: boolean; onDeleted?: () => void; onComment?: () => void }) {
+  if (mobileCompact) {
+    return (
+      <>
+        <article className="mb-2 overflow-hidden rounded-[22px] bg-white md:hidden" aria-labelledby={`post-${post.id}-compact-author`}>
+          <header className="flex items-center gap-2.5 px-3 py-2.5">
+            <Link href={`/@${post.author.handle}`} aria-hidden="true" tabIndex={-1}><UserAvatar name={post.author.name} avatarUrl={post.author.avatarUrl} size={34} /></Link>
+            <div className="min-w-0 flex-1">
+              <Link id={`post-${post.id}-compact-author`} href={`/@${post.author.handle}`} className="block truncate text-sm font-bold text-ink no-underline">{post.author.handle}</Link>
+              <div className="flex items-center gap-1.5 text-xs text-subtle">
+                <Link href={`/posts/${post.id}`} className="text-subtle no-underline"><time dateTime={String(post.createdAt)}>{timeAgo(post.createdAt)}</time></Link>
+                {post.visibility !== 'public' && <VisibilityBadge value={post.visibility} />}
+              </div>
+            </div>
+            {post.isOwner
+              ? <OwnerMenu post={post} onDeleted={onDeleted} />
+              : <SafetyMenu kind="post" targetId={String(post.id)} what="post" authorHandle={post.author.handle} label="Post options" />}
+          </header>
+          <div className="flex items-start gap-3 px-3 pb-1">
+            {post.media[0] && <Link href={`/posts/${post.id}`} aria-label="Open post" className="h-[78px] w-[66px] shrink-0 overflow-hidden rounded-[14px] bg-line">
+              <img src={post.media[0].thumbUrl} alt="" className="h-full w-full object-cover" />
+            </Link>}
+            <div className="min-w-0 flex-1">
+              {post.kind === 'status'
+                ? <p className="whitespace-pre-line break-words text-[13px] leading-[1.4]">{post.caption}</p>
+                : <Caption post={post} full />}
+              <p className="mt-1 text-[11px] text-subtle">{post.likeCount} {post.likeCount === 1 ? 'like' : 'likes'}</p>
+            </div>
+          </div>
+          {post.kind === 'photo' && <PostActions post={post} onComment={onComment} />}
+        </article>
+        <div className="hidden md:block">
+          <PostCard post={post} full={full} onDeleted={onDeleted} onComment={onComment} />
+        </div>
+      </>
+    );
+  }
   return (
-    <article className="overflow-hidden rounded-[30px] bg-white" aria-labelledby={`post-${post.id}-author`}>
-      <header className="flex items-center gap-3 px-[18px] py-3.5">
+    <article className="overflow-hidden rounded-[24px] bg-white md:rounded-[30px]" aria-labelledby={`post-${post.id}-author`}>
+      <header className="flex items-center gap-3 px-3.5 py-3 md:px-[18px] md:py-3.5">
         <Link href={`/@${post.author.handle}`} aria-hidden="true" tabIndex={-1}><UserAvatar name={post.author.name} avatarUrl={post.author.avatarUrl} size={42} /></Link>
         <div className="min-w-0 flex-1">
           <Link id={`post-${post.id}-author`} href={`/@${post.author.handle}`} className="block truncate text-[15px] font-bold text-ink no-underline">{post.author.handle}</Link>
@@ -132,7 +168,7 @@ export function PostCard({ post, full = false, onDeleted, onComment }: { post: F
           : <SafetyMenu kind="post" targetId={String(post.id)} what="post" authorHandle={post.author.handle} label="Post options" />}
       </header>
       {post.kind === 'photo' && post.media.length > 0 && <><Photos post={post} /><PostActions post={post} onComment={onComment} /></>}
-      <div className={post.kind === 'status' ? 'px-[18px] pb-2' : 'px-[18px] pb-[18px] pt-1'}>
+      <div className={post.kind === 'status' ? 'px-3.5 pb-2 md:px-[18px]' : 'px-3.5 pb-4 pt-1 md:px-[18px] md:pb-[18px]'}>
         {post.kind === 'status'
           ? <p className={`whitespace-pre-line break-words ${post.caption.length < 140 ? 'font-display text-[22px] leading-snug tracking-[-.03em]' : 'text-[15px] leading-relaxed'}`}>{post.caption}</p>
           : <Caption post={post} full={full} />}

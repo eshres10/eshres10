@@ -57,22 +57,22 @@ export function ForumPage() {
   return (
     <div className="mx-auto max-w-[1232px]">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <p className="eyebrow">Forum{board && ` · ${BOARDS[board]}`}</p>
-          <h1 className="mt-1 font-display text-[34px] leading-tight tracking-[-.05em]">Ask, share, help</h1>
+          <h1 className="mt-1 font-display text-[29px] leading-tight tracking-[-.05em] sm:text-[34px]">Ask, share, help</h1>
         </div>
-        <button type="button" className="btn btn-primary" onClick={() => { if (ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) setComposing(true); }}>
+        <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={() => { if (ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) setComposing(true); }}>
           <Plus size={16} aria-hidden="true" />Start a discussion
         </button>
       </div>
 
-      <label className="relative mt-4 block max-w-xl">
+      <label className="relative mt-3 block max-w-xl sm:mt-4">
         <span className="sr-only">Search the forum</span>
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden="true" />
         <input type="search" value={q} onChange={e => { setQ(e.target.value); go({ q: e.target.value || undefined }); }} className="field min-h-[48px] pl-9" placeholder="Search the forum" />
       </label>
 
-      <div className="mt-4 flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label="Filter">
+      <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mt-4" role="group" aria-label="Filter">
         {chips.map(c => (
           <button key={c.id} type="button" aria-pressed={filter === c.id} onClick={() => go({ filter: c.id })}
             className={`inline-flex min-h-[40px] shrink-0 items-center gap-1.5 rounded-full px-3.5 text-sm font-semibold ${filter === c.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>
@@ -81,12 +81,12 @@ export function ForumPage() {
         ))}
       </div>
 
-      <div className="mt-4 grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
+      <div className="mt-3 grid gap-5 lg:mt-4 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
         <section aria-label="Topics">
-          <div role="tablist" aria-label="Sort" className="mb-3 flex w-fit gap-1 rounded-full bg-white p-1">
+          <div role="tablist" aria-label="Sort" className="mb-3 flex w-full gap-1 rounded-full bg-white p-1 sm:w-fit">
             {SORTS.map(s => (
               <button key={s.id} type="button" role="tab" aria-selected={sort === s.id} onClick={() => go({ sort: s.id })}
-                className={`min-h-[40px] rounded-full px-4 text-sm font-bold ${sort === s.id ? 'bg-ink text-white' : 'text-ink'}`}>{s.label}</button>
+                className={`min-h-[40px] flex-1 rounded-full px-2 text-sm font-bold sm:flex-none sm:px-4 ${sort === s.id ? 'bg-ink text-white' : 'text-ink'}`}>{s.label}</button>
             ))}
           </div>
           {topics.isLoading ? <div className="grid place-items-center py-16" role="status" aria-label="Loading"><Loader2 className="animate-spin" /></div>
