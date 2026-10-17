@@ -1,4 +1,3 @@
-import { useAuth } from '@clerk/react';
 import { Link, useLocation } from 'wouter';
 
 /** The community sections. Each is its own page (own URL, meta tags and filters); this bar switches between them. */
@@ -15,10 +14,10 @@ export function inCommunity(location: string) {
 
 export function CommunityTabs() {
   const [location] = useLocation();
-  // Signed out on a wide screen, the public header already has these links.
-  const { isSignedIn } = useAuth();
+  // Phones only: from 768 px the sidebar (signed in) or the public header
+  // (signed out) already has these links (owner asked to drop it on desktop).
   return (
-    <nav aria-label="Community sections" className={`mb-5 flex w-full max-w-full gap-1 rounded-full bg-white p-1 sm:w-fit ${isSignedIn ? '' : 'md:hidden'}`}>
+    <nav aria-label="Community sections" className="mb-5 flex w-full max-w-full gap-1 rounded-full bg-white p-1 sm:w-fit md:hidden">
       {COMMUNITY_TABS.map(t => {
         const active = location === t.href || location.startsWith(`${t.href}/`);
         return (
