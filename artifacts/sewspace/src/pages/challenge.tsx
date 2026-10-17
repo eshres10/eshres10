@@ -12,7 +12,7 @@ import {
   type Challenge,
   type ChallengeEntry,
 } from '@workspace/api-client-react';
-import { Check, Heart, Loader2, MessageCircle, Pencil, Plus, Share2, Trash2, Trophy, X } from 'lucide-react';
+import { Check, Heart, Loader2, MessageCircle, Pencil, Plus, Send, Trash2, Trophy, X } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
@@ -25,6 +25,8 @@ import { Sheet, useSheetDirty } from '@/components/social/Sheet';
 import NotFound from '@/pages/not-found';
 import { CaptionText } from '@/components/feed/CaptionText';
 
+const BIG = 'inline-flex min-h-[48px] items-center gap-2 rounded-full px-6 text-[15px] font-bold disabled:opacity-60';
+
 const SORTS = [
   { id: 'liked', label: 'Most liked' },
   { id: 'newest', label: 'Newest' },
@@ -32,18 +34,47 @@ const SORTS = [
 ] as const;
 type Sort = (typeof SORTS)[number]['id'];
 
-/** "12 days 06 hours 41 mins" until a moment; refreshes every minute. */
-function Countdown({ to, label }: { to: string; label: string }) {
+/** Days, hours and minutes until a moment as black tiles, plus the entries tile; refreshes every minute. */
+function Countdown({ to, label, entries }: { to: string; label: string; entries: number }) {
   const [now, setNow] = useState(Date.now());
   useEffect(() => { const t = setInterval(() => setNow(Date.now()), 60_000); return () => clearInterval(t); }, []);
   const ms = Math.max(0, new Date(to).getTime() - now);
   const parts: Array<[number, string]> = [[Math.floor(ms / 86400000), 'days'], [Math.floor(ms / 3600000) % 24, 'hours'], [Math.floor(ms / 60000) % 60, 'mins']];
   return (
-    <div aria-label={`${label}: ${parts.map(([n, u]) => `${n} ${u}`).join(' ')}`}>
-      <p className="eyebrow">{label}</p>
-      <div className="mt-1 flex gap-3" aria-hidden="true">
-        {parts.map(([n, unit]) => <span key={unit}><b className="font-display text-[30px] tracking-[-.04em]">{String(n).padStart(2, '0')}</b> <span className="text-sm text-subtle">{unit}</span></span>)}
-      </div>
+    <div role="group" aria-label={`${label}: ${parts.map(([n, u]) => `${n} ${u}`).join(' ')}. ${entries} entries.`} className="grid grid-cols-4 gap-2">
+      {parts.map(([n, unit]) => (
+        <span key={unit} aria-hidden="true" className="rounded-[20px] bg-ink py-4 text-center text-white">
+          <b className="block font-display text-[clamp(24px,3vw,32px)] leading-none">{String(n).padStart(2, '0')}</b><span className="mt-1.5 block text-xs">{unit}</span>
+        </span>
+      ))}
+      <span aria-hidden="true" className="rounded-[20px] bg-canvas py-4 text-center">
+        <b className="block font-display text-[clamp(24px,3vw,32px)] leading-none">{entries}</b><span className="mt-1.5 block text-xs text-subtle">entries</span>
+      </span>
+    </div>
+  );
+}
+
+function useEntries(slug: string, sort: Sort) {
+  return useInfiniteQuery({
+    queryKey: [...FEED_KEYS.all, 'challenge', slug, sort] as const,
+    queryFn: ({ pageParam }) => getChallengeEntries(slug, { sort, ...(pageParam ? { cursor: pageParam } : {}) }),
+    initialPageParam: undefined as string | undefined,
+    getNextPageParam: last => last.nextCursor ?? undefined,
+  });
+}
+
+/** The hero picture: the most liked entry with a photo, the tag on a sticker and the dates. */
+function Cover({ challenge: c }: { challenge: Challenge }) {
+  const entries = useEntries(c.slug, 'liked');
+  const photo = entries.data?.pages[0]?.items.find(e => e.post.media.length)?.post;
+  const media = photo?.media[0];
+  return (
+    <div className="relative min-h-[300px] overflow-hidden rounded-[30px] bg-blue-soft sm:min-h-[380px] md:rounded-[40px]">
+      {media
+        ? <img src={media.url} alt={media.altText || `Entry by @${photo.author.handle}`} className="absolute inset-0 h-full w-full object-cover" style={{ backgroundColor: media.color ?? undefined }} />
+        : <span aria-hidden="true" className="absolute inset-0 grid place-items-center"><Trophy size={64} strokeWidth={1.5} /></span>}
+      <span className="absolute right-5 top-5 rounded-full bg-white px-3 py-1.5 text-[13px] font-semibold">{dateRange(c.startsAt, c.endsAt)}</span>
+      <span className="absolute bottom-6 left-6 max-w-[85%] -rotate-[4deg] truncate rounded-[18px] bg-yellow px-5 py-2.5 font-display text-[clamp(26px,3.4vw,40px)] tracking-[-.04em]">#{c.tag}</span>
     </div>
   );
 }
@@ -60,14 +91,16 @@ function EntryTile({ entry, onChanged }: { entry: ChallengeEntry; onChanged: () 
   return (
     <div className="relative">
       <Link href={`/posts/${p.id}`} aria-label={`Entry by @${p.author.handle}${p.caption ? `: ${p.caption.slice(0, 80)}` : ''}`}
-        className="relative block aspect-square overflow-hidden rounded-[22px] bg-line text-ink no-underline" style={cover?.color ? { backgroundColor: cover.color } : undefined}>
-        {cover
-          ? <img src={cover.thumbUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-          : <span className="absolute inset-0 flex items-center bg-white p-4 font-display text-[clamp(14px,2vw,18px)] font-semibold leading-snug tracking-[-.03em]"><span className="line-clamp-5"><CaptionText text={p.caption} linked={false} /></span></span>}
-        <span className="absolute inset-x-0 bottom-0 flex items-center gap-3 bg-gradient-to-t from-ink/70 to-transparent px-3 pb-2.5 pt-8 text-xs font-semibold text-white">
-          <span className="min-w-0 flex-1 truncate">@{p.author.handle}</span>
-          <span className="inline-flex items-center gap-1"><Heart size={13} aria-hidden="true" />{p.likeCount}</span>
-          <span className="inline-flex items-center gap-1"><MessageCircle size={13} aria-hidden="true" />{p.commentCount}</span>
+        className="block overflow-hidden rounded-[22px] bg-white text-ink no-underline hover:outline hover:outline-2 hover:outline-ink">
+        <span className="relative block aspect-[4/5] bg-line" style={cover?.color ? { backgroundColor: cover.color } : undefined}>
+          {cover
+            ? <img src={cover.thumbUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
+            : <span className="absolute inset-0 flex items-center bg-white p-4 font-display text-[clamp(14px,2vw,18px)] font-semibold leading-snug tracking-[-.03em]"><span className="line-clamp-6"><CaptionText text={p.caption} linked={false} /></span></span>}
+        </span>
+        <span className="flex items-center gap-3 px-3 py-2.5 text-[13px]">
+          <b className="min-w-0 flex-1 truncate font-semibold">@{p.author.handle}</b>
+          <span className="inline-flex items-center gap-1"><Heart size={14} aria-hidden="true" />{p.likeCount}<span className="sr-only"> likes</span></span>
+          <span className="inline-flex items-center gap-1"><MessageCircle size={14} aria-hidden="true" />{p.commentCount}<span className="sr-only"> comments</span></span>
         </span>
       </Link>
       {(entry.canRemove || entry.isMine) && (
@@ -87,13 +120,7 @@ function Entries({ challenge }: { challenge: Challenge }) {
   const { isSignedIn } = useAuth();
   const client = useQueryClient();
   const [sort, setSort] = useState<Sort>('liked');
-  const key = [...FEED_KEYS.all, 'challenge', challenge.slug, sort] as const;
-  const entries = useInfiniteQuery({
-    queryKey: key,
-    queryFn: ({ pageParam }) => getChallengeEntries(challenge.slug, { sort, ...(pageParam ? { cursor: pageParam } : {}) }),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: last => last.nextCursor ?? undefined,
-  });
+  const entries = useEntries(challenge.slug, sort);
   const refresh = () => {
     client.invalidateQueries({ queryKey: [...FEED_KEYS.all, 'challenge', challenge.slug] });
     client.invalidateQueries({ queryKey: getGetChallengePageQueryKey(challenge.slug) });
@@ -101,9 +128,9 @@ function Entries({ challenge }: { challenge: Challenge }) {
   const items = entries.data?.pages.flatMap(p => p.items) ?? [];
   return (
     <section aria-labelledby="entries-title">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="entries-title" className="font-display text-[26px] tracking-[-.04em]">Entries</h2>
-        <div role="tablist" aria-label="Sort entries" className="flex gap-1 rounded-full bg-white p-1">
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-[30px] bg-white py-2.5 pl-6 pr-2.5">
+        <h2 id="entries-title" className="font-display text-[24px] tracking-[-.04em]">Entries</h2>
+        <div role="tablist" aria-label="Sort entries" className="flex gap-1 rounded-full bg-canvas p-1">
           {SORTS.filter(s => s.id !== 'following' || isSignedIn).map(s => (
             <button key={s.id} type="button" role="tab" aria-selected={sort === s.id} onClick={() => setSort(s.id)}
               className={`min-h-[40px] rounded-full px-3.5 text-sm font-bold ${sort === s.id ? 'bg-ink text-white' : 'text-ink'}`}>{s.label}</button>
@@ -157,6 +184,7 @@ export function ChallengePage({ slug }: { slug: string }) {
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [editing, setEditing] = useState(false);
+  const { isSignedIn } = useAuth();
   useEffect(() => { const c = page.data?.challenge; if (c) document.title = `#${c.tag}: ${c.title} · Seams Club`; }, [page.data]);
 
   if (page.isLoading) return <Loading />;
@@ -187,62 +215,57 @@ export function ChallengePage({ slug }: { slug: string }) {
 
   return (
     <div className="mx-auto max-w-[1232px] space-y-5">
-      <section className="overflow-hidden rounded-[40px] bg-white">
-        <div className="grid gap-6 px-5 pb-8 pt-6 sm:px-10 sm:pt-9 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-          <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full bg-ink px-3 py-1 font-display text-sm text-white">#{c.tag}</span>
-              <StatusPill status={c.status} />
-              <span className="text-sm text-subtle">{dateRange(c.startsAt, c.endsAt)}</span>
-            </div>
-            <h1 className="mt-3 font-display text-[clamp(32px,4.4vw,56px)] leading-[1.02] tracking-[-.05em]">{c.title}</h1>
-            <p className="mt-2 text-sm">Started by <Link href={`/@${c.host.handle}`} className="font-bold">@{c.host.handle}</Link></p>
-            {c.description && <p className="mt-3 max-w-2xl whitespace-pre-line text-[16px] leading-relaxed">{c.description}</p>}
+      <section className="grid gap-4 md:grid-cols-2">
+        <Cover challenge={c} />
+        <div className="rounded-[30px] bg-white p-6 sm:p-8 md:rounded-[40px] md:p-10">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <StatusPill status={c.status} />
+            <span className="text-sm text-subtle">Started by <Link href={`/@${c.host.handle}`} className="font-semibold text-ink underline underline-offset-4">@{c.host.handle}</Link></span>
           </div>
-          <div className="space-y-4">
-            {c.status === 'active' && <Countdown to={c.endsAt} label="Ends in" />}
-            {c.status === 'upcoming' && <Countdown to={c.startsAt} label="Starts in" />}
-            <div className="flex flex-wrap gap-2.5">
-              <span className="rounded-[20px] bg-yellow px-[18px] py-3"><b className="font-display text-xl">{c.entries}</b> <span className="text-sm">entries</span></span>
-              <span className="inline-flex items-center gap-2 rounded-[20px] bg-canvas px-[18px] py-2.5">
-                <span className="flex -space-x-2" aria-hidden="true">{memberPreview.slice(0, 4).map(m => <UserAvatar key={m.handle} name={m.name} avatarUrl={m.avatarUrl} size={28} className="ring-2 ring-canvas" />)}</span>
-                <span className="text-sm"><b>{c.members}</b> {c.members === 1 ? 'sewist has' : 'sewists have'} joined</span>
-              </span>
-            </div>
+          <h1 className="mt-4 font-display text-[clamp(34px,4.4vw,60px)] leading-[1] tracking-[-.05em]">{c.title}</h1>
+          {c.description && <p className="mt-4 max-w-2xl whitespace-pre-line text-[16px] leading-relaxed text-subtle">{c.description}</p>}
+          <div className="mt-6">
+            {c.status === 'active' && <Countdown to={c.endsAt} label="Ends in" entries={c.entries} />}
+            {c.status === 'upcoming' && <Countdown to={c.startsAt} label="Starts in" entries={c.entries} />}
+            {c.status === 'ended' && <p className="text-[15px]"><b>{c.entries}</b> {c.entries === 1 ? 'entry' : 'entries'} · this challenge has finished.</p>}
           </div>
-        </div>
-        <div className="flex flex-wrap items-center gap-2 border-t border-line px-5 py-4 sm:px-10">
-          {c.status === 'active' && (
-            <button type="button" onClick={enter} className="btn btn-primary"><Plus size={16} aria-hidden="true" />Enter a post</button>
-          )}
-          {c.status !== 'ended' && !c.isHost && (
-            <button type="button" onClick={toggleJoin} disabled={busy} aria-pressed={c.joinedByMe} className={c.joinedByMe ? 'btn btn-line' : c.status === 'active' ? 'btn btn-line' : 'btn btn-primary'}>
-              {busy ? <Loader2 size={16} className="animate-spin" /> : c.joinedByMe ? <Check size={16} aria-hidden="true" /> : <Trophy size={16} aria-hidden="true" />}
-              {c.joinedByMe ? 'Joined' : 'Join challenge'}
-            </button>
-          )}
-          <button type="button" onClick={share} className="btn bg-ink text-white">{copied ? <Check size={16} aria-hidden="true" /> : <Share2 size={16} aria-hidden="true" />}{copied ? 'Link copied' : 'Share'}</button>
-          {c.isHost
-            ? <button type="button" onClick={() => setEditing(true)} className="btn btn-line"><Pencil size={15} aria-hidden="true" />Edit</button>
-            : <span className="grid h-12 w-12 place-items-center rounded-full border border-ink"><SafetyMenu kind="challenge" targetId={c.slug} what="challenge" authorHandle={c.host.handle} label="More: report or block" leaveOnBlock="/challenges" /></span>}
-          {error && <p role="alert" className="w-full text-sm font-semibold text-red-ink">{error}</p>}
+          <p className="mt-5 flex items-center gap-3 text-[15px]">
+            {memberPreview.length > 0 && <span className="flex -space-x-2" aria-hidden="true">{memberPreview.slice(0, 4).map(m => <UserAvatar key={m.handle} name={m.name} avatarUrl={m.avatarUrl} size={30} className="ring-2 ring-white" />)}</span>}
+            <span><b>{c.members} {c.members === 1 ? 'sewist' : 'sewists'}</b> {c.members === 1 ? 'has' : 'have'} joined</span>
+          </p>
+          <div className="mt-6 flex flex-wrap items-center gap-2.5">
+            {c.status === 'active' && (c.joinedByMe || c.isHost) && (
+              <button type="button" onClick={enter} className={`${BIG} bg-yellow text-ink`}><Plus size={16} aria-hidden="true" />Enter a post</button>
+            )}
+            {c.status !== 'ended' && !c.isHost && (
+              <button type="button" onClick={toggleJoin} disabled={busy} aria-pressed={c.joinedByMe} className={`${BIG} ${c.joinedByMe ? 'border border-ink bg-white text-ink' : 'bg-yellow text-ink'}`}>
+                {busy ? <Loader2 size={16} className="animate-spin" /> : c.joinedByMe && <Check size={16} aria-hidden="true" />}
+                {c.joinedByMe ? 'Joined' : 'Join challenge'}
+              </button>
+            )}
+            <button type="button" onClick={share} className={`${BIG} bg-ink text-white`}>{copied ? <Check size={16} aria-hidden="true" /> : <Send size={16} aria-hidden="true" />}{copied ? 'Link copied' : 'Share'}</button>
+            {c.isHost
+              ? <button type="button" onClick={() => setEditing(true)} className={`${BIG} border border-ink bg-white text-ink`}><Pencil size={15} aria-hidden="true" />Edit</button>
+              : <SafetyMenu kind="challenge" targetId={c.slug} what="challenge" authorHandle={c.host.handle} label="More: report or block" leaveOnBlock="/challenges" />}
+          </div>
+          {error && <p role="alert" className="mt-3 text-sm font-semibold text-red-ink">{error}</p>}
         </div>
       </section>
 
-      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_340px] lg:items-start">
+      <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start">
         <Entries challenge={c} />
         <aside className="space-y-4">
           <section className="rounded-[30px] bg-white p-6" aria-labelledby="rules-title">
-            <h2 id="rules-title" className="eyebrow">Rules</h2>
+            <h2 id="rules-title" className="font-display text-[22px] tracking-[-.04em]">Rules</h2>
             {rules.length
-              ? <ol className="mt-3 space-y-2.5">{rules.map((r, i) => <li key={i} className="flex gap-3 text-sm"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-yellow text-xs font-bold">{i + 1}</span><span>{r}</span></li>)}</ol>
+              ? <ol className="mt-4 space-y-3">{rules.map((r, i) => <li key={i} className="flex gap-3 text-[15px]"><span className="grid h-6 w-6 shrink-0 place-items-center rounded-full bg-yellow text-xs font-bold">{i + 1}</span><span>{r}</span></li>)}</ol>
               : <p className="mt-3 text-sm text-subtle">No special rules. Keep it kind and on theme.</p>}
-            <p className="mt-4 text-xs text-subtle">The host can remove entries that break these rules. Spotted a problem? Use Report on the entry.</p>
+            <p className="mt-4 rounded-[16px] bg-canvas p-3.5 text-[13px] text-subtle">The host can remove entries that break these rules. Spotted a problem? Use Report on the entry.</p>
           </section>
-          <section className="rounded-[30px] bg-white p-6" aria-labelledby="how-title">
-            <h2 id="how-title" className="eyebrow">How to enter</h2>
-            <p className="mt-3 text-sm leading-relaxed">Join the challenge, then share a public post: a finished make from your studio or something new. Entries show here, on your profile and in your followers' feeds.</p>
-            {c.status === 'active' && <button type="button" onClick={enter} className="btn btn-primary mt-4 w-full"><Plus size={16} aria-hidden="true" />Enter a post</button>}
+          <section className="rounded-[30px] bg-ink p-6 text-white" aria-labelledby="how-title">
+            <h2 id="how-title" className="font-display text-[22px] tracking-[-.04em]">How to enter</h2>
+            <p className="mt-3 text-[15px] leading-relaxed">Join the challenge, then share a public post: a finished make from your studio or something new. Entries show here, on your profile and in your followers' feeds.</p>
+            {c.status === 'active' && <button type="button" onClick={enter} className={`${BIG} mt-5 bg-yellow text-ink`}>{isSignedIn ? 'Enter a post' : 'Sign in to join'}</button>}
             {c.status === 'ended' && <p className="mt-3 text-sm font-semibold">This challenge has finished.</p>}
           </section>
         </aside>
