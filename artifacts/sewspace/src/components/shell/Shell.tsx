@@ -8,6 +8,7 @@ import { PublicHeader } from '@/components/shell/PublicHeader';
 import { UserAvatar } from '@/components/avatar';
 import { Logo } from '@/components/brand/Logo';
 import { currentAppPath } from '@/lib/navigation';
+import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
 
 type NavItem = { href: string; label: string; icon: typeof Home };
 
@@ -111,6 +112,8 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [location] = useLocation();
   const profile = useGetProfile();
+  const profilePage = location.startsWith('/@');
+  const profileHeaderHidden = useHideOnScroll(profilePage);
   useEffect(() => { setMenuOpen(false); }, [location]);
 
   // First visit: choose a handle before using the app, then come back here.
@@ -136,7 +139,10 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         </div>
       )}
       <div className="min-w-0 flex-1">
-        <header className={`${mobileFocus ? 'hidden md:flex' : 'sticky top-[calc(.5rem+env(safe-area-inset-top))] mx-3 mt-3 flex'} relative z-30 items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:static md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3`}>
+        {profilePage && <div aria-hidden="true" className="h-[calc(4rem+env(safe-area-inset-top))] md:hidden" />}
+        <header className={profilePage
+          ? `fixed inset-x-0 top-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 bg-white px-4 pb-2 pt-[env(safe-area-inset-top)] shadow-float transition-transform duration-200 ease-out ${profileHeaderHidden ? '-translate-y-full' : 'translate-y-0'} md:static md:mx-0 md:mt-0 md:h-auto md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3 md:transition-none md:translate-y-0`
+          : `${mobileFocus ? 'hidden md:flex' : 'sticky top-[calc(.5rem+env(safe-area-inset-top))] mx-3 mt-3 flex'} relative z-30 items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:static md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3`}>
           {location === '/feed'
             ? <div className="min-w-0 flex-1 md:hidden"><Logo href="/feed" /></div>
             : <h1 className="min-w-0 flex-1 truncate font-display text-[20px] tracking-[-.04em] md:text-[22px]">{title}</h1>}
@@ -160,10 +166,11 @@ export function AdaptiveLayout({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
   const [location] = useLocation();
   const postDetail = location.startsWith('/posts/');
+  const profilePage = location.startsWith('/@');
   if (isLoaded && isSignedIn) return <ShellFrame>{children}</ShellFrame>;
   return (
     <div className={`${postDetail ? 'h-[100dvh] overflow-hidden pb-0' : 'min-h-[100dvh] pb-14'}`}>
-      <div className={postDetail ? 'hidden md:block' : ''}><PublicHeader /></div>
+      <div className={postDetail ? 'hidden md:block' : ''}><PublicHeader profilePage={profilePage} /></div>
       <main className={postDetail ? 'mx-auto h-[100dvh] max-w-[1232px] px-3 pt-0 md:h-auto md:px-4 md:pt-7' : 'mx-auto max-w-[1232px] px-4 pt-7'}>{children}</main>
     </div>
   );
