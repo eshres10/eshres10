@@ -19,7 +19,7 @@ import { MultiOptions, OnboardingPage, QuestionScreen, SingleOptions, TileOption
 // existing profile fields (PATCH /profile). Leaving halfway and coming back
 // resumes at current_step; going back keeps the answers.
 
-const AFTER_FINISH = '/studio'; // Setting up and Ready come in O5.
+const AFTER_FINISH = '/welcome/setup'; // Setting up, then Ready
 const AFTER_SKIP = '/feed';
 
 function errorMessage(error: unknown): string {

@@ -4,6 +4,7 @@ import { Link } from 'wouter';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { FeedList } from '@/components/feed/FeedList';
 import { usePipGate } from '@/components/onboarding/gate';
+import { FinishSetupCard } from '@/pages/onboarding-finish';
 
 function CurrentProject() {
   const dashboard = useGetDashboard();
@@ -28,6 +29,7 @@ export function FeedPage() {
   return (
     <div className="mx-auto grid max-w-[920px] justify-center gap-4 lg:grid-cols-[minmax(0,600px)_300px] lg:gap-5">
       <div className="flex min-w-0 flex-col gap-3.5 md:gap-4">
+        <FinishSetupCard />
         <FeedList queryKey={FEED_KEYS.home} fetchPage={cursor => getHomeFeed(cursor ? { cursor } : undefined)} empty={
           <div className="rounded-[30px] bg-white px-6 py-14 text-center">
             <Compass className="mx-auto" size={28} aria-hidden="true" />

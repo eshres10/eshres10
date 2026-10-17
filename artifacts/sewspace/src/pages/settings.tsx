@@ -135,6 +135,14 @@ export function SettingsPage() {
         </div>
       </section>
 
+      <section className="studio-card flex flex-wrap items-center justify-between gap-3 p-6 sm:p-8">
+        <div>
+          <p className="eyebrow">Setup with Pip</p>
+          <p className="mt-1 text-sm text-subtle">Answer Pip's questions again to get new suggestions. Your answers stay private.</p>
+        </div>
+        <Link href="/welcome" className="btn btn-line min-h-[44px]">Run setup again</Link>
+      </section>
+
       <BlockedAccounts />
 
       <div className="sticky bottom-28 z-20 flex flex-wrap items-center justify-end gap-3 rounded-[30px] bg-white/95 p-3 shadow-float backdrop-blur md:bottom-4">
