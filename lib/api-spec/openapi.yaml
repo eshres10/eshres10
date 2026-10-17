@@ -1410,6 +1410,24 @@ paths:
       responses:
         "204":
           description: Deleted
+  /stash/colours:
+    post:
+      operationId: extractColours
+      tags: [studio]
+      summary: "Four main colours of one of your photo uploads (no AI: resized and grouped on the server)."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ColourRequest" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ColourResult" }
+        "400": { description: Not an image we can read }
+        "404": { description: Not one of your uploads }
   /patterns/analyze-pdf:
     post:
       operationId: analyzePatternPdf
@@ -1840,6 +1858,19 @@ components:
       schema:
         type: integer
   schemas:
+    ColourRequest:
+      type: object
+      properties:
+        imageUrl: { type: string, description: "/api/storage/objects/... of your own image upload" }
+      required: [imageUrl]
+    ColourResult:
+      type: object
+      properties:
+        colours:
+          type: array
+          description: "Most common first, as #rrggbb"
+          items: { type: string }
+      required: [colours]
     DraftKind:
       type: string
       enum: [post, project, stash, topic]
@@ -2758,7 +2789,8 @@ components:
         visibility: { $ref: "#/components/schemas/Visibility" }
         isDemo: { type: boolean }
         catalogId: { type: integer, nullable: true, description: Shared catalog page this is linked to }
-      required: [visibility, id, name, type, color, width, quantity, unit, composition, stretch, weight, notes, imageUrl, isDemo, catalogId]
+        colorHex: { type: string, nullable: true, description: "Swatch colour as #rrggbb" }
+      required: [visibility, id, name, type, color, width, quantity, unit, composition, stretch, weight, notes, imageUrl, isDemo, catalogId, colorHex]
     FabricInput:
       type: object
       required: [name, type, color]
@@ -2775,6 +2807,7 @@ components:
         weight: { type: string, nullable: true }
         notes: { type: string, nullable: true }
         imageUrl: { type: string, nullable: true }
+        colorHex: { type: string, nullable: true, pattern: "^#[0-9a-f]{6}$" }
     FabricUpdate:
       allOf:
         - $ref: "#/components/schemas/FabricInput"
@@ -2837,7 +2870,8 @@ components:
           nullable: true
           description: Construction steps as short phrases (private)
           items: { type: string }
-      required: [visibility, id, name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, coverImageUrl, pdfUrl, pdfFileName, status, isDemo, catalogId, steps]
+        format: { type: string, nullable: true, enum: [pdf, paper, traced, null] }
+      required: [visibility, id, name, designer, garmentType, difficulty, sizes, requiredFabric, yardage, recommendedFabrics, seamAllowance, instructions, notes, coverImageUrl, pdfUrl, pdfFileName, status, isDemo, catalogId, steps, format]
     PatternInput:
       type: object
       required: [name, garmentType, difficulty]
@@ -2863,6 +2897,7 @@ components:
           nullable: true
           maxItems: 60
           items: { type: string, minLength: 1, maxLength: 200 }
+        format: { type: string, nullable: true, enum: [pdf, paper, traced, null] }
     PatternUpdate:
       allOf:
         - $ref: "#/components/schemas/PatternInput"

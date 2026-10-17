@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { createProject, getListProjectsQueryKey, useListPatterns } from '@workspace/api-client-react';
+import { createProject, getListProjectsQueryKey, useListFabrics, useListPatterns, useListThreads } from '@workspace/api-client-react';
 import { BookOpen, Camera } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import {
@@ -54,6 +54,11 @@ export function QuickStart() {
   const params = new URLSearchParams(useSearch());
   const client = useQueryClient();
   const patterns = useListPatterns();
+  const fabricId = Number(params.get('fabric')) || null;
+  const threadId = Number(params.get('thread')) || null;
+  const fabrics = useListFabrics(undefined, { query: { enabled: Boolean(fabricId) } });
+  const threads = useListThreads(undefined, { query: { enabled: Boolean(threadId) } });
+  const using = [fabrics.data?.find(f => f.id === fabricId)?.name, threads.data?.find(t => t.id === threadId)?.colorName].filter(Boolean).join(' and ');
   const [name, setName] = useState('');
   const [patternId, setPatternId] = useState<number | null>(Number(params.get('pattern')) || null);
   const [garment, setGarment] = useState<string | null>(null);
@@ -107,8 +112,8 @@ export function QuickStart() {
         visibility: 'private',
         status: 'planning',
         patternId,
-        fabricId: Number(params.get('fabric')) || null,
-        threadId: Number(params.get('thread')) || null,
+        fabricId,
+        threadId,
         garment,
         coverImageUrl: items[0]?.result ?? null,
       });
@@ -134,6 +139,7 @@ export function QuickStart() {
           <p className="eyebrow hidden text-red-ink lg:block">New project</p>
           <h2 className="font-display text-[34px] leading-tight tracking-[-.05em]">What are you making?</h2>
           <p className="mt-1 text-[15px] text-subtle">Just a name to start. Pattern, fabric and the rest can come later.</p>
+          {using && <p className="mt-2 inline-flex rounded-full bg-yellow px-3 py-1 text-sm font-bold">Using {using}</p>}
         </div>
 
         <FieldCard name="name" label="Project name" error={v.error('name')}>

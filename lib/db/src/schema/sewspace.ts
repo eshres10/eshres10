@@ -58,6 +58,8 @@ export const fabricsTable = pgTable("sewspace_fabrics", {
   weight: text("weight"),
   notes: text("notes"),
   imageUrl: text("image_url"),
+  // Phase F3 (migration 0012): the swatch colour, #rrggbb.
+  colorHex: text("color_hex"),
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   // Phase 5: the shared catalog page this item is (migration 0006).
   catalogId: integer("catalog_id"),
@@ -102,6 +104,8 @@ export const patternsTable = pgTable("sewspace_patterns", {
   pdfFileName: text("pdf_file_name"),
   // Phase F2 (migration 0011): construction steps as short phrases. Never public.
   steps: jsonb("steps").$type<string[] | null>(),
+  // Phase F3 (migration 0012): pdf | paper | traced.
+  format: text("format").$type<"pdf" | "paper" | "traced" | null>(),
   status: text("status").notNull().default("want_to_make"),
   visibility: text("visibility").$type<Visibility>().notNull().default("private"),
   // Phase 5: the shared catalog page this item is (migration 0006).

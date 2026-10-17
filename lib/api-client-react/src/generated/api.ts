@@ -45,6 +45,8 @@ import type {
   ChallengeUpdate,
   CheckHandleAvailability200,
   CheckHandleAvailabilityParams,
+  ColourRequest,
+  ColourResult,
   Comment,
   CommentInput,
   Dashboard,
@@ -7901,6 +7903,94 @@ export const useDeletePattern = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeletePatternMutationOptions(options), queryClient);
+    }
+
+export const getExtractColoursUrl = () => {
+
+
+
+
+  return `/api/stash/colours`
+}
+
+/**
+ * @summary Four main colours of one of your photo uploads (no AI: resized and grouped on the server).
+ */
+export const extractColours = async (colourRequest: ColourRequest, options?: Parameters<typeof customFetch>[1]): Promise<ColourResult> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<ColourResult>(getExtractColoursUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(colourRequest)
+  }
+);}
+
+
+
+
+
+export const getExtractColoursMutationKey = () => ['extractColours'] as const;
+
+export const getExtractColoursMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof extractColours>>, TError,ExtractColoursMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof extractColours>>, TError,ExtractColoursMutationVariables, TContext> => {
+
+const mutationKey = getExtractColoursMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof extractColours>>, ExtractColoursMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  extractColours(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ExtractColoursMutationResult = NonNullable<Awaited<ReturnType<typeof extractColours>>>
+    export type ExtractColoursMutationBody = BodyType<ColourRequest>
+    export type ExtractColoursMutationError = ErrorType<void>
+    export type ExtractColoursMutationVariables = {data: BodyType<ColourRequest>}
+
+    /**
+ * @summary Four main colours of one of your photo uploads (no AI: resized and grouped on the server).
+ */
+export const useExtractColours = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof extractColours>>, TError,ExtractColoursMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof extractColours>>,
+        TError,
+        ExtractColoursMutationVariables,
+        TContext
+      > => {
+      return useMutation(getExtractColoursMutationOptions(options), queryClient);
     }
 
 export const getAnalyzePatternPdfUrl = () => {

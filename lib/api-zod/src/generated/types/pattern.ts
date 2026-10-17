@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { PatternFormat } from './patternFormat';
 import type { PatternStatus } from './patternStatus';
 import type { Visibility } from './visibility';
 
@@ -48,4 +49,6 @@ export interface Pattern {
      * @nullable
      */
   steps: string[] | null;
+  /** @nullable */
+  format: PatternFormat;
 }

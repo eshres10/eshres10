@@ -2755,7 +2755,8 @@ export const GetDashboardResponse = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 })),
   "recentPatterns": zod.array(zod.object({
   "id": zod.number().int(),
@@ -2777,7 +2778,8 @@ export const GetDashboardResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
   "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
-  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 }))
 })
 
@@ -2804,7 +2806,8 @@ export const ListFabricsResponseItem = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 })
 export const ListFabricsResponse = zod.array(ListFabricsResponseItem)
 
@@ -2813,6 +2816,7 @@ export const ListFabricsResponse = zod.array(ListFabricsResponseItem)
  * @summary Add a fabric to the stash
  */
 
+export const createFabricBodyColorHexRegExp = new RegExp('^#[0-9a-f]{6}$');
 
 
 export const CreateFabricBody = zod.object({
@@ -2827,7 +2831,8 @@ export const CreateFabricBody = zod.object({
   "stretch": zod.string().nullish(),
   "weight": zod.string().nullish(),
   "notes": zod.string().nullish(),
-  "imageUrl": zod.string().nullish()
+  "imageUrl": zod.string().nullish(),
+  "colorHex": zod.string().regex(createFabricBodyColorHexRegExp).nullish()
 })
 
 export const CreateFabricResponse = zod.object({
@@ -2845,7 +2850,8 @@ export const CreateFabricResponse = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 })
 
 
@@ -2857,6 +2863,7 @@ export const UpdateFabricParams = zod.object({
 })
 
 
+export const updateFabricBodyOneColorHexRegExp = new RegExp('^#[0-9a-f]{6}$');
 
 
 export const UpdateFabricBody = zod.object({
@@ -2871,7 +2878,8 @@ export const UpdateFabricBody = zod.object({
   "stretch": zod.string().nullish(),
   "weight": zod.string().nullish(),
   "notes": zod.string().nullish(),
-  "imageUrl": zod.string().nullish()
+  "imageUrl": zod.string().nullish(),
+  "colorHex": zod.string().regex(updateFabricBodyOneColorHexRegExp).nullish()
 })
 
 export const UpdateFabricResponse = zod.object({
@@ -2889,7 +2897,8 @@ export const UpdateFabricResponse = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 })
 
 
@@ -3030,7 +3039,8 @@ export const ListPatternsResponseItem = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
   "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
-  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 })
 export const ListPatternsResponse = zod.array(ListPatternsResponseItem)
 
@@ -3061,7 +3071,8 @@ export const CreatePatternBody = zod.object({
   "pdfUrl": zod.string().nullish(),
   "pdfFileName": zod.string().nullish(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional(),
-  "steps": zod.array(zod.string().min(1).max(createPatternBodyStepsItemMax)).max(createPatternBodyStepsMax).nullish()
+  "steps": zod.array(zod.string().min(1).max(createPatternBodyStepsItemMax)).max(createPatternBodyStepsMax).nullish(),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullish()
 })
 
 export const CreatePatternResponse = zod.object({
@@ -3084,7 +3095,8 @@ export const CreatePatternResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
   "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
-  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 })
 
 
@@ -3118,7 +3130,8 @@ export const UpdatePatternBody = zod.object({
   "pdfUrl": zod.string().nullish(),
   "pdfFileName": zod.string().nullish(),
   "status": zod.enum(['want_to_make', 'purchased', 'made', 'favorite']).optional(),
-  "steps": zod.array(zod.string().min(1).max(updatePatternBodyOneStepsItemMax)).max(updatePatternBodyOneStepsMax).nullish()
+  "steps": zod.array(zod.string().min(1).max(updatePatternBodyOneStepsItemMax)).max(updatePatternBodyOneStepsMax).nullish(),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullish()
 })
 
 export const UpdatePatternResponse = zod.object({
@@ -3141,7 +3154,8 @@ export const UpdatePatternResponse = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
   "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
-  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 })
 
 
@@ -3153,6 +3167,18 @@ export const DeletePatternParams = zod.object({
 })
 
 export const DeletePatternResponse = zod.void()
+
+
+/**
+ * @summary Four main colours of one of your photo uploads (no AI: resized and grouped on the server).
+ */
+export const ExtractColoursBody = zod.object({
+  "imageUrl": zod.string().describe('/api/storage/objects/... of your own image upload')
+})
+
+export const ExtractColoursResponse = zod.object({
+  "colours": zod.array(zod.string()).describe('Most common first, as #rrggbb')
+})
 
 
 /**
@@ -3865,7 +3891,8 @@ export const GetRecommendationsResponseItem = zod.object({
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
   "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
-  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)')
+  "steps": zod.array(zod.string()).nullable().describe('Construction steps as short phrases (private)'),
+  "format": zod.union([zod.literal('pdf'),zod.literal('paper'),zod.literal('traced'),zod.literal(null)]).nullable()
 }),
   "fabric": zod.object({
   "id": zod.number().int(),
@@ -3882,7 +3909,8 @@ export const GetRecommendationsResponseItem = zod.object({
   "imageUrl": zod.string().nullable(),
   "visibility": zod.enum(['public', 'followers', 'private']).describe('public: anyone, signed out included. followers: your followers. private: only you.'),
   "isDemo": zod.boolean(),
-  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to')
+  "catalogId": zod.number().int().nullable().describe('Shared catalog page this is linked to'),
+  "colorHex": zod.string().nullable().describe('Swatch colour as #rrggbb')
 }),
   "suitability": zod.number().int(),
   "reason": zod.string()

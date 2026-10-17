@@ -266,7 +266,7 @@ function Question({ row, index, project, units, patterns, fabrics, threads, prof
   if (row === 'pattern') {
     help = 'One of the patterns in your library.';
     body = patterns.length ? patterns.map(p => option(p.id, <><span className="block font-bold">{p.name}</span>{p.designer && <span className="block text-sm text-subtle">{p.designer}</span>}</>, undefined, thumb(p.coverImageUrl, BookOpen)))
-      : empty('No patterns in your library yet.', '/patterns', 'Add one');
+      : empty('No patterns in your library yet.', '/stash/new?kind=pattern', 'Add one');
   } else if (row === 'fabric') {
     help = pattern?.yardage ? `${pattern.name} needs ${formatLength(pattern.yardage * 0.9144, units)}. We checked your stash.` : 'Fabrics from your stash.';
     body = fabrics.length ? fabrics.map(f => {
@@ -274,12 +274,12 @@ function Question({ row, index, project, units, patterns, fabrics, threads, prof
       return option(f.id, <><span className="block font-bold">{f.name}</span><span className="block text-sm text-subtle">{f.quantity ? `${formatLength(toMetres(f.quantity, f.unit), units)} in your stash` : f.color}</span></>,
         fit && <span className={`shrink-0 rounded-full px-3 py-1 text-sm font-bold ${fit.enough ? 'bg-yellow text-ink' : 'bg-red-ink text-white'}`}>{fit.label}</span>,
         thumb(f.imageUrl, Layers));
-    }) : empty('No fabric in your stash yet.', '/stash/fabrics', 'Add some');
+    }) : empty('No fabric in your stash yet.', '/stash/new?kind=fabric', 'Add some');
   } else if (row === 'thread') {
     help = 'Thread from your stash.';
     body = threads.length ? threads.map(t => option(t.id, <><span className="block font-bold">{t.colorName}</span><span className="block text-sm text-subtle">{[t.brand, t.type, t.quantity ? `${t.quantity} spool${t.quantity === 1 ? '' : 's'}` : null].filter(Boolean).join(' · ')}</span></>,
       undefined, <span className="h-14 w-14 shrink-0 rounded-full border border-line" style={{ backgroundColor: t.color }} aria-hidden="true" />))
-      : empty('No thread in your stash yet.', '/stash/threads', 'Add some');
+      : empty('No thread in your stash yet.', '/stash/new?kind=thread', 'Add some');
   } else if (row === 'measurements') {
     help = 'They stay private. Nobody else ever sees them.';
     body = profiles.length ? profiles.map(m => option(m.id, <><span className="block font-bold">{m.name}</span><span className="block text-sm text-subtle">{new Date(m.recordedAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}</span></>))

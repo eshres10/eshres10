@@ -14,6 +14,7 @@ import { Landing } from '@/pages/landing';
 import { Marketplace } from '@/pages/marketplace';
 import { MeasurementsPage } from '@/pages/measurements';
 import { FabricPage, PatternsPage, ThreadPage } from '@/pages/stash';
+import { EditStashPage, NewStashPage } from '@/pages/stash-flow';
 import { Studio } from '@/pages/studio';
 import { ProjectsList, ProjectDetail } from '@/components/projects';
 import { QuickStart } from '@/components/projects/QuickStart';
@@ -48,6 +49,7 @@ const InShellAdminReports = studio(AdminReportsPage);
 const InShellFabricPage = studio(FabricPage);
 const InShellThreadPage = studio(ThreadPage);
 const InShellPatternsPage = studio(PatternsPage);
+const InShellNewStashPage = studio(NewStashPage);
 const InShellProjectsList = studio(ProjectsList);
 const InShellProjectDetail = studio(ProjectDetail);
 const InShellQuickStart = studio(QuickStart);
@@ -71,6 +73,8 @@ function Router() {
     <Route path="/studio" component={InShellStudio} />
     <Route path="/stash/fabrics" component={InShellFabricPage} />
     <Route path="/stash/threads" component={InShellThreadPage} />
+    <Route path="/stash/new" component={InShellNewStashPage} />
+    <Route path="/stash/:kind/:id/edit">{(params: { kind: string; id: string }) => <Shell><EditStashPage kind={params.kind} id={Number(params.id)} /></Shell>}</Route>
     <Route path="/patterns" component={InShellPatternsPage} />
     <Route path="/projects" component={InShellProjectsList} />
     <Route path="/projects/new" component={InShellQuickStart} />

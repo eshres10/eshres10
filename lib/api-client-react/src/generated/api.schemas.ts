@@ -5,6 +5,16 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+export interface ColourRequest {
+  /** /api/storage/objects/... of your own image upload */
+  imageUrl: string;
+}
+
+export interface ColourResult {
+  /** Most common first, as #rrggbb */
+  colours: string[];
+}
+
 export type DraftKind = typeof DraftKind[keyof typeof DraftKind];
 
 
@@ -1316,6 +1326,11 @@ export interface Fabric {
      * @nullable
      */
   catalogId: number | null;
+  /**
+     * Swatch colour as #rrggbb
+     * @nullable
+     */
+  colorHex: string | null;
 }
 
 export interface FabricInput {
@@ -1340,6 +1355,11 @@ export interface FabricInput {
   notes?: string | null;
   /** @nullable */
   imageUrl?: string | null;
+  /**
+     * @nullable
+     * @pattern ^#[0-9a-f]{6}$
+     */
+  colorHex?: string | null;
 }
 
 export type FabricUpdate = FabricInput;
@@ -1396,6 +1416,18 @@ export const PatternStatus = {
   favorite: 'favorite',
 } as const;
 
+/**
+ * @nullable
+ */
+export type PatternFormat = typeof PatternFormat[keyof typeof PatternFormat] | null;
+
+
+export const PatternFormat = {
+  pdf: 'pdf',
+  paper: 'paper',
+  traced: 'traced',
+} as const;
+
 export interface Pattern {
   id: number;
   name: string;
@@ -1436,6 +1468,8 @@ export interface Pattern {
      * @nullable
      */
   steps: string[] | null;
+  /** @nullable */
+  format: PatternFormat;
 }
 
 export type PatternInputStatus = typeof PatternInputStatus[keyof typeof PatternInputStatus];
@@ -1446,6 +1480,18 @@ export const PatternInputStatus = {
   purchased: 'purchased',
   made: 'made',
   favorite: 'favorite',
+} as const;
+
+/**
+ * @nullable
+ */
+export type PatternInputFormat = typeof PatternInputFormat[keyof typeof PatternInputFormat] | null;
+
+
+export const PatternInputFormat = {
+  pdf: 'pdf',
+  paper: 'paper',
+  traced: 'traced',
 } as const;
 
 export interface PatternInput {
@@ -1484,6 +1530,8 @@ export interface PatternInput {
      * @items.maxLength 200
      */
   steps?: string[] | null;
+  /** @nullable */
+  format?: PatternInputFormat;
 }
 
 export type PatternUpdate = PatternInput;
