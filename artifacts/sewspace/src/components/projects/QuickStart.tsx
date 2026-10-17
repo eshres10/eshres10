@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { createProject, getListProjectsQueryKey, useListFabrics, useListPatterns, useListThreads } from '@workspace/api-client-react';
+import { createProject, deleteIdea, getListIdeasQueryKey, getListProjectsQueryKey, useListFabrics, useListPatterns, useListThreads } from '@workspace/api-client-react';
 import { BookOpen, Camera } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import {
@@ -18,6 +18,7 @@ import {
   useValidation,
 } from '@/components/flow';
 import { toast } from '@/hooks/use-toast';
+import { Sheet } from '@/components/social/Sheet';
 import { uploadFile } from '@/lib/upload';
 
 export const GARMENTS = ['Dress', 'Top', 'Trousers', 'Skirt', 'Outerwear', 'Bag', 'Other'] as const;
@@ -56,6 +57,10 @@ export function QuickStart() {
   const patterns = useListPatterns();
   const fabricId = Number(params.get('fabric')) || null;
   const threadId = Number(params.get('thread')) || null;
+  // Started from an idea on the studio overview: offer to remove it afterwards.
+  const ideaId = Number(params.get('idea')) || null;
+  const [madeFromIdea, setMadeFromIdea] = useState<number | null>(null);
+  const [removingIdea, setRemovingIdea] = useState(false);
   const fabrics = useListFabrics(undefined, { query: { enabled: Boolean(fabricId) } });
   const threads = useListThreads(undefined, { query: { enabled: Boolean(threadId) } });
   const using = [fabrics.data?.find(f => f.id === fabricId)?.name, threads.data?.find(t => t.id === threadId)?.colorName].filter(Boolean).join(' and ');
@@ -120,6 +125,7 @@ export function QuickStart() {
       await draft.clear();
       client.invalidateQueries({ queryKey: getListProjectsQueryKey() });
       toast({ title: 'Project created', description: 'Finish setting it up whenever you like.' });
+      if (ideaId) { setBusy(false); setMadeFromIdea(project.id); return; }
       setLocation(`/projects/${project.id}`, { replace: true });
     } catch (e) {
       setError((e as { data?: { error?: string } })?.data?.error ?? "That didn't save. Try again.");
@@ -185,6 +191,21 @@ export function QuickStart() {
         {error && <p role="alert" className="px-2 text-sm font-semibold text-red-ink">{error}</p>}
       </div>
       {leave.dialog}
+      {madeFromIdea !== null && (
+        <Sheet label="Remove this idea?" onClose={() => setLocation(`/projects/${madeFromIdea}`, { replace: true })}>
+          <h2 className="font-display text-2xl tracking-[-.04em]">Remove this idea?</h2>
+          <p className="mt-1 text-[15px] text-subtle">Your project is started. You can keep the idea in My ideas or remove it.</p>
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <button type="button" onClick={() => setLocation(`/projects/${madeFromIdea}`, { replace: true })} className="min-h-[52px] rounded-full border-2 border-ink font-bold">Keep</button>
+            <button type="button" disabled={removingIdea} onClick={async () => {
+              setRemovingIdea(true);
+              await deleteIdea(ideaId!).catch(() => undefined);
+              client.invalidateQueries({ queryKey: getListIdeasQueryKey() });
+              setLocation(`/projects/${madeFromIdea}`, { replace: true });
+            }} className="min-h-[52px] rounded-full bg-ink font-bold text-white">Remove</button>
+          </div>
+        </Sheet>
+      )}
     </FlowShell>
   );
 }

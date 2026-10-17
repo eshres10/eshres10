@@ -1301,6 +1301,63 @@ paths:
       responses:
         "204":
           description: Deleted
+  /ideas:
+    get:
+      operationId: listIdeas
+      tags: [studio]
+      summary: "Your ideas (pattern + fabric to make), newest first. Private to you."
+      responses:
+        "200":
+          description: Ideas
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Idea" }
+    post:
+      operationId: createIdea
+      tags: [studio]
+      summary: "Save an idea: one of your patterns with one of your fabrics."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IdeaInput" }
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Idea" }
+        "400": { description: Not your pattern or fabric }
+        "429": { description: Too many ideas this hour }
+  /ideas/{id}:
+    patch:
+      operationId: updateIdea
+      tags: [studio]
+      summary: Change an idea's pattern, fabric or note
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/IdeaUpdate" }
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Idea" }
+    delete:
+      operationId: deleteIdea
+      tags: [studio]
+      summary: Delete an idea
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "204":
+          description: Deleted
   /threads:
     get:
       operationId: listThreads
@@ -2690,6 +2747,35 @@ components:
               type: array
               items: { $ref: "#/components/schemas/ForumReplyChild" }
           required: [accepted, replies]
+    IdeaItem:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        imageUrl: { type: string, nullable: true }
+      required: [id, name, imageUrl]
+    Idea:
+      type: object
+      properties:
+        id: { type: integer }
+        note: { type: string }
+        pattern: { $ref: "#/components/schemas/IdeaItem" }
+        fabric: { $ref: "#/components/schemas/IdeaItem" }
+        createdAt: { type: string, format: date-time }
+      required: [id, note, pattern, fabric, createdAt]
+    IdeaInput:
+      type: object
+      properties:
+        patternId: { type: integer }
+        fabricId: { type: integer }
+        note: { type: string, maxLength: 80 }
+      required: [patternId, fabricId]
+    IdeaUpdate:
+      type: object
+      properties:
+        patternId: { type: integer }
+        fabricId: { type: integer }
+        note: { type: string, maxLength: 80 }
     ForumTopicInput:
       type: object
       properties:
@@ -2936,6 +3022,8 @@ components:
         threadId: { type: integer, nullable: true }
         measurementProfileId: { type: integer, nullable: true }
         coverImageUrl: { type: string, nullable: true }
+        stepsTotal: { type: integer, description: "Steps on the project (project lists only)" }
+        stepsDone: { type: integer, description: "Steps ticked off (project lists only)" }
         description: { type: string, nullable: true }
         notes: { type: string, nullable: true }
         alterations: { type: string, nullable: true }

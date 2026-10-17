@@ -1181,6 +1181,35 @@ export type ForumReply = ForumReplyChild & {
   replies: ForumReplyChild[];
 };
 
+export interface IdeaItem {
+  id: number;
+  name: string;
+  /** @nullable */
+  imageUrl: string | null;
+}
+
+export interface Idea {
+  id: number;
+  note: string;
+  pattern: IdeaItem;
+  fabric: IdeaItem;
+  createdAt: string;
+}
+
+export interface IdeaInput {
+  patternId: number;
+  fabricId: number;
+  /** @maxLength 80 */
+  note?: string;
+}
+
+export interface IdeaUpdate {
+  patternId?: number;
+  fabricId?: number;
+  /** @maxLength 80 */
+  note?: string;
+}
+
 export type ForumTopicInputPollDays = typeof ForumTopicInputPollDays[keyof typeof ForumTopicInputPollDays];
 
 
@@ -1646,6 +1675,10 @@ export interface Project {
   measurementProfileId: number | null;
   /** @nullable */
   coverImageUrl: string | null;
+  /** Steps on the project (project lists only) */
+  stepsTotal?: number;
+  /** Steps ticked off (project lists only) */
+  stepsDone?: number;
   /** @nullable */
   description?: string | null;
   /** @nullable */

@@ -81,6 +81,9 @@ import type {
   HashtagCount,
   HealthStatus,
   HelpfulState,
+  Idea,
+  IdeaInput,
+  IdeaUpdate,
   LibraryResult,
   LikeState,
   ListCatalogParams,
@@ -7292,6 +7295,358 @@ export const useDeleteFabric = <TError = ErrorType<unknown>,
         TContext
       > => {
       return useMutation(getDeleteFabricMutationOptions(options), queryClient);
+    }
+
+export const getListIdeasUrl = () => {
+
+
+
+
+  return `/api/ideas`
+}
+
+/**
+ * @summary Your ideas (pattern + fabric to make), newest first. Private to you.
+ */
+export const listIdeas = async ( options?: Parameters<typeof customFetch>[1]): Promise<Idea[]> => {
+
+  return customFetch<Idea[]>(getListIdeasUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListIdeasQueryKey = () => {
+    return [
+    `/api/ideas`
+    ] as const;
+    }
+
+
+export const getListIdeasQueryOptions = <TData = Awaited<ReturnType<typeof listIdeas>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listIdeas>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListIdeasQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listIdeas>>> = ({ signal }) => listIdeas({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listIdeas>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListIdeasQueryResult = NonNullable<Awaited<ReturnType<typeof listIdeas>>>
+export type ListIdeasQueryError = ErrorType<unknown>
+
+
+export function useListIdeas<TData = Awaited<ReturnType<typeof listIdeas>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listIdeas>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listIdeas>>,
+          TError,
+          Awaited<ReturnType<typeof listIdeas>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListIdeas<TData = Awaited<ReturnType<typeof listIdeas>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listIdeas>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listIdeas>>,
+          TError,
+          Awaited<ReturnType<typeof listIdeas>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListIdeas<TData = Awaited<ReturnType<typeof listIdeas>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listIdeas>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Your ideas (pattern + fabric to make), newest first. Private to you.
+ */
+
+export function useListIdeas<TData = Awaited<ReturnType<typeof listIdeas>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listIdeas>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListIdeasQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateIdeaUrl = () => {
+
+
+
+
+  return `/api/ideas`
+}
+
+/**
+ * @summary Save an idea: one of your patterns with one of your fabrics.
+ */
+export const createIdea = async (ideaInput: IdeaInput, options?: Parameters<typeof customFetch>[1]): Promise<Idea> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Idea>(getCreateIdeaUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(ideaInput)
+  }
+);}
+
+
+
+
+
+export const getCreateIdeaMutationKey = () => ['createIdea'] as const;
+
+export const getCreateIdeaMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createIdea>>, TError,CreateIdeaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createIdea>>, TError,CreateIdeaMutationVariables, TContext> => {
+
+const mutationKey = getCreateIdeaMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createIdea>>, CreateIdeaMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createIdea(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateIdeaMutationResult = NonNullable<Awaited<ReturnType<typeof createIdea>>>
+    export type CreateIdeaMutationBody = BodyType<IdeaInput>
+    export type CreateIdeaMutationError = ErrorType<void>
+    export type CreateIdeaMutationVariables = {data: BodyType<IdeaInput>}
+
+    /**
+ * @summary Save an idea: one of your patterns with one of your fabrics.
+ */
+export const useCreateIdea = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createIdea>>, TError,CreateIdeaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createIdea>>,
+        TError,
+        CreateIdeaMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateIdeaMutationOptions(options), queryClient);
+    }
+
+export const getUpdateIdeaUrl = (id: number,) => {
+
+
+
+
+  return `/api/ideas/${id}`
+}
+
+/**
+ * @summary Change an idea's pattern, fabric or note
+ */
+export const updateIdea = async (id: number,
+    ideaUpdate: IdeaUpdate, options?: Parameters<typeof customFetch>[1]): Promise<Idea> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Idea>(getUpdateIdeaUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(ideaUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateIdeaMutationKey = () => ['updateIdea'] as const;
+
+export const getUpdateIdeaMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateIdea>>, TError,UpdateIdeaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateIdea>>, TError,UpdateIdeaMutationVariables, TContext> => {
+
+const mutationKey = getUpdateIdeaMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateIdea>>, UpdateIdeaMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateIdea(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateIdeaMutationResult = NonNullable<Awaited<ReturnType<typeof updateIdea>>>
+    export type UpdateIdeaMutationBody = BodyType<IdeaUpdate>
+    export type UpdateIdeaMutationError = ErrorType<unknown>
+    export type UpdateIdeaMutationVariables = {id: number;data: BodyType<IdeaUpdate>}
+
+    /**
+ * @summary Change an idea's pattern, fabric or note
+ */
+export const useUpdateIdea = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateIdea>>, TError,UpdateIdeaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof updateIdea>>,
+        TError,
+        UpdateIdeaMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUpdateIdeaMutationOptions(options), queryClient);
+    }
+
+export const getDeleteIdeaUrl = (id: number,) => {
+
+
+
+
+  return `/api/ideas/${id}`
+}
+
+/**
+ * @summary Delete an idea
+ */
+export const deleteIdea = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getDeleteIdeaUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getDeleteIdeaMutationKey = () => ['deleteIdea'] as const;
+
+export const getDeleteIdeaMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteIdea>>, TError,DeleteIdeaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteIdea>>, TError,DeleteIdeaMutationVariables, TContext> => {
+
+const mutationKey = getDeleteIdeaMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteIdea>>, DeleteIdeaMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  deleteIdea(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteIdeaMutationResult = NonNullable<Awaited<ReturnType<typeof deleteIdea>>>
+
+    export type DeleteIdeaMutationError = ErrorType<unknown>
+    export type DeleteIdeaMutationVariables = {id: number}
+
+    /**
+ * @summary Delete an idea
+ */
+export const useDeleteIdea = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteIdea>>, TError,DeleteIdeaMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteIdea>>,
+        TError,
+        DeleteIdeaMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeleteIdeaMutationOptions(options), queryClient);
     }
 
 export const getListThreadsUrl = (params?: ListThreadsParams,) => {

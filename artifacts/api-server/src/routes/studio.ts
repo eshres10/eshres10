@@ -600,7 +600,13 @@ router.delete("/patterns/:id", scoped(async (req, res, db): Promise<void> => {
 router.get("/projects", scoped(async (req, res, db): Promise<void> => {
   const uid = userId(req);
   const rows = await db.select().from(projectsTable).where(eq(projectsTable.userId, uid)).orderBy(desc(projectsTable.createdAt));
-  res.json(ListProjectsResponse.parse(rows.map(projectResponse)));
+  // Step counts for the progress bars ("6 of 10 steps").
+  const steps = await db.select({ projectId: projectStepsTable.projectId, completed: projectStepsTable.completed })
+    .from(projectStepsTable).where(eq(projectStepsTable.userId, uid));
+  res.json(ListProjectsResponse.parse(rows.map((row) => {
+    const mine = steps.filter((s) => s.projectId === row.id);
+    return { ...projectResponse(row), stepsTotal: mine.length, stepsDone: mine.filter((s) => s.completed).length };
+  })));
 }));
 
 router.post("/projects", scoped(async (req, res, db): Promise<void> => {

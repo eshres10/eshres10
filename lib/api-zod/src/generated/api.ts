@@ -2929,6 +2929,8 @@ export const GetDashboardResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3116,6 +3118,101 @@ export const DeleteFabricParams = zod.object({
 })
 
 export const DeleteFabricResponse = zod.void()
+
+
+/**
+ * @summary Your ideas (pattern + fabric to make), newest first. Private to you.
+ */
+export const ListIdeasResponseItem = zod.object({
+  "id": zod.number().int(),
+  "note": zod.string(),
+  "pattern": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "fabric": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date()
+})
+export const ListIdeasResponse = zod.array(ListIdeasResponseItem)
+
+
+/**
+ * @summary Save an idea: one of your patterns with one of your fabrics.
+ */
+export const createIdeaBodyNoteMax = 80;
+
+
+
+export const CreateIdeaBody = zod.object({
+  "patternId": zod.number().int(),
+  "fabricId": zod.number().int(),
+  "note": zod.string().max(createIdeaBodyNoteMax).optional()
+})
+
+export const CreateIdeaResponse = zod.object({
+  "id": zod.number().int(),
+  "note": zod.string(),
+  "pattern": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "fabric": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Change an idea's pattern, fabric or note
+ */
+export const UpdateIdeaParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const updateIdeaBodyNoteMax = 80;
+
+
+
+export const UpdateIdeaBody = zod.object({
+  "patternId": zod.number().int().optional(),
+  "fabricId": zod.number().int().optional(),
+  "note": zod.string().max(updateIdeaBodyNoteMax).optional()
+})
+
+export const UpdateIdeaResponse = zod.object({
+  "id": zod.number().int(),
+  "note": zod.string(),
+  "pattern": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "fabric": zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "imageUrl": zod.string().nullable()
+}),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
+ * @summary Delete an idea
+ */
+export const DeleteIdeaParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const DeleteIdeaResponse = zod.void()
 
 
 /**
@@ -3419,6 +3516,8 @@ export const ListProjectsResponseItem = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3484,6 +3583,8 @@ export const CreateProjectResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3525,6 +3626,8 @@ export const GetProjectResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3613,6 +3716,8 @@ export const UpdateProjectResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
@@ -3700,6 +3805,8 @@ export const UpdateProjectFieldsResponse = zod.object({
   "threadId": zod.number().int().nullable(),
   "measurementProfileId": zod.number().int().nullable(),
   "coverImageUrl": zod.string().nullable(),
+  "stepsTotal": zod.number().int().optional().describe('Steps on the project (project lists only)'),
+  "stepsDone": zod.number().int().optional().describe('Steps ticked off (project lists only)'),
   "description": zod.string().nullish(),
   "notes": zod.string().nullable(),
   "alterations": zod.string().nullable(),
