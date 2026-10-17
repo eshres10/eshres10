@@ -3,6 +3,7 @@ import { Compass } from 'lucide-react';
 import { Link } from 'wouter';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { FeedList } from '@/components/feed/FeedList';
+import { usePipGate } from '@/components/onboarding/gate';
 
 function CurrentProject() {
   const dashboard = useGetDashboard();
@@ -23,6 +24,7 @@ function CurrentProject() {
 
 /** Home: posts from people you follow, and your own. Browsing everyone is Explore (no Discover tab: owner's call). */
 export function FeedPage() {
+  usePipGate();
   return (
     <div className="mx-auto grid max-w-[920px] justify-center gap-4 lg:grid-cols-[minmax(0,600px)_300px] lg:gap-5">
       <div className="flex min-w-0 flex-col gap-3.5 md:gap-4">

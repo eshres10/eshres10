@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ClerkProvider } from '@clerk/react';
-import { Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
+import { Redirect, Route, Router as WouterRouter, Switch, useLocation } from 'wouter';
 import { ErrorBoundary } from '@/components/error-boundary';
 import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -38,6 +38,7 @@ import { PostPage } from '@/pages/post';
 import { PublicProfilePage } from '@/pages/public-profile';
 import { SettingsPage } from '@/pages/settings';
 import { QuestionRoute, WelcomeRoute } from '@/pages/onboarding';
+import { JoinPage } from '@/pages/join';
 
 const queryClient = new QueryClient();
 
@@ -106,7 +107,9 @@ function Router() {
     <Route path="/welcome/:step">{(params: { step: string }) => <QuestionRoute step={Number(params.step)} />}</Route>
     <Route path="/makes/:id">{(params: { id: string }) => <PublicMakePage id={Number(params.id)} />}</Route>
     <Route path="/sign-in/*?" component={() => <ClerkAuth mode="sign-in" />} />
-    <Route path="/sign-up/*?" component={() => <ClerkAuth mode="sign-up" />} />
+    <Route path="/join/*?" component={JoinPage} />
+    {/* Old sign-up links (and Clerk sub-steps under /sign-up) now live at /join. */}
+    <Route path="/sign-up/*?">{(params: { "*"?: string }) => <Redirect to={`/join${params["*"] ? `/${params["*"]}` : ""}${window.location.search}`} replace />}</Route>
     <Route path="/:segment" component={HandleRoute} />
     <Route>{() => <NotFound />}</Route>
   </Switch>;
@@ -115,7 +118,7 @@ function Router() {
 function ClerkRoutes() {
   const [, setLocation] = useLocation();
   const stripBase = (path: string) => basePath && path.startsWith(basePath) ? path.slice(basePath.length) || '/' : path;
-  return <ClerkProvider publishableKey={clerkPubKey} proxyUrl={clerkProxyUrl} appearance={clerkAppearance} signInUrl={`${basePath}/sign-in`} signUpUrl={`${basePath}/sign-up`} localization={{ signIn: { start: { title: 'Welcome back, maker', subtitle: 'Sign in to return to your studio' } }, signUp: { start: { title: 'Create your studio', subtitle: 'A calmer place for your sewing practice' } } }} routerPush={to => setLocation(stripBase(to))} routerReplace={to => setLocation(stripBase(to), { replace: true })}><SignInPromptProvider><Router /></SignInPromptProvider></ClerkProvider>;
+  return <ClerkProvider publishableKey={clerkPubKey} proxyUrl={clerkProxyUrl} appearance={clerkAppearance} signInUrl={`${basePath}/sign-in`} signUpUrl={`${basePath}/join`} localization={{ signIn: { start: { title: 'Welcome back, maker', subtitle: 'Sign in to return to your studio' } }, signUp: { start: { title: 'Create your studio', subtitle: 'A calmer place for your sewing practice' }, emailLink: { title: 'Check your inbox', subtitle: 'We sent you a link. Open it to carry on.', formTitle: 'Check your inbox', formSubtitle: 'Open the link we sent to {{identifier}} to carry on.' }, emailCode: { title: 'Check your inbox', subtitle: 'We sent a code to {{identifier}}. Enter it to carry on.' } }, unstable__errors: { form_param_format_invalid__email_address: 'Enter an email like name@example.com.' } }} routerPush={to => setLocation(stripBase(to))} routerReplace={to => setLocation(stripBase(to), { replace: true })}><SignInPromptProvider><Router /></SignInPromptProvider></ClerkProvider>;
 }
 
 function App() { return <QueryClientProvider client={queryClient}><TooltipProvider><WouterRouter base={basePath}><ErrorBoundary><ClerkRoutes /></ErrorBoundary></WouterRouter><Toaster /></TooltipProvider></QueryClientProvider>; }

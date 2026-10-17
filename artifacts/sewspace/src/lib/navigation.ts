@@ -28,5 +28,6 @@ export function safeReturnPath(value: string | null | undefined, fallback = '/fe
  */
 export function authHref(mode: 'sign-in' | 'sign-up', returnTo: string = currentAppPath()): string {
   const target = `${window.location.origin}${basePath}${safeReturnPath(returnTo, '/')}`;
-  return `/${mode}?redirect_url=${encodeURIComponent(target)}`;
+  // Joining is /join (Pip's sign-up page); new accounts go on to /welcome whatever the target.
+  return `/${mode === 'sign-up' ? 'join' : mode}?redirect_url=${encodeURIComponent(target)}`;
 }

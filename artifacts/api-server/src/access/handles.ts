@@ -8,7 +8,7 @@ export const HANDLE_MAX = 30;
 export const RESERVED_HANDLES: ReadonlySet<string> = new Set([
   // Route words from the brief.
   "admin", "api", "explore", "feed", "forum", "settings", "studio", "challenges",
-  "patterns", "products", "makes", "sign-in", "sign-up", "help",
+  "patterns", "products", "makes", "sign-in", "sign-up", "join", "help",
   // Other app paths and system names.
   "welcome", "me", "saved", "notifications", "about", "privacy", "terms", "support",
   "sewspace", "seamsclub", "seams_club", "assets", "sitemap.xml", "robots.txt",
