@@ -39,6 +39,11 @@
   --color-cream: #ece3cf;
   --color-line: #e6e6e6;
   --color-subtle: #555555;
+  /* Onboarding (Pip): soft icon tiles, Pip's pins and the mark outline. */
+  --color-blue-soft: #d6defd;
+  --color-mist: #ececec;
+  --color-pin: #8a8a8a;
+  --color-mark: #c4c4c4;
   --font-display: 'Poppins', system-ui, sans-serif;
   --radius-card: 30px;
   --radius-pill: 3000px;
@@ -132,6 +137,10 @@ label:has(.field[required]) > span:first-child::after { content: " *"; color: va
 .delay-1 { animation-delay: .08s; }
 .delay-2 { animation-delay: .16s; }
 .delay-3 { animation-delay: .24s; }
+/* Pip's gentle bob (onboarding). Off for people who prefer less motion. */
+@keyframes pip-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-4px); } }
+.pip-bob { animation: pip-bob 2.8s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .pip-bob { animation: none; } }
 @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
 @media (max-width: 767px) {

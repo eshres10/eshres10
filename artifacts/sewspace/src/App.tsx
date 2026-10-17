@@ -37,7 +37,7 @@ import { FeedPage } from '@/pages/feed';
 import { PostPage } from '@/pages/post';
 import { PublicProfilePage } from '@/pages/public-profile';
 import { SettingsPage } from '@/pages/settings';
-import { WelcomePage } from '@/pages/welcome';
+import { QuestionRoute, WelcomeRoute } from '@/pages/onboarding';
 
 const queryClient = new QueryClient();
 
@@ -102,7 +102,8 @@ function Router() {
     <Route path="/posts/:id/edit">{(params: { id: string }) => <Shell><EditPostPage id={Number(params.id)} /></Shell>}</Route>
     <Route path="/tags/:tag">{(params: { tag: string }) => <AdaptiveLayout><TagPage tag={decodeURIComponent(params.tag)} /></AdaptiveLayout>}</Route>
     <Route path="/posts/:id">{(params: { id: string }) => <AdaptiveLayout><PostPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
-    <Route path="/welcome" component={WelcomePage} />
+    <Route path="/welcome" component={WelcomeRoute} />
+    <Route path="/welcome/:step">{(params: { step: string }) => <QuestionRoute step={Number(params.step)} />}</Route>
     <Route path="/makes/:id">{(params: { id: string }) => <PublicMakePage id={Number(params.id)} />}</Route>
     <Route path="/sign-in/*?" component={() => <ClerkAuth mode="sign-in" />} />
     <Route path="/sign-up/*?" component={() => <ClerkAuth mode="sign-up" />} />
