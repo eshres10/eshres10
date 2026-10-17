@@ -53,8 +53,13 @@ export function ForumPage() {
 
   return (
     <div className="mx-auto max-w-[1232px]">
-      <div className="flex justify-end">
-        <button type="button" className="btn btn-primary w-full sm:w-auto" onClick={() => { if (!ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) return;
+      <div className="flex items-center justify-between gap-3">
+        <label className="relative block min-w-0 w-full max-w-xl flex-1">
+          <span className="sr-only">Search the forum</span>
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden="true" />
+          <input type="search" value={q} onChange={e => { setQ(e.target.value); go({ q: e.target.value || undefined }); }} className="field min-h-[48px] w-full pl-9" placeholder="Search the forum" />
+        </label>
+        <button type="button" className="btn btn-primary min-h-[48px] shrink-0 whitespace-nowrap px-4" onClick={() => { if (!ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) return;
           const p = new URLSearchParams();
           if (board) p.set('board', board);
           if (filter !== 'all' && filter !== 'solved') p.set('kind', filter);
@@ -63,12 +68,6 @@ export function ForumPage() {
           <Plus size={16} aria-hidden="true" />Start a discussion
         </button>
       </div>
-
-      <label className="relative mt-3 block max-w-xl sm:mt-4">
-        <span className="sr-only">Search the forum</span>
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" aria-hidden="true" />
-        <input type="search" value={q} onChange={e => { setQ(e.target.value); go({ q: e.target.value || undefined }); }} className="field min-h-[48px] pl-9" placeholder="Search the forum" />
-      </label>
 
       <div className="mt-3 flex gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden sm:mt-4" role="group" aria-label="Filter">
         {chips.map(c => (

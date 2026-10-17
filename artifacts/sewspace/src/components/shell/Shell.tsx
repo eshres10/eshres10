@@ -65,7 +65,7 @@ function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: (
             return (
               <Link key={item.href} href={item.href} onClick={onNavigate} aria-current={active ? 'page' : undefined}
                 data-testid={`link-nav-${item.label.toLowerCase().replace(/[^a-z]+/g, '-')}`}
-                className={`flex min-h-[44px] items-center gap-3 rounded-[18px] px-3 text-sm font-semibold no-underline ${active ? 'bg-ink text-white' : 'text-ink hover:bg-white/60'}`}>
+                className={`flex min-h-[44px] items-center gap-3 rounded-[18px] px-3 text-sm ${item.label === 'Home' ? 'font-bold' : 'font-semibold'} no-underline ${active ? 'bg-ink text-white' : 'text-ink hover:bg-white/60'}`}>
                 <Icon size={18} aria-hidden="true" /><span className="flex-1">{item.label}</span>
               </Link>
             );
@@ -144,13 +144,13 @@ export function ShellFrame({ children }: { children: ReactNode }) {
           : `fixed inset-x-0 top-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 bg-white px-4 pb-2 pt-[env(safe-area-inset-top)] shadow-float transition-transform duration-200 ease-out ${profileHeaderHidden ? '-translate-y-full' : 'translate-y-0'} md:static md:mx-0 md:mt-0 md:h-auto md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3 md:transition-none md:translate-y-0`}>
           {location === '/feed'
             ? <div className="min-w-0 flex-1 md:hidden"><Logo href="/feed" /></div>
-            : <h1 className="min-w-0 flex-1 truncate font-display text-[20px] tracking-[-.04em] md:text-[22px]">{title}</h1>}
-          <h1 className={location === '/feed' ? 'sr-only md:not-sr-only md:min-w-0 md:flex-1 md:truncate md:font-display md:text-[22px] md:tracking-[-.04em]' : 'hidden'}>{title}</h1>
+            : <h1 className={`min-w-0 flex-1 truncate font-display text-[20px] tracking-[-.04em] md:text-[22px] ${title === 'Home' ? 'font-bold' : ''}`}>{title}</h1>}
+          <h1 className={location === '/feed' ? `sr-only md:not-sr-only md:min-w-0 md:flex-1 md:truncate md:font-display md:text-[22px] md:tracking-[-.04em] ${title === 'Home' ? 'md:font-bold' : ''}` : 'hidden'}>{title}</h1>
           <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="grid h-10 w-10 shrink-0 place-items-center rounded-full md:hidden"><Menu size={19} /></button>
           {location !== '/new' && <Link href="/new" className="hidden min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white no-underline md:inline-flex"><Plus size={16} aria-hidden="true" />New post</Link>}
           <Link href="/settings" aria-label="Profile & settings" className="hidden md:block"><UserAvatar name={profile.data?.name} avatarUrl={profile.data?.avatarUrl} size={40} /></Link>
         </header>
-        <main className={`${location === '/new' ? 'mx-auto w-full max-w-7xl px-0 py-0 md:px-2 md:py-8' : location.startsWith('/posts/') ? 'mx-auto flex h-[100dvh] min-h-0 w-full max-w-7xl flex-col overflow-hidden px-3 py-0 md:block md:h-auto md:overflow-visible md:px-2 md:py-8' : 'mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8'}`}>{children}</main>
+        <main className={`${location === '/new' ? 'mx-auto w-full max-w-7xl px-0 py-0 md:px-2 md:py-8' : location.startsWith('/posts/') ? 'mx-auto flex h-[100dvh] min-h-0 w-full max-w-7xl flex-col overflow-hidden px-3 py-0 md:block md:h-auto md:overflow-visible md:px-2 md:py-8' : location === '/forum' ? 'mx-auto w-full max-w-7xl px-4 pb-6 pt-0 md:px-2 md:pb-8 md:pt-0' : 'mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8'}`}>{children}</main>
       </div>
       {!mobileFocus && <MobileTabBar location={location} />}
     </div>
@@ -165,11 +165,12 @@ export function AdaptiveLayout({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
   const [location] = useLocation();
   const postDetail = location.startsWith('/posts/');
+  const forumPage = location === '/forum';
   if (isLoaded && isSignedIn) return <ShellFrame>{children}</ShellFrame>;
   return (
     <div className={`${postDetail ? 'h-[100dvh] overflow-hidden pb-0' : 'min-h-[100dvh] pb-14'}`}>
       <div className={postDetail ? 'hidden md:block' : ''}><PublicHeader /></div>
-      <main className={postDetail ? 'mx-auto h-[100dvh] max-w-[1232px] px-3 pt-0 md:h-auto md:px-4 md:pt-7' : 'mx-auto max-w-[1232px] px-4 pt-7'}>{children}</main>
+      <main className={postDetail ? 'mx-auto h-[100dvh] max-w-[1232px] px-3 pt-0 md:h-auto md:px-4 md:pt-7' : `mx-auto max-w-[1232px] px-4 ${forumPage ? 'pt-0' : 'pt-7'}`}>{children}</main>
     </div>
   );
 }
