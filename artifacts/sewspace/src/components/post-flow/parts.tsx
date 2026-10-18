@@ -184,31 +184,6 @@ export function ChallengeSheet({ options, loading, value, onDone, onClose }: {
   );
 }
 
-/** "Describe this photo": alt text for one photo. */
-export function AltTextSheet({ item, value, onSave, onClose }: { item: PhotoItem; value: string; onSave: (v: string) => void; onClose: () => void }) {
-  const [text, setText] = useState(value);
-  useSheetDirty(text !== value);
-  return (
-    <Sheet label="Describe this photo" onClose={onClose}>
-      <div className="flex items-center gap-4">
-        <img src={photoSrc(item, true)} alt="" className="h-[70px] w-[56px] shrink-0 rounded-[14px] object-cover" />
-        <div>
-          <h2 className="font-display text-[24px] leading-tight tracking-[-.05em]">Describe this photo</h2>
-          <p className="text-[15px] text-subtle">Read aloud to people using screen readers.</p>
-        </div>
-      </div>
-      <label className="mt-4 block text-sm font-bold" htmlFor="alt-text">Alt text</label>
-      <textarea id="alt-text" data-autofocus value={text} onChange={e => setText(e.target.value.slice(0, 500))} rows={3} className="field mt-1.5 resize-none text-[17px]"
-        placeholder="e.g. Navy linen knot bag on a wooden table" />
-      <p className="mt-1 text-right text-xs text-subtle">{text.length} / 500</p>
-      <div className="mt-3 flex gap-2">
-        <button type="button" onClick={onClose} className="btn btn-line min-h-[52px] flex-1 text-base">Cancel</button>
-        <button type="button" onClick={() => { onSave(text.trim()); onClose(); }} className="btn btn-primary min-h-[52px] flex-1 text-base">Save</button>
-      </div>
-    </Sheet>
-  );
-}
-
 /**
  * Hashtag help for the caption: while typing "#lin" it offers matching tags
  * (most used public tags); otherwise tags suggested from the tagged make,

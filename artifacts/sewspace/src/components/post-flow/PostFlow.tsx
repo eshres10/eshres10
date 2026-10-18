@@ -36,7 +36,6 @@ import {
 import { appendHashtag, aspectRatio, MAX_HASHTAGS, normaliseHashtag, parseHashtags, removeHashtag } from '@/lib/hashtags';
 import { processPhoto } from '@/lib/photos';
 import {
-  AltTextSheet,
   AudienceCards,
   insertHashtag,
   PhotoCarousel,
@@ -48,7 +47,6 @@ import {
   useHashtagAssist,
   type Aspect,
   type Audience,
-  type PhotoItem,
 } from './parts';
 
 const MAX_PHOTOS = 10;
@@ -321,7 +319,6 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
   const cover = items[0];
   const handle = me.data?.handle ?? '';
 
-  const [altFor, setAltFor] = useState<PhotoItem | null>(null);
   const [picker, setPicker] = useState<null | 'make' | 'pattern' | 'fabric'>(null);
   const [option, setOption] = useState(0);
   const captionRef = useRef<HTMLTextAreaElement>(null);
@@ -473,7 +470,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
               </div>
               <div className="mt-2 flex items-center gap-1.5">
                 <button type="button" onClick={() => uploads.move(item.key, -1)} disabled={i === 0} aria-label={`Move photo ${i + 1} earlier`} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 border-ink disabled:border-line disabled:text-subtle"><ChevronLeft size={18} /></button>
-                <button type="button" onClick={() => setAltFor(item)} className={`min-h-[44px] flex-1 truncate rounded-full px-3 text-sm font-bold ${alts[item.key] ? 'bg-canvas' : 'bg-yellow'}`}>{alts[item.key] ? <><Check size={14} className="mr-1 inline" aria-hidden="true" />Alt text</> : 'Add alt text'}</button>
+                <span className="flex-1 text-center text-sm font-bold text-subtle">Photo {i + 1}</span>
                 <button type="button" onClick={() => uploads.move(item.key, 1)} disabled={i === items.length - 1} aria-label={`Move photo ${i + 1} later`} className="grid h-11 w-11 shrink-0 place-items-center rounded-full border-2 border-ink disabled:border-line disabled:text-subtle"><ChevronRight size={18} /></button>
               </div>
             </li>
@@ -481,7 +478,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
         </ul>
       </div>
       <div className="hidden lg:block">
-        <h2 className="font-display text-xl tracking-[-.04em]">Order, cover and alt text</h2>
+        <h2 className="font-display text-xl tracking-[-.04em]">Order and cover</h2>
         <p className="mt-1 text-sm text-subtle">The first photo is the cover. Photos keep uploading while you work.</p>
         <ol className="mt-3 space-y-2">
           {items.map((item, i) => (
@@ -491,8 +488,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
                 {i === 0 && <span className="absolute left-1 top-1 rounded-full bg-yellow px-1.5 text-[10px] font-bold">Cover</span>}
               </button>
               <div className="min-w-0 flex-1">
-                <label htmlFor={`alt-${item.key}`} className="text-xs font-bold text-subtle">Alt text for photo {i + 1}</label>
-                <input id={`alt-${item.key}`} value={alts[item.key] ?? ''} onChange={e => setAlts(a => ({ ...a, [item.key]: e.target.value.slice(0, 500) }))} className="field mt-1 min-h-[40px] py-2 text-sm" placeholder="Describe what's in the photo" />
+                <p className="pt-1 text-sm font-bold">Photo {i + 1}{i === 0 ? ' · cover' : ''}</p>
                 {item.status === 'uploading' && <><p className="mt-1.5 text-xs font-bold">Uploading {Math.round(item.progress * 100)}%</p><span className="mt-1 block h-1 overflow-hidden rounded-full bg-line"><span className="block h-full bg-ink" style={{ width: `${item.progress * 100}%` }} /></span></>}
                 {item.status === 'error' && <p className="mt-1.5 text-xs font-bold text-red-ink">Didn't upload. <button type="button" className="underline" onClick={() => uploads.retry(item.key)}>Retry</button></p>}
               </div>
@@ -507,8 +503,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       </div>
       {moreButton}
       {shape}
-      <p className="flex gap-2 text-[15px] text-subtle lg:text-sm"><Info size={18} aria-hidden="true" className="mt-0.5 shrink-0" />Photos keep uploading while you write. Alt text describes the photo for people using screen readers.</p>
-      {altFor && <AltTextSheet item={altFor} value={alts[altFor.key] ?? ''} onSave={text => setAlts(a => ({ ...a, [altFor.key]: text }))} onClose={() => setAltFor(null)} />}
+      <p className="flex gap-2 text-[15px] text-subtle lg:text-sm"><Info size={18} aria-hidden="true" className="mt-0.5 shrink-0" />Photos keep uploading while you write.</p>
     </div>
   );
 
