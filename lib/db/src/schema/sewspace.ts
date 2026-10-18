@@ -1,4 +1,5 @@
 import {
+  bigserial,
   boolean,
   date,
   integer,
@@ -614,3 +615,23 @@ export type InsertMeasurementProfile = z.infer<
 export type InsertProject = z.infer<typeof insertProjectSchema>;
 export type InsertProjectStep = z.infer<typeof insertProjectStepSchema>;
 export type InsertProjectPhoto = z.infer<typeof insertProjectPhotoSchema>;
+
+// Notifications (migration 0019): written only by database triggers on likes,
+// comments, follows, forum replies, accepted answers and challenge entries; the
+// recipient reads them (RLS hides blocked actors and things they can't see) and
+// may only set read_at.
+export const NOTIFICATION_KINDS = ["like", "comment", "comment_reply", "follow", "forum_reply", "answer_accepted", "challenge_entry"] as const;
+export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
+export const notificationsTable = pgTable("sewspace_notifications", {
+  id: bigserial("id", { mode: "number" }).primaryKey(),
+  recipientId: varchar("recipient_id", { length: 255 }).notNull(),
+  actorId: varchar("actor_id", { length: 255 }).notNull(),
+  kind: text("kind").$type<NotificationKind>().notNull(),
+  postId: integer("post_id"),
+  commentId: integer("comment_id"),
+  topicId: integer("topic_id"),
+  replyId: integer("reply_id"),
+  challengeId: integer("challenge_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  readAt: timestamp("read_at", { withTimezone: true }),
+});
