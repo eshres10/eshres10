@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getGetPublicPostQueryKey, useDeletePost, type FeedPost } from '@workspace/api-client-react';
-import { BookOpen, ChevronLeft, ChevronRight, Layers, Loader2, MessagesSquare, MoreHorizontal, Pencil, Scissors, Trash2, Trophy, X } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Loader2, MessagesSquare, MoreHorizontal, Pencil, Scissors, Trash2, Trophy, X } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { VisibilityBadge } from '@/components/visibility';
@@ -14,8 +14,8 @@ import { Sheet, SheetButton } from '@/components/social/Sheet';
 import { aspectRatio } from '@/lib/hashtags';
 import { timeAgo } from '@/lib/time';
 
-const TAG_ICON = { make: Scissors, pattern: BookOpen, fabric: Layers } as const;
-const TAG_LABEL = { make: 'Make', pattern: 'Pattern', fabric: 'Fabric' } as const;
+const TAG_ICON = { make: Scissors, pattern: BookOpen } as const;
+const TAG_LABEL = { make: 'Make', pattern: 'Pattern' } as const;
 
 function Photos({ post }: { post: FeedPost }) {
   const strip = useRef<HTMLDivElement>(null);
@@ -23,6 +23,7 @@ function Photos({ post }: { post: FeedPost }) {
   // The shape chosen when posting (4:5, 1:1, or the first photo's own, kept
   // between 4:5 and 1.91:1). Photos are cropped with object-fit, never re-cut.
   const ratio = aspectRatio(post.aspect, post.media[0]);
+  const pattern = post.tags.find(t => t.kind === 'pattern');
   const go = (next: number) => {
     const el = strip.current;
     if (!el) return;
@@ -38,9 +39,11 @@ function Photos({ post }: { post: FeedPost }) {
             className="h-full w-full shrink-0 snap-center object-cover" />
         ))}
       </div>
+      {/* Owner: the pattern sits on the photo, bottom left, as on Explore cards (fabric isn't shown). */}
+      {pattern && <span className={`absolute bottom-3 left-3 truncate rounded-full bg-white/90 px-3 py-1.5 text-[13px] font-bold ${post.media.length > 1 ? 'max-w-[calc(100%-7rem)]' : 'max-w-[calc(100%-1.5rem)]'}`}>Pattern: {pattern.name}</span>}
       {post.media.length > 1 && <>
         <span className="absolute right-3.5 top-3.5 rounded-full bg-ink/70 px-2.5 py-1 text-xs font-semibold text-white">{index + 1}/{post.media.length}</span>
-        <span className="absolute bottom-3.5 left-1/2 flex -translate-x-1/2 gap-1.5" aria-hidden="true">
+        <span className={`absolute flex gap-1.5 ${pattern ? 'bottom-[1.4rem] right-4' : 'bottom-3.5 left-1/2 -translate-x-1/2'}`} aria-hidden="true">
           {post.media.map((m, i) => <span key={m.id} className={`h-2 w-2 rounded-full ${i === index ? 'bg-white' : 'bg-white/50'}`} />)}
         </span>
         {index > 0 && <button type="button" onClick={() => go(index - 1)} aria-label="Previous photo" className="absolute left-2 top-1/2 hidden h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-white/90 md:grid"><ChevronLeft size={20} /></button>}
@@ -141,6 +144,9 @@ export function PostCard({ post, full = false, mobileCompact = false, onDeleted,
       </>
     );
   }
+  const onPhoto = post.kind === 'photo' && post.media.length > 0;
+  // Fabric tags are never shown; a photo post's pattern is on the photo instead.
+  const tags = post.tags.filter((t): t is typeof t & { kind: 'make' | 'pattern' } => t.kind === 'make' || (t.kind === 'pattern' && !onPhoto));
   return (
     <article className="overflow-hidden rounded-[24px] bg-white md:rounded-[30px]" aria-labelledby={`post-${post.id}-author`}>
       <header className="flex items-center gap-3 px-3.5 py-3 md:px-[18px] md:py-3.5">
@@ -178,9 +184,9 @@ export function PostCard({ post, full = false, mobileCompact = false, onDeleted,
             ))}
           </div>
         )}
-        {post.tags.length > 0 && (
+        {tags.length > 0 && (
           <div className="mt-3.5 flex flex-wrap gap-2">
-            {post.tags.map(tag => {
+            {tags.map(tag => {
               const Icon = TAG_ICON[tag.kind];
               const body = <><Icon size={16} aria-hidden="true" /><span className="min-w-0"><span className="block text-[11px] font-bold uppercase tracking-[.14em] text-red-ink">{TAG_LABEL[tag.kind]}</span><span className="block truncate text-sm font-bold">{tag.name}</span></span></>;
               return tag.kind === 'make'

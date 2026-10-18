@@ -48,7 +48,6 @@ export const UPCYCLE_TAGS = ["upcycle", "refashion", "thrifted"];
 const PATTERN_CATEGORIES: Record<string, string[]> = {
   dresses: ["dresses"], tops: ["tops"], bottoms: ["trousers", "skirts"], outerwear: ["outerwear"], bags: ["bags"], upcycle: [],
 };
-const FABRIC_LABEL: Record<PostFabric, string> = { linen: "Linen", cotton: "Cotton", satin: "Satin", viscose: "Viscose", crepe: "Crepe", haul: "Fabric haul" };
 /** "For you" boosts, in hours of recency: someone you follow, a garment you saved or asked for more of. */
 const FOLLOW_BOOST_HOURS = 72;
 const GARMENT_BOOST_HOURS = 24;
@@ -167,7 +166,8 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
     const photo = p.media[0] ?? null;
     if (!photo && p.kind !== "status") return [];
     const pattern = p.tags.find((t) => t.kind === "pattern");
-    const chip = p.fabric ? FABRIC_LABEL[p.fabric] : pattern ? `Pattern: ${pattern.name}` : null;
+    // Owner: only the pattern is shown on a post, never the fabric label.
+    const chip = pattern ? `Pattern: ${pattern.name}` : null;
     return [{ ...empty, type: "post", key: `post-${p.id}`, itemId: p.id, saved: p.savedByMe, post: { id: p.id, caption: p.caption, photo, author: p.author, chip, savedByMe: p.savedByMe } }];
   });
   return { items, nextCursor: nextCursor(offset, rows.length), total: n };

@@ -79,7 +79,7 @@ test("filters use the post's labels; Upcycle uses the hashtags; Fabric shows fab
   assert.deepEqual(postIds(await cards(anon, "?sub=upcycle")), [linen.id], "#thrifted counts as upcycle");
   const fabric = await cards(anon, "?tab=fabric");
   assert.deepEqual(postIds(fabric), [linen.id]);
-  assert.equal(fabric.items[0].post!.chip, "Fabric haul");
+  assert.equal(fabric.items[0].post!.chip, null, "the fabric label is never shown");
   assert.deepEqual(postIds(await cards(anon, "?tab=fabric&sub=hauls")), [linen.id]);
   assert.deepEqual(postIds(await cards(anon, "?tab=fabric&sub=linen")), []);
   assert.deepEqual(postIds(await cards(anon, "?sub=nonsense")).length, 4, "an unknown filter means the first one (photo and words posts)");

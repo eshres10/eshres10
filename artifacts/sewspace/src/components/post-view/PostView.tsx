@@ -27,7 +27,6 @@ import { timeAgo } from '@/lib/time';
 // their replies; posting shows straight away and rolls back if it fails.
 // Liking, commenting, following and saving ask signed-out visitors to sign in.
 
-const FABRIC_LABEL: Record<string, string> = { linen: 'Linen', cotton: 'Cotton', satin: 'Satin', viscose: 'Viscose', crepe: 'Crepe', haul: 'Fabric haul' };
 const MAX_COMMENT = 1000;
 
 function useWide(): boolean {
@@ -268,12 +267,7 @@ function Discussion({ post, wide, saved, onSave, top }: { post: FeedPost; wide: 
       <div className="min-w-0 text-[14px] leading-[1.45]">
         {(wide || post.media.length > 0) && post.caption && <p className="whitespace-pre-line break-words"><b className="mr-1.5">{post.author.handle}</b><CaptionText text={post.caption} /></p>}
         {post.linkUrl && <div className="mt-2"><PostLink url={post.linkUrl} /></div>}
-        {(pattern || post.fabric) && (
-          <div className="mt-2 flex flex-wrap gap-1.5">
-            {pattern && <Link href={`/search?tab=patterns&q=${encodeURIComponent(pattern.name)}`} className="inline-flex min-h-8 items-center rounded-full bg-yellow px-3 text-[12px] font-bold text-ink no-underline">Pattern: {pattern.name}</Link>}
-            {post.fabric && <span className="inline-flex min-h-8 items-center rounded-full bg-blue-soft px-3 text-[12px] font-bold">Fabric: {FABRIC_LABEL[post.fabric] ?? post.fabric}</span>}
-          </div>
-        )}
+        {pattern && <div className="mt-2"><Link href={`/search?tab=patterns&q=${encodeURIComponent(pattern.name)}`} className="inline-flex min-h-8 items-center rounded-full bg-yellow px-3 text-[12px] font-bold text-ink no-underline">Pattern: {pattern.name}</Link></div>}
         {wide && <p className="mt-1.5 text-[12px] text-subtle"><time dateTime={String(post.createdAt)}>{timeAgo(post.createdAt)}</time></p>}
       </div>
     </div>
