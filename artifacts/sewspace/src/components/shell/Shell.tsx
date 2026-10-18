@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useGetProfile, useListProjects } from '@workspace/api-client-react';
-import { BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, MessageCircle, MessagesSquare, PanelLeftClose, PanelLeftOpen, Plus, Ruler, Scissors, Search, ShoppingBag, Sparkles, Spool, Store, Trophy } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, MessageCircle, MessagesSquare, Plus, Ruler, Scissors, Search, ShoppingBag, Sparkles, Spool, Store, Trophy } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
 import { useAuth } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
@@ -98,17 +98,11 @@ function SidebarNav({ location, onNavigate, collapsed = false, onToggle }: { loc
           : <Logo href="/feed" />}
         {onToggle && (
           <button type="button" onClick={onToggle} aria-expanded={!collapsed} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-            className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-white/60 text-ink hover:bg-white">
-            {collapsed ? <PanelLeftOpen size={18} aria-hidden="true" /> : <PanelLeftClose size={18} aria-hidden="true" />}
+            className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink/70 transition-colors hover:bg-white/60 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-ink motion-reduce:transition-none">
+            {collapsed ? <ChevronRight size={20} strokeWidth={2.25} aria-hidden="true" /> : <ChevronLeft size={20} strokeWidth={2.25} aria-hidden="true" />}
           </button>
         )}
       </div>
-      {location !== '/new' && (
-        <Link href="/new" onClick={onNavigate} aria-label={collapsed ? 'New post' : undefined} title={collapsed ? 'New post' : undefined}
-          className={`flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-ink text-sm font-bold text-white no-underline ${collapsed ? 'px-0' : 'px-4'}`}>
-          <Plus size={17} aria-hidden="true" />{!collapsed && 'New post'}
-        </Link>
-      )}
       {[...navGroups, ...(me?.isAdmin ? [adminGroup] : [])].map(group => (
         <nav key={group.label} aria-label={group.label}>
           <div className={collapsed ? 'mx-3 mb-1.5 border-t border-ink/20' : 'px-3 pb-1 text-[11px] font-bold uppercase tracking-[.16em]'}>{collapsed ? null : group.label}</div>
