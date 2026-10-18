@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useGetProfile, useListProjects } from '@workspace/api-client-react';
-import { BookOpen, ChevronLeft, ChevronRight, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, MessageCircle, MessagesSquare, Plus, Ruler, Scissors, Search, ShoppingBag, Sparkles, Spool, Store, Trophy } from 'lucide-react';
+import { BookOpen, Bookmark, ChevronLeft, ChevronRight, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, MessageCircle, MessagesSquare, Plus, Ruler, Scissors, Search, ShoppingBag, Sparkles, Spool, Store, Trophy } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
 import { useAuth } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
@@ -18,7 +18,7 @@ import { NotificationBellDesktop, NotificationBellMobile } from '@/components/no
 type NavItem = { href: string; label: string; icon: typeof Home };
 
 // Groups follow the owner's sidebar redesign (October 2026): Community / My studio /
-// Selling / Help, then Recent projects. Saved posts lives in the account menu.
+// Selling / Help, then Recent projects. Saved is under My studio (Saved brief) and in the account menu.
 export const navGroups: Array<{ label: string; items: NavItem[] }> = [
   { label: 'Community', items: [
     { href: '/feed', label: 'Home', icon: House },
@@ -34,6 +34,7 @@ export const navGroups: Array<{ label: string; items: NavItem[] }> = [
     { href: '/stash/fabrics', label: 'Fabric stash', icon: Layers },
     { href: '/stash/threads', label: 'Thread drawer', icon: Spool },
     { href: '/patterns', label: 'Pattern library', icon: BookOpen },
+    { href: '/saved', label: 'Saved', icon: Bookmark },
     { href: '/measurements', label: 'Measurements', icon: Ruler },
     { href: '/ai-studio', label: 'AI studio', icon: Sparkles },
   ] },
@@ -209,7 +210,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
 
   const studio = studioSection(location);
   const title = allItems.find(item => isActive(location, item.href))?.label
-    ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search', '/saved': 'Saved posts', '/notifications': 'Notifications' } as Record<string, string>)[location]
+    ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search', '/notifications': 'Notifications' } as Record<string, string>)[location]
     ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@')
       ? (profile.data?.handle && location.toLowerCase() === `/@${profile.data.handle.toLowerCase()}` ? 'My profile' : 'Profile')
       : 'Seams Club');

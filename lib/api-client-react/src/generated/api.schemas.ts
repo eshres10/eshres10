@@ -491,6 +491,48 @@ export interface Collection {
   coverUrl: string | null;
 }
 
+/**
+ * Something you saved, as a tile or cover.
+ */
+export interface SavedItem {
+  type: ExploreItemType;
+  id: number;
+  title: string;
+  /** @nullable */
+  subtitle: string | null;
+  /** @nullable */
+  imageUrl: string | null;
+  /** @nullable */
+  width: number | null;
+  /** @nullable */
+  height: number | null;
+  /** @nullable */
+  color: string | null;
+  /** A words post's card colour (no photo) */
+  cardColor: PostCardColor | null;
+  href: string;
+}
+
+export interface SavedCollection {
+  id: number;
+  name: string;
+  count: number;
+  /** @maxItems 4 */
+  covers: SavedItem[];
+}
+
+export type SavedOverviewAll = {
+  count: number;
+  /** @maxItems 4 */
+  covers: SavedItem[];
+};
+
+export interface SavedOverview {
+  total: number;
+  all: SavedOverviewAll;
+  collections: SavedCollection[];
+}
+
 export interface CollectionInput {
   /**
      * @minLength 1

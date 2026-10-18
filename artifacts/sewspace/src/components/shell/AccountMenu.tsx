@@ -117,7 +117,7 @@ function MenuBody({ me, close, closeButton, phone = false }: { me: Profile | und
       </div>
       <nav aria-label="Your account" className="border-b border-line py-1.5">
         <Row href="/studio" icon={SquareKanban} label="My studio" onClick={close} />
-        <Row href="/saved" icon={Bookmark} label="Saved posts" onClick={close}>
+        <Row href="/saved" icon={Bookmark} label="Saved" onClick={close}>
           {!!summary?.savedCount && <Badge className="bg-canvas">{summary.savedCount}<span className="sr-only"> saved</span></Badge>}
         </Row>
         <Row href="/challenges" icon={Trophy} label="My challenges" onClick={close}>

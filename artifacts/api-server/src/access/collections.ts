@@ -28,7 +28,7 @@ type Fail<E extends string> = { ok: false; error: E };
 type Ok<T> = { ok: true; value: T };
 
 /** The item a collection row (or feedback row) points at is one the viewer may see. */
-function visibleItem(viewer: Viewer, type: SQL, id: SQL): SQL {
+export function visibleItem(viewer: Viewer, type: SQL, id: SQL): SQL {
   const notBlocked = (col: SQL) => (viewer.userId ? sql` AND NOT sewspace_blocked_with(${col})` : sql``);
   return sql`(
     (${type} = 'post' AND EXISTS (SELECT 1 FROM ${postsTable} WHERE ${postsTable.id} = ${id} AND ${visibleTo(postsTable, viewer)}))

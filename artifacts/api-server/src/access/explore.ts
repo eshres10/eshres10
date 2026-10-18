@@ -239,7 +239,7 @@ async function challengeCards(db: Tx, viewer: Viewer, sub: string, offset: numbe
 }
 
 /** Each challenge's most liked live entry photo the viewer may see (the post's first photo). */
-async function challengeCovers(db: Tx, viewer: Viewer, ids: number[]): Promise<Map<number, MediaView>> {
+export async function challengeCovers(db: Tx, viewer: Viewer, ids: number[]): Promise<Map<number, MediaView>> {
   if (!ids.length) return new Map();
   const likes = sql`(SELECT count(*) FROM ${likesTable} WHERE ${likesTable.postId} = ${postsTable.id})`;
   const rows = await db.selectDistinctOn([challengeEntriesTable.challengeId], { challengeId: challengeEntriesTable.challengeId, media: mediaTable })

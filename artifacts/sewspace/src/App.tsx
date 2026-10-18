@@ -22,7 +22,7 @@ import { SignInPromptProvider } from '@/components/auth/SignInPrompt';
 import { PublicMakePage } from '@/pages/public-make';
 import { EditPostPage, NewPostPage } from '@/pages/post-flow';
 import { TagPage } from '@/pages/tag';
-import { SavedPage } from '@/pages/saved';
+import { SavedCollectionPlaceholder, SavedPage, SavedPostsPage } from '@/pages/saved';
 import { NotificationsPage } from '@/components/notifications/Notifications';
 import { CatalogPage } from '@/pages/catalog';
 import { ChallengesPage } from '@/pages/challenges';
@@ -51,6 +51,8 @@ const InShellStudio = studio(Studio);
 const InShellFeedPage = studio(FeedPage);
 const InShellNewPostPage = studio(NewPostPage);
 const InShellSavedPage = studio(SavedPage);
+const InShellSavedPostsPage = studio(SavedPostsPage);
+const InShellSavedCollection = studio(SavedCollectionPlaceholder);
 const InShellNotificationsPage = studio(NotificationsPage);
 const InShellAdminReports = studio(AdminReportsPage);
 const InShellFabricPage = studio(FabricPage);
@@ -94,6 +96,8 @@ function Router() {
     <Route path="/feed" component={InShellFeedPage} />
     <Route path="/new" component={InShellNewPostPage} />
     <Route path="/saved" component={InShellSavedPage} />
+    <Route path="/saved/all" component={InShellSavedPostsPage} />
+    <Route path="/saved/:id" component={InShellSavedCollection} />
     <Route path="/notifications" component={InShellNotificationsPage} />
     <Route path="/admin/reports" component={InShellAdminReports} />
     <Route path="/forum">{() => <AdaptiveLayout><ForumPage /></AdaptiveLayout>}</Route>

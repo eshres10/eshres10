@@ -5,13 +5,14 @@ import {
   AddCollectionItemResponse,
   CreateCollectionBody,
   CreateCollectionResponse,
+  GetSavedOverviewResponse,
   ListCollectionsResponse,
   RemoveCollectionItemParams,
   RemoveCollectionItemQueryParams,
   SendExploreFeedbackBody,
   UndoExploreFeedbackQueryParams,
 } from "@workspace/api-zod";
-import { addToCollection, createCollection, listCollections, removeFromCollection, sendFeedback, undoFeedback } from "../access";
+import { addToCollection, createCollection, listCollections, removeFromCollection, savedOverview, sendFeedback, undoFeedback } from "../access";
 import { hourlyLimit } from "../lib/hourly";
 import { scoped } from "../lib/scoped";
 import { viewerOf } from "../middlewares/auth";
@@ -28,6 +29,10 @@ const limited: RequestHandler = (req, res, next) => {
   if (!allowed(viewerOf(req).userId!)) return void res.status(429).json({ error: "That's a lot of saving for one hour. Try again later." });
   next();
 };
+
+router.get("/saved/overview", noStore, scoped(async (req, res, db): Promise<void> => {
+  res.json(GetSavedOverviewResponse.parse(await savedOverview(db, viewerOf(req))));
+}));
 
 router.get("/collections", noStore, scoped(async (req, res, db): Promise<void> => {
   res.json(ListCollectionsResponse.parse(await listCollections(db, viewerOf(req))));

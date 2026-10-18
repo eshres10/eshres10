@@ -154,6 +154,7 @@ import type {
   Review,
   ReviewInput,
   SaveState,
+  SavedOverview,
   SearchPeopleParams,
   SearchPostsParams,
   SearchTagsParams,
@@ -8924,6 +8925,107 @@ export const useMarkNotificationsRead = <TError = ErrorType<void>,
       > => {
       return useMutation(getMarkNotificationsReadMutationOptions(options), queryClient);
     }
+
+export const getGetSavedOverviewUrl = () => {
+
+
+
+
+  return `/api/saved/overview`
+}
+
+/**
+ * @summary The Saved page: All posts (your saves, hearts and everything in your collections) and your collections, each with a count and up to 4 covers. Only things you can still see. Private to you.
+ */
+export const getSavedOverview = async ( options?: Parameters<typeof customFetch>[1]): Promise<SavedOverview> => {
+
+  return customFetch<SavedOverview>(getGetSavedOverviewUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSavedOverviewQueryKey = () => {
+    return [
+    `/api/saved/overview`
+    ] as const;
+    }
+
+
+export const getGetSavedOverviewQueryOptions = <TData = Awaited<ReturnType<typeof getSavedOverview>>, TError = ErrorType<void>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSavedOverview>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSavedOverviewQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSavedOverview>>> = ({ signal }) => getSavedOverview({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSavedOverview>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSavedOverviewQueryResult = NonNullable<Awaited<ReturnType<typeof getSavedOverview>>>
+export type GetSavedOverviewQueryError = ErrorType<void>
+
+
+export function useGetSavedOverview<TData = Awaited<ReturnType<typeof getSavedOverview>>, TError = ErrorType<void>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSavedOverview>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSavedOverview>>,
+          TError,
+          Awaited<ReturnType<typeof getSavedOverview>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSavedOverview<TData = Awaited<ReturnType<typeof getSavedOverview>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSavedOverview>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSavedOverview>>,
+          TError,
+          Awaited<ReturnType<typeof getSavedOverview>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSavedOverview<TData = Awaited<ReturnType<typeof getSavedOverview>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSavedOverview>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The Saved page: All posts (your saves, hearts and everything in your collections) and your collections, each with a count and up to 4 covers. Only things you can still see. Private to you.
+ */
+
+export function useGetSavedOverview<TData = Awaited<ReturnType<typeof getSavedOverview>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSavedOverview>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSavedOverviewQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getListCollectionsUrl = () => {
 

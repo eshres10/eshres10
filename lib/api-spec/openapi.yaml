@@ -1576,6 +1576,18 @@ paths:
               schema: { $ref: "#/components/schemas/UnreadNotificationCount" }
         "400": { description: Not a list of ids }
         "401": { description: Sign in first }
+  /saved/overview:
+    get:
+      operationId: getSavedOverview
+      tags: [social]
+      summary: "The Saved page: All posts (your saves, hearts and everything in your collections) and your collections, each with a count and up to 4 covers. Only things you can still see. Private to you."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/SavedOverview" }
+        "401": { description: Sign in first }
   /collections:
     get:
       operationId: listCollections
@@ -2687,6 +2699,52 @@ components:
         count: { type: integer, description: Saved things in it you can still see }
         coverUrl: { type: string, nullable: true }
       required: [id, name, count, coverUrl]
+    SavedItem:
+      type: object
+      description: Something you saved, as a tile or cover.
+      properties:
+        type: { $ref: "#/components/schemas/ExploreItemType" }
+        id: { type: integer }
+        title: { type: string }
+        subtitle: { type: string, nullable: true }
+        imageUrl: { type: string, nullable: true }
+        width: { type: integer, nullable: true }
+        height: { type: integer, nullable: true }
+        color: { type: string, nullable: true }
+        cardColor:
+          allOf: [{ $ref: "#/components/schemas/PostCardColor" }]
+          nullable: true
+          description: A words post's card colour (no photo)
+        href: { type: string }
+      required: [type, id, title, subtitle, imageUrl, width, height, color, cardColor, href]
+    SavedCollection:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        count: { type: integer }
+        covers:
+          type: array
+          maxItems: 4
+          items: { $ref: "#/components/schemas/SavedItem" }
+      required: [id, name, count, covers]
+    SavedOverview:
+      type: object
+      properties:
+        total: { type: integer }
+        all:
+          type: object
+          properties:
+            count: { type: integer }
+            covers:
+              type: array
+              maxItems: 4
+              items: { $ref: "#/components/schemas/SavedItem" }
+          required: [count, covers]
+        collections:
+          type: array
+          items: { $ref: "#/components/schemas/SavedCollection" }
+      required: [total, all, collections]
     CollectionInput:
       type: object
       properties:

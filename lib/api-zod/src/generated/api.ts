@@ -3933,6 +3933,52 @@ export const MarkNotificationsReadResponse = zod.object({
 
 
 /**
+ * @summary The Saved page: All posts (your saves, hearts and everything in your collections) and your collections, each with a count and up to 4 covers. Only things you can still see. Private to you.
+ */
+export const getSavedOverviewResponseAllCoversMax = 4;
+
+export const getSavedOverviewResponseCollectionsItemCoversMax = 4;
+
+
+
+export const GetSavedOverviewResponse = zod.object({
+  "total": zod.number().int(),
+  "all": zod.object({
+  "count": zod.number().int(),
+  "covers": zod.array(zod.object({
+  "type": zod.enum(['post', 'pattern', 'challenge', 'thread']),
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "subtitle": zod.string().nullable(),
+  "imageUrl": zod.string().nullable(),
+  "width": zod.number().int().nullable(),
+  "height": zod.number().int().nullable(),
+  "color": zod.string().nullable(),
+  "cardColor": zod.union([zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),zod.null()]).describe('A words post\'s card colour (no photo)'),
+  "href": zod.string()
+}).describe('Something you saved, as a tile or cover.')).max(getSavedOverviewResponseAllCoversMax)
+}),
+  "collections": zod.array(zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "count": zod.number().int(),
+  "covers": zod.array(zod.object({
+  "type": zod.enum(['post', 'pattern', 'challenge', 'thread']),
+  "id": zod.number().int(),
+  "title": zod.string(),
+  "subtitle": zod.string().nullable(),
+  "imageUrl": zod.string().nullable(),
+  "width": zod.number().int().nullable(),
+  "height": zod.number().int().nullable(),
+  "color": zod.string().nullable(),
+  "cardColor": zod.union([zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),zod.null()]).describe('A words post\'s card colour (no photo)'),
+  "href": zod.string()
+}).describe('Something you saved, as a tile or cover.')).max(getSavedOverviewResponseCollectionsItemCoversMax)
+}))
+})
+
+
+/**
  * @summary Your collections (private to you), most recently used first. Counts only include things you can still see.
  */
 export const ListCollectionsResponseItem = zod.object({
