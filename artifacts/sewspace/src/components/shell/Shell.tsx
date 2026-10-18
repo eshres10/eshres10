@@ -216,7 +216,9 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   const studio = studioSection(location);
   const title = allItems.find(item => isActive(location, item.href))?.label
     ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search', '/saved': 'Saved posts', '/notifications': 'Notifications' } as Record<string, string>)[location]
-    ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'Seams Club');
+    ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@')
+      ? (profile.data?.handle && location.toLowerCase() === `/@${profile.data.handle.toLowerCase()}` ? 'My profile' : 'Profile')
+      : 'Seams Club');
   return (
     <ChromeContext.Provider value={{ hidden: profileHeaderHidden, shell: 'app' }}>
     <div className={`${mobileFocus ? 'min-h-[100dvh] pb-0' : 'min-h-[100dvh] pb-[calc(6rem+env(safe-area-inset-bottom))]'} md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]`}>

@@ -16,7 +16,7 @@ import {
   type ProfileStats,
   type UsedProduct,
 } from '@workspace/api-client-react';
-import { BookOpen, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Send, Share2, ShoppingBag, Spool, Store, Trophy, UserCheck, UserPlus, AtSign } from 'lucide-react';
+import { BookOpen, Bookmark, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Send, Share2, ShoppingBag, Spool, Store, Trophy, UserCheck, UserPlus, AtSign } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState, Loading } from '@/components/common';
@@ -177,7 +177,7 @@ function PostTile({ post, showVisibility }: { post: FeedPost; showVisibility: bo
   const label = post.caption ? post.caption.slice(0, 120) : post.kind === 'photo' ? 'Photo post' : 'Post';
   return (
     <Link href={`/posts/${post.id}`} aria-label={label}
-      className="relative block aspect-square overflow-hidden rounded-[22px] bg-line text-ink no-underline"
+      className="relative block aspect-square overflow-hidden rounded-[22px] bg-line text-ink no-underline md:aspect-[4/5] md:rounded-[12px]"
       style={cover?.color ? { backgroundColor: cover.color } : undefined}>
       {cover
         ? <img src={cover.thumbUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
@@ -186,7 +186,7 @@ function PostTile({ post, showVisibility }: { post: FeedPost; showVisibility: bo
           </span>}
       {post.media.length > 1 && <span className="absolute right-2.5 top-2.5 rounded-full bg-ink/75 px-2 py-0.5 text-[11px] font-semibold text-white">1/{post.media.length}</span>}
       {showVisibility && post.visibility !== 'public' && (
-        <span className="absolute bottom-2 left-2"><VisibilityBadge value={post.visibility} /></span>
+        <span className="absolute bottom-2 left-2 md:bottom-auto md:top-2"><VisibilityBadge value={post.visibility} /></span>
       )}
     </Link>
   );
@@ -205,7 +205,7 @@ function PostsTab({ handle, name, isMe, locked }: { handle: string; name: string
   return (
     <>
       {items.length
-        ? <div className="grid grid-cols-3 gap-1.5 sm:grid-cols-[repeat(auto-fill,minmax(220px,1fr))] sm:gap-2.5">
+        ? <div className="grid grid-cols-3 gap-1.5 md:grid-cols-4 md:gap-2.5">
             {items.map(post => <PostTile key={post.id} post={post} showVisibility={isMe} />)}
           </div>
         : <Empty icon={Grid3x3} title={isMe ? 'Share your first post' : 'No posts yet'}
@@ -381,6 +381,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
               ? <Link href="/settings" className="inline-flex min-h-[44px] items-center gap-2 rounded-[14px] bg-white px-4 text-[15px] font-semibold text-ink no-underline hover:bg-canvas"><Pencil size={16} aria-hidden="true" />Edit profile</Link>
               : <FollowButton handle={p.handle} name={p.name} following={p.followedByMe} compact />}
             <ShareButton name={p.name} labelled />
+            {p.isMe && <Link href="/saved" aria-label="Saved posts" title="Saved posts" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink no-underline hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"><Bookmark size={19} aria-hidden="true" /></Link>}
             {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
           </div>
           <p className="mt-4 flex flex-wrap gap-x-8 gap-y-1 text-[17px]">
@@ -420,6 +421,7 @@ export function PublicProfilePage({ handle }: { handle: string }) {
               </Link>
             )}
             <ShareButton name={p.name} />
+            {p.isMe && <Link href="/saved" aria-label="Saved posts" title="Saved posts" className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink no-underline hover:bg-canvas focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink"><Bookmark size={19} aria-hidden="true" /></Link>}
             {!p.isMe && <SafetyMenu kind="profile" targetId={p.handle} what="profile" authorHandle={p.handle} label="More: report or block" leaveOnBlock="/feed" />}
           </div>
         </div>
@@ -428,10 +430,10 @@ export function PublicProfilePage({ handle }: { handle: string }) {
         {!p.isMe && <div className="mt-3"><FollowButton handle={p.handle} name={p.name} following={p.followedByMe} /></div>}
       </section>
 
-      <div role="tablist" aria-label="Profile sections" className="mt-3 flex w-full max-w-[520px] gap-1 rounded-full bg-white p-[5px] sm:mt-[22px]">
+      <div role="tablist" aria-label="Profile sections" className="mt-3 flex w-full max-w-[520px] gap-1 rounded-full bg-white p-[5px] sm:mt-[22px] md:mt-6 md:max-w-none md:justify-center md:gap-3 md:rounded-none md:border-b md:border-line md:bg-transparent md:p-0">
         {TABS.map(t => (
           <button key={t.id} type="button" role="tab" id={`tab-${t.id}`} aria-selected={tab === t.id} aria-controls="profile-panel" onClick={() => setTab(t.id)}
-            className={`min-h-[44px] flex-1 rounded-full text-[15px] font-bold ${tab === t.id ? 'bg-ink text-white' : 'text-ink'}`}>{t.id === 'used' ? <><span className="sm:hidden">Used</span><span className="hidden sm:inline">{t.label}</span></> : t.label}</button>
+            className={`min-h-[44px] flex-1 rounded-full text-[15px] font-bold md:-mb-px md:flex-none md:rounded-none md:border-b-2 md:px-5 md:text-[11px] md:uppercase md:tracking-[.16em] ${tab === t.id ? 'bg-ink text-white md:border-ink md:bg-transparent md:text-ink' : 'text-ink md:border-transparent md:text-subtle'}`}>{t.id === 'used' ? <><span className="sm:hidden">Used</span><span className="hidden sm:inline">{t.label}</span></> : t.label}</button>
         ))}
       </div>
       <section id="profile-panel" role="tabpanel" aria-labelledby={`tab-${tab}`} className="mt-5">
