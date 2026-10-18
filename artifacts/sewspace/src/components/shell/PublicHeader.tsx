@@ -7,14 +7,16 @@ import { COMMUNITY_TABS } from '@/components/shell/CommunityTabs';
 import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
 
 /** Public header, fixed edge-to-edge on mobile and floating on larger screens. */
-export function PublicHeader() {
+/** `hidden` from the page's layout when it shares the state (Explore); otherwise the header works it out itself. */
+export function PublicHeader({ hidden: shared }: { hidden?: boolean } = {}) {
   const { isSignedIn } = useAuth();
   const [location] = useLocation();
-  const hidden = useHideOnScroll(true, location);
+  const own = useHideOnScroll(shared === undefined, location);
+  const hidden = shared ?? own;
   return (
     <>
     <div aria-hidden="true" className="h-[calc(5rem+env(safe-area-inset-top))] md:hidden" />
-    <header className={`fixed inset-x-0 top-0 z-40 max-w-none px-0 pt-[env(safe-area-inset-top)] transition-transform duration-200 ease-out ${hidden ? '-translate-y-full' : 'translate-y-0'} md:static md:mx-auto md:max-w-[1232px] md:px-4 md:pt-5 md:transition-none md:translate-y-0`}>
+    <header className={`fixed inset-x-0 top-0 z-40 max-w-none px-0 pt-[env(safe-area-inset-top)] transition-transform duration-[280ms] ease-out motion-reduce:transition-none ${hidden ? '-translate-y-full' : 'translate-y-0'} md:static md:mx-auto md:max-w-[1232px] md:px-4 md:pt-5 md:transition-none md:translate-y-0`}>
       <nav aria-label="Main" className="flex w-full items-center justify-between gap-3 rounded-none bg-white py-2 pl-4 pr-2 shadow-float sm:py-3 sm:pl-[22px] sm:pr-3.5 md:rounded-[30px]">
         <Logo />
         <span className="hidden flex-1 items-center gap-1 pl-4 md:flex">

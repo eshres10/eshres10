@@ -8,7 +8,7 @@ import { PublicHeader } from '@/components/shell/PublicHeader';
 import { UserAvatar } from '@/components/avatar';
 import { Logo } from '@/components/brand/Logo';
 import { currentAppPath } from '@/lib/navigation';
-import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
+import { ChromeContext, EXPLORE_SCROLL, useHideOnScroll } from '@/components/shell/useHideOnScroll';
 import { inCommunity } from '@/components/shell/CommunityTabs';
 import { inStudio, StudioMobileHeader, studioSection } from '@/components/shell/StudioMobile';
 import { AccountMenuDesktop, AccountMenuMobile, LogOut } from '@/components/shell/AccountMenu';
@@ -167,7 +167,7 @@ function SidebarNav({ location, onNavigate, collapsed = false, onToggle }: { loc
  * full-width style from the studio mockups (Phase S; elsewhere stays floating
  * until the owner decides).
  */
-function MobileTabBar({ location, full = false }: { location: string; full?: boolean }) {
+function MobileTabBar({ location, full = false, hidden = false }: { location: string; full?: boolean; hidden?: boolean }) {
   const me = useMyProfile();
   const meHref = me?.handle ? `/@${me.handle}` : '/settings';
   const tab = (href: string, label: string, Icon: typeof Home, active: boolean) => (
@@ -179,7 +179,7 @@ function MobileTabBar({ location, full = false }: { location: string; full?: boo
   return (
     <nav aria-label="App" className={full
       ? 'fixed inset-x-0 bottom-0 z-40 flex items-center justify-between border-t border-line bg-white px-4 pb-[calc(.5rem+env(safe-area-inset-bottom))] pt-2 md:hidden'
-      : 'fixed inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between rounded-[30px] bg-white px-3 py-2 shadow-float md:hidden'}>
+      : `fixed inset-x-3 bottom-[calc(1rem+env(safe-area-inset-bottom))] z-40 flex items-center justify-between rounded-[30px] bg-white px-3 py-2 shadow-float transition-transform duration-[280ms] ease-out motion-reduce:transition-none md:hidden ${hidden ? 'translate-y-[calc(100%+2rem+env(safe-area-inset-bottom))]' : 'translate-y-0'}`}>
       {tab('/feed', 'Home', House, isActive(location, '/feed'))}
       {/* Explore is the door to all community sections (forum, challenges, patterns). */}
       {tab('/explore', 'Explore', Compass, inCommunity(location) || location === '/search')}
@@ -197,7 +197,9 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const profile = useGetProfile();
   const mobileFocus = location === '/new' || location.startsWith('/posts/');
-  const profileHeaderHidden = useHideOnScroll(!mobileFocus, location);
+  // Explore (owner's brief): the bars slide away on the way down and the filters stay pinned.
+  const explore = location === '/explore';
+  const profileHeaderHidden = useHideOnScroll(!mobileFocus, location, explore ? EXPLORE_SCROLL : undefined);
 
   // First visit: choose a handle before using the app, then come back here.
   if (profile.data?.needsHandle && location !== '/welcome') {
@@ -209,6 +211,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
     ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search', '/saved': 'Saved posts', '/notifications': 'Notifications' } as Record<string, string>)[location]
     ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'Seams Club');
   return (
+    <ChromeContext.Provider value={{ hidden: profileHeaderHidden, shell: 'app' }}>
     <div className={`${mobileFocus ? 'min-h-[100dvh] pb-0' : 'min-h-[100dvh] pb-[calc(6rem+env(safe-area-inset-bottom))]'} md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]`}>
       <aside aria-label="Main menu" className={`sticky top-[18px] hidden h-[calc(100dvh-36px)] shrink-0 overflow-y-auto rounded-[30px] bg-yellow py-5 md:block ${collapsed ? 'w-[84px] px-3' : 'w-[260px] px-4'}`}>
         <SidebarNav location={location} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
@@ -220,7 +223,9 @@ export function ShellFrame({ children }: { children: ReactNode }) {
           ? 'relative z-30 hidden items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:flex md:relative md:z-40 md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3'
           : studio
             ? 'hidden items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:flex md:relative md:z-40 md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3'
-            : `fixed inset-x-0 top-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 bg-white px-4 pb-2 pt-[env(safe-area-inset-top)] shadow-float transition-transform duration-200 ease-out ${profileHeaderHidden ? '-translate-y-full' : 'translate-y-0'} md:relative md:z-40 md:mx-0 md:mt-0 md:h-auto md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3 md:transition-none md:translate-y-0`}>
+            : `fixed inset-x-0 top-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 bg-white px-4 pb-2 pt-[env(safe-area-inset-top)] shadow-float transition-transform ease-out motion-reduce:transition-none ${explore ? 'duration-[280ms]' : 'duration-200'} ${profileHeaderHidden ? '-translate-y-full' : 'translate-y-0'} md:z-40 md:mx-0 md:mt-0 md:h-auto md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3 ${explore
+                ? `md:sticky md:top-[18px] ${profileHeaderHidden ? 'md:-translate-y-[calc(100%+18px)]' : 'md:translate-y-0'}`
+                : 'md:relative md:transition-none md:translate-y-0'}`}>
           {location === '/feed'
             ? <div className="min-w-0 flex-1 md:hidden"><Logo href="/feed" /></div>
             : <h1 className={`min-w-0 flex-1 truncate font-display text-[20px] tracking-[-.04em] md:text-[22px] ${title === 'Home' ? 'font-bold' : ''}`}>{title}</h1>}
@@ -234,8 +239,9 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         </header>
         <main className={`${location === '/new' ? 'mx-auto w-full max-w-7xl px-0 py-0 md:px-2 md:py-8' : location.startsWith('/posts/') ? 'mx-auto flex h-[100dvh] min-h-0 w-full max-w-7xl flex-col overflow-hidden px-3 py-0 md:block md:h-auto md:overflow-visible md:px-2 md:py-8' : compactToolbarPages.has(location) ? 'mx-auto w-full max-w-7xl px-4 pb-6 pt-4 md:px-2 md:pb-8 md:pt-6' : 'mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8'}`}>{children}</main>
       </div>
-      {!mobileFocus && <MobileTabBar location={location} full={Boolean(studio)} />}
+      {!mobileFocus && <MobileTabBar location={location} full={Boolean(studio)} hidden={explore && profileHeaderHidden} />}
     </div>
+    </ChromeContext.Provider>
   );
 }
 
@@ -248,12 +254,15 @@ export function AdaptiveLayout({ children }: { children: ReactNode }) {
   const [location] = useLocation();
   const postDetail = location.startsWith('/posts/');
   const compactToolbarPage = compactToolbarPages.has(location);
+  const publicHidden = useHideOnScroll(!(isLoaded && isSignedIn), location, location === '/explore' ? EXPLORE_SCROLL : undefined);
   if (isLoaded && isSignedIn) return <ShellFrame>{children}</ShellFrame>;
   return (
+    <ChromeContext.Provider value={{ hidden: publicHidden, shell: 'public' }}>
     <div className={`${postDetail ? 'h-[100dvh] overflow-hidden pb-0' : 'min-h-[100dvh] pb-14'}`}>
-      <div className={postDetail ? 'hidden md:block' : ''}><PublicHeader /></div>
+      <div className={postDetail ? 'hidden md:block' : ''}><PublicHeader hidden={publicHidden} /></div>
       <main className={postDetail ? 'mx-auto h-[100dvh] max-w-[1232px] px-3 pt-0 md:h-auto md:px-4 md:pt-7' : `mx-auto max-w-[1232px] px-4 ${compactToolbarPage ? 'pt-4 md:pt-6' : 'pt-7'}`}>{children}</main>
     </div>
+    </ChromeContext.Provider>
   );
 }
 

@@ -6,6 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import { ErrorState } from '@/components/common';
 import { GuestBanner } from '@/pages/explore';
+import { useChrome } from '@/components/shell/useHideOnScroll';
 import { cardHeight, ExploreCardView } from './cards';
 
 // Explore (owner: one page, named Explore): makes, fabric, pattern pages,
@@ -33,6 +34,18 @@ const TABS: Array<{ id: Tab; label: string; subs: Array<{ id: string; label: str
   ] },
 ];
 const SHARES_GARMENTS = new Set<Tab>(['explore', 'patterns']);
+
+/**
+ * Where the filters stick: just under the top bar, and up to the very top
+ * when the bar slides away (same 280 ms, instant with reduced motion).
+ * Signed in: the phone header is 4rem; the desktop bar sits at 18 px and is
+ * 64 px tall. Signed out: the phone header is 63 px; on desktop the website
+ * header scrolls with the page, so the filters stick to the top.
+ */
+const STICKY = {
+  app: { base: 'top-[calc(4rem+env(safe-area-inset-top))] md:top-[94px]', hidden: '-translate-y-[4rem] md:-translate-y-[76px]' },
+  public: { base: 'top-[calc(63px+env(safe-area-inset-top))] md:top-0', hidden: '-translate-y-[63px] md:translate-y-0' },
+} as const;
 
 /** 2 columns on phones, 5 beside the sidebar on desktop (by the grid's own width). */
 function useColumns(ref: React.RefObject<HTMLElement | null>): number {
@@ -66,6 +79,7 @@ export function placeInColumns(cards: ExploreCard[], columns: number): ExploreCa
 
 export function ExploreBrowsePage() {
   const { isLoaded, isSignedIn } = useAuth();
+  const chrome = useChrome();
   const search = useSearch();
   const [, setLocation] = useLocation();
   const params = new URLSearchParams(search);
@@ -109,11 +123,24 @@ export function ExploreBrowsePage() {
     return () => io.disconnect();
   }, [feed.hasNextPage, feed.isFetchingNextPage, feed.fetchNextPage]);
 
+  // Pinned (the 1 px marker above the filters has scrolled under the bar): square corners, so nothing shows past them.
+  const marker = useRef<HTMLDivElement>(null);
+  const [pinned, setPinned] = useState(false);
+  useEffect(() => {
+    const el = marker.current;
+    if (!el) return;
+    const io = new IntersectionObserver(([entry]) => setPinned(!entry.isIntersecting && entry.boundingClientRect.top < 200), { rootMargin: '-100px 0px 0px 0px' });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   const countText = total === undefined ? '' : `${total.toLocaleString()} ${total === 1 ? tab.noun[0] : tab.noun[1]}`;
   return (
     <div className="mx-auto w-full max-w-[1400px]">
       {isLoaded && !isSignedIn && <GuestBanner />}
       <div className="md:rounded-[30px] md:bg-white md:p-5">
+        <div ref={marker} aria-hidden="true" className="h-px" />
+        <div className={`explore-sticky sticky z-30 -mx-4 bg-canvas px-4 pb-3 transition-transform duration-[280ms] ease-out motion-reduce:transition-none md:-mx-5 md:-mt-5 md:bg-white md:px-5 md:pt-5 ${pinned ? '' : 'md:rounded-t-[30px]'} ${STICKY[chrome.shell].base} ${chrome.hidden ? `${STICKY[chrome.shell].hidden} shadow-[0_8px_18px_-10px_rgb(0_0_0/0.18)]` : 'translate-y-0'}`}>
         <div role="group" aria-label="Show" className="-mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 md:mx-0 md:gap-1.5 md:border-0 md:px-0">
           {TABS.map(t => {
             const on = t.id === tab.id;
@@ -140,8 +167,9 @@ export function ExploreBrowsePage() {
           <p role="status" className="hidden shrink-0 text-sm font-semibold text-subtle md:block">{countText}</p>
         </div>
         <p role="status" className="sr-only md:hidden">{countText}</p>
+        </div>
 
-        <div ref={grid} className="mt-4">
+        <div ref={grid} className="mt-1">
           {feed.isLoading || !isLoaded ? (
             <div className="grid place-items-center py-16" role="status" aria-label="Loading"><Loader2 className="animate-spin" aria-hidden="true" /></div>
           ) : feed.isError ? (
