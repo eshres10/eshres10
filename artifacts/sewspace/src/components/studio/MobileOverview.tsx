@@ -11,9 +11,10 @@ import {
   useListProjects,
   type Idea,
 } from '@workspace/api-client-react';
-import { BookOpen, Grid3x3, Loader2, MoreHorizontal, Plus, Spool } from 'lucide-react';
+import { BookOpen, ChevronRight, Grid3x3, Loader2, MoreHorizontal, Plus, Spool } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
 import { Sheet, useSheetDirty } from '@/components/social/Sheet';
+import { PrivacyBadge } from './parts';
 
 const NOTE_MAX = 80;
 const errorText = (e: unknown, fallback: string) => (e as { data?: { error?: string } })?.data?.error ?? fallback;
@@ -149,10 +150,44 @@ function IdeaCard({ idea, onEdit }: { idea: Idea; onEdit: () => void }) {
 }
 
 const ACTIVE = new Set(['planning', 'cutting', 'sewing', 'fitting']);
+const CAROUSEL_MAX = 8;
+const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/** A titled row that scrolls sideways: the first few items, then a Show more tile when there are more. */
+function Carousel<T>({ title, id, href, items, loading, render, empty, addHref, addLabel }: {
+  title: string; id: string; href: string; items: T[] | undefined; loading: boolean; render: (item: T) => ReactNode;
+  empty: string; addHref: string; addLabel: string;
+}) {
+  const list = items ?? [];
+  return (
+    <section aria-labelledby={`${id}-title`}>
+      <div className="flex items-baseline justify-between gap-3">
+        <h2 id={`${id}-title`} className="font-display text-[22px] tracking-[-.04em]">{title}</h2>
+        {list.length > 0 && <Link href={href} className="text-sm font-bold text-ink underline">Show more<span className="sr-only">: {title.toLowerCase()}</span></Link>}
+      </div>
+      {loading
+        ? <Loader2 className="mt-3 animate-spin" aria-label={`Loading ${title.toLowerCase()}`} />
+        : list.length === 0
+          ? <p className="mt-2 rounded-[26px] bg-white p-5 text-sm text-subtle">{empty} <Link href={addHref} className="font-bold text-ink underline">{addLabel}</Link></p>
+          : (
+            <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              {list.slice(0, CAROUSEL_MAX).map(render)}
+              {list.length > CAROUSEL_MAX && (
+                <Link href={href} className="flex w-[120px] shrink-0 flex-col items-center justify-center gap-2 rounded-[22px] border-2 border-dashed border-subtle/40 text-center text-sm font-bold text-ink no-underline">
+                  <span className="grid h-11 w-11 place-items-center rounded-full bg-ink text-white" aria-hidden="true"><ChevronRight size={20} /></span>
+                  Show more<span className="font-normal text-subtle">{list.length - CAROUSEL_MAX} more</span>
+                </Link>
+              )}
+            </div>
+          )}
+    </section>
+  );
+}
 
 /**
- * My studio overview on phones (Phase S2): My ideas, On your table, and
- * Add to your studio. Desktop keeps the existing overview.
+ * My studio overview on phones (Phase S2): the Fabric / Thread / Pattern add
+ * tiles, My ideas, On your table, Your stash and Pattern library. Desktop keeps
+ * the existing overview.
  */
 export function MobileOverview() {
   const [, setLocation] = useLocation();
@@ -167,13 +202,26 @@ export function MobileOverview() {
   const count = ideas.data?.length ?? 0;
   return (
     <div className="space-y-7">
+      {/* Owner, October 2026: the add tiles come first, straight after the section pills, with no visible heading. */}
+      <section aria-labelledby="add-title">
+        <h2 id="add-title" className="sr-only">Add to your studio</h2>
+        <div className="grid grid-cols-3 gap-2.5">
+          {([['fabric', 'Fabric', 'bg-yellow text-ink'], ['thread', 'Thread', 'bg-blue text-white'], ['pattern', 'Pattern', 'bg-peach text-ink']] as const).map(([kind, label, tone]) => (
+            <button key={kind} type="button" onClick={() => setLocation(`/stash/new?kind=${kind}`)} aria-label={`Add ${label.toLowerCase()}`}
+              className={`flex min-h-[96px] flex-col justify-between rounded-[24px] p-3.5 text-left font-display text-[17px] tracking-[-.03em] ${tone}`}>
+              <Plus size={20} aria-hidden="true" />{label}
+            </button>
+          ))}
+        </div>
+      </section>
+
       <section aria-labelledby="ideas-title">
         <div className="flex items-baseline justify-between gap-3">
           <h2 id="ideas-title" className="font-display text-[22px] tracking-[-.04em]">My ideas</h2>
           <span className="text-sm text-subtle">{count} idea{count === 1 ? '' : 's'}</span>
         </div>
         <p className="text-sm text-subtle">Things you want to make, from patterns and fabric you already have.</p>
-        <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1">
+        <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <button type="button" onClick={() => setSheet({ editing: null })} aria-label="Add an idea"
             className="flex min-h-[248px] w-[130px] shrink-0 flex-col items-center justify-center gap-2 rounded-[26px] border-2 border-dashed border-subtle/40 font-bold">
             <span className="grid h-12 w-12 place-items-center rounded-full bg-ink text-white" aria-hidden="true"><Plus size={22} /></span>Add idea
@@ -191,7 +239,7 @@ export function MobileOverview() {
         {onTable.length === 0
           ? <p className="mt-2 rounded-[26px] bg-white p-5 text-sm text-subtle">Nothing on the go. Start a project from an idea, or with New project.</p>
           : (
-            <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1">
+            <div className="-mx-4 mt-3 flex gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {onTable.map(p => {
                 const total = p.stepsTotal ?? 0, done = p.stepsDone ?? 0;
                 const meta = [patternName(p.patternId), fabricName(p.fabricId)].filter(Boolean).join(' · ');
@@ -213,17 +261,32 @@ export function MobileOverview() {
           )}
       </section>
 
-      <section aria-labelledby="add-title">
-        <h2 id="add-title" className="font-display text-[22px] tracking-[-.04em]">Add to your studio</h2>
-        <div className="mt-3 grid grid-cols-3 gap-2.5">
-          {([['fabric', 'Fabric', 'bg-yellow text-ink'], ['thread', 'Thread', 'bg-blue text-white'], ['pattern', 'Pattern', 'bg-peach text-ink']] as const).map(([kind, label, tone]) => (
-            <button key={kind} type="button" onClick={() => setLocation(`/stash/new?kind=${kind}`)}
-              className={`flex min-h-[96px] flex-col justify-between rounded-[24px] p-3.5 text-left font-display text-[17px] tracking-[-.03em] ${tone}`}>
-              <Plus size={20} aria-hidden="true" />{label}
-            </button>
-          ))}
-        </div>
-      </section>
+      <Carousel title="Your stash" id="stash" href="/stash/fabrics" items={fabrics.data} loading={fabrics.isLoading}
+        empty="No fabric yet." addHref="/stash/new?kind=fabric" addLabel="Add fabric"
+        render={f => (
+          <Link key={f.id} href={`/stash/fabric/${f.id}/edit`} className="w-[150px] shrink-0 overflow-hidden rounded-[22px] bg-white text-ink no-underline">
+            <span className="relative block aspect-[6/5] bg-line" style={!f.imageUrl && f.colorHex ? { backgroundColor: f.colorHex } : undefined}>
+              {f.imageUrl && <img src={f.imageUrl} alt="" loading="lazy" className="h-full w-full object-cover" />}
+              <span className="absolute left-2 top-2"><PrivacyBadge value={f.visibility} /></span>
+            </span>
+            <span className="block px-3 pb-3 pt-2">
+              <span className="block truncate font-bold">{f.name}</span>
+              <span className="block truncate text-sm text-subtle">{[f.type && cap(f.type), f.quantity != null ? `${f.quantity} ${f.unit ?? ''}`.trim() : null].filter(Boolean).join(' · ') || 'Fabric'}</span>
+            </span>
+          </Link>
+        )} />
+
+      <Carousel title="Pattern library" id="patterns" href="/patterns" items={patterns.data} loading={patterns.isLoading}
+        empty="No patterns yet." addHref="/stash/new?kind=pattern" addLabel="Add a pattern"
+        render={p => (
+          <Link key={p.id} href={`/stash/pattern/${p.id}/edit`} className="w-[150px] shrink-0 overflow-hidden rounded-[22px] bg-white text-ink no-underline">
+            <Thumb src={p.coverImageUrl} icon={<BookOpen size={26} />} className="block aspect-[4/5] w-full" />
+            <span className="block px-3 pb-3 pt-2">
+              <span className="block truncate font-bold">{p.name}</span>
+              <span className="block truncate text-sm text-subtle">{p.designer || 'Independent'}</span>
+            </span>
+          </Link>
+        )} />
 
       {sheet && (
         <Sheet label={sheet.editing ? 'Edit idea' : 'Add an idea'} onClose={() => setSheet(null)}>
