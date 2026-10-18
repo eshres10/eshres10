@@ -71,7 +71,9 @@ test("saving: only things you can see; the Saved page and badge follow", async (
 
   // When Ann makes the post private, it stops counting for Ben.
   ok(await ann("PATCH", `/api/posts/${dress.id}`, { visibility: "private" }));
-  assert.equal(ok(await ben("GET", "/api/collections"))[0].count, 1, "only the pattern still counts");
+  const [hidden] = ok(await ben("GET", "/api/collections"));
+  assert.equal(hidden.count, 1, "only the pattern still counts");
+  assert.equal(hidden.coverUrl, null, "and the private post's photo is no longer the cover");
   ok(await ann("PATCH", `/api/posts/${dress.id}`, { visibility: "public" }));
 
   assert.equal((await ben("DELETE", `/api/collections/${quick.id}/items?type=post&itemId=${dress.id}`)).status, 204);
@@ -89,6 +91,21 @@ test("Hide stays hidden for you only, Undo brings it back; nothing you can't see
   ok(await ben("POST", "/api/explore/feedback", { type: "post", id: dress.id, kind: "more_like" }));
   const [{ n }] = (await ownerSql("SELECT count(*)::int AS n FROM sewspace_discover_feedback WHERE user_id = 'co_ben'")).rows;
   assert.equal(n, 1);
+});
+
+test("blocks: nothing across a block either way, and it's back once unblocked", async () => {
+  const [quick] = ok(await ben("GET", "/api/collections"));
+  ok(await ben("POST", `/api/collections/${quick.id}/items`, { type: "post", id: dress.id }));
+  assert.equal((await ann("PUT", "/api/blocks/ben.co")).status, 204);
+  const [blocked] = ok(await ben("GET", "/api/collections"));
+  assert.equal(blocked.count, 1, "Ann's post stops counting (the pattern page is shared reference, still there)");
+  assert.equal(blocked.coverUrl, null);
+  assert.equal((await ben("POST", `/api/collections/${quick.id}/items`, { type: "post", id: dress.id })).status, 404, "can't save it");
+  assert.equal((await ben("POST", "/api/explore/feedback", { type: "post", id: dress.id, kind: "more_like" })).status, 404, "or ask for more");
+  assert.ok(!ok(await ben("GET", "/api/saved")).items.some((p: { id: number }) => p.id === dress.id), "not on the Saved page");
+  assert.equal((await ann("DELETE", "/api/blocks/ben.co")).status, 204);
+  assert.equal(ok(await ben("GET", "/api/collections"))[0].count, 2, "back after unblocking (nothing was deleted)");
+  assert.equal((await ben("DELETE", `/api/collections/${quick.id}/items?type=post&itemId=${dress.id}`)).status, 204);
 });
 
 test("module alone (RLS bypassed) lists only your own collections", async () => {

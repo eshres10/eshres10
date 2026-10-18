@@ -250,11 +250,15 @@ export function ExploreActionCard({ card, index }: { card: ExploreCard; index: n
             )}
             <MoreMenu card={card} index={index} className="absolute bottom-2 right-2" round />
           </div>
+          {/* Touch screens: beside the caption, just under the photo. Hover screens use the corner one. */}
+          <MoreMenu card={card} index={index} className="pointer-events-auto absolute right-0 top-full mt-0.5 [@media(hover:hover)]:hidden" />
         </div>
-      ) : badge}
-      {/* Always there for touch and screen readers; on hover-capable screens photo cards use the corner one. */}
-      <MoreMenu card={card} index={index}
-        className={area ? 'absolute bottom-0 right-0 [@media(hover:hover)]:hidden' : 'absolute right-1.5 top-1.5'} />
+      ) : (
+        <>
+          {badge}
+          <MoreMenu card={card} index={index} className="absolute right-1.5 top-1.5" />
+        </>
+      )}
     </div>
   );
 }

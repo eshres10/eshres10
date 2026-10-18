@@ -8,8 +8,8 @@ import { formatPrice } from '@/lib/currency';
 // Explore's four card types. Every card opens its existing page. Photos keep
 // their real shape (posts) or a fixed 4:5 (pattern and challenge covers,
 // which have no stored size), so the grid can hold the space before loading.
-// Save / Share / More / Hide sit on top of these (actions.tsx); the bottom
-// line of each card leaves room (pr-9) for its "…" button.
+// Save / Share / More / Hide sit on top of these (actions.tsx); the first
+// text line of each card leaves room (pr-9) for its "…" button.
 
 const ART: Record<string, string> = { dresses: 'Dresses', tops: 'Tops', skirts: 'Skirts', trousers: 'Trousers', outerwear: 'Outerwear', knitwear: 'Knits', bags: 'Bags', jumpsuits: 'Dresses', home: 'Home', other: 'Other' };
 const TONES = ['bg-blue-soft', 'bg-peach-soft', 'bg-mist'];
@@ -87,10 +87,10 @@ function PostCard({ post }: { post: NonNullable<ExploreCard['post']> }) {
     <Link href={`/posts/${post.id}`} className={CARD_LINK} draggable={false}>
       <span className="relative block overflow-hidden rounded-[20px]" style={{ aspectRatio: `${photo.width} / ${photo.height}`, background: photo.color ?? undefined }}>
         <img src={photo.thumbUrl} alt={photo.altText} loading="lazy" draggable={false} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02] motion-reduce:transition-none" />
-        {post.chip && <Chip className="bg-yellow text-ink">{post.chip}</Chip>}
+        {post.chip && <span className="absolute bottom-2 left-2 max-w-[calc(100%-1rem)] truncate rounded-full bg-white/90 px-2.5 py-1 text-[12px] font-bold">{post.chip}</span>}
       </span>
-      {post.caption && <span className="mt-2 line-clamp-2 px-1 text-[13px] font-semibold leading-snug">{post.caption}</span>}
-      <span className="mt-1.5 flex items-center gap-1.5 px-1 pb-1 pr-9">
+      {post.caption && <span className="mt-2 line-clamp-2 px-1 pr-9 text-[13px] font-semibold leading-snug">{post.caption}</span>}
+      <span className={`mt-1.5 flex items-center gap-1.5 px-1 pb-1 ${post.caption ? '' : 'pr-9'}`}>
         <UserAvatar name={post.author.name} avatarUrl={post.author.avatarUrl} size={20} />
         <span className="truncate text-[12px] text-subtle">@{post.author.handle}</span>
       </span>
@@ -109,8 +109,8 @@ function PatternCard({ pattern, index }: { pattern: NonNullable<ExploreCard['pat
           : <Garment name={ART[pattern.category] ?? 'Tops'} tone={TONES[index % TONES.length]} className="aspect-[4/5] w-full" />}
         {price && <Chip className={pattern.free ? 'bg-blue text-white' : 'bg-yellow text-ink'}>{price}</Chip>}
       </span>
-      <span className="mt-2 block truncate px-1 text-[14px] font-bold">{pattern.name}</span>
-      <span className="mt-0.5 block truncate px-1 pb-1 pr-9 text-[12px] text-subtle">{meta}</span>
+      <span className="mt-2 block truncate px-1 pr-9 text-[14px] font-bold">{pattern.name}</span>
+      <span className="mt-0.5 block truncate px-1 pb-1 text-[12px] text-subtle">{meta}</span>
     </Link>
   );
 }
@@ -142,8 +142,8 @@ function ChallengeCard({ challenge }: { challenge: NonNullable<ExploreCard['chal
           : <span className="grid aspect-[4/5] w-full place-items-center bg-yellow/40"><Trophy size={40} aria-hidden="true" /></span>}
         <Chip className={status.className}>{status.label}</Chip>
       </span>
-      <span className="mt-2 block truncate px-1 text-[14px] font-bold">{challenge.title.startsWith('#') ? challenge.title : `#${challenge.tag}`}</span>
-      <span className="mt-0.5 block truncate px-1 pb-1 pr-9 text-[12px] text-subtle">{challengeLine(challenge)}</span>
+      <span className="mt-2 block truncate px-1 pr-9 text-[14px] font-bold">{challenge.title.startsWith('#') ? challenge.title : `#${challenge.tag}`}</span>
+      <span className="mt-0.5 block truncate px-1 pb-1 text-[12px] text-subtle">{challengeLine(challenge)}</span>
     </Link>
   );
 }
