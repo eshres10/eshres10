@@ -53,6 +53,8 @@ export interface FeedPostView {
   savedByMe: boolean;
   challenges: Array<{ slug: string; tag: string; entryId: number }>;
   aspect: Post["aspect"];
+  garment: Post["garment"];
+  fabric: Post["fabric"];
   forumTopic: { id: number; title: string; replies: number } | null;
 }
 
@@ -158,6 +160,8 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
       savedByMe: savedSet.has(post.id),
       challenges: entries.filter((e) => e.postId === post.id).map(({ slug, tag, entryId }) => ({ slug, tag, entryId })),
       aspect: post.aspect,
+      garment: post.garment ?? null,
+      fabric: post.fabric ?? null,
       forumTopic: ((t) => (t ? { id: t.id, title: t.title, replies: t.replies } : null))(topics.find((t) => t.postId === post.id && t.userId === post.userId)),
     }];
   });

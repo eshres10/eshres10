@@ -1,6 +1,8 @@
 import { Router, type IRouter } from "express";
 import {
   GetExploreFeedQueryParams,
+  GetExploreCardsQueryParams,
+  GetExploreCardsResponse,
   GetExploreFeedResponse,
   GetPublicMakeParams,
   GetPublicMakeResponse,
@@ -23,7 +25,7 @@ import {
   SearchTagsQueryParams,
   SearchTagsResponse,
 } from "@workspace/api-zod";
-import { exploreFeed, listComments, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, searchPeople, searchPosts, searchTags, tagPage } from "../access";
+import { exploreCards, exploreFeed, listComments, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, searchPeople, searchPosts, searchTags, tagPage } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { scoped } from "../lib/scoped";
 
@@ -97,6 +99,17 @@ router.get("/public/posts/:id/comments", scoped(async (req, res, db): Promise<vo
     return;
   }
   res.json(GetPostCommentsResponse.parse(comments));
+}));
+
+// Explore: the mixed browse page (posts, fabric, pattern pages, challenges, threads).
+// Signed in, the page holds followers-only posts and your own saves: never cache it.
+router.get("/public/explore/cards", (req, res, next) => {
+  if (viewerOf(req).userId) res.set("Cache-Control", "private, no-store");
+  next();
+}, scoped(async (req, res, db): Promise<void> => {
+  const query = GetExploreCardsQueryParams.safeParse(req.query);
+  const q = query.success ? query.data : undefined;
+  res.json(GetExploreCardsResponse.parse(await exploreCards(db, viewerOf(req), q?.tab, q?.sub, q?.cursor)));
 }));
 
 router.get("/public/explore", scoped(async (req, res, db): Promise<void> => {

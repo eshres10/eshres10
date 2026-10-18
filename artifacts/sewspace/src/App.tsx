@@ -32,7 +32,7 @@ import { NewTopicPage } from '@/pages/forum-flow';
 import { ChallengePage } from '@/pages/challenge';
 import { CatalogEntryPage } from '@/pages/catalog-entry';
 import { AdminReportsPage } from '@/pages/admin-reports';
-import { ExplorePage } from '@/pages/explore';
+import { ExploreBrowsePage } from '@/components/explore/ExploreBrowse';
 import { SearchPage } from '@/pages/search';
 import { FeedPage } from '@/pages/feed';
 import { PostPage } from '@/pages/post';
@@ -102,7 +102,7 @@ function Router() {
     <Route path="/challenges/:slug">{(params: { slug: string }) => <AdaptiveLayout><ChallengePage slug={params.slug} /></AdaptiveLayout>}</Route>
     <Route path="/catalog">{() => <AdaptiveLayout><CatalogPage /></AdaptiveLayout>}</Route>
     <Route path="/catalog/:kind/:slug">{(params: { kind: string; slug: string }) => <AdaptiveLayout><CatalogEntryPage kind={params.kind} slug={params.slug} /></AdaptiveLayout>}</Route>
-    <Route path="/explore">{() => <AdaptiveLayout><ExplorePage /></AdaptiveLayout>}</Route>
+    <Route path="/explore">{() => <AdaptiveLayout><ExploreBrowsePage /></AdaptiveLayout>}</Route>
     <Route path="/search">{() => <AdaptiveLayout><SearchPage /></AdaptiveLayout>}</Route>
     <Route path="/posts/:id/edit">{(params: { id: string }) => <Shell><EditPostPage id={Number(params.id)} /></Shell>}</Route>
     <Route path="/tags/:tag">{(params: { tag: string }) => <AdaptiveLayout><TagPage tag={decodeURIComponent(params.tag)} /></AdaptiveLayout>}</Route>

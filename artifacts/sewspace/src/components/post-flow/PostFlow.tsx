@@ -14,6 +14,8 @@ import {
   useListProjects,
   type FeedPost,
   type Media,
+  type PostFabric,
+  type PostGarment,
 } from '@workspace/api-client-react';
 import { BookOpen, Camera, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Hash, ImagePlus, Info, Layers, Scissors, Search, Trophy, X } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
@@ -64,6 +66,8 @@ interface PostDraft extends Record<string, unknown> {
   projectId: number | null;
   patternId: number | null;
   fabricId: number | null;
+  garment?: PostGarment | null;
+  fabric?: PostFabric | null;
   visibility: Audience;
   challenges: string[];
   reached: number;
@@ -71,6 +75,26 @@ interface PostDraft extends Record<string, unknown> {
 
 function errorText(error: unknown, fallback: string): string {
   return (error as { data?: { error?: string } })?.data?.error ?? fallback;
+}
+
+// Explore labels (optional): what was made, and whether the post is about fabric.
+const GARMENT_CHOICES: Array<{ value: PostGarment; label: string }> = [
+  { value: 'dresses', label: 'Dress' }, { value: 'tops', label: 'Top' }, { value: 'bottoms', label: 'Trousers or skirt' },
+  { value: 'outerwear', label: 'Outerwear' }, { value: 'bags', label: 'Bag' },
+];
+const FABRIC_CHOICES: Array<{ value: PostFabric; label: string }> = [
+  { value: 'linen', label: 'Linen' }, { value: 'cotton', label: 'Cotton' }, { value: 'satin', label: 'Satin' },
+  { value: 'viscose', label: 'Viscose' }, { value: 'crepe', label: 'Crepe' }, { value: 'haul', label: 'Fabric haul' },
+];
+/** A make's garment (Quick start choices) as an Explore garment. */
+function garmentOf(name: string | null | undefined): PostGarment | null {
+  const g = (name ?? '').toLowerCase();
+  if (g.startsWith('dress')) return 'dresses';
+  if (g.startsWith('top')) return 'tops';
+  if (g.startsWith('trouser') || g.startsWith('skirt')) return 'bottoms';
+  if (g.startsWith('outerwear')) return 'outerwear';
+  if (g.startsWith('bag')) return 'bags';
+  return null;
 }
 
 function endsIn(date: string): string {
@@ -106,6 +130,8 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
   const [projectId, setProjectId] = useState<number | null>(editing ? tagged('make') : Number(params.get('make')) || null);
   const [patternId, setPatternId] = useState<number | null>(editing ? tagged('pattern') : null);
   const [fabricId, setFabricId] = useState<number | null>(editing ? tagged('fabric') : null);
+  const [garment, setGarment] = useState<PostGarment | null>(editing?.garment ?? null);
+  const [fabric, setFabric] = useState<PostFabric | null>(editing?.fabric ?? null);
   const [visibility, setVisibility] = useState<Audience>((editing?.visibility as Audience | undefined) ?? 'public');
   const [challenges, setChallenges] = useState<string[]>(editing ? editing.challenges.map(c => c.slug) : paramChallenge ? [paramChallenge] : []);
   const [reached, setReached] = useState(isEdit ? ALL_STEPS.length - 1 : 0);
@@ -121,12 +147,13 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
 
   // Draft: new posts only. Applied once, before autosave starts.
   const payload: PostDraft = {
-    kind, caption, aspect, projectId, patternId, fabricId, visibility, challenges, reached,
+    kind, caption, aspect, projectId, patternId, fabricId, garment, fabric, visibility, challenges, reached,
     photos: uploads.items.filter(i => i.status === 'done' && i.result).map(i => ({ media: i.result!, alt: alts[i.key] ?? '' })),
   };
   const dirty = isEdit
     ? caption !== editing!.caption || aspect !== editing!.aspect || visibility !== editing!.visibility || uploads.items.length !== editing!.media.length
       || projectId !== tagged('make') || challenges.join() !== editing!.challenges.map(c => c.slug).join()
+      || garment !== (editing!.garment ?? null) || fabric !== (editing!.fabric ?? null)
     : Boolean(caption.trim() || uploads.items.length || projectId || patternId || fabricId);
   const [hydrated, setHydrated] = useState(isEdit);
   const draft = useDraft('post', payload, { enabled: !isEdit, active: hydrated && dirty });
@@ -139,6 +166,8 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       setProjectId(d.projectId ?? (Number(params.get('make')) || null));
       setPatternId(d.patternId ?? null);
       setFabricId(d.fabricId ?? null);
+      setGarment(d.garment ?? null);
+      setFabric(d.fabric ?? null);
       setVisibility(d.visibility ?? 'public');
       setChallenges([...new Set([...(d.challenges ?? []), ...(paramChallenge ? [paramChallenge] : [])])]);
       setReached(Math.min(d.reached ?? 0, ALL_STEPS.length - 1));
@@ -156,6 +185,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
     setProjectId(id);
     setPatternId(m ? m.patternId ?? null : null);
     setFabricId(m ? m.fabricId ?? null : null);
+    if (m && !garment) setGarment(garmentOf(m.garment));
   };
   useEffect(() => {
     if (isEdit || !make || patternId || fabricId) return;
@@ -237,7 +267,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       if (isEdit) {
         const post = editing!;
         await updatePost(post.id, {
-          caption: caption.trim(), visibility, projectId, patternId, fabricId, aspect, altTexts,
+          caption: caption.trim(), visibility, projectId, patternId, fabricId, garment, fabric, aspect, altTexts,
           ...(post.kind === 'photo' ? { mediaIds: media.map(m => m.id) } : {}),
         });
         for (const c of post.challenges.filter(c => !challenges.includes(c.slug))) if (c.entryId) await deleteChallengeEntry(c.entryId).catch(() => undefined);
@@ -250,7 +280,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       }
       const post = await createPost({
         kind, caption: caption.trim(), visibility, mediaIds: kind === 'photo' ? media.map(m => m.id) : [],
-        projectId, patternId, fabricId, aspect, altTexts: kind === 'photo' ? altTexts : [],
+        projectId, patternId, fabricId, garment, fabric, aspect, altTexts: kind === 'photo' ? altTexts : [],
       });
       const entered: string[] = [], notEntered: string[] = [];
       if (visibility === 'public') {
@@ -611,6 +641,12 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
         <p className="mt-2 text-sm text-subtle lg:hidden">Up to {MAX_HASHTAGS}. They're added to your caption and link to their own page.</p>
       </div>
 
+      <div className="rounded-[34px] bg-white p-4 lg:rounded-[20px] lg:border lg:border-line">
+        <p className="text-sm font-semibold text-subtle" id="explore-labels">Help people find it on Explore <span className="font-normal">(optional)</span></p>
+        <LabelChips label="What did you make?" options={GARMENT_CHOICES} value={garment} onChange={setGarment} />
+        <LabelChips label="Is it about fabric?" options={FABRIC_CHOICES} value={fabric} onChange={setFabric} />
+      </div>
+
       <div className="rounded-[34px] bg-white px-4 py-1 lg:rounded-[20px] lg:border lg:border-line">
         {tagRow('Make', Scissors, 'make', nameOf(projects.data, projectId), false)}
         {tagRow('Pattern', BookOpen, 'pattern', nameOf(patterns.data, patternId), Boolean(make && make.patternId === patternId))}
@@ -727,5 +763,28 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       {body}
       {leave.dialog}
     </FlowShell>
+  );
+}
+
+/** One optional choice as chips; tapping the chosen one clears it. */
+function LabelChips({ label, options, value, onChange }: {
+  label: string;
+  options: Array<{ value: string; label: string }>;
+  value: string | null;
+  onChange: (value: never) => void;
+}) {
+  const id = useId();
+  return (
+    <div role="group" aria-labelledby={id} className="mt-3">
+      <p id={id} className="text-[15px] font-semibold">{label}</p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {options.map(o => (
+          <button key={o.value} type="button" aria-pressed={value === o.value} onClick={() => onChange((value === o.value ? null : o.value) as never)}
+            className={`min-h-[44px] rounded-full px-4 text-[15px] font-semibold ${value === o.value ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
   );
 }

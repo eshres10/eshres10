@@ -58,7 +58,7 @@ export interface ChallengeSummaryView {
   joinedByMe: boolean;
 }
 
-async function summaries(db: Tx, viewer: Viewer, rows: Challenge[]): Promise<ChallengeSummaryView[]> {
+export async function challengeSummaries(db: Tx, viewer: Viewer, rows: Challenge[]): Promise<ChallengeSummaryView[]> {
   if (!rows.length) return [];
   const ids = rows.map((r) => r.id);
   const hosts = await db.select().from(publicProfilesView).where(inArray(publicProfilesView.userId, [...new Set(rows.map((r) => r.createdBy))]));
@@ -99,7 +99,7 @@ export async function listChallenges(db: Tx, viewer: Viewer, status: ChallengeSt
     : status === "ended" ? [lt(challengesTable.endsAt, now), desc(challengesTable.endsAt)]
     : [and(lte(challengesTable.startsAt, now), gte(challengesTable.endsAt, now)), asc(challengesTable.endsAt)];
   const rows = await db.select().from(challengesTable).where(and(where, notBlockedHost(viewer))).orderBy(order).limit(50);
-  return summaries(db, viewer, rows);
+  return challengeSummaries(db, viewer, rows);
 }
 
 /** Running challenges the viewer joined (for picking one when posting). */
@@ -112,13 +112,13 @@ export async function listJoinedChallenges(db: Tx, viewer: Viewer) {
     .innerJoin(challengeMembersTable, and(eq(challengeMembersTable.challengeId, challengesTable.id), eq(challengeMembersTable.userId, viewer.userId)))
     .where(and(lte(challengesTable.startsAt, now), gte(challengesTable.endsAt, now), notBlockedHost(viewer)))
     .orderBy(asc(challengesTable.endsAt));
-  return summaries(db, viewer, rows.map((r) => r.c));
+  return challengeSummaries(db, viewer, rows.map((r) => r.c));
 }
 
 export type ChallengeView = ChallengeSummaryView & { rules: string; isHost: boolean };
 
 async function challengeView(db: Tx, viewer: Viewer, c: Challenge): Promise<ChallengeView | null> {
-  const [summary] = await summaries(db, viewer, [c]);
+  const [summary] = await challengeSummaries(db, viewer, [c]);
   return summary ? { ...summary, rules: c.rules, isHost: c.createdBy === viewer.userId } : null;
 }
 

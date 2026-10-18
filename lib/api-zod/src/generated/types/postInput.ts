@@ -7,6 +7,8 @@
  */
 import type { AltTextInput } from './altTextInput';
 import type { PostAspect } from './postAspect';
+import type { PostFabric } from './postFabric';
+import type { PostGarment } from './postGarment';
 import type { PostInputKind } from './postInputKind';
 import type { Visibility } from './visibility';
 
@@ -23,6 +25,8 @@ export interface PostInput {
   patternId?: number | null;
   /** @nullable */
   fabricId?: number | null;
+  garment?: PostGarment | null;
+  fabric?: PostFabric | null;
   aspect?: PostAspect;
   /** @maxItems 10 */
   altTexts?: AltTextInput[];

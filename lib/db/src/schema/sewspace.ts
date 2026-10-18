@@ -245,6 +245,10 @@ export const POST_KINDS = ["status", "photo"] as const;
 export type PostKind = (typeof POST_KINDS)[number];
 export const POST_ASPECTS = ["4:5", "1:1", "original"] as const;
 export type PostAspect = (typeof POST_ASPECTS)[number];
+export const POST_GARMENTS = ["dresses", "tops", "bottoms", "outerwear", "bags"] as const;
+export type PostGarment = (typeof POST_GARMENTS)[number];
+export const POST_FABRICS = ["linen", "cotton", "satin", "viscose", "crepe", "haul"] as const;
+export type PostFabric = (typeof POST_FABRICS)[number];
 
 export const postsTable = pgTable("sewspace_posts", {
   id: serial("id").primaryKey(),
@@ -257,6 +261,9 @@ export const postsTable = pgTable("sewspace_posts", {
   fabricId: integer("fabric_id").references(() => fabricsTable.id, { onDelete: "set null" }),
   // Phase F1: display crop for the photos (object-fit: cover). Older posts are 'original'.
   aspect: text("aspect").$type<PostAspect>().notNull().default("4:5"),
+  // Explore (migration 0020): optional labels the author picks; null on older posts.
+  garment: text("garment").$type<PostGarment>(),
+  fabric: text("fabric").$type<PostFabric>(),
   ...timestamps,
 });
 
@@ -635,3 +642,34 @@ export const notificationsTable = pgTable("sewspace_notifications", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   readAt: timestamp("read_at", { withTimezone: true }),
 });
+
+// Explore (migration 0020): private collections of saved things, and private
+// "see less" / "more like this" feedback. Owner-only (RLS owner_all).
+export const EXPLORE_ITEM_TYPES = ["post", "pattern", "challenge", "thread"] as const;
+export type ExploreItemType = (typeof EXPLORE_ITEM_TYPES)[number];
+export const FEEDBACK_KINDS = ["see_less", "more_like"] as const;
+export type FeedbackKind = (typeof FEEDBACK_KINDS)[number];
+
+export const collectionsTable = pgTable("sewspace_collections", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  name: text("name").notNull(),
+  visibility: text("visibility").$type<"private">().notNull().default("private"),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const collectionItemsTable = pgTable("sewspace_collection_items", {
+  collectionId: integer("collection_id").notNull().references(() => collectionsTable.id, { onDelete: "cascade" }),
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  itemType: text("item_type").$type<ExploreItemType>().notNull(),
+  itemId: integer("item_id").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.collectionId, t.itemType, t.itemId] })]);
+
+export const discoverFeedbackTable = pgTable("sewspace_discover_feedback", {
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  itemType: text("item_type").$type<ExploreItemType>().notNull(),
+  itemId: integer("item_id").notNull(),
+  kind: text("kind").$type<FeedbackKind>().notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.userId, t.itemType, t.itemId, t.kind] })]);

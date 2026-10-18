@@ -346,6 +346,35 @@ export const PostAspect = {
   original: 'original',
 } as const;
 
+/**
+ * What the post shows was made (Explore filters). Optional; the author picks it.
+ */
+export type PostGarment = typeof PostGarment[keyof typeof PostGarment];
+
+
+export const PostGarment = {
+  dresses: 'dresses',
+  tops: 'tops',
+  bottoms: 'bottoms',
+  outerwear: 'outerwear',
+  bags: 'bags',
+} as const;
+
+/**
+ * Set when the post is about fabric (Explore's Fabric tab). Optional; the author picks it.
+ */
+export type PostFabric = typeof PostFabric[keyof typeof PostFabric];
+
+
+export const PostFabric = {
+  linen: 'linen',
+  cotton: 'cotton',
+  satin: 'satin',
+  viscose: 'viscose',
+  crepe: 'crepe',
+  haul: 'haul',
+} as const;
+
 export interface FeedPost {
   id: number;
   kind: FeedPostKind;
@@ -365,6 +394,8 @@ export interface FeedPost {
   /** Challenges this post is a (not removed) entry in */
   challenges: ChallengeRef[];
   aspect: PostAspect;
+  garment: PostGarment | null;
+  fabric: PostFabric | null;
   /**
      * The forum thread this post was shared from (Show & tell)
      * @nullable
@@ -392,6 +423,117 @@ export interface TagPage {
   items: FeedPost[];
   /** @nullable */
   nextCursor: string | null;
+}
+
+export type ExploreCardType = typeof ExploreCardType[keyof typeof ExploreCardType];
+
+
+export const ExploreCardType = {
+  post: 'post',
+  pattern: 'pattern',
+  challenge: 'challenge',
+  thread: 'thread',
+} as const;
+
+export type ExploreCardChallengeStatus = typeof ExploreCardChallengeStatus[keyof typeof ExploreCardChallengeStatus];
+
+
+export const ExploreCardChallengeStatus = {
+  upcoming: 'upcoming',
+  active: 'active',
+  ended: 'ended',
+} as const;
+
+/**
+ * @nullable
+ */
+export type ExploreCardPost = {
+  id: number;
+  caption: string;
+  photo: Media;
+  author: PublicPerson;
+  /**
+     * Pattern: {name} when the tagged pattern is visible to you, or the fabric type
+     * @nullable
+     */
+  chip: string | null;
+  savedByMe: boolean;
+} | null;
+
+/**
+ * @nullable
+ */
+export type ExploreCardPattern = {
+  id: number;
+  slug: string;
+  name: string;
+  /** The designer's name or the maker as written on the page */
+  designer: string;
+  category: string;
+  /** @nullable */
+  rating: number | null;
+  makes: number;
+  free: boolean;
+  /** @nullable */
+  priceCents: number | null;
+  /** @nullable */
+  currency: string | null;
+  /** @nullable */
+  coverImageUrl: string | null;
+} | null;
+
+/**
+ * @nullable
+ */
+export type ExploreCardChallenge = {
+  slug: string;
+  tag: string;
+  title: string;
+  status: ExploreCardChallengeStatus;
+  startsAt: string;
+  endsAt: string;
+  members: number;
+  entries: number;
+  /** The most liked entry photo you may see */
+  cover: Media | null;
+} | null;
+
+/**
+ * @nullable
+ */
+export type ExploreCardThread = {
+  id: number;
+  board: string;
+  kind: string;
+  title: string;
+  excerpt: string;
+  author: PublicPerson;
+  replies: number;
+} | null;
+
+/**
+ * One card. `type` says which of post / pattern / challenge / thread is filled in.
+ */
+export interface ExploreCard {
+  type: ExploreCardType;
+  /** Unique in the list, e.g. post-12 */
+  key: string;
+  /** @nullable */
+  post: ExploreCardPost;
+  /** @nullable */
+  pattern: ExploreCardPattern;
+  /** @nullable */
+  challenge: ExploreCardChallenge;
+  /** @nullable */
+  thread: ExploreCardThread;
+}
+
+export interface ExploreCardsPage {
+  items: ExploreCard[];
+  /** @nullable */
+  nextCursor: string | null;
+  /** How many there are for this tab and filter (what you may see) */
+  total: number;
 }
 
 export interface FeedPage {
@@ -424,6 +566,8 @@ export interface PostInput {
   patternId?: number | null;
   /** @nullable */
   fabricId?: number | null;
+  garment?: PostGarment | null;
+  fabric?: PostFabric | null;
   aspect?: PostAspect;
   /** @maxItems 10 */
   altTexts?: AltTextInput[];
@@ -444,6 +588,8 @@ export interface PostUpdate {
      * @maxItems 10
      */
   mediaIds?: number[];
+  garment?: PostGarment | null;
+  fabric?: PostFabric | null;
   aspect?: PostAspect;
   /** @maxItems 10 */
   altTexts?: AltTextInput[];
@@ -2633,6 +2779,26 @@ export type GetExploreFeedSort = typeof GetExploreFeedSort[keyof typeof GetExplo
 export const GetExploreFeedSort = {
   recent: 'recent',
   popular: 'popular',
+} as const;
+
+export type GetExploreCardsParams = {
+tab?: GetExploreCardsTab;
+/**
+ * explore/patterns: for-you, dresses, tops, bottoms, outerwear, bags, upcycle. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one.
+ */
+sub?: string;
+cursor?: string;
+};
+
+export type GetExploreCardsTab = typeof GetExploreCardsTab[keyof typeof GetExploreCardsTab];
+
+
+export const GetExploreCardsTab = {
+  explore: 'explore',
+  forum: 'forum',
+  challenges: 'challenges',
+  patterns: 'patterns',
+  fabric: 'fabric',
 } as const;
 
 export type GetSavedPostsParams = {

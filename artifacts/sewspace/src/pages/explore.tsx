@@ -80,7 +80,7 @@ function ExploreCard({ post }: { post: FeedPost }) {
 }
 
 /** Signed out: what an account adds, with a way back here after signing in. */
-function GuestBanner() {
+export function GuestBanner() {
   return (
     <div className="mb-6 flex flex-col gap-3 rounded-[30px] bg-yellow p-5 sm:flex-row sm:items-center sm:gap-4 sm:px-6">
       <Heart size={22} aria-hidden="true" className="shrink-0" />

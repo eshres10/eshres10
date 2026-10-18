@@ -7,6 +7,8 @@
  */
 import type { AltTextInput } from './altTextInput';
 import type { PostAspect } from './postAspect';
+import type { PostFabric } from './postFabric';
+import type { PostGarment } from './postGarment';
 import type { Visibility } from './visibility';
 
 export interface PostUpdate {
@@ -24,6 +26,8 @@ export interface PostUpdate {
      * @maxItems 10
      */
   mediaIds?: number[];
+  garment?: PostGarment | null;
+  fabric?: PostFabric | null;
   aspect?: PostAspect;
   /** @maxItems 10 */
   altTexts?: AltTextInput[];

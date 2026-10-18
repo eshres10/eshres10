@@ -10,6 +10,8 @@ import type { FeedPostForumTopic } from './feedPostForumTopic';
 import type { FeedPostKind } from './feedPostKind';
 import type { Media } from './media';
 import type { PostAspect } from './postAspect';
+import type { PostFabric } from './postFabric';
+import type { PostGarment } from './postGarment';
 import type { PostTag } from './postTag';
 import type { PublicPerson } from './publicPerson';
 import type { Visibility } from './visibility';
@@ -33,6 +35,8 @@ export interface FeedPost {
   /** Challenges this post is a (not removed) entry in */
   challenges: ChallengeRef[];
   aspect: PostAspect;
+  garment: PostGarment | null;
+  fabric: PostFabric | null;
   /**
      * The forum thread this post was shared from (Show & tell)
      * @nullable

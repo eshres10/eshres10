@@ -201,6 +201,8 @@ router.post("/posts", scoped(async (req, res, db): Promise<void> => {
       projectId: body.projectId ?? null,
       patternId: body.patternId ?? null,
       fabricId: body.fabricId ?? null,
+      garment: body.garment ?? null,
+      fabric: body.fabric ?? null,
       ...(body.aspect ? { aspect: body.aspect } : {}),
     })
     .returning();
@@ -255,6 +257,8 @@ router.patch("/posts/:id", scoped(async (req, res, db): Promise<void> => {
       projectId: body.projectId,
       patternId: body.patternId,
       fabricId: body.fabricId,
+      garment: body.garment,
+      fabric: body.fabric,
       aspect: body.aspect,
       updatedAt: new Date(),
     })

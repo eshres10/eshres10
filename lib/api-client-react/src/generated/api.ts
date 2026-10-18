@@ -57,6 +57,7 @@ import type {
   DraftKind,
   EntryInput,
   ErrorResponse,
+  ExploreCardsPage,
   Fabric,
   FabricInput,
   FabricUpdate,
@@ -75,6 +76,7 @@ import type {
   ForumTopicUpdate,
   ForumVoteState,
   GetChallengeEntriesParams,
+  GetExploreCardsParams,
   GetExploreFeedParams,
   GetForumDiscussionsParams,
   GetHomeFeedParams,
@@ -1547,6 +1549,114 @@ export function useGetExploreFeed<TData = Awaited<ReturnType<typeof getExploreFe
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetExploreFeedQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetExploreCardsUrl = (params?: GetExploreCardsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/explore/cards?${stringifiedParams}` : `/api/public/explore/cards`
+}
+
+/**
+ * @summary Explore: photo posts, fabric posts, pattern pages, challenges and forum threads as one mixed list (30 a page). Works signed out (public only); signed in you also see followers-only posts from people you follow. Blocks apply and things you hid are left out.
+ */
+export const getExploreCards = async (params?: GetExploreCardsParams, options?: Parameters<typeof customFetch>[1]): Promise<ExploreCardsPage> => {
+
+  return customFetch<ExploreCardsPage>(getGetExploreCardsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetExploreCardsQueryKey = (params?: GetExploreCardsParams,) => {
+    return [
+    `/api/public/explore/cards`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetExploreCardsQueryOptions = <TData = Awaited<ReturnType<typeof getExploreCards>>, TError = ErrorType<unknown>>(params?: GetExploreCardsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreCards>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExploreCardsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExploreCards>>> = ({ signal }) => getExploreCards(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExploreCards>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetExploreCardsQueryResult = NonNullable<Awaited<ReturnType<typeof getExploreCards>>>
+export type GetExploreCardsQueryError = ErrorType<unknown>
+
+
+export function useGetExploreCards<TData = Awaited<ReturnType<typeof getExploreCards>>, TError = ErrorType<unknown>>(
+ params: undefined |  GetExploreCardsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreCards>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExploreCards>>,
+          TError,
+          Awaited<ReturnType<typeof getExploreCards>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExploreCards<TData = Awaited<ReturnType<typeof getExploreCards>>, TError = ErrorType<unknown>>(
+ params?: GetExploreCardsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreCards>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExploreCards>>,
+          TError,
+          Awaited<ReturnType<typeof getExploreCards>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExploreCards<TData = Awaited<ReturnType<typeof getExploreCards>>, TError = ErrorType<unknown>>(
+ params?: GetExploreCardsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreCards>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Explore: photo posts, fabric posts, pattern pages, challenges and forum threads as one mixed list (30 a page). Works signed out (public only); signed in you also see followers-only posts from people you follow. Blocks apply and things you hid are left out.
+ */
+
+export function useGetExploreCards<TData = Awaited<ReturnType<typeof getExploreCards>>, TError = ErrorType<unknown>>(
+ params?: GetExploreCardsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreCards>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetExploreCardsQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

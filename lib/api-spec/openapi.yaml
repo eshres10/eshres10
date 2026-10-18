@@ -244,6 +244,28 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/FeedPage" }
+  /public/explore/cards:
+    get:
+      operationId: getExploreCards
+      tags: [public]
+      summary: "Explore: photo posts, fabric posts, pattern pages, challenges and forum threads as one mixed list (30 a page). Works signed out (public only); signed in you also see followers-only posts from people you follow. Blocks apply and things you hid are left out."
+      parameters:
+        - name: tab
+          in: query
+          required: false
+          schema: { type: string, enum: [explore, forum, challenges, patterns, fabric], default: explore }
+        - name: sub
+          in: query
+          required: false
+          description: "explore/patterns: for-you, dresses, tops, bottoms, outerwear, bags, upcycle. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one."
+          schema: { type: string }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: A page of cards
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ExploreCardsPage" }
   /public/posts/{id}/comments:
     get:
       operationId: getPostComments
@@ -2425,6 +2447,12 @@ components:
           description: Challenges this post is a (not removed) entry in
           items: { $ref: "#/components/schemas/ChallengeRef" }
         aspect: { $ref: "#/components/schemas/PostAspect" }
+        garment:
+          allOf: [{ $ref: "#/components/schemas/PostGarment" }]
+          nullable: true
+        fabric:
+          allOf: [{ $ref: "#/components/schemas/PostFabric" }]
+          nullable: true
         forumTopic:
           type: object
           nullable: true
@@ -2434,7 +2462,15 @@ components:
             title: { type: string }
             replies: { type: integer }
           required: [id, title, replies]
-      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect, forumTopic]
+      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect, garment, fabric, forumTopic]
+    PostGarment:
+      type: string
+      description: What the post shows was made (Explore filters). Optional; the author picks it.
+      enum: [dresses, tops, bottoms, outerwear, bags]
+    PostFabric:
+      type: string
+      description: Set when the post is about fabric (Explore's Fabric tab). Optional; the author picks it.
+      enum: [linen, cotton, satin, viscose, crepe, haul]
     PostAspect:
       type: string
       description: "How photos are cropped for display: 4:5, 1:1 or the first photo's own shape"
@@ -2461,6 +2497,78 @@ components:
           items: { $ref: "#/components/schemas/FeedPost" }
         nextCursor: { type: string, nullable: true }
       required: [tag, posts, items, nextCursor]
+    ExploreCardsPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/ExploreCard" }
+        nextCursor: { type: string, nullable: true }
+        total: { type: integer, description: How many there are for this tab and filter (what you may see) }
+      required: [items, nextCursor, total]
+    ExploreCard:
+      type: object
+      description: One card. `type` says which of post / pattern / challenge / thread is filled in.
+      properties:
+        type: { type: string, enum: [post, pattern, challenge, thread] }
+        key: { type: string, description: "Unique in the list, e.g. post-12" }
+        post:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            caption: { type: string }
+            photo: { $ref: "#/components/schemas/Media" }
+            author: { $ref: "#/components/schemas/PublicPerson" }
+            chip: { type: string, nullable: true, description: "Pattern: {name} when the tagged pattern is visible to you, or the fabric type" }
+            savedByMe: { type: boolean }
+          required: [id, caption, photo, author, chip, savedByMe]
+        pattern:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            slug: { type: string }
+            name: { type: string }
+            designer: { type: string, description: The designer's name or the maker as written on the page }
+            category: { type: string }
+            rating: { type: number, nullable: true }
+            makes: { type: integer }
+            free: { type: boolean }
+            priceCents: { type: integer, nullable: true }
+            currency: { type: string, nullable: true }
+            coverImageUrl: { type: string, nullable: true }
+          required: [id, slug, name, designer, category, rating, makes, free, priceCents, currency, coverImageUrl]
+        challenge:
+          type: object
+          nullable: true
+          properties:
+            slug: { type: string }
+            tag: { type: string }
+            title: { type: string }
+            status: { type: string, enum: [upcoming, active, ended] }
+            startsAt: { type: string, format: date-time }
+            endsAt: { type: string, format: date-time }
+            members: { type: integer }
+            entries: { type: integer }
+            cover:
+              allOf: [{ $ref: "#/components/schemas/Media" }]
+              nullable: true
+              description: The most liked entry photo you may see
+          required: [slug, tag, title, status, startsAt, endsAt, members, entries, cover]
+        thread:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            board: { type: string }
+            kind: { type: string }
+            title: { type: string }
+            excerpt: { type: string }
+            author: { $ref: "#/components/schemas/PublicPerson" }
+            replies: { type: integer }
+          required: [id, board, kind, title, excerpt, author, replies]
+      required: [type, key, post, pattern, challenge, thread]
     FeedPage:
       type: object
       properties:
@@ -2482,6 +2590,12 @@ components:
         projectId: { type: integer, nullable: true }
         patternId: { type: integer, nullable: true }
         fabricId: { type: integer, nullable: true }
+        garment:
+          allOf: [{ $ref: "#/components/schemas/PostGarment" }]
+          nullable: true
+        fabric:
+          allOf: [{ $ref: "#/components/schemas/PostFabric" }]
+          nullable: true
         aspect: { $ref: "#/components/schemas/PostAspect" }
         altTexts:
           type: array
@@ -2501,6 +2615,12 @@ components:
           description: "Photo posts: the photos in order (1 to 10). Leave out to keep them as they are."
           maxItems: 10
           items: { type: integer }
+        garment:
+          allOf: [{ $ref: "#/components/schemas/PostGarment" }]
+          nullable: true
+        fabric:
+          allOf: [{ $ref: "#/components/schemas/PostFabric" }]
+          nullable: true
         aspect: { $ref: "#/components/schemas/PostAspect" }
         altTexts:
           type: array
