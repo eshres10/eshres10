@@ -9,6 +9,7 @@ import { ErrorState } from '@/components/common';
 import { BOARDS, KINDS, KindBadge, StateBadges } from '@/components/forum/parts';
 import { timeAgo } from '@/lib/time';
 import { CommunityTabs } from '@/components/shell/CommunityTabs';
+import { STICKY, useChrome } from '@/components/shell/useHideOnScroll';
 
 const SORTS: Array<{ id: ListForumTopicsSort; label: string }> = [
   { id: 'hot', label: 'Hot' },
@@ -63,6 +64,7 @@ export function ForumPage() {
   const [q, setQ] = useState(params.get('q') ?? '');
   const [debounced, setDebounced] = useState(q);
   const ask = useRequireSignIn();
+  const chrome = useChrome();
   useEffect(() => { const t = setTimeout(() => setDebounced(q), 300); return () => clearTimeout(t); }, [q]);
   useEffect(() => { document.title = 'Forum · Seams Club'; }, []);
 
@@ -88,10 +90,10 @@ export function ForumPage() {
     ...o?.kinds.map(k => ({ id: k.kind as ListForumTopicsFilter, label: KINDS[k.kind].plural, count: k.count })) ?? [],
     { id: 'solved', label: 'Solved', count: o?.solved },
   ];
-  const start = () => {
+  const start = (on: ForumBoard | undefined = board) => {
     if (!ask({ title: 'Sign in to start a discussion', body: "You'll come straight back to the forum." })) return;
     const p = new URLSearchParams();
-    if (board) p.set('board', board);
+    if (on) p.set('board', on);
     if (filter !== 'all' && filter !== 'solved') p.set('kind', filter);
     setLocation(`/forum/new${p.size ? `?${p}` : ''}`);
   };
@@ -99,10 +101,12 @@ export function ForumPage() {
   return (
     <div className="mx-auto max-w-[1232px]">
       <CommunityTabs />
-      {/* Signed in, the top bar already names the page: search and Start a discussion in one row (owner). */}
+      {/* Signed in, the top bar already names the page: search and Start a discussion in one row (owner).
+          Like Explore, the row stays pinned under the top bar, which slides away on the way down. */}
       {isSignedIn ? (
-        <section aria-label="Search the forum" className="flex flex-wrap items-center gap-3">
-          <div className="min-w-[240px] flex-1">
+        <section aria-label="Search the forum"
+          className={`explore-sticky sticky z-30 -mx-4 flex items-center gap-2 bg-canvas sm:gap-3 px-4 py-2 transition-transform duration-[280ms] ease-out motion-reduce:transition-none md:-mx-2 md:px-2 ${STICKY[chrome.shell].base} ${chrome.hidden ? STICKY[chrome.shell].hidden : 'translate-y-0'}`}>
+          <div className="min-w-0 flex-1">
             <label className="relative block">
               <span className="sr-only">Search the forum</span>
               <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-ink" aria-hidden="true" />
@@ -110,8 +114,10 @@ export function ForumPage() {
                 className="min-h-[54px] w-full rounded-full border-2 border-ink bg-white pl-12 pr-5 text-[16px] outline-none focus:ring-4 focus:ring-yellow" placeholder={'Search before you ask: “gaping neckline”'} />
             </label>
           </div>
-          <button type="button" onClick={start} className="inline-flex min-h-[50px] items-center gap-2 rounded-full bg-yellow px-6 text-[16px] font-bold text-ink">
-            <Plus size={17} aria-hidden="true" />Start a discussion
+          {/* Phones: a round + so the pinned row stays one line. */}
+          <button type="button" onClick={() => start()} aria-label="Start a discussion"
+            className="inline-flex min-h-[50px] min-w-[50px] shrink-0 items-center justify-center gap-2 rounded-full bg-yellow text-[16px] font-bold text-ink sm:px-6">
+            <Plus size={17} aria-hidden="true" /><span className="hidden sm:inline">Start a discussion</span>
           </button>
         </section>
       ) : (
@@ -128,30 +134,35 @@ export function ForumPage() {
             <input type="search" value={q} onChange={e => { setQ(e.target.value); go({ q: e.target.value || undefined }); }}
               className="min-h-[54px] w-full rounded-full border-2 border-ink bg-white pl-12 pr-5 text-[16px] outline-none focus:ring-4 focus:ring-yellow" placeholder={'Search before you ask: “gaping neckline”'} />
           </label>
-          <button type="button" onClick={start} className="inline-flex min-h-[50px] items-center gap-2 rounded-full bg-yellow px-6 text-[16px] font-bold text-ink">
+          <button type="button" onClick={() => start()} className="inline-flex min-h-[50px] items-center gap-2 rounded-full bg-yellow px-6 text-[16px] font-bold text-ink">
             <Plus size={17} aria-hidden="true" />Start a discussion
           </button>
         </div>
       </section>
       )}
 
-      <section aria-label="Boards" className="-mx-3 mt-6 flex snap-x gap-3 overflow-x-auto px-3 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+      {/* Owner, October 2026: smaller board cards, each with a + (bottom right) to start a discussion on that board. */}
+      <section aria-label="Boards" className="-mx-3 mt-4 flex snap-x gap-2.5 overflow-x-auto px-3 pb-1 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
         {(Object.keys(BOARDS) as ForumBoard[]).map(b => {
           const info = o?.boards.find(x => x.board === b);
           const on = board === b;
           return (
-            <div key={b} className={`flex w-[260px] shrink-0 snap-start flex-col rounded-[24px] bg-white p-5 sm:w-auto ${on ? 'outline outline-2 outline-ink' : ''}`}>
-              <button type="button" onClick={() => go({ board: on ? undefined : b })} aria-pressed={on} className="flex items-center gap-2.5 text-left">
-                <span aria-hidden="true" className={`h-3.5 w-3.5 shrink-0 rounded-full ${BOARD_INFO[b].dot}`} />
-                <span className="flex-1 text-[17px] font-semibold">{BOARDS[b]}</span>
+            <div key={b} className={`flex w-[220px] shrink-0 snap-start flex-col rounded-[20px] bg-white px-4 pb-2 pt-3.5 sm:w-auto ${on ? 'outline outline-2 outline-ink' : ''}`}>
+              <button type="button" onClick={() => go({ board: on ? undefined : b })} aria-pressed={on} className="flex items-center gap-2 text-left">
+                <span aria-hidden="true" className={`h-3 w-3 shrink-0 rounded-full ${BOARD_INFO[b].dot}`} />
+                <span className="min-w-0 flex-1 truncate text-[15px] font-semibold">{BOARDS[b]}</span>
                 <span className="text-xs text-subtle">{info ? compact.format(info.count) : ''}</span>
               </button>
-              <p className="mt-1.5 text-sm text-subtle">{BOARD_INFO[b].desc}</p>
-              {info?.latest && (
-                <p className="mt-auto border-t border-line pt-3 text-sm [margin-top:max(.75rem,auto)]">
-                  <span className="text-subtle">Latest: </span><Link href={`/forum/topics/${info.latest.id}`} className="font-semibold text-ink no-underline hover:underline">{info.latest.title}</Link>
+              <p className="mt-1 line-clamp-2 text-[13px] leading-snug text-subtle">{BOARD_INFO[b].desc}</p>
+              <div className="mt-auto flex items-end gap-2 pt-1.5">
+                <p className="min-w-0 flex-1 truncate pb-2.5 text-[13px]">
+                  {info?.latest && <><span className="text-subtle">Latest: </span><Link href={`/forum/topics/${info.latest.id}`} className="font-semibold text-ink no-underline hover:underline">{info.latest.title}</Link></>}
                 </p>
-              )}
+                <button type="button" onClick={() => start(b)} aria-label={`Start a discussion in ${BOARDS[b]}`} title={`Start a discussion in ${BOARDS[b]}`}
+                  className="-mr-1.5 grid h-11 w-11 shrink-0 place-items-center rounded-full">
+                  <span className="grid h-8 w-8 place-items-center rounded-full bg-ink text-white"><Plus size={16} aria-hidden="true" /></span>
+                </button>
+              </div>
             </div>
           );
         })}

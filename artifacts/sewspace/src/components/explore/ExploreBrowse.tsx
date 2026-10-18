@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import { ErrorState } from '@/components/common';
 import { GuestBanner } from '@/pages/explore';
-import { useChrome } from '@/components/shell/useHideOnScroll';
+import { STICKY, useChrome } from '@/components/shell/useHideOnScroll';
 import { ExploreActionCard, ExploreActionsProvider, ExplorePostOverlay } from './actions';
 import { overlaySearch } from './overlay';
 import { cardHeight } from './cards';
@@ -41,10 +41,6 @@ const SHARES_GARMENTS = new Set<Tab>(['explore', 'patterns']);
  * 64 px tall. Signed out: the phone header is 63 px; on desktop the website
  * header scrolls with the page, so the filters stick to the top.
  */
-const STICKY = {
-  app: { base: 'top-[calc(4rem+env(safe-area-inset-top))] md:top-[94px]', hidden: '-translate-y-[4rem] md:-translate-y-[76px]' },
-  public: { base: 'top-[calc(63px+env(safe-area-inset-top))] md:top-0', hidden: '-translate-y-[63px] md:translate-y-0' },
-} as const;
 
 /** 2 columns on phones, 5 beside the sidebar on desktop (by the grid's own width). */
 function useColumns(ref: React.RefObject<HTMLElement | null>): number {

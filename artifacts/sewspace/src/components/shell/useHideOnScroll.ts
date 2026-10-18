@@ -9,6 +9,13 @@ export interface HideOnScrollOptions {
 const DEFAULTS: HideOnScrollOptions = { step: 10, minY: 0 };
 /** Explore (owner's brief): hide after 6 px down once past 80 px; show after 6 px up. */
 export const EXPLORE_SCROLL: HideOnScrollOptions = { step: 6, minY: 80 };
+/** Pages whose top bar slides away on the way down (desktop too) while a toolbar stays pinned under it. Owner added Forum, October 2026. */
+export const SCROLL_AWAY_PAGES = new Set(['/explore', '/forum']);
+/** Where a pinned toolbar sits under the bar, and how far it moves up when the bar slides away. */
+export const STICKY = {
+  app: { base: 'top-[calc(4rem+env(safe-area-inset-top))] md:top-[94px]', hidden: '-translate-y-[4rem] md:-translate-y-[76px]' },
+  public: { base: 'top-[calc(63px+env(safe-area-inset-top))] md:top-0', hidden: '-translate-y-[63px] md:translate-y-0' },
+} as const;
 
 /**
  * True while the page is scrolling down (the top bar slides away), false once

@@ -8,7 +8,7 @@ import { PublicHeader } from '@/components/shell/PublicHeader';
 import { UserAvatar } from '@/components/avatar';
 import { Logo } from '@/components/brand/Logo';
 import { currentAppPath } from '@/lib/navigation';
-import { ChromeContext, EXPLORE_SCROLL, useHideOnScroll } from '@/components/shell/useHideOnScroll';
+import { ChromeContext, EXPLORE_SCROLL, SCROLL_AWAY_PAGES, useHideOnScroll } from '@/components/shell/useHideOnScroll';
 import { isExploreOverlay } from '@/components/explore/overlay';
 import { inCommunity } from '@/components/shell/CommunityTabs';
 import { inStudio, StudioMobileHeader, studioSection } from '@/components/shell/StudioMobile';
@@ -198,8 +198,8 @@ export function ShellFrame({ children }: { children: ReactNode }) {
   const location = useShellLocation();
   const profile = useGetProfile();
   const mobileFocus = location === '/new' || location.startsWith('/posts/');
-  // Explore (owner's brief): the bars slide away on the way down and the filters stay pinned.
-  const explore = location === '/explore';
+  // Explore and Forum (owner): the bars slide away on the way down and a toolbar stays pinned.
+  const explore = SCROLL_AWAY_PAGES.has(location);
   const profileHeaderHidden = useHideOnScroll(!mobileFocus, location, explore ? EXPLORE_SCROLL : undefined);
 
   // First visit: choose a handle before using the app, then come back here.
@@ -257,7 +257,7 @@ export function AdaptiveLayout({ children }: { children: ReactNode }) {
   const location = useShellLocation();
   const postDetail = location.startsWith('/posts/');
   const compactToolbarPage = compactToolbarPages.has(location);
-  const publicHidden = useHideOnScroll(!(isLoaded && isSignedIn), location, location === '/explore' ? EXPLORE_SCROLL : undefined);
+  const publicHidden = useHideOnScroll(!(isLoaded && isSignedIn), location, SCROLL_AWAY_PAGES.has(location) ? EXPLORE_SCROLL : undefined);
   if (isLoaded && isSignedIn) return <ShellFrame>{children}</ShellFrame>;
   return (
     <ChromeContext.Provider value={{ hidden: publicHidden, shell: 'public' }}>
