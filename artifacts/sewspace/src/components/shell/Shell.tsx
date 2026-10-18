@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { useGetProfile } from '@workspace/api-client-react';
-import { Bookmark, BookMarked, BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, Menu, MessageCircle, MessagesSquare, Plus, Ruler, Scissors, Search, Sparkles, Spool, Store, Trophy, X } from 'lucide-react';
+import { useGetProfile, useListProjects } from '@workspace/api-client-react';
+import { BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, Menu, MessageCircle, MessagesSquare, PanelLeftClose, PanelLeftOpen, Plus, Ruler, Scissors, Search, ShoppingBag, Sparkles, Spool, Store, Trophy, X } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
 import { useAuth } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
@@ -15,16 +15,16 @@ import { AccountMenuDesktop, AccountMenuMobile, LogOut } from '@/components/shel
 
 type NavItem = { href: string; label: string; icon: typeof Home };
 
-// Groups follow the design (Community / My studio / Help). Forum, Challenges
-// and Saved join Community as their phases ship.
+// Groups follow the owner's sidebar redesign (October 2026): Community / My studio /
+// Selling / Help, then Recent projects. Saved posts lives in the account menu.
 export const navGroups: Array<{ label: string; items: NavItem[] }> = [
   { label: 'Community', items: [
     { href: '/feed', label: 'Home', icon: House },
     { href: '/explore', label: 'Explore', icon: Compass },
     { href: '/forum', label: 'Forum', icon: MessagesSquare },
     { href: '/challenges', label: 'Challenges', icon: Trophy },
-    { href: '/catalog', label: 'Patterns & supplies', icon: BookMarked },
-    { href: '/saved', label: 'Saved', icon: Bookmark },
+    // The pattern directory (owner: "Shop" opens it; nothing is sold on Seams Club yet).
+    { href: '/catalog', label: 'Shop', icon: ShoppingBag },
   ] },
   { label: 'My studio', items: [
     { href: '/studio', label: 'Overview', icon: LayoutGrid },
@@ -33,11 +33,14 @@ export const navGroups: Array<{ label: string; items: NavItem[] }> = [
     { href: '/stash/threads', label: 'Thread drawer', icon: Spool },
     { href: '/patterns', label: 'Pattern library', icon: BookOpen },
     { href: '/measurements', label: 'Measurements', icon: Ruler },
+    { href: '/ai-studio', label: 'AI studio', icon: Sparkles },
+  ] },
+  // Pattern sales aren't built: the dashboard opens the "Coming soon" marketplace page.
+  { label: 'Selling', items: [
+    { href: '/marketplace', label: 'Seller dashboard', icon: Store },
   ] },
   { label: 'Help', items: [
     { href: '/assistant', label: 'Sewing assistant', icon: MessageCircle },
-    { href: '/ai-studio', label: 'Outfit preview', icon: Sparkles },
-    { href: '/marketplace', label: 'Marketplace', icon: Store },
   ] },
 ];
 
@@ -55,37 +58,104 @@ function useMyProfile() {
   return profile.data;
 }
 
-function SidebarNav({ location, onNavigate }: { location: string; onNavigate?: () => void }) {
+const COLLAPSED_KEY = 'seams.sidebar-collapsed';
+
+/** The desktop sidebar can shrink to an icon rail; remembered on this device. */
+function useSidebarCollapsed(): [boolean, (next: boolean) => void] {
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return localStorage.getItem(COLLAPSED_KEY) === '1'; } catch { return false; }
+  });
+  const set = (next: boolean) => {
+    setCollapsed(next);
+    try { localStorage.setItem(COLLAPSED_KEY, next ? '1' : '0'); } catch { /* private mode: not remembered */ }
+  };
+  return [collapsed, set];
+}
+
+/** Recent: up to three projects still on the go, newest first (the API has no "last edited" time). */
+function useRecentProjects() {
+  const projects = useListProjects().data ?? [];
+  return projects.filter(p => p.status !== 'finished').sort((a, b) => b.id - a.id).slice(0, 3);
+}
+
+/**
+ * The sidebar (desktop) and the phone ☰ menu. `onToggle` is passed on desktop only:
+ * it shows the collapse button, and `collapsed` turns the rows into icons with labels
+ * kept for screen readers and tooltips.
+ */
+function SidebarNav({ location, onNavigate, collapsed = false, onToggle }: { location: string; onNavigate?: () => void; collapsed?: boolean; onToggle?: () => void }) {
   const me = useMyProfile();
+  const recent = useRecentProjects();
+  const row = (active: boolean) => `flex min-h-[44px] items-center rounded-[16px] text-sm no-underline ${collapsed ? 'justify-center px-0' : 'gap-3 px-3'} ${active ? 'bg-ink text-white' : 'text-ink hover:bg-white/60'}`;
+  const label = (text: string) => <span className={collapsed ? 'sr-only' : 'min-w-0 flex-1 leading-tight'}>{text}</span>;
   return (
-    <div className="flex h-full flex-col gap-[22px]">
-      <Logo href="/studio" />
+    <div className="flex h-full flex-col gap-4">
+      <div className={`flex items-center ${collapsed ? 'flex-col gap-2' : 'justify-between gap-2'}`}>
+        {collapsed
+          ? <Link href="/feed" aria-label="Seams Club home" className="grid h-11 w-11 place-items-center"><span aria-hidden="true" className="grid h-10 w-10 place-items-center rounded-[12px] bg-ink font-display text-[22px] leading-none text-yellow">S</span></Link>
+          : <Logo href="/feed" />}
+        {onToggle && (
+          <button type="button" onClick={onToggle} aria-expanded={!collapsed} aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            className="grid h-10 w-10 shrink-0 place-items-center rounded-[12px] bg-white/60 text-ink hover:bg-white">
+            {collapsed ? <PanelLeftOpen size={18} aria-hidden="true" /> : <PanelLeftClose size={18} aria-hidden="true" />}
+          </button>
+        )}
+      </div>
+      {location !== '/new' && (
+        <Link href="/new" onClick={onNavigate} aria-label={collapsed ? 'New post' : undefined} title={collapsed ? 'New post' : undefined}
+          className={`flex min-h-[44px] items-center justify-center gap-2 rounded-full bg-ink text-sm font-bold text-white no-underline ${collapsed ? 'px-0' : 'px-4'}`}>
+          <Plus size={17} aria-hidden="true" />{!collapsed && 'New post'}
+        </Link>
+      )}
       {[...navGroups, ...(me?.isAdmin ? [adminGroup] : [])].map(group => (
         <nav key={group.label} aria-label={group.label}>
-          <div className="px-3 pb-1.5 text-[11px] font-bold uppercase tracking-[.16em]">{group.label}</div>
+          <div className={collapsed ? 'mx-3 mb-1.5 border-t border-ink/20' : 'px-3 pb-1 text-[11px] font-bold uppercase tracking-[.16em]'}>{collapsed ? null : group.label}</div>
           {group.items.map(item => {
             const Icon = item.icon;
             const active = isActive(location, item.href);
             return (
-              <Link key={item.href} href={item.href} onClick={onNavigate} aria-current={active ? 'page' : undefined}
+              <Link key={item.href} href={item.href} onClick={onNavigate} aria-current={active ? 'page' : undefined} title={collapsed ? item.label : undefined}
                 data-testid={`link-nav-${item.label.toLowerCase().replace(/[^a-z]+/g, '-')}`}
-                className={`flex min-h-[44px] items-center gap-3 rounded-[18px] px-3 text-sm ${item.label === 'Home' ? 'font-bold' : 'font-semibold'} no-underline ${active ? 'bg-ink text-white' : 'text-ink hover:bg-white/60'}`}>
-                <Icon size={18} aria-hidden="true" /><span className="flex-1">{item.label}</span>
+                className={`${row(active)} ${item.label === 'Home' ? 'font-bold' : 'font-semibold'}`}>
+                <Icon size={18} aria-hidden="true" className="shrink-0" />{label(item.label)}
+                {item.href === '/marketplace' && !collapsed && <span className="shrink-0 rounded-full bg-white/70 px-2 py-0.5 text-[11px] font-bold">Soon</span>}
               </Link>
             );
           })}
         </nav>
       ))}
-      <Link href="/settings" onClick={onNavigate} data-testid="link-settings" className="mt-auto flex min-h-[52px] items-center gap-3 border-t border-ink px-3 pt-3.5 text-ink no-underline">
-        <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-sm font-bold">{me?.name ?? 'Your profile'}</span>
-          <span className="block truncate text-xs">{me?.handle ? `@${me.handle} · ` : ''}Profile &amp; settings</span>
-        </span>
-      </Link>
-      <div className="-mt-3">
-        <LogOut close={onNavigate} panelClass="bg-white" cancelClass="bg-canvas"
-          rowClass="flex min-h-[44px] w-full items-center gap-3 rounded-[18px] px-3 text-left text-sm font-semibold text-ink hover:bg-white/60" />
+      {recent.length > 0 && (
+        <nav aria-label="Recent projects">
+          <div className={collapsed ? 'mx-3 mb-1.5 border-t border-ink/20' : 'px-3 pb-1 text-[11px] font-bold uppercase tracking-[.16em]'}>{collapsed ? null : 'Recent'}</div>
+          {recent.map(p => {
+            const href = `/projects/${p.id}`;
+            return (
+              <Link key={p.id} href={href} onClick={onNavigate} aria-current={location === href ? 'page' : undefined} title={collapsed ? p.name : undefined} className={`${row(location === href)} font-semibold`}>
+                {p.coverImageUrl
+                  ? <img src={p.coverImageUrl} alt="" className="h-[22px] w-[22px] shrink-0 rounded-[6px] object-cover" />
+                  : <span aria-hidden="true" className="grid h-[22px] w-[22px] shrink-0 place-items-center rounded-[6px] bg-white/70"><Scissors size={13} /></span>}
+                {label(p.name)}
+              </Link>
+            );
+          })}
+        </nav>
+      )}
+      <div className="mt-auto border-t border-ink pt-3">
+        <Link href="/settings" onClick={onNavigate} data-testid="link-settings" aria-label={collapsed ? 'Profile & settings' : undefined} title={collapsed ? 'Profile & settings' : undefined}
+          className={`flex min-h-[48px] items-center text-ink no-underline ${collapsed ? 'justify-center' : 'gap-3 px-3'}`}>
+          <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} />
+          {!collapsed && (
+            <span className="min-w-0 flex-1">
+              <span className="block truncate text-sm font-bold">{me?.name ?? 'Your profile'}</span>
+              <span className="block truncate text-xs">{me?.handle ? `@${me.handle} · ` : ''}Profile &amp; settings</span>
+            </span>
+          )}
+        </Link>
+        {/* Collapsed, Log out stays in the account menu (avatar, top right). */}
+        {!collapsed && (
+          <LogOut close={onNavigate} panelClass="bg-white" cancelClass="bg-canvas"
+            rowClass="flex min-h-[44px] w-full items-center gap-3 rounded-[16px] px-3 text-left text-sm font-semibold text-ink hover:bg-white/60" />
+        )}
       </div>
     </div>
   );
@@ -123,6 +193,7 @@ function MobileTabBar({ location, full = false }: { location: string; full?: boo
 
 export function ShellFrame({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = useSidebarCollapsed();
   const [location] = useLocation();
   const profile = useGetProfile();
   const mobileFocus = location === '/new' || location.startsWith('/posts/');
@@ -136,12 +207,12 @@ export function ShellFrame({ children }: { children: ReactNode }) {
 
   const studio = studioSection(location);
   const title = allItems.find(item => isActive(location, item.href))?.label
-    ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search' } as Record<string, string>)[location]
+    ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search', '/saved': 'Saved posts' } as Record<string, string>)[location]
     ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'Seams Club');
   return (
     <div className={`${mobileFocus ? 'min-h-[100dvh] pb-0' : 'min-h-[100dvh] pb-[calc(6rem+env(safe-area-inset-bottom))]'} md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]`}>
-      <aside className="sticky top-[18px] hidden h-[calc(100dvh-36px)] w-[260px] shrink-0 overflow-y-auto rounded-[30px] bg-yellow px-4 py-[22px] md:block">
-        <SidebarNav location={location} />
+      <aside aria-label="Main menu" className={`sticky top-[18px] hidden h-[calc(100dvh-36px)] shrink-0 overflow-y-auto rounded-[30px] bg-yellow py-5 md:block ${collapsed ? 'w-[84px] px-3' : 'w-[260px] px-4'}`}>
+        <SidebarNav location={location} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       </aside>
       {menuOpen && (
          <div className="fixed inset-0 z-50 flex justify-end bg-ink/40 md:hidden" onClick={e => { if (e.target === e.currentTarget) setMenuOpen(false); }}>
