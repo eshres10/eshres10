@@ -228,13 +228,14 @@ export function ExploreActionCard({ card, index }: { card: ExploreCard; index: n
   if (actions.isHidden(card)) return <HiddenNotice card={card} />;
   const saved = actions.isSaved(card);
   const title = cardTitle(card);
-  const badge = saved && (
-    <span className="pointer-events-none absolute right-2 top-2 inline-flex min-h-8 items-center rounded-full bg-ink px-3 text-[12px] font-bold text-white">Saved</span>
-  );
+  // Photo cards: a "Saved" pill on the photo. Text cards: a round pin beside "…" (their first line leaves room for both).
+  const badge = saved && (area
+    ? <span className="pointer-events-none absolute right-2 top-2 inline-flex min-h-8 items-center rounded-full bg-ink px-3 text-[12px] font-bold text-white">Saved</span>
+    : <span className="pointer-events-none absolute right-12 top-3 grid h-8 w-8 place-items-center rounded-full bg-ink text-white"><PinIcon size={15} /><span className="sr-only">Saved</span></span>);
   return (
     <div ref={wrapRef} {...press.handlers}
       className={`group/card relative select-none transition-transform duration-150 motion-reduce:transition-none has-[[aria-expanded=true]]:z-20 ${press.pressed ? 'scale-[.97]' : ''}`}>
-      <ExploreCardView card={card} index={index} />
+      <ExploreCardView card={card} index={index} saved={saved} />
       {area ? (
         <div ref={areaRef} className="pointer-events-none absolute inset-x-0 top-0" style={{ aspectRatio: area }}>
           <span aria-hidden="true" className="absolute inset-0 rounded-[20px] bg-ink/40 opacity-0 transition-opacity group-hover/card:opacity-100 group-has-[:focus-visible]/card:opacity-100" />

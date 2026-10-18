@@ -38,15 +38,17 @@ const followers = await photoPost(ann, "For my followers", { visibility: "follow
 const secret = await photoPost(ann, "Just mine", { visibility: "private", garment: "dresses" });
 const linen = await photoPost(oak, "Fabric haul! #thrifted", { fabric: "haul" });
 const top = await photoPost(oak, "A boxy top", { garment: "tops" });
-await ann("POST", "/api/posts", { kind: "status", caption: "Words only", visibility: "public" });
+const words = ok(await ann("POST", "/api/posts", { kind: "status", caption: "Words only", visibility: "public" })) as { id: number };
+const quietWords = ok(await ann("POST", "/api/posts", { kind: "status", caption: "Words for followers", visibility: "followers" })) as { id: number };
 
-test("signed out: public photo posts only, with photo sizes, never cached as private", async () => {
+test("signed out: public photo and words posts only, with photo sizes, never cached as private", async () => {
   const r = await anon("GET", "/api/public/explore/cards");
   assert.equal(r.status, 200, r.text);
   assert.notEqual(r.headers.get("cache-control"), "private, no-store");
   const page = r.json;
-  assert.deepEqual(postIds(page).sort(), [dress.id, linen.id, top.id].sort(), "no followers-only, private or words-only posts");
-  assert.equal(page.total, 3);
+  assert.deepEqual(postIds(page).sort(), [dress.id, linen.id, top.id, words.id].sort(), "no followers-only or private posts");
+  assert.equal(page.total, 4);
+  assert.equal(page.items.find((c: Card) => c.post?.id === words.id).post.photo, null, "a words card has no photo");
   const card = page.items.find((c: Card) => c.post?.id === dress.id);
   assert.deepEqual([card.post.photo.width, card.post.photo.height], [800, 1000], "real size, so the grid can hold the space");
 });
@@ -62,6 +64,15 @@ test("followers-only reaches followers; private never; blocks hide both ways", a
   assert.equal(r.headers.get("cache-control"), "private, no-store", "signed in: never cached");
 });
 
+test("Words: status posts only, by the same visibility rules", async () => {
+  assert.deepEqual(postIds(await cards(anon, "?sub=words")), [words.id], "signed out: public words posts");
+  assert.deepEqual(postIds(await cards(fen, "?sub=words")).sort(), [words.id, quietWords.id].sort(), "a follower also gets followers-only words");
+  assert.deepEqual(postIds(await cards(oak, "?sub=words")), [words.id]);
+  assert.deepEqual(postIds(await cards(bo, "?sub=words")), [], "nothing across a block");
+  assert.ok(postIds(await cards(fen)).includes(quietWords.id), "For you mixes them in");
+  assert.deepEqual(postIds(await cards(anon, "?tab=patterns&sub=words")), [], "Patterns has no Words filter (falls back to For you: pattern pages only)");
+});
+
 test("filters use the post's labels; Upcycle uses the hashtags; Fabric shows fabric posts", async () => {
   assert.deepEqual(postIds(await cards(anon, "?sub=dresses")), [dress.id]);
   assert.deepEqual(postIds(await cards(anon, "?sub=tops")), [top.id]);
@@ -71,7 +82,7 @@ test("filters use the post's labels; Upcycle uses the hashtags; Fabric shows fab
   assert.equal(fabric.items[0].post!.chip, "Fabric haul");
   assert.deepEqual(postIds(await cards(anon, "?tab=fabric&sub=hauls")), [linen.id]);
   assert.deepEqual(postIds(await cards(anon, "?tab=fabric&sub=linen")), []);
-  assert.deepEqual(postIds(await cards(anon, "?sub=nonsense")).length, 3, "an unknown filter means the first one");
+  assert.deepEqual(postIds(await cards(anon, "?sub=nonsense")).length, 4, "an unknown filter means the first one (photo and words posts)");
   assert.equal((await anon("PATCH", `/api/posts/${dress.id}`, { garment: "hats" })).status, 401);
   assert.equal((await ann("PATCH", `/api/posts/${dress.id}`, { garment: "hats" })).status, 400, "only the fixed garments");
 });
@@ -87,7 +98,8 @@ test("hidden things stay hidden for you only; undo brings them back", async () =
 test("For you lifts people you follow", async () => {
   const fresh = await photoPost(oak, "Newest of all", { garment: "tops" });
   const fens = postIds(await cards(fen));
-  assert.equal(fens[0], followers.id, "Ann's posts come first for her follower, even though Oak posted later");
+  assert.equal(fens[0], quietWords.id, "Ann's posts (her newest, a words post) come first for her follower, even though Oak posted later");
+  assert.ok(fens.indexOf(followers.id) < fens.indexOf(fresh.id), "her photo posts too");
   assert.equal(postIds(await cards(anon))[0], fresh.id, "signed out: newest first");
 });
 

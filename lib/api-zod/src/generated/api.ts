@@ -564,7 +564,7 @@ export const getExploreCardsQueryTabDefault = `explore`;
 
 export const GetExploreCardsQueryParams = zod.object({
   "tab": zod.enum(['explore', 'forum', 'challenges', 'patterns', 'fabric']).default(getExploreCardsQueryTabDefault),
-  "sub": zod.coerce.string().optional().describe('explore/patterns: for-you, dresses, tops, bottoms, outerwear, bags, upcycle. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one.'),
+  "sub": zod.coerce.string().optional().describe('explore: for-you, dresses, tops, bottoms, outerwear, bags, upcycle, words (status posts only). patterns: the same without words. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one.'),
   "cursor": zod.coerce.string().optional()
 })
 
@@ -577,7 +577,7 @@ export const GetExploreCardsResponse = zod.object({
   "post": zod.object({
   "id": zod.number().int(),
   "caption": zod.string(),
-  "photo": zod.object({
+  "photo": zod.union([zod.object({
   "id": zod.number().int(),
   "url": zod.string().describe('Full image'),
   "thumbUrl": zod.string().describe('Thumbnail'),
@@ -585,7 +585,7 @@ export const GetExploreCardsResponse = zod.object({
   "height": zod.number().int(),
   "color": zod.string().nullable().describe('Dominant colour as a placeholder while loading'),
   "altText": zod.string().describe('Read aloud by screen readers; empty when not given')
-}),
+}),zod.null()]).describe('Null for a words (status) post'),
   "author": zod.object({
   "handle": zod.string(),
   "name": zod.string(),

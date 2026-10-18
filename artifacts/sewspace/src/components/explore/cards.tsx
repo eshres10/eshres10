@@ -1,7 +1,8 @@
 import type { ExploreCard } from '@workspace/api-client-react';
-import { MessageCircle, Trophy } from 'lucide-react';
+import { MessageCircle, Quote, Trophy } from 'lucide-react';
 import { Link } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
+import { CaptionText } from '@/components/feed/CaptionText';
 import { Garment } from '@/components/brand/Garment';
 import { formatPrice } from '@/lib/currency';
 
@@ -24,7 +25,8 @@ const BOARD_TONE: Record<string, string> = {
 
 /** Height of a card relative to its width, for placing it in the shortest column. */
 export function cardHeight(card: ExploreCard): number {
-  if (card.post) return card.post.photo.height / Math.max(1, card.post.photo.width) + 0.32;
+  if (card.post?.photo) return card.post.photo.height / Math.max(1, card.post.photo.width) + 0.32;
+  if (card.post) return 0.55 + Math.min(card.post.caption.length, 280) / 380;
   if (card.thread) return 0.85 + Math.min(card.thread.excerpt.length, 180) / 600 + Math.min(card.thread.title.length, 80) / 300;
   return 1.25 + 0.3;
 }
@@ -48,14 +50,17 @@ export function cardTitle(card: ExploreCard): string {
 
 /** The shape of the photo area (top of the card), or null for thread cards (all text). */
 export function cardArea(card: ExploreCard): string | null {
-  if (card.post) return `${card.post.photo.width} / ${card.post.photo.height}`;
+  if (card.post) return card.post.photo ? `${card.post.photo.width} / ${card.post.photo.height}` : null;
   return card.thread ? null : '4 / 5';
 }
 
 /** The card's picture filling its box: for the lifted card and the save sheet. Threads get their tone and title. */
 export function CardMedia({ card, index, small = false }: { card: ExploreCard; index: number; small?: boolean }) {
   const fill = 'h-full w-full object-cover';
-  if (card.post) return <img src={card.post.photo.thumbUrl} alt="" draggable={false} className={fill} style={{ background: card.post.photo.color ?? undefined }} />;
+  if (card.post?.photo) return <img src={card.post.photo.thumbUrl} alt="" draggable={false} className={fill} style={{ background: card.post.photo.color ?? undefined }} />;
+  if (card.post) return small
+    ? <span className="grid h-full w-full place-items-center bg-yellow"><Quote size={20} aria-hidden="true" /></span>
+    : <span className="block h-full w-full overflow-hidden bg-yellow p-4 font-display text-[17px] leading-tight tracking-[-.03em]">{card.post.caption}</span>;
   if (card.pattern) return card.pattern.coverImageUrl
     ? <img src={card.pattern.coverImageUrl} alt="" draggable={false} className={fill} />
     : <Garment name={ART[card.pattern.category] ?? 'Tops'} tone={TONES[index % TONES.length]} className="h-full w-full" />;
@@ -69,8 +74,8 @@ export function CardMedia({ card, index, small = false }: { card: ExploreCard; i
     : <span className={`block h-full w-full p-4 font-display text-[16px] leading-tight tracking-[-.03em] ${tone}`}>{t.title}</span>;
 }
 
-export function ExploreCardView({ card, index }: { card: ExploreCard; index: number }) {
-  if (card.post) return <PostCard post={card.post} />;
+export function ExploreCardView({ card, index, saved = false }: { card: ExploreCard; index: number; saved?: boolean }) {
+  if (card.post) return <PostCard post={card.post} saved={saved} />;
   if (card.pattern) return <PatternCard pattern={card.pattern} index={index} />;
   if (card.challenge) return <ChallengeCard challenge={card.challenge} />;
   if (card.thread) return <ThreadCard thread={card.thread} />;
@@ -81,8 +86,9 @@ function Chip({ className, children }: { className: string; children: React.Reac
   return <span className={`absolute left-2 top-2 max-w-[calc(100%-1rem)] truncate rounded-full px-2.5 py-1 text-[12px] font-bold ${className}`}>{children}</span>;
 }
 
-function PostCard({ post }: { post: NonNullable<ExploreCard['post']> }) {
+function PostCard({ post, saved }: { post: NonNullable<ExploreCard['post']>; saved: boolean }) {
   const { photo } = post;
+  if (!photo) return <WordsCard post={post} saved={saved} />;
   return (
     <Link href={`/posts/${post.id}`} className={CARD_LINK} draggable={false}>
       <span className="relative block overflow-hidden rounded-[20px]" style={{ aspectRatio: `${photo.width} / ${photo.height}`, background: photo.color ?? undefined }}>
@@ -93,6 +99,24 @@ function PostCard({ post }: { post: NonNullable<ExploreCard['post']> }) {
       <span className={`mt-1.5 flex items-center gap-1.5 px-1 pb-1 ${post.caption ? '' : 'pr-9'}`}>
         <UserAvatar name={post.author.name} avatarUrl={post.author.avatarUrl} size={20} />
         <span className="truncate text-[12px] text-subtle">@{post.author.handle}</span>
+      </span>
+    </Link>
+  );
+}
+
+/** A words (status) post: the caption on yellow, like the composer's status card. */
+function WordsCard({ post, saved }: { post: NonNullable<ExploreCard['post']>; saved: boolean }) {
+  return (
+    <Link href={`/posts/${post.id}`} className={`${CARD_LINK} bg-yellow p-4`} draggable={false}>
+      {/* At most 8 lines. The float leaves room on the first line for "…" and the Saved pin (actions.tsx). */}
+      <span className="block max-h-[10em] overflow-hidden whitespace-pre-line font-display text-[17px] leading-tight tracking-[-.03em]">
+        <span aria-hidden="true" className={`float-right h-7 ${saved ? 'w-[4.25rem]' : 'w-8'}`} />
+        {post.chip && <><span className="mb-2 inline-block max-w-full truncate rounded-full bg-white px-2.5 py-1 font-sans text-[12px] font-bold tracking-normal">{post.chip}</span><br /></>}
+        <CaptionText text={post.caption} linked={false} />
+      </span>
+      <span className="mt-3 flex items-center gap-1.5">
+        <UserAvatar name={post.author.name} avatarUrl={post.author.avatarUrl} size={20} />
+        <span className="truncate text-[12px] font-semibold">@{post.author.handle}</span>
       </span>
     </Link>
   );
@@ -153,7 +177,7 @@ function ThreadCard({ thread }: { thread: NonNullable<ExploreCard['thread']> }) 
   const tone = thread.kind === 'show_tell' ? 'bg-peach/30' : BOARD_TONE[thread.board] ?? 'bg-mist';
   return (
     <Link href={`/forum/topics/${thread.id}`} className={`${CARD_LINK} ${tone} p-4`} draggable={false}>
-      <span className="inline-block max-w-[calc(100%-2.5rem)] truncate rounded-full bg-white px-2.5 py-1 text-[12px] font-bold">{label}</span>
+      <span className="inline-block max-w-[calc(100%-4.5rem)] truncate rounded-full bg-white px-2.5 py-1 text-[12px] font-bold">{label}</span>
       <span className="mt-3 block font-display text-[17px] leading-tight tracking-[-.03em]">{thread.title}</span>
       {thread.excerpt && <span className="mt-2 line-clamp-3 text-[13px] leading-snug text-ink/80">{thread.excerpt}</span>}
       <span className="mt-3 flex items-center justify-between gap-2 text-[12px]">

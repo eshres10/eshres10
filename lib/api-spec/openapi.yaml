@@ -257,7 +257,7 @@ paths:
         - name: sub
           in: query
           required: false
-          description: "explore/patterns: for-you, dresses, tops, bottoms, outerwear, bags, upcycle. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one."
+          description: "explore: for-you, dresses, tops, bottoms, outerwear, bags, upcycle, words (status posts only). patterns: the same without words. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one."
           schema: { type: string }
         - { name: cursor, in: query, required: false, schema: { type: string } }
       responses:
@@ -2641,7 +2641,10 @@ components:
           properties:
             id: { type: integer }
             caption: { type: string }
-            photo: { $ref: "#/components/schemas/Media" }
+            photo:
+              allOf: [{ $ref: "#/components/schemas/Media" }]
+              nullable: true
+              description: Null for a words (status) post
             author: { $ref: "#/components/schemas/PublicPerson" }
             chip: { type: string, nullable: true, description: "Pattern: {name} when the tagged pattern is visible to you, or the fabric type" }
             savedByMe: { type: boolean }

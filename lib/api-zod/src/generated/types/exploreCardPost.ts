@@ -14,7 +14,8 @@ import type { PublicPerson } from './publicPerson';
 export type ExploreCardPost = {
   id: number;
   caption: string;
-  photo: Media;
+  /** Null for a words (status) post */
+  photo: Media | null;
   author: PublicPerson;
   /**
      * Pattern: {name} when the tagged pattern is visible to you, or the fabric type

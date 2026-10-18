@@ -21,8 +21,8 @@ import { hydratePosts, mediaView, type MediaView } from "./posts";
 import type { Viewer } from "./viewer";
 import { visibleTo } from "./visibility";
 
-// Explore (owner-approved plan): one browse page mixing photo posts, fabric
-// posts, pattern pages, challenges and forum threads. Every list repeats the
+// Explore (owner-approved plan): one browse page mixing photo and words
+// (status) posts, fabric posts, pattern pages, challenges and forum threads. Every list repeats the
 // rules of its own kind: posts through visibleTo (signed out = public only,
 // followers-only for followers, blocks either way), pattern pages are public,
 // challenges and threads hide anyone across a block. Things you hid ("see
@@ -35,7 +35,8 @@ export const EXPLORE_TABS = ["explore", "forum", "challenges", "patterns", "fabr
 export type ExploreTab = (typeof EXPLORE_TABS)[number];
 const GARMENT_SUBS = ["for-you", "dresses", "tops", "bottoms", "outerwear", "bags", "upcycle"] as const;
 export const EXPLORE_SUBS: Record<ExploreTab, readonly string[]> = {
-  explore: GARMENT_SUBS,
+  // Words = status posts only (owner); every other post filter shows both kinds.
+  explore: [...GARMENT_SUBS, "words"],
   patterns: GARMENT_SUBS,
   forum: ["all", "fitting", "pattern-help", "fabric", "machines", "show-tell"],
   challenges: ["all", "running", "soon", "finished"],
@@ -58,7 +59,8 @@ export interface ExploreCardView {
   key: string;
   itemId: number;
   saved: boolean;
-  post: { id: number; caption: string; photo: MediaView; author: Person; chip: string | null; savedByMe: boolean } | null;
+  /** `photo` is null for a words (status) post. */
+  post: { id: number; caption: string; photo: MediaView | null; author: Person; chip: string | null; savedByMe: boolean } | null;
   pattern: {
     id: number; slug: string; name: string; designer: string; category: string; rating: number | null; makes: number;
     free: boolean; priceCents: number | null; currency: string | null; coverImageUrl: string | null;
@@ -128,8 +130,11 @@ async function likedGarments(db: Tx, viewer: Viewer): Promise<string[]> {
 
 async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub: string, offset: number): Promise<ExploreCardsPage> {
   const filters: Array<SQL | undefined> = [
-    eq(postsTable.kind, "photo"),
-    sql`EXISTS (SELECT 1 FROM ${postMediaTable} WHERE ${postMediaTable.postId} = ${postsTable.id})`,
+    // Photo posts with a photo, and words posts with something to read.
+    sub === "words"
+      ? and(eq(postsTable.kind, "status"), sql`btrim(${postsTable.caption}) <> ''`)
+      : sql`((${postsTable.kind} = 'photo' AND EXISTS (SELECT 1 FROM ${postMediaTable} WHERE ${postMediaTable.postId} = ${postsTable.id}))
+        OR (${postsTable.kind} = 'status' AND btrim(${postsTable.caption}) <> ''))`,
     sql`EXISTS (SELECT 1 FROM ${publicProfilesView} WHERE ${publicProfilesView.userId} = ${postsTable.userId})`,
     visibleTo(postsTable, viewer),
     notHidden(viewer, "post", postsTable.id),
@@ -140,7 +145,7 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
   } else if (sub === "upcycle") {
     filters.push(sql`EXISTS (SELECT 1 FROM sewspace_post_hashtags ph JOIN sewspace_hashtags h ON h.id = ph.hashtag_id
       WHERE ph.post_id = ${postsTable.id} AND h.tag IN (${sql.join(UPCYCLE_TAGS.map((t) => sql`${t}`), sql`, `)}))`);
-  } else if (sub !== "for-you") {
+  } else if (sub !== "for-you" && sub !== "words") {
     filters.push(eq(postsTable.garment, sub as PostGarment));
   }
   const where = and(...filters);
@@ -159,8 +164,8 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
   const rows = await db.select().from(postsTable).where(where).orderBy(...order).limit(EXPLORE_PAGE + 1).offset(offset);
   const posts = await hydratePosts(db, viewer, rows.slice(0, EXPLORE_PAGE));
   const items: ExploreCardView[] = posts.flatMap((p) => {
-    const photo = p.media[0];
-    if (!photo) return [];
+    const photo = p.media[0] ?? null;
+    if (!photo && p.kind !== "status") return [];
     const pattern = p.tags.find((t) => t.kind === "pattern");
     const chip = p.fabric ? FABRIC_LABEL[p.fabric] : pattern ? `Pattern: ${pattern.name}` : null;
     return [{ ...empty, type: "post", key: `post-${p.id}`, itemId: p.id, saved: p.savedByMe, post: { id: p.id, caption: p.caption, photo, author: p.author, chip, savedByMe: p.savedByMe } }];
