@@ -157,7 +157,9 @@ label:has(.field[required]) > span:first-child::after { content: " *"; color: va
 .account-pop { transform-origin: top right; animation: account-pop .15s ease-out both; }
 .account-fade { animation: account-fade .2s ease-out both; }
 .account-drawer { animation: account-drawer .2s ease-out both; }
-@media (prefers-reduced-motion: reduce) { .account-pop, .account-fade, .account-drawer { animation: none; } }
+@keyframes comments-sheet { from { transform: translateY(100%); } to { transform: none; } }
+.comments-sheet { animation: comments-sheet .22s ease-out both; }
+@media (prefers-reduced-motion: reduce) { .account-pop, .account-fade, .account-drawer, .comments-sheet { animation: none; } }
 
 /* Explore: on desktop the pinned filters cover the strip above them with the
    page background, so cards don't show through around the floating top bar. */

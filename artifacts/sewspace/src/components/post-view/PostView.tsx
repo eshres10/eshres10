@@ -201,8 +201,61 @@ function FollowLink({ handle }: { handle: string }) {
 type Draft = { id: number; handle: string } | null;
 type Pages = InfiniteData<CommentsPage, string | undefined>;
 
-/** Caption, comments, actions and the comment box. On phones `top` (header + photo) scrolls with them. */
-function Discussion({ post, wide, saved, onSave, top }: { post: FeedPost; wide: boolean; saved?: boolean; onSave?: () => void; top?: ReactNode }) {
+/**
+ * Comments rising from the bottom of the screen on phones, like Instagram
+ * (owner, October 2026): opened from a feed card's comment icon or "n comments"
+ * instead of going to the post page. Drag the handle down, tap outside, Back,
+ * Escape or ✕ to close. Back works because opening adds a history entry with
+ * the same address (a mark in its state), so wouter doesn't change page.
+ */
+export function CommentsSheet({ post, onClose }: { post: FeedPost; onClose: () => void }) {
+  const panel = useRef<HTMLDivElement>(null);
+  const [drag, setDrag] = useState(0);
+  const start = useRef<number | null>(null);
+  const close = useRef(onClose);
+  close.current = onClose;
+  useEffect(() => {
+    const mark = { seamsComments: post.id };
+    history.pushState({ ...(history.state ?? {}), ...mark }, '');
+    const onPop = () => close.current();
+    window.addEventListener('popstate', onPop);
+    return () => {
+      window.removeEventListener('popstate', onPop);
+      // Closed by ✕, outside or a drag: take our entry off again. (Leaving through a link keeps it; Back then stays on the feed.)
+      if ((history.state as { seamsComments?: number } | null)?.seamsComments === post.id) history.back();
+    };
+  }, [post.id]);
+  useModal(panel, onClose);
+  const onPointerDown = (e: React.PointerEvent) => { start.current = e.clientY; e.currentTarget.setPointerCapture(e.pointerId); };
+  const onPointerMove = (e: React.PointerEvent) => { if (start.current !== null) setDrag(Math.max(0, e.clientY - start.current)); };
+  const onPointerUp = () => {
+    if (start.current === null) return;
+    start.current = null;
+    if (drag > 110) onClose(); else setDrag(0);
+  };
+  return createPortal(
+    <div className="account-fade fixed inset-0 z-[80] flex items-end bg-ink/45" onMouseDown={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="comments-sheet w-full">
+      <div ref={panel} role="dialog" aria-modal="true" aria-label={`Comments on @${post.author.handle}'s post`}
+        style={drag ? { transform: `translateY(${drag}px)` } : undefined}
+        className={`flex h-[78dvh] w-full flex-col rounded-t-[24px] bg-white ${drag ? '' : 'transition-transform duration-200 motion-reduce:transition-none'}`}>
+        <div onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}
+          className="relative shrink-0 touch-none border-b border-line pb-2.5 pt-2 text-center">
+          <span className="mx-auto mb-2 block h-[5px] w-11 rounded-full bg-line" aria-hidden="true" />
+          <h2 className="text-[15px] font-bold">Comments</h2>
+          <button type="button" onClick={onClose} onPointerDown={e => e.stopPropagation()} aria-label="Close comments"
+            className="absolute right-1.5 top-1.5 grid h-11 w-11 place-items-center rounded-full hover:bg-canvas"><X size={20} aria-hidden="true" /></button>
+        </div>
+        <Discussion post={post} wide={false} sheet />
+      </div>
+      </div>
+    </div>,
+    document.body,
+  );
+}
+
+/** Caption, comments, actions and the comment box. On phones `top` (header + photo) scrolls with them; `sheet` is the comments alone. */
+function Discussion({ post, wide, saved, onSave, top, sheet = false }: { post: FeedPost; wide: boolean; saved?: boolean; onSave?: () => void; top?: ReactNode; sheet?: boolean }) {
   const { isSignedIn } = useAuth();
   const ask = useRequireSignIn();
   const client = useQueryClient();
@@ -274,7 +327,7 @@ function Discussion({ post, wide, saved, onSave, top }: { post: FeedPost; wide: 
   );
   const list = (
     <section aria-label="Comments" className="space-y-4">
-      {!wide && <h2 className="text-[14px] font-semibold text-subtle">{total === 1 ? '1 comment' : `${total.toLocaleString()} comments`}</h2>}
+      {!wide && !sheet && <h2 className="text-[14px] font-semibold text-subtle">{total === 1 ? '1 comment' : `${total.toLocaleString()} comments`}</h2>}
       {comments.isLoading
         ? <div className="grid place-items-center py-6" role="status" aria-label="Loading comments"><Loader2 className="animate-spin" aria-hidden="true" /></div>
         : items.length === 0
@@ -326,6 +379,14 @@ function Discussion({ post, wide, saved, onSave, top }: { post: FeedPost; wide: 
       <>
         <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain p-3.5">{caption}{list}</div>
         <div className="shrink-0 border-t border-line px-3.5 pb-2.5 pt-1.5">{actions}</div>
+        {box}
+      </>
+    );
+  }
+  if (sheet) {
+    return (
+      <>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3.5 py-4">{list}</div>
         {box}
       </>
     );

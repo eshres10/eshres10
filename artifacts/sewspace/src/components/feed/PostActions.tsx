@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { likePost, savePost, unlikePost, unsavePost, type FeedPost } from '@workspace/api-client-react';
 import { Bookmark, Check, Heart, MessageCircle, Send } from 'lucide-react';
 import { Link } from 'wouter';
+import { CommentsSheet } from '@/components/post-view/PostView';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 
 /** The full link to a post, for sharing. */
@@ -37,6 +38,13 @@ export function PostActions({ post, onComment }: { post: FeedPost; onComment?: (
   const [likes, setLikes] = useState(post.likeCount);
   const [saved, setSaved] = useState(post.savedByMe);
   const [copied, setCopied] = useState(false);
+  const [comments, setComments] = useState(false);
+  // Phones open the comments from the bottom of the screen (like Instagram); wider screens go to the post page.
+  const openComments = (e: React.MouseEvent) => {
+    if (window.matchMedia('(min-width: 768px)').matches || e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    setComments(true);
+  };
   useEffect(() => { setLiked(post.likedByMe); setLikes(post.likeCount); setSaved(post.savedByMe); }, [post.likedByMe, post.likeCount, post.savedByMe]);
 
   const toggleLike = async () => {
@@ -77,7 +85,7 @@ export function PostActions({ post, onComment }: { post: FeedPost; onComment?: (
       </button>
       {onComment
         ? <button type="button" onClick={onComment} aria-label="Comment" className={iconButton}><MessageCircle size={24} aria-hidden="true" /></button>
-        : <Link href={`/posts/${post.id}#comments`} aria-label={`Comments (${post.commentCount})`} className={`${iconButton} text-ink`}><MessageCircle size={24} aria-hidden="true" /></Link>}
+        : <Link href={`/posts/${post.id}#comments`} onClick={openComments} aria-label={`Comments (${post.commentCount})`} className={`${iconButton} text-ink`}><MessageCircle size={24} aria-hidden="true" /></Link>}
       <button type="button" onClick={share} aria-label={copied ? 'Link copied' : 'Share'} className={iconButton}>
         {copied ? <Check size={22} aria-hidden="true" /> : <Send size={22} aria-hidden="true" />}
       </button>
@@ -85,13 +93,14 @@ export function PostActions({ post, onComment }: { post: FeedPost; onComment?: (
         {likes > 0 && <b>{plural(likes, 'like')}</b>}
         {likes > 0 && post.commentCount > 0 && <span className="text-subtle"> · </span>}
         {post.commentCount > 0 && (
-          <Link href={`/posts/${post.id}#comments`} className="text-subtle no-underline hover:underline">{plural(post.commentCount, 'comment')}</Link>
+          <Link href={`/posts/${post.id}#comments`} onClick={openComments} className="text-subtle no-underline hover:underline">{plural(post.commentCount, 'comment')}</Link>
         )}
         {copied && <span className="ml-1 font-semibold text-blue-ink">Link copied</span>}
       </span>
       <button type="button" onClick={toggleSave} aria-pressed={saved} aria-label={saved ? 'Remove from saved' : 'Save'} className={iconButton}>
         <Bookmark size={23} aria-hidden="true" className={saved ? 'fill-ink' : ''} />
       </button>
+      {comments && <CommentsSheet post={post} onClose={() => setComments(false)} />}
     </div>
   );
 }
