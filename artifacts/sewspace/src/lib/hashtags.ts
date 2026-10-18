@@ -1,7 +1,8 @@
 // Hashtags in captions. Same rule as the API (access/hashtags.ts): "#" plus
 // 1–50 of a-z 0-9 _ (any case), not inside a word, a URL or an HTML entity.
 const IN_TEXT = /(^|[^\p{L}\p{N}_#&/])#([a-z0-9_]{1,50})(?![\p{L}\p{N}_])/giu;
-export const MAX_HASHTAGS = 30;
+/** Owner: at most 3 hashtags a post (same as the API). */
+export const MAX_HASHTAGS = 3;
 
 /** Distinct lower-case hashtags, in order of first use. */
 export function parseHashtags(text: string): string[] {
@@ -48,4 +49,23 @@ export function aspectRatio(aspect: string | undefined, first?: { width: number;
   if (aspect === '4:5') return 0.8;
   if (aspect === '1:1') return 1;
   return first ? Math.min(1.91, Math.max(0.8, first.width / first.height)) : 0.8;
+}
+
+/** A tag typed on its own ("#Linen Love" → "linenlove"); null if nothing usable is left. */
+export function normaliseHashtag(input: string): string | null {
+  const tag = input.trim().replace(/^#+/, '').toLowerCase().replace(/[^a-z0-9_]/g, '').slice(0, 50);
+  return tag || null;
+}
+
+/** Adds "#tag" to the end of the caption, unless it's already there. */
+export function appendHashtag(caption: string, tag: string): string {
+  if (parseHashtags(caption).includes(tag)) return caption;
+  const base = caption.replace(/\s+$/, '');
+  return base ? `${base} #${tag}` : `#${tag}`;
+}
+
+/** Takes every "#tag" (any case) out of the caption, keeping the rest of the text. */
+export function removeHashtag(caption: string, tag: string): string {
+  const out = caption.replace(IN_TEXT, (whole, before: string, found: string) => (found.toLowerCase() === tag ? before : whole));
+  return out.replace(/[ \t]{2,}/g, ' ').replace(/[ \t]+$/gm, '');
 }

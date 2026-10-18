@@ -51,7 +51,7 @@ test("parsing hashtags", () => {
 test("creating a photo post with alt text, a shape and hashtags", async () => {
   const foreign = await photo(oak);
   assert.equal((await ann("POST", "/api/posts", { kind: "photo", caption: "x", visibility: "public", mediaIds: [p1.id], altTexts: [{ mediaId: foreign.id, text: "not mine" }] })).status, 400, "alt text only for this post's photos");
-  assert.equal((await ann("POST", "/api/posts", { kind: "photo", caption: Array.from({ length: 31 }, (_, i) => `#t${i}`).join(" "), visibility: "public", mediaIds: [p1.id] })).status, 400, "at most 30 hashtags");
+  assert.equal((await ann("POST", "/api/posts", { kind: "photo", caption: Array.from({ length: 4 }, (_, i) => `#t${i}`).join(" "), visibility: "public", mediaIds: [p1.id] })).status, 400, "at most 3 hashtags");
   assert.equal((await ann("POST", "/api/posts", { kind: "photo", caption: "x", visibility: "public", mediaIds: [p1.id], aspect: "16:9" })).status, 400);
   const r = await ann("POST", "/api/posts", {
     kind: "photo", caption: "Sailor collar set is done! #SailorCollar #linen", visibility: "public", mediaIds: [p1.id, p2.id], aspect: "1:1",

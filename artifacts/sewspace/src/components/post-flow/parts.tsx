@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { useSuggestHashtags, type Media } from '@workspace/api-client-react';
-import { ChevronLeft, ChevronRight, Globe, Lock, Users } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Globe, Lock, Search, Users } from 'lucide-react';
 import type { UploadItem } from '@/components/flow';
 import { Sheet, useSheetDirty } from '@/components/social/Sheet';
 import { aspectRatio, hashtagAtCaret, parseHashtags, shortCount } from '@/lib/hashtags';
@@ -120,6 +120,65 @@ export function PickerSheet<T extends { id: number; name: string }>({ title, hel
       <div className="mt-4 flex gap-2">
         {value !== null && <button type="button" onClick={() => { onPick(null); onClose(); }} className="btn btn-line min-h-[52px] flex-1 text-base">Remove tag</button>}
         <button type="button" onClick={onClose} className="btn min-h-[52px] flex-1 bg-ink text-base text-white">Done</button>
+      </div>
+    </Sheet>
+  );
+}
+
+export type ChallengeOption = { slug: string; tag: string; title: string; detail: string; joined: boolean };
+
+/**
+ * "Enter a challenge": search the running challenges by tag or title and pick
+ * one or more (yours first). Entering joins you, so any running one can be picked.
+ */
+export function ChallengeSheet({ options, loading, value, onDone, onClose }: {
+  options: ChallengeOption[];
+  loading: boolean;
+  value: string[];
+  onDone: (slugs: string[]) => void;
+  onClose: () => void;
+}) {
+  const [picked, setPicked] = useState(value);
+  const [q, setQ] = useState('');
+  useSheetDirty(picked.join() !== value.join());
+  const needle = q.trim().replace(/^#/, '').toLowerCase();
+  const shown = options
+    .filter(o => !needle || o.tag.toLowerCase().includes(needle) || o.title.toLowerCase().includes(needle))
+    .sort((a, b) => Number(b.joined) - Number(a.joined));
+  const toggle = (slug: string) => setPicked(list => (list.includes(slug) ? list.filter(s => s !== slug) : [...list, slug]));
+  return (
+    <Sheet label="Enter a challenge" onClose={onClose}>
+      <h2 className="font-display text-[26px] leading-tight tracking-[-.05em]">Enter a challenge</h2>
+      <p className="mt-1 text-[15px] text-subtle">Pick a running challenge. Entering joins you, and the post has to be public.</p>
+      <label className="relative mt-4 block">
+        <span className="sr-only">Search challenges</span>
+        <Search size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" />
+        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search by #tag or name" className="field pl-9" autoComplete="off" />
+      </label>
+      <div className="mt-3 max-h-[45dvh] space-y-2 overflow-y-auto" role="listbox" aria-multiselectable="true" aria-label="Running challenges">
+        {loading && <p role="status" className="p-4 text-sm text-subtle">Loading challenges…</p>}
+        {!loading && !shown.length && (
+          <p className="rounded-[20px] bg-canvas p-4 text-sm text-subtle">{options.length ? `No running challenge matches “${q.trim()}”.` : 'No challenges are running right now.'}</p>
+        )}
+        {shown.map(o => {
+          const on = picked.includes(o.slug);
+          return (
+            <button key={o.slug} type="button" role="option" aria-selected={on} onClick={() => toggle(o.slug)}
+              className={`flex min-h-[60px] w-full items-center gap-3 rounded-[22px] border-2 px-3 py-2 text-left ${on ? 'border-ink bg-yellow' : 'border-line hover:border-ink'}`}>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[16px] font-bold">#{o.tag}</span>
+                <span className="block truncate text-sm text-subtle">{[o.title !== o.tag ? o.title : '', o.detail, o.joined ? 'joined' : ''].filter(Boolean).join(' · ')}</span>
+              </span>
+              <span aria-hidden="true" className={`grid h-7 w-7 shrink-0 place-items-center rounded-full border-2 ${on ? 'border-ink bg-ink text-white' : 'border-line'}`}>{on && <Check size={15} />}</span>
+            </button>
+          );
+        })}
+      </div>
+      <div className="mt-4 flex gap-2">
+        <button type="button" onClick={onClose} className="btn btn-line min-h-[52px] flex-1 text-base">Cancel</button>
+        <button type="button" onClick={() => { onDone(picked); onClose(); }} className="btn min-h-[52px] flex-1 bg-ink text-base text-white">
+          {picked.length ? `Enter ${picked.length === 1 ? '1 challenge' : `${picked.length} challenges`}` : 'Done'}
+        </button>
       </div>
     </Sheet>
   );

@@ -8,13 +8,14 @@ import {
   useGetChallengePage,
   useGetProfile,
   useListFabrics,
+  useListChallenges,
   useListJoinedChallenges,
   useListPatterns,
   useListProjects,
   type FeedPost,
   type Media,
 } from '@workspace/api-client-react';
-import { BookOpen, Camera, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Hash, ImagePlus, Info, Layers, Scissors, Trophy, X } from 'lucide-react';
+import { BookOpen, Camera, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Hash, ImagePlus, Info, Layers, Scissors, Search, Trophy, X } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { CaptionText } from '@/components/feed/CaptionText';
@@ -30,7 +31,7 @@ import {
   useUploads,
   useValidation,
 } from '@/components/flow';
-import { aspectRatio, MAX_HASHTAGS, parseHashtags } from '@/lib/hashtags';
+import { appendHashtag, aspectRatio, MAX_HASHTAGS, normaliseHashtag, parseHashtags, removeHashtag } from '@/lib/hashtags';
 import { processPhoto } from '@/lib/photos';
 import {
   AltTextSheet,
@@ -39,6 +40,7 @@ import {
   PhotoCarousel,
   photoSrc,
   PickerSheet,
+  ChallengeSheet,
   Switch,
   tagLabel,
   useHashtagAssist,
@@ -272,13 +274,17 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
   };
 
   // Challenge choices: active ones you joined, the one you came from, and (editing) the post's own.
+  const [choosingChallenge, setChoosingChallenge] = useState(false);
+  // Every running challenge (the API joins you on entering), loaded when the search opens.
+  const running = useListChallenges({ status: 'active' }, { query: { enabled: choosingChallenge || challenges.length > 0, staleTime: 60_000 } });
   const challengeOptions = useMemo(() => {
-    const list = (joined.data ?? []).map(c => ({ slug: c.slug, tag: c.tag, endsAt: c.endsAt as string | undefined }));
+    const list = (joined.data ?? []).map(c => ({ slug: c.slug, tag: c.tag, title: c.title, endsAt: c.endsAt as string | undefined, joined: true }));
+    for (const c of running.data ?? []) if (!list.some(x => x.slug === c.slug)) list.push({ slug: c.slug, tag: c.tag, title: c.title, endsAt: c.endsAt, joined: c.joinedByMe });
     const extra = extraChallenge.data?.challenge;
-    if (extra && extra.status === 'active' && !list.some(c => c.slug === extra.slug)) list.push({ slug: extra.slug, tag: extra.tag, endsAt: extra.endsAt });
-    for (const c of editing?.challenges ?? []) if (!list.some(x => x.slug === c.slug)) list.push({ slug: c.slug, tag: c.tag, endsAt: undefined });
+    if (extra && extra.status === 'active' && !list.some(c => c.slug === extra.slug)) list.push({ slug: extra.slug, tag: extra.tag, title: extra.title, endsAt: extra.endsAt, joined: extra.joinedByMe });
+    for (const c of editing?.challenges ?? []) if (!list.some(x => x.slug === c.slug)) list.push({ slug: c.slug, tag: c.tag, title: c.tag, endsAt: undefined, joined: true });
     return list;
-  }, [joined.data, extraChallenge.data, editing]);
+  }, [joined.data, running.data, extraChallenge.data, editing]);
 
   const assist = useHashtagAssist(caption, caret, { projectId, patternId, fabricId, challenge: challenges[0] });
   const items = uploads.items;
@@ -484,6 +490,14 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
     setOption(0);
     requestAnimationFrame(() => { captionRef.current?.focus(); captionRef.current?.setSelectionRange(next.caret, next.caret); });
   };
+  const [ownTag, setOwnTag] = useState('');
+  const atLimit = hashtags.length >= MAX_HASHTAGS;
+  const addOwnTag = () => {
+    const tag = normaliseHashtag(ownTag);
+    if (!tag || atLimit) return;
+    setCaption(appendHashtag(caption, tag));
+    setOwnTag('');
+  };
   const showList = assist.matching && assist.list.length > 0;
   const onCaptionKey = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (!showList || !window.matchMedia('(min-width: 1024px)').matches) return;
@@ -554,26 +568,48 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
         {v.error('caption') && <p id="f-caption-error" className="mt-2 text-sm font-semibold text-red-ink">{v.error('caption')}</p>}
       </div>
 
-      {/* Hashtag chips: matches while typing (phones), suggestions otherwise. */}
-      {(assist.list.length > 0 || hashtags.length > 0) && (
-        <div className={`rounded-[34px] bg-white p-4 lg:rounded-none lg:p-0 ${showList ? 'lg:hidden' : ''}`}>
-          <div className="flex items-baseline justify-between gap-3">
-            <p className="text-sm font-semibold text-subtle">{assist.matching ? 'Matching hashtags' : assist.list.length ? 'Suggested for this post' : 'Hashtags'}</p>
-            <p className={`text-sm font-bold ${hashtags.length > MAX_HASHTAGS ? 'text-red-ink' : 'text-subtle'}`}>{hashtags.length} / {MAX_HASHTAGS}<span className="lg:hidden"> hashtags</span></p>
-          </div>
-          {assist.list.length > 0 && (
+      {/* Hashtags: the post's own (removable), add your own (owner: at most 3), and matches/suggestions. */}
+      <div className={`rounded-[34px] bg-white p-4 lg:rounded-none lg:p-0 ${showList ? 'lg:hidden' : ''}`}>
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="text-sm font-semibold text-subtle">Hashtags</p>
+          <p className={`text-sm font-bold ${hashtags.length > MAX_HASHTAGS ? 'text-red-ink' : 'text-subtle'}`}>{hashtags.length} / {MAX_HASHTAGS}<span className="lg:hidden"> hashtags</span></p>
+        </div>
+        {hashtags.length > 0 && (
+          <ul className="mt-2 flex flex-wrap gap-2" aria-label="Hashtags on this post">
+            {hashtags.map(tag => (
+              <li key={tag} className="inline-flex min-h-[40px] items-center gap-1 rounded-full bg-yellow py-1 pl-3.5 pr-1 text-[15px] font-bold">
+                #{tag}
+                <button type="button" onClick={() => setCaption(removeHashtag(caption, tag))} aria-label={`Remove #${tag}`}
+                  className="grid h-8 w-8 place-items-center rounded-full hover:bg-ink/10"><X size={14} aria-hidden="true" /></button>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className="mt-3 flex gap-2">
+          <label className="relative min-w-0 flex-1">
+            <span className="sr-only">Add your own hashtag</span>
+            <Hash size={16} aria-hidden="true" className="absolute left-3 top-1/2 -translate-y-1/2 text-subtle" />
+            <input value={ownTag} onChange={e => setOwnTag(e.target.value)} disabled={atLimit} maxLength={51}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addOwnTag(); } }}
+              placeholder={atLimit ? `${MAX_HASHTAGS} is the most` : 'Add your own'} className="field pl-9 disabled:bg-canvas" autoComplete="off" />
+          </label>
+          <button type="button" onClick={addOwnTag} disabled={atLimit || !normaliseHashtag(ownTag)} className="btn min-h-[48px] shrink-0 bg-ink px-5 text-white disabled:opacity-40">Add</button>
+        </div>
+        {!atLimit && assist.list.length > 0 && (
+          <>
+            <p className="mt-3 text-sm font-semibold text-subtle">{assist.matching ? 'Matching hashtags' : 'Suggested for this post'}</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {assist.list.map(t => (
-                <button key={t.tag} type="button" onClick={() => choose(t.tag)}
+                <button key={t.tag} type="button" onClick={() => (assist.matching ? choose(t.tag) : setCaption(appendHashtag(caption, t.tag)))}
                   className={`inline-flex min-h-[44px] items-center gap-1.5 rounded-full px-4 text-[15px] font-bold ${assist.matching ? 'bg-ink text-white' : 'bg-canvas text-ink'}`}>
                   {!assist.matching && <span aria-hidden="true">+</span>}#{t.tag}{t.posts > 0 && <span className={assist.matching ? 'font-normal text-white/70' : 'font-normal text-subtle'}><span className="sr-only">, </span>{tagLabel(t.posts)}<span className="sr-only"> posts</span></span>}
                 </button>
               ))}
             </div>
-          )}
-          <p className="mt-2 text-sm text-subtle lg:hidden">Hashtags link to their own page.</p>
-        </div>
-      )}
+          </>
+        )}
+        <p className="mt-2 text-sm text-subtle lg:hidden">Up to {MAX_HASHTAGS}. They're added to your caption and link to their own page.</p>
+      </div>
 
       <div className="rounded-[34px] bg-white px-4 py-1 lg:rounded-[20px] lg:border lg:border-line">
         {tagRow('Make', Scissors, 'make', nameOf(projects.data, projectId), false)}
@@ -582,14 +618,34 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       </div>
       {(projectId || patternId || fabricId) && <p className="px-2 text-sm text-subtle">Tagged items show on the post only for people who can already see them.</p>}
 
-      {challengeOptions.map(c => (
-        <div key={c.slug} className="flex min-h-[72px] items-center gap-3 rounded-[34px] bg-white px-4 py-3 lg:rounded-[20px] lg:border lg:border-line">
-          <Trophy size={22} aria-hidden="true" />
-          <span className="min-w-0 flex-1"><span className="block text-[17px] font-semibold lg:text-[15px]">Enter in a challenge</span><span className="block text-sm text-subtle">#{c.tag}{c.endsAt ? ` · ${endsIn(c.endsAt)}` : ''}</span></span>
-          <Switch label={`Enter in #${c.tag}`} checked={challenges.includes(c.slug)}
-            onChange={on => { setChallenges(list => (on ? [...list, c.slug] : list.filter(s => s !== c.slug))); if (on) setVisibility('public'); }} />
-        </div>
-      ))}
+      <div className="flex min-h-[72px] flex-wrap items-center gap-3 rounded-[34px] bg-white px-4 py-3 lg:rounded-[20px] lg:border lg:border-line">
+        <Trophy size={22} aria-hidden="true" />
+        <span className="min-w-0 flex-1 text-[17px] font-semibold lg:text-[15px]">Enter a challenge</span>
+        <button type="button" onClick={() => setChoosingChallenge(true)} aria-haspopup="dialog"
+          className="inline-flex min-h-[44px] items-center gap-1.5 rounded-full bg-canvas px-4 text-[15px] font-semibold">
+          <Search size={16} aria-hidden="true" />{challenges.length ? 'Change' : 'Search'}
+        </button>
+        {challenges.length > 0 && (
+          <ul className="flex w-full flex-wrap gap-2 pl-[34px]" aria-label="Entering">
+            {challenges.map(slug => {
+              const c = challengeOptions.find(o => o.slug === slug);
+              return (
+                <li key={slug} className="inline-flex min-h-[36px] items-center gap-1 rounded-full bg-yellow py-1 pl-3 pr-1 text-sm font-bold">
+                  #{c?.tag ?? slug}{c?.endsAt && <span className="font-normal text-ink/70"> · {endsIn(c.endsAt)}</span>}
+                  <button type="button" onClick={() => setChallenges(list => list.filter(s => s !== slug))} aria-label={`Don't enter #${c?.tag ?? slug}`}
+                    className="grid h-8 w-8 place-items-center rounded-full hover:bg-ink/10"><X size={14} aria-hidden="true" /></button>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+      {choosingChallenge && (
+        <ChallengeSheet value={challenges} loading={running.isLoading && joined.isLoading}
+          options={challengeOptions.filter(c => c.endsAt).map(c => ({ slug: c.slug, tag: c.tag, title: c.title, detail: endsIn(c.endsAt!), joined: c.joined }))}
+          onDone={slugs => { setChallenges(slugs); if (slugs.some(s => !challenges.includes(s))) setVisibility('public'); }}
+          onClose={() => setChoosingChallenge(false)} />
+      )}
 
       {picker === 'make' && <PickerSheet title="Tag a make" help="We'll fill in the pattern and fabric from it." items={projects.data} value={projectId}
         image={p => p.coverImageUrl} describe={p => [nameOf(patterns.data, p.patternId ?? null), nameOf(fabrics.data, p.fabricId ?? null)].filter(Boolean).join(' · ') || p.status}

@@ -13,7 +13,8 @@ import { pagePosts } from "./posts";
 import { own } from "./studio";
 import type { Viewer } from "./viewer";
 
-export const MAX_HASHTAGS = 30;
+// Owner: at most 3 hashtags a post.
+export const MAX_HASHTAGS = 3;
 export const SUGGEST_LIMIT = 6;
 const TAG = /^[a-z0-9_]{1,50}$/;
 
