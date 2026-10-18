@@ -29,7 +29,7 @@ import {
   SearchTagsQueryParams,
   SearchTagsResponse,
 } from "@workspace/api-zod";
-import { browsePage, exploreCards, exploreFeed, likedByFollowee, listComments, listCommentsPage, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, searchPeople, searchPosts, searchTags, tagPage } from "../access";
+import { browsePage, exploreCards, exploreFeed, parseExploreFilter, likedByFollowee, listComments, listCommentsPage, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, searchPeople, searchPosts, searchTags, tagPage } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { scoped } from "../lib/scoped";
 
@@ -134,7 +134,8 @@ router.get("/public/explore/cards", (req, res, next) => {
 }, scoped(async (req, res, db): Promise<void> => {
   const query = GetExploreCardsQueryParams.safeParse(req.query);
   const q = query.success ? query.data : undefined;
-  res.json(GetExploreCardsResponse.parse(await exploreCards(db, viewerOf(req), q?.tab, q?.sub, q?.cursor)));
+  const filter = parseExploreFilter({ category: q?.category, tag: q?.tag, fabric: q?.fabric, way: q?.way });
+  res.json(GetExploreCardsResponse.parse(await exploreCards(db, viewerOf(req), q?.tab, q?.sub, q?.cursor, filter)));
 }));
 
 router.get("/public/explore", scoped(async (req, res, db): Promise<void> => {

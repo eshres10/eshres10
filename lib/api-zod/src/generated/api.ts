@@ -645,6 +645,10 @@ export const getExploreCardsQueryTabDefault = `explore`;
 export const GetExploreCardsQueryParams = zod.object({
   "tab": zod.enum(['explore', 'forum', 'challenges', 'patterns', 'fabric']).default(getExploreCardsQueryTabDefault),
   "sub": zod.coerce.string().optional().describe('explore: for-you, photos (photo posts only), dresses, tops, bottoms, outerwear, bags, upcycle, words (status posts only). patterns: the same without photos and words. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one.'),
+  "category": zod.coerce.string().optional().describe('Browse by, Explore tab: a post garment label (dresses, shirts, tops, trousers, skirts, outerwear, knitwear, bags, home, kids, formal) or upcycled (the upcycle hashtags). Anything else is ignored.'),
+  "tag": zod.coerce.string().optional().describe('Browse by on the Explore tab - posts with this hashtag.'),
+  "fabric": zod.coerce.string().optional().describe('Browse by on the Explore tab - the post\'s fabric label.'),
+  "way": zod.coerce.string().optional().describe('Ways to browse. Explore tab: popular (most saved public posts this week), beginner, quick, zerowaste, hacks (hashtags). Patterns tab: free (free pattern pages).'),
   "cursor": zod.coerce.string().optional()
 })
 

@@ -163,3 +163,30 @@ test("module alone (RLS bypassed) keeps the same rules", async () => {
   const bos = await withoutRls("xp_bo", (tx) => exploreCards(tx, viewerFor("xp_bo")));
   assert.ok(!bos.items.some((c) => c.post?.id === dress.id), "blocked: nothing of Ann's");
 });
+
+test("Browse by filters: category, hashtag, fabric, ways; public-only Popular; Free patterns", async () => {
+  const shirt = await photoPost(ann, "Denim shirt #xpstash", { garment: "shirts", fabric: "denim" });
+  const quiet = await photoPost(ann, "Followers only #xpstash", { visibility: "followers", fabric: "denim" });
+  const first = await photoPost(fen, "My first shirt #xpstash #firstmake", { garment: "shirts" });
+  const ids = async (user: ReturnType<typeof as>, q: string) => postIds(await cards(user, q)).sort();
+
+  assert.deepEqual(await ids(anon, "?tag=xpstash"), [shirt.id, first.id].sort(), "signed out: public posts with the tag");
+  assert.deepEqual(await ids(anon, "?tag=%23XpStash"), [shirt.id, first.id].sort(), "# and case don't matter");
+  assert.deepEqual(await ids(fen, "?tag=xpstash"), [shirt.id, quiet.id, first.id].sort(), "a follower also gets followers-only");
+  assert.deepEqual(await ids(bo, "?tag=xpstash"), [first.id], "nothing across a block");
+  assert.deepEqual(await ids(anon, "?category=shirts"), [shirt.id, first.id].sort());
+  assert.deepEqual(await ids(anon, "?fabric=denim"), [shirt.id]);
+  assert.deepEqual(await ids(anon, "?way=beginner"), [first.id], "beginner = #beginnerfriendly or #firstmake");
+  assert.deepEqual(await ids(anon, "?tag=xpstash&sub=words"), [], "filters add to the sub-filter");
+  assert.equal((await cards(anon, "?category=nonsense&fabric=silk&way=nope")).total, (await cards(anon)).total, "unknown filters are ignored");
+
+  ok(await fen("PUT", `/api/posts/${shirt.id}/save`));
+  ok(await fen("PUT", `/api/posts/${quiet.id}/save`));
+  const popular = await ids(fen, "?way=popular");
+  assert.ok(popular.includes(shirt.id), "most saved this week");
+  assert.ok(!popular.includes(quiet.id), "followers-only saves never count, not even for a follower");
+  assert.ok(!(await ids(bo, "?way=popular")).includes(shirt.id), "not across a block");
+
+  assert.deepEqual((await cards(anon, "?tab=patterns&way=free")).items.map((c) => c.pattern.name), ["Tiered Skirt"], "Free = free pattern pages");
+  assert.equal((await cards(anon, "?tab=patterns&tag=xpstash")).total, 2, "Patterns ignores post filters");
+});

@@ -30,6 +30,13 @@ export const WAYS = [
   { id: 'free', title: 'Free patterns', line: 'No cost to start', tone: 'bg-blue-soft text-ink' },
 ] as const;
 
+/** Labels for the filter chip (the address holds ids only). */
+export const CATEGORY_LABEL: Record<string, string> = {
+  dresses: 'Dresses', shirts: 'Shirts & blouses', tops: 'Tops', trousers: 'Pants & trousers', skirts: 'Skirts', outerwear: 'Outerwear',
+  knitwear: 'Knitwear', bags: 'Bags', home: 'Quilts & home', kids: 'Kids', upcycled: 'Upcycled', formal: 'Formal',
+};
+export const FABRIC_LABEL: Record<string, string> = { linen: 'Linen', denim: 'Denim', cotton: 'Cotton', knit: 'Knit', satin: 'Satin', wool: 'Wool' };
+
 const ART: Record<string, string> = {
   dresses: 'Dresses', shirts: 'Tops', tops: 'Tops', trousers: 'Trousers', skirts: 'Skirts', outerwear: 'Outerwear',
   knitwear: 'Knits', bags: 'Bags', home: 'Home', kids: 'Tops', upcycled: 'Mending', formal: 'Dresses',

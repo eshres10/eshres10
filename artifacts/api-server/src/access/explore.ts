@@ -7,6 +7,8 @@ import {
   likesTable,
   mediaTable,
   postMediaTable,
+  POST_FABRICS,
+  POST_GARMENTS,
   postsTable,
   publicProfilesView,
   type ExploreItemType,
@@ -18,6 +20,7 @@ import {
 import { entryViews } from "./catalog";
 import { collectedKeys } from "./collections";
 import { challengeSummaries, notBlockedHost } from "./challenges";
+import { normaliseTag } from "./hashtags";
 import { hydratePosts, mediaView, type MediaView } from "./posts";
 import type { Viewer } from "./viewer";
 import { visibleTo } from "./visibility";
@@ -45,6 +48,39 @@ export const EXPLORE_SUBS: Record<ExploreTab, readonly string[]> = {
 };
 /** Upcycle has no field of its own: public posts using one of these hashtags. */
 export const UPCYCLE_TAGS = ["upcycle", "refashion", "thrifted"];
+/**
+ * "Ways to browse" (owner-approved Browse plan): hashtags for the ways that have
+ * no field of their own. Popular = most saved public posts in 7 days; Free =
+ * free pattern pages on the Patterns tab.
+ */
+export const WAY_TAGS: Record<string, string[]> = {
+  beginner: ["beginnerfriendly", "firstmake"],
+  quick: ["quickmake"],
+  zerowaste: ["zerowaste", "scrapbusting"],
+  hacks: ["patternhack"],
+};
+export const EXPLORE_WAYS = ["popular", "free", ...Object.keys(WAY_TAGS)] as const;
+const POPULAR_DAYS = 7;
+
+/** Filters from Browse by, on top of the tab and sub-filter. Only valid values survive. */
+export interface ExploreFilter { category?: string; tag?: string; fabric?: PostFabric; way?: string }
+
+export function parseExploreFilter(raw: { category?: string; tag?: string; fabric?: string; way?: string }): ExploreFilter {
+  const out: ExploreFilter = {};
+  if (raw.category && ((POST_GARMENTS as readonly string[]).includes(raw.category) || raw.category === "upcycled")) out.category = raw.category;
+  const tag = raw.tag ? normaliseTag(raw.tag) : null;
+  if (tag) out.tag = tag;
+  if (raw.fabric && (POST_FABRICS as readonly string[]).includes(raw.fabric)) out.fabric = raw.fabric as PostFabric;
+  if (raw.way && (EXPLORE_WAYS as readonly string[]).includes(raw.way)) out.way = raw.way;
+  return out;
+}
+
+/** Posts using one of these hashtags. */
+function hasTag(tags: string[]): SQL {
+  return sql`EXISTS (SELECT 1 FROM sewspace_post_hashtags ph JOIN sewspace_hashtags h ON h.id = ph.hashtag_id
+    WHERE ph.post_id = ${postsTable.id} AND h.tag IN (${sql.join(tags.map((t) => sql`${t}`), sql`, `)}))`;
+}
+
 /** Pattern page categories behind each garment filter (Upcycle has none). */
 const PATTERN_CATEGORIES: Record<string, string[]> = {
   dresses: ["dresses"], tops: ["tops"], bottoms: ["trousers", "skirts"], outerwear: ["outerwear"], bags: ["bags"], upcycle: [],
@@ -99,13 +135,13 @@ export function parseExplore(tab: string | undefined, sub: string | undefined): 
   return { tab: t, sub: s };
 }
 
-export async function exploreCards(db: Tx, viewer: Viewer, tabIn?: string, subIn?: string, cursor?: string): Promise<ExploreCardsPage> {
+export async function exploreCards(db: Tx, viewer: Viewer, tabIn?: string, subIn?: string, cursor?: string, filter: ExploreFilter = {}): Promise<ExploreCardsPage> {
   const { tab, sub } = parseExplore(tabIn, subIn);
   const offset = offsetOf(cursor);
   const page = tab === "forum" ? await threadCards(db, viewer, sub, offset)
     : tab === "challenges" ? await challengeCards(db, viewer, sub, offset)
-    : tab === "patterns" ? await patternCards(db, viewer, sub, offset)
-    : await postCards(db, viewer, tab, sub, offset);
+    : tab === "patterns" ? await patternCards(db, viewer, sub, offset, filter.way === "free")
+    : await postCards(db, viewer, tab, sub, offset, tab === "explore" ? filter : {});
   // "Saved" badge: in one of your collections (or a post you saved / a page you hearted).
   const collected = await collectedKeys(db, viewer, page.items.map((c) => ({ type: c.type, id: c.itemId })));
   for (const card of page.items) card.saved ||= collected.has(`${card.type}-${card.itemId}`);
@@ -128,7 +164,7 @@ async function likedGarments(db: Tx, viewer: Viewer): Promise<string[]> {
   return rows.map((r) => r.g!).filter(Boolean);
 }
 
-async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub: string, offset: number): Promise<ExploreCardsPage> {
+async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub: string, offset: number, filter: ExploreFilter): Promise<ExploreCardsPage> {
   const filters: Array<SQL | undefined> = [
     // Photo posts with a photo, and words posts with something to read.
     sub === "words"
@@ -145,14 +181,22 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
     filters.push(isNotNull(postsTable.fabric));
     if (sub !== "all") filters.push(eq(postsTable.fabric, (sub === "hauls" ? "haul" : sub) as PostFabric));
   } else if (sub === "upcycle") {
-    filters.push(sql`EXISTS (SELECT 1 FROM sewspace_post_hashtags ph JOIN sewspace_hashtags h ON h.id = ph.hashtag_id
-      WHERE ph.post_id = ${postsTable.id} AND h.tag IN (${sql.join(UPCYCLE_TAGS.map((t) => sql`${t}`), sql`, `)}))`);
+    filters.push(hasTag(UPCYCLE_TAGS));
   } else if (sub === "bottoms") {
     // Bottoms covers the older "bottoms" label and the newer trousers / skirts (migration 0025).
     filters.push(inArray(postsTable.garment, ["bottoms", "trousers", "skirts"]));
   } else if (sub !== "for-you" && sub !== "words" && sub !== "photos") {
     filters.push(eq(postsTable.garment, sub as PostGarment));
   }
+  // Browse by filters add to the sub-filter.
+  if (filter.category === "upcycled") filters.push(hasTag(UPCYCLE_TAGS));
+  else if (filter.category) filters.push(eq(postsTable.garment, filter.category as PostGarment));
+  if (filter.tag) filters.push(hasTag([filter.tag]));
+  if (filter.fabric) filters.push(eq(postsTable.fabric, filter.fabric));
+  if (filter.way && WAY_TAGS[filter.way]) filters.push(hasTag(WAY_TAGS[filter.way]));
+  // Popular: saves in the last week, counted on public posts only (numbers only, not across a block).
+  const saves = sql`COALESCE((SELECT saves FROM sewspace_save_counts(ARRAY[${postsTable.id}], ${POPULAR_DAYS})), 0)`;
+  if (filter.way === "popular") filters.push(sql`${saves} > 0`);
   const where = and(...filters);
   const [{ n }] = await db.select({ n: count() }).from(postsTable).where(where);
 
@@ -166,6 +210,7 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
       : sql`0`;
     order = [sql`extract(epoch FROM ${postsTable.createdAt}) / 3600 + ${followed} + ${liked} DESC`, desc(postsTable.id)];
   }
+  if (filter.way === "popular") order = [sql`${saves} DESC`, desc(postsTable.createdAt), desc(postsTable.id)];
   const rows = await db.select().from(postsTable).where(where).orderBy(...order).limit(EXPLORE_PAGE + 1).offset(offset);
   const posts = await hydratePosts(db, viewer, rows.slice(0, EXPLORE_PAGE));
   const items: ExploreCardView[] = posts.flatMap((p) => {
@@ -181,12 +226,13 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
 
 // ------------------------------------------------------------------ patterns
 
-async function patternCards(db: Tx, viewer: Viewer, sub: string, offset: number): Promise<ExploreCardsPage> {
+async function patternCards(db: Tx, viewer: Viewer, sub: string, offset: number, freeOnly = false): Promise<ExploreCardsPage> {
   const categories = sub === "for-you" ? null : PATTERN_CATEGORIES[sub] ?? [];
   if (categories && !categories.length) return { items: [], nextCursor: null, total: 0 };
   const where = and(
     eq(catalogTable.kind, "pattern"),
     categories ? inArray(catalogTable.category, categories) : undefined,
+    freeOnly ? eq(catalogTable.source, "free") : undefined,
     notHidden(viewer, "pattern", sql`${catalogTable.id}`),
   );
   const [{ n }] = await db.select({ n: count() }).from(catalogTable).where(where);

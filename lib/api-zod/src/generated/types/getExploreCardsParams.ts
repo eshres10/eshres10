@@ -13,5 +13,21 @@ tab?: GetExploreCardsTab;
  * explore: for-you, photos (photo posts only), dresses, tops, bottoms, outerwear, bags, upcycle, words (status posts only). patterns: the same without photos and words. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one.
  */
 sub?: string;
+/**
+ * Browse by, Explore tab: a post garment label (dresses, shirts, tops, trousers, skirts, outerwear, knitwear, bags, home, kids, formal) or upcycled (the upcycle hashtags). Anything else is ignored.
+ */
+category?: string;
+/**
+ * Browse by on the Explore tab - posts with this hashtag.
+ */
+tag?: string;
+/**
+ * Browse by on the Explore tab - the post's fabric label.
+ */
+fabric?: string;
+/**
+ * Ways to browse. Explore tab: popular (most saved public posts this week), beginner, quick, zerowaste, hacks (hashtags). Patterns tab: free (free pattern pages).
+ */
+way?: string;
 cursor?: string;
 };

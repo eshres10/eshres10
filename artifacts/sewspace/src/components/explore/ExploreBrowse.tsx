@@ -2,12 +2,12 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useAuth } from '@clerk/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getExploreCards, type ExploreCard, type GetExploreCardsTab } from '@workspace/api-client-react';
-import { LayoutGrid, Loader2 } from 'lucide-react';
+import { LayoutGrid, Loader2, X } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import { ErrorState } from '@/components/common';
 import { GuestBanner } from '@/pages/explore';
 import { STICKY, useChrome } from '@/components/shell/useHideOnScroll';
-import { BrowseModal, type BrowsePick } from './BrowseModal';
+import { BrowseModal, CATEGORY_LABEL, FABRIC_LABEL, WAYS, type BrowsePick } from './BrowseModal';
 import { ExploreActionCard, ExploreActionsProvider, ExplorePostOverlay } from './actions';
 import { overlaySearch } from './overlay';
 import { cardHeight } from './cards';
@@ -34,6 +34,25 @@ const TABS: Array<{ id: Tab; label: string; subs: Array<{ id: string; label: str
   // Owner, October 2026: no Fabric tab (the API still answers tab=fabric).
 ];
 const SHARES_GARMENTS = new Set<Tab>(['explore', 'patterns']);
+
+type Filter = { key: 'category' | 'tag' | 'fabric' | 'way'; value: string; label: string };
+/**
+ * The Browse by filter in the address, if it applies to this tab: Explore takes
+ * a category, hashtag, fabric or way (not Free); Patterns takes Free only.
+ */
+function filterFrom(params: URLSearchParams, tab: Tab): Filter | null {
+  const way = params.get('way');
+  if (tab === 'patterns') return way === 'free' ? { key: 'way', value: way, label: 'Free patterns' } : null;
+  if (tab !== 'explore') return null;
+  const category = params.get('category');
+  if (category && CATEGORY_LABEL[category]) return { key: 'category', value: category, label: CATEGORY_LABEL[category] };
+  const tag = params.get('tag')?.trim().replace(/^#/, '').toLowerCase();
+  if (tag) return { key: 'tag', value: tag, label: `#${tag}` };
+  const fabric = params.get('fabric');
+  if (fabric && FABRIC_LABEL[fabric]) return { key: 'fabric', value: fabric, label: FABRIC_LABEL[fabric] };
+  const w = WAYS.find(x => x.id === way && x.id !== 'free');
+  return w ? { key: 'way', value: w.id, label: w.title } : null;
+}
 
 /**
  * Where the filters stick: just under the top bar, and up to the very top
@@ -82,12 +101,15 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
   const params = new URLSearchParams(postId ? overlaySearch() : search);
   const tab = TABS.find(t => t.id === params.get('tab')) ?? TABS[0];
   const sub = tab.subs.find(s => s.id === params.get('sub')) ?? tab.subs[0];
+  const filter = filterFrom(params, tab.id);
   useEffect(() => { if (!postId) document.title = 'Explore · Seams Club'; }, [postId]);
 
-  const go = (nextTab: Tab, nextSub?: string) => {
+  // Changing the sub-filter keeps the Browse by filter; changing tab (or keep: false) drops it.
+  const go = (nextTab: Tab, nextSub?: string, keep = nextTab === tab.id) => {
     const q = new URLSearchParams();
     if (nextTab !== 'explore') q.set('tab', nextTab);
     if (nextSub && nextSub !== TABS.find(t => t.id === nextTab)!.subs[0].id) q.set('sub', nextSub);
+    if (keep && filter) q.set(filter.key, filter.value);
     setLocation(`/explore${q.size ? `?${q}` : ''}`, { replace: true });
     window.scrollTo({ top: 0 });
   };
@@ -99,7 +121,7 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
   const [browsing, setBrowsing] = useState(false);
   const pick = (choice: BrowsePick) => {
     setBrowsing(false);
-    if (choice.kind === 'sub') return go('explore', choice.sub);
+    if (choice.kind === 'sub') return go('explore', choice.sub, false);
     const q = new URLSearchParams();
     if (choice.kind === 'way' && choice.id === 'free') q.set('tab', 'patterns');
     q.set(choice.kind === 'tag' ? 'tag' : choice.kind, choice.kind === 'tag' ? choice.tag : choice.id);
@@ -108,8 +130,10 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
   };
 
   const feed = useInfiniteQuery({
-    queryKey: ['explore-cards', tab.id, sub.id, Boolean(isSignedIn)],
-    queryFn: ({ pageParam }) => getExploreCards({ tab: tab.id, sub: sub.id, ...(pageParam ? { cursor: pageParam } : {}) }),
+    queryKey: ['explore-cards', tab.id, sub.id, filter?.key ?? '', filter?.value ?? '', Boolean(isSignedIn)],
+    queryFn: ({ pageParam }) => getExploreCards({
+      tab: tab.id, sub: sub.id, ...(filter ? { [filter.key]: filter.value } : {}), ...(pageParam ? { cursor: pageParam } : {}),
+    }),
     initialPageParam: undefined as string | undefined,
     getNextPageParam: last => last.nextCursor ?? undefined,
     enabled: isLoaded,
@@ -146,6 +170,15 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
     return () => io.disconnect();
   }, []);
 
+  // The Browse by filter as a blue chip: next to Browse on phones, beside Browse by from 768 px. ✕ clears it.
+  const filterChip = (show: string) => filter && (
+    <span className={`${show} min-h-[44px] shrink-0 items-center gap-1 rounded-full bg-blue pl-4 pr-1 text-[14px] font-bold text-white`}>
+      {filter.label}
+      <button type="button" onClick={() => go(tab.id, sub.id, false)} aria-label={`Remove filter ${filter.label}`}
+        className="grid h-9 w-9 place-items-center rounded-full hover:bg-white/20"><X size={16} aria-hidden="true" /></button>
+    </span>
+  );
+
   const countText = total === undefined ? '' : `${total.toLocaleString()} ${total === 1 ? tab.noun[0] : tab.noun[1]}`;
   return (
     <ExploreActionsProvider>
@@ -172,6 +205,7 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
                 className="inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border-2 border-ink bg-white px-4 text-[14px] font-bold text-ink md:hidden">
                 <LayoutGrid size={16} aria-hidden="true" />Browse
               </button>
+              {filterChip('inline-flex md:hidden')}
               {tab.subs.map(s => {
                 const on = s.id === sub.id;
                 return (
@@ -182,6 +216,7 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
                 );
               })}
             </div>
+            {filterChip('hidden md:inline-flex')}
             <button type="button" onClick={() => setBrowsing(true)} aria-haspopup="dialog"
               className="hidden min-h-[44px] shrink-0 items-center gap-2 rounded-full border-2 border-ink bg-white px-4 text-[15px] font-bold text-ink hover:bg-canvas md:inline-flex">
               <LayoutGrid size={17} aria-hidden="true" />Browse by
@@ -198,14 +233,15 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
               <ErrorState retry={() => feed.refetch()} />
             ) : !cards.length ? (
               <div className="rounded-[24px] bg-white px-6 py-14 text-center text-sm text-subtle md:bg-canvas">
-                {tab.id === 'explore' && sub.id === 'upcycle' ? 'Nothing yet. Tag a post #upcycle, #refashion or #thrifted and it shows here.'
+                {filter ? `Nothing here yet for ${filter.label}. Try another filter or remove it.`
+                  : tab.id === 'explore' && sub.id === 'upcycle' ? 'Nothing yet. Tag a post #upcycle, #refashion or #thrifted and it shows here.'
                   : tab.id === 'explore' && sub.id === 'words' ? 'No words posts yet. Write a status and it shows here.'
                   : tab.id === 'explore' && sub.id === 'photos' ? 'No photo posts yet. Share a make and it shows here.'
                 : tab.id === 'patterns' && sub.id === 'upcycle' ? 'Patterns aren’t sorted for upcycling yet. Try another filter.'
                   : 'Nothing here yet.'}
               </div>
             ) : (
-              <div className="flex items-start gap-2.5 md:gap-3.5" aria-label={`${tab.label}: ${sub.label}`} role="region">
+              <div className="flex items-start gap-2.5 md:gap-3.5" aria-label={`${tab.label}: ${sub.label}${filter ? `, ${filter.label}` : ''}`} role="region">
                 {placed.map((column, c) => (
                   <div key={c} className="flex min-w-0 flex-1 flex-col gap-3.5 md:gap-4">
                     {column.map(card => <ExploreActionCard key={card.key} card={card} index={cards.indexOf(card)} />)}
