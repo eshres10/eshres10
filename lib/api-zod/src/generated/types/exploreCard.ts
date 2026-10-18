@@ -18,6 +18,10 @@ export interface ExploreCard {
   type: ExploreCardType;
   /** Unique in the list, e.g. post-12 */
   key: string;
+  /** The id to save or hide it by (with type) */
+  itemId: number;
+  /** In one of your collections (or a post you saved) */
+  saved: boolean;
   /** @nullable */
   post: ExploreCardPost;
   /** @nullable */

@@ -15,6 +15,7 @@ import {
   type Tx,
 } from "@workspace/db";
 import { entryViews } from "./catalog";
+import { collectedKeys } from "./collections";
 import { challengeSummaries, notBlockedHost } from "./challenges";
 import { hydratePosts, mediaView, type MediaView } from "./posts";
 import type { Viewer } from "./viewer";
@@ -55,6 +56,8 @@ type Person = { handle: string; name: string; avatarUrl: string | null };
 export interface ExploreCardView {
   type: ExploreItemType;
   key: string;
+  itemId: number;
+  saved: boolean;
   post: { id: number; caption: string; photo: MediaView; author: Person; chip: string | null; savedByMe: boolean } | null;
   pattern: {
     id: number; slug: string; name: string; designer: string; category: string; rating: number | null; makes: number;
@@ -97,10 +100,14 @@ export function parseExplore(tab: string | undefined, sub: string | undefined): 
 export async function exploreCards(db: Tx, viewer: Viewer, tabIn?: string, subIn?: string, cursor?: string): Promise<ExploreCardsPage> {
   const { tab, sub } = parseExplore(tabIn, subIn);
   const offset = offsetOf(cursor);
-  if (tab === "forum") return threadCards(db, viewer, sub, offset);
-  if (tab === "challenges") return challengeCards(db, viewer, sub, offset);
-  if (tab === "patterns") return patternCards(db, viewer, sub, offset);
-  return postCards(db, viewer, tab, sub, offset);
+  const page = tab === "forum" ? await threadCards(db, viewer, sub, offset)
+    : tab === "challenges" ? await challengeCards(db, viewer, sub, offset)
+    : tab === "patterns" ? await patternCards(db, viewer, sub, offset)
+    : await postCards(db, viewer, tab, sub, offset);
+  // "Saved" badge: in one of your collections (or a post you saved / a page you hearted).
+  const collected = await collectedKeys(db, viewer, page.items.map((c) => ({ type: c.type, id: c.itemId })));
+  for (const card of page.items) card.saved ||= collected.has(`${card.type}-${card.itemId}`);
+  return page;
 }
 
 // ------------------------------------------------------------------ posts
@@ -156,7 +163,7 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
     if (!photo) return [];
     const pattern = p.tags.find((t) => t.kind === "pattern");
     const chip = p.fabric ? FABRIC_LABEL[p.fabric] : pattern ? `Pattern: ${pattern.name}` : null;
-    return [{ ...empty, type: "post", key: `post-${p.id}`, post: { id: p.id, caption: p.caption, photo, author: p.author, chip, savedByMe: p.savedByMe } }];
+    return [{ ...empty, type: "post", key: `post-${p.id}`, itemId: p.id, saved: p.savedByMe, post: { id: p.id, caption: p.caption, photo, author: p.author, chip, savedByMe: p.savedByMe } }];
   });
   return { items, nextCursor: nextCursor(offset, rows.length), total: n };
 }
@@ -179,6 +186,8 @@ async function patternCards(db: Tx, viewer: Viewer, sub: string, offset: number)
     ...empty,
     type: "pattern",
     key: `pattern-${v.id}`,
+    itemId: v.id,
+    saved: v.savedByMe,
     pattern: {
       id: v.id, slug: v.slug, name: v.name, designer: v.designer?.name || v.maker, category: v.category,
       rating: v.stats.rating, makes: v.stats.makes, free: v.source === "free", priceCents: v.priceCents, currency: v.currency,
@@ -213,6 +222,8 @@ async function challengeCards(db: Tx, viewer: Viewer, sub: string, offset: numbe
     ...empty,
     type: "challenge",
     key: `challenge-${idBySlug.get(c.slug)}`,
+    itemId: idBySlug.get(c.slug)!,
+    saved: false,
     challenge: {
       slug: c.slug, tag: c.tag, title: c.title, status: c.status, startsAt: c.startsAt, endsAt: c.endsAt,
       members: c.members, entries: c.entries, cover: covers.get(idBySlug.get(c.slug)!) ?? null,
@@ -267,6 +278,8 @@ async function threadCards(db: Tx, viewer: Viewer, sub: string, offset: number):
       ...empty,
       type: "thread" as const,
       key: `thread-${t.id}`,
+      itemId: t.id,
+      saved: false,
       thread: { id: t.id, board: t.board, kind: t.kind, title: t.title, excerpt: excerpt(t.body), author, replies: t.replyCount },
     }];
   });

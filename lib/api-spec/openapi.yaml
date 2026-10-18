@@ -1519,6 +1519,98 @@ paths:
               schema: { $ref: "#/components/schemas/UnreadNotificationCount" }
         "400": { description: Not a list of ids }
         "401": { description: Sign in first }
+  /collections:
+    get:
+      operationId: listCollections
+      tags: [social]
+      summary: "Your collections (private to you), most recently used first. Counts only include things you can still see."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/Collection" }
+    post:
+      operationId: createCollection
+      tags: [social]
+      summary: "Start a collection (always private). A name you already use returns that collection. 120 writes an hour."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/CollectionInput" }
+      responses:
+        "200":
+          description: The collection you already had with that name
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Collection" }
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Collection" }
+        "400": { description: "Name 1 to 40 characters" }
+        "429": { description: Too many writes this hour }
+  /collections/{id}/items:
+    post:
+      operationId: addCollectionItem
+      tags: [social]
+      summary: "Save something you can see into one of your collections. Posts also count as saved (Saved page); pattern pages also get your heart."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExploreItemRef" }
+      responses:
+        "200":
+          description: Saved
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Collection" }
+        "404": { description: "Not your collection, or nothing you can see" }
+        "429": { description: Too many writes this hour }
+    delete:
+      operationId: removeCollectionItem
+      tags: [social]
+      summary: "Take something out of one of your collections. A post leaves your Saved page once it's in none of them."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+        - { name: type, in: query, required: true, schema: { $ref: "#/components/schemas/ExploreItemType" } }
+        - { name: itemId, in: query, required: true, schema: { type: integer } }
+      responses:
+        "204": { description: Removed }
+        "404": { description: Not your collection }
+        "429": { description: Too many writes this hour }
+  /explore/feedback:
+    post:
+      operationId: sendExploreFeedback
+      tags: [social]
+      summary: "Hide (see_less) or More like this (more_like). Private to you. 120 writes an hour."
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ExploreFeedback" }
+      responses:
+        "204": { description: Noted }
+        "404": { description: Nothing you can see }
+        "429": { description: Too many writes this hour }
+    delete:
+      operationId: undoExploreFeedback
+      tags: [social]
+      summary: Undo a Hide or More like this.
+      parameters:
+        - { name: type, in: query, required: true, schema: { $ref: "#/components/schemas/ExploreItemType" } }
+        - { name: itemId, in: query, required: true, schema: { type: integer } }
+        - { name: kind, in: query, required: true, schema: { type: string, enum: [see_less, more_like] } }
+      responses:
+        "204": { description: Undone }
+        "429": { description: Too many writes this hour }
   /onboarding:
     get:
       operationId: getOnboarding
@@ -2497,6 +2589,35 @@ components:
           items: { $ref: "#/components/schemas/FeedPost" }
         nextCursor: { type: string, nullable: true }
       required: [tag, posts, items, nextCursor]
+    ExploreItemType:
+      type: string
+      enum: [post, pattern, challenge, thread]
+    ExploreItemRef:
+      type: object
+      properties:
+        type: { $ref: "#/components/schemas/ExploreItemType" }
+        id: { type: integer, description: "Post id, pattern page id, challenge id or forum topic id" }
+      required: [type, id]
+    ExploreFeedback:
+      type: object
+      properties:
+        type: { $ref: "#/components/schemas/ExploreItemType" }
+        id: { type: integer }
+        kind: { type: string, enum: [see_less, more_like] }
+      required: [type, id, kind]
+    Collection:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        count: { type: integer, description: Saved things in it you can still see }
+        coverUrl: { type: string, nullable: true }
+      required: [id, name, count, coverUrl]
+    CollectionInput:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 40 }
+      required: [name]
     ExploreCardsPage:
       type: object
       properties:
@@ -2512,6 +2633,8 @@ components:
       properties:
         type: { type: string, enum: [post, pattern, challenge, thread] }
         key: { type: string, description: "Unique in the list, e.g. post-12" }
+        itemId: { type: integer, description: "The id to save or hide it by (with type)" }
+        saved: { type: boolean, description: In one of your collections (or a post you saved) }
         post:
           type: object
           nullable: true
@@ -2568,7 +2691,7 @@ components:
             author: { $ref: "#/components/schemas/PublicPerson" }
             replies: { type: integer }
           required: [id, board, kind, title, excerpt, author, replies]
-      required: [type, key, post, pattern, challenge, thread]
+      required: [type, key, itemId, saved, post, pattern, challenge, thread]
     FeedPage:
       type: object
       properties:

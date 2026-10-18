@@ -572,6 +572,8 @@ export const GetExploreCardsResponse = zod.object({
   "items": zod.array(zod.object({
   "type": zod.enum(['post', 'pattern', 'challenge', 'thread']),
   "key": zod.string().describe('Unique in the list, e.g. post-12'),
+  "itemId": zod.number().int().describe('The id to save or hide it by (with type)'),
+  "saved": zod.boolean().describe('In one of your collections (or a post you saved)'),
   "post": zod.object({
   "id": zod.number().int(),
   "caption": zod.string(),
@@ -3716,6 +3718,96 @@ export const MarkNotificationsReadBody = zod.object({
 export const MarkNotificationsReadResponse = zod.object({
   "unreadCount": zod.number().int()
 })
+
+
+/**
+ * @summary Your collections (private to you), most recently used first. Counts only include things you can still see.
+ */
+export const ListCollectionsResponseItem = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "count": zod.number().int().describe('Saved things in it you can still see'),
+  "coverUrl": zod.string().nullable()
+})
+export const ListCollectionsResponse = zod.array(ListCollectionsResponseItem)
+
+
+/**
+ * @summary Start a collection (always private). A name you already use returns that collection. 120 writes an hour.
+ */
+export const createCollectionBodyNameMax = 40;
+
+
+
+export const CreateCollectionBody = zod.object({
+  "name": zod.string().min(1).max(createCollectionBodyNameMax)
+})
+
+export const CreateCollectionResponse = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "count": zod.number().int().describe('Saved things in it you can still see'),
+  "coverUrl": zod.string().nullable()
+})
+
+
+/**
+ * @summary Save something you can see into one of your collections. Posts also count as saved (Saved page); pattern pages also get your heart.
+ */
+export const AddCollectionItemParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const AddCollectionItemBody = zod.object({
+  "type": zod.enum(['post', 'pattern', 'challenge', 'thread']),
+  "id": zod.number().int().describe('Post id, pattern page id, challenge id or forum topic id')
+})
+
+export const AddCollectionItemResponse = zod.object({
+  "id": zod.number().int(),
+  "name": zod.string(),
+  "count": zod.number().int().describe('Saved things in it you can still see'),
+  "coverUrl": zod.string().nullable()
+})
+
+
+/**
+ * @summary Take something out of one of your collections. A post leaves your Saved page once it's in none of them.
+ */
+export const RemoveCollectionItemParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const RemoveCollectionItemQueryParams = zod.object({
+  "type": zod.enum(['post', 'pattern', 'challenge', 'thread']),
+  "itemId": zod.coerce.number().int()
+})
+
+export const RemoveCollectionItemResponse = zod.void()
+
+
+/**
+ * @summary Hide (see_less) or More like this (more_like). Private to you. 120 writes an hour.
+ */
+export const SendExploreFeedbackBody = zod.object({
+  "type": zod.enum(['post', 'pattern', 'challenge', 'thread']),
+  "id": zod.number().int(),
+  "kind": zod.enum(['see_less', 'more_like'])
+})
+
+export const SendExploreFeedbackResponse = zod.void()
+
+
+/**
+ * @summary Undo a Hide or More like this.
+ */
+export const UndoExploreFeedbackQueryParams = zod.object({
+  "type": zod.enum(['post', 'pattern', 'challenge', 'thread']),
+  "itemId": zod.coerce.number().int(),
+  "kind": zod.enum(['see_less', 'more_like'])
+})
+
+export const UndoExploreFeedbackResponse = zod.void()
 
 
 /**

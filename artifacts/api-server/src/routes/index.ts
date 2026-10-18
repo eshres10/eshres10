@@ -15,6 +15,7 @@ import ideasRouter from "./ideas";
 import onboardingRouter from "./onboarding";
 import menuRouter from "./menu";
 import notificationsRouter from "./notifications";
+import collectionsRouter from "./collections";
 import storageRouter, { objectReadRouter } from "./storage";
 import { requireAuth } from "../middlewares/auth";
 
@@ -44,6 +45,7 @@ router.use(ideasRouter);
 router.use(onboardingRouter);
 router.use(menuRouter);
 router.use(notificationsRouter);
+router.use(collectionsRouter);
 router.use(storageRouter);
 
 export default router;

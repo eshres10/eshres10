@@ -48,6 +48,8 @@ import type {
   ChallengeUpdate,
   CheckHandleAvailability200,
   CheckHandleAvailabilityParams,
+  Collection,
+  CollectionInput,
   Comment,
   CommentInput,
   Dashboard,
@@ -58,6 +60,8 @@ import type {
   EntryInput,
   ErrorResponse,
   ExploreCardsPage,
+  ExploreFeedback,
+  ExploreItemRef,
   Fabric,
   FabricInput,
   FabricUpdate,
@@ -140,6 +144,7 @@ import type {
   PublicPerson,
   PublicProfile,
   Recommendation,
+  RemoveCollectionItemParams,
   Report,
   ReportInput,
   ReportReceipt,
@@ -156,6 +161,7 @@ import type {
   Thread,
   ThreadInput,
   ThreadUpdate,
+  UndoExploreFeedbackParams,
   UnreadNotificationCount,
   UploadRequest,
   UploadResponse,
@@ -8555,6 +8561,536 @@ export const useMarkNotificationsRead = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getMarkNotificationsReadMutationOptions(options), queryClient);
+    }
+
+export const getListCollectionsUrl = () => {
+
+
+
+
+  return `/api/collections`
+}
+
+/**
+ * @summary Your collections (private to you), most recently used first. Counts only include things you can still see.
+ */
+export const listCollections = async ( options?: Parameters<typeof customFetch>[1]): Promise<Collection[]> => {
+
+  return customFetch<Collection[]>(getListCollectionsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListCollectionsQueryKey = () => {
+    return [
+    `/api/collections`
+    ] as const;
+    }
+
+
+export const getListCollectionsQueryOptions = <TData = Awaited<ReturnType<typeof listCollections>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCollections>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListCollectionsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listCollections>>> = ({ signal }) => listCollections({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listCollections>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListCollectionsQueryResult = NonNullable<Awaited<ReturnType<typeof listCollections>>>
+export type ListCollectionsQueryError = ErrorType<unknown>
+
+
+export function useListCollections<TData = Awaited<ReturnType<typeof listCollections>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCollections>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCollections>>,
+          TError,
+          Awaited<ReturnType<typeof listCollections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCollections<TData = Awaited<ReturnType<typeof listCollections>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCollections>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listCollections>>,
+          TError,
+          Awaited<ReturnType<typeof listCollections>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListCollections<TData = Awaited<ReturnType<typeof listCollections>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCollections>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Your collections (private to you), most recently used first. Counts only include things you can still see.
+ */
+
+export function useListCollections<TData = Awaited<ReturnType<typeof listCollections>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listCollections>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListCollectionsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreateCollectionUrl = () => {
+
+
+
+
+  return `/api/collections`
+}
+
+/**
+ * @summary Start a collection (always private). A name you already use returns that collection. 120 writes an hour.
+ */
+export const createCollection = async (collectionInput: CollectionInput, options?: Parameters<typeof customFetch>[1]): Promise<Collection> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Collection>(getCreateCollectionUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(collectionInput)
+  }
+);}
+
+
+
+
+
+export const getCreateCollectionMutationKey = () => ['createCollection'] as const;
+
+export const getCreateCollectionMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCollection>>, TError,CreateCollectionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof createCollection>>, TError,CreateCollectionMutationVariables, TContext> => {
+
+const mutationKey = getCreateCollectionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createCollection>>, CreateCollectionMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  createCollection(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateCollectionMutationResult = NonNullable<Awaited<ReturnType<typeof createCollection>>>
+    export type CreateCollectionMutationBody = BodyType<CollectionInput>
+    export type CreateCollectionMutationError = ErrorType<void>
+    export type CreateCollectionMutationVariables = {data: BodyType<CollectionInput>}
+
+    /**
+ * @summary Start a collection (always private). A name you already use returns that collection. 120 writes an hour.
+ */
+export const useCreateCollection = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createCollection>>, TError,CreateCollectionMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createCollection>>,
+        TError,
+        CreateCollectionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreateCollectionMutationOptions(options), queryClient);
+    }
+
+export const getAddCollectionItemUrl = (id: number,) => {
+
+
+
+
+  return `/api/collections/${id}/items`
+}
+
+/**
+ * @summary Save something you can see into one of your collections. Posts also count as saved (Saved page); pattern pages also get your heart.
+ */
+export const addCollectionItem = async (id: number,
+    exploreItemRef: ExploreItemRef, options?: Parameters<typeof customFetch>[1]): Promise<Collection> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<Collection>(getAddCollectionItemUrl(id),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(exploreItemRef)
+  }
+);}
+
+
+
+
+
+export const getAddCollectionItemMutationKey = () => ['addCollectionItem'] as const;
+
+export const getAddCollectionItemMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addCollectionItem>>, TError,AddCollectionItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof addCollectionItem>>, TError,AddCollectionItemMutationVariables, TContext> => {
+
+const mutationKey = getAddCollectionItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addCollectionItem>>, AddCollectionItemMutationVariables> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  addCollectionItem(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddCollectionItemMutationResult = NonNullable<Awaited<ReturnType<typeof addCollectionItem>>>
+    export type AddCollectionItemMutationBody = BodyType<ExploreItemRef>
+    export type AddCollectionItemMutationError = ErrorType<void>
+    export type AddCollectionItemMutationVariables = {id: number;data: BodyType<ExploreItemRef>}
+
+    /**
+ * @summary Save something you can see into one of your collections. Posts also count as saved (Saved page); pattern pages also get your heart.
+ */
+export const useAddCollectionItem = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addCollectionItem>>, TError,AddCollectionItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addCollectionItem>>,
+        TError,
+        AddCollectionItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAddCollectionItemMutationOptions(options), queryClient);
+    }
+
+export const getRemoveCollectionItemUrl = (id: number,
+    params: RemoveCollectionItemParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/collections/${id}/items?${stringifiedParams}` : `/api/collections/${id}/items`
+}
+
+/**
+ * @summary Take something out of one of your collections. A post leaves your Saved page once it's in none of them.
+ */
+export const removeCollectionItem = async (id: number,
+    params: RemoveCollectionItemParams, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getRemoveCollectionItemUrl(id,params),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRemoveCollectionItemMutationKey = () => ['removeCollectionItem'] as const;
+
+export const getRemoveCollectionItemMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeCollectionItem>>, TError,RemoveCollectionItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof removeCollectionItem>>, TError,RemoveCollectionItemMutationVariables, TContext> => {
+
+const mutationKey = getRemoveCollectionItemMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeCollectionItem>>, RemoveCollectionItemMutationVariables> = (props) => {
+          const {id,params} = props ?? {};
+
+          return  removeCollectionItem(id,params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveCollectionItemMutationResult = NonNullable<Awaited<ReturnType<typeof removeCollectionItem>>>
+
+    export type RemoveCollectionItemMutationError = ErrorType<void>
+    export type RemoveCollectionItemMutationVariables = {id: number;params: RemoveCollectionItemParams}
+
+    /**
+ * @summary Take something out of one of your collections. A post leaves your Saved page once it's in none of them.
+ */
+export const useRemoveCollectionItem = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeCollectionItem>>, TError,RemoveCollectionItemMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof removeCollectionItem>>,
+        TError,
+        RemoveCollectionItemMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRemoveCollectionItemMutationOptions(options), queryClient);
+    }
+
+export const getSendExploreFeedbackUrl = () => {
+
+
+
+
+  return `/api/explore/feedback`
+}
+
+/**
+ * @summary Hide (see_less) or More like this (more_like). Private to you. 120 writes an hour.
+ */
+export const sendExploreFeedback = async (exploreFeedback: ExploreFeedback, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<void>(getSendExploreFeedbackUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(exploreFeedback)
+  }
+);}
+
+
+
+
+
+export const getSendExploreFeedbackMutationKey = () => ['sendExploreFeedback'] as const;
+
+export const getSendExploreFeedbackMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendExploreFeedback>>, TError,SendExploreFeedbackMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof sendExploreFeedback>>, TError,SendExploreFeedbackMutationVariables, TContext> => {
+
+const mutationKey = getSendExploreFeedbackMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof sendExploreFeedback>>, SendExploreFeedbackMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  sendExploreFeedback(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SendExploreFeedbackMutationResult = NonNullable<Awaited<ReturnType<typeof sendExploreFeedback>>>
+    export type SendExploreFeedbackMutationBody = BodyType<ExploreFeedback>
+    export type SendExploreFeedbackMutationError = ErrorType<void>
+    export type SendExploreFeedbackMutationVariables = {data: BodyType<ExploreFeedback>}
+
+    /**
+ * @summary Hide (see_less) or More like this (more_like). Private to you. 120 writes an hour.
+ */
+export const useSendExploreFeedback = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof sendExploreFeedback>>, TError,SendExploreFeedbackMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof sendExploreFeedback>>,
+        TError,
+        SendExploreFeedbackMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSendExploreFeedbackMutationOptions(options), queryClient);
+    }
+
+export const getUndoExploreFeedbackUrl = (params: UndoExploreFeedbackParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/explore/feedback?${stringifiedParams}` : `/api/explore/feedback`
+}
+
+/**
+ * @summary Undo a Hide or More like this.
+ */
+export const undoExploreFeedback = async (params: UndoExploreFeedbackParams, options?: Parameters<typeof customFetch>[1]): Promise<void> => {
+
+  return customFetch<void>(getUndoExploreFeedbackUrl(params),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getUndoExploreFeedbackMutationKey = () => ['undoExploreFeedback'] as const;
+
+export const getUndoExploreFeedbackMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof undoExploreFeedback>>, TError,UndoExploreFeedbackMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof undoExploreFeedback>>, TError,UndoExploreFeedbackMutationVariables, TContext> => {
+
+const mutationKey = getUndoExploreFeedbackMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof undoExploreFeedback>>, UndoExploreFeedbackMutationVariables> = (props) => {
+          const {params} = props ?? {};
+
+          return  undoExploreFeedback(params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UndoExploreFeedbackMutationResult = NonNullable<Awaited<ReturnType<typeof undoExploreFeedback>>>
+
+    export type UndoExploreFeedbackMutationError = ErrorType<void>
+    export type UndoExploreFeedbackMutationVariables = {params: UndoExploreFeedbackParams}
+
+    /**
+ * @summary Undo a Hide or More like this.
+ */
+export const useUndoExploreFeedback = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof undoExploreFeedback>>, TError,UndoExploreFeedbackMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof undoExploreFeedback>>,
+        TError,
+        UndoExploreFeedbackMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUndoExploreFeedbackMutationOptions(options), queryClient);
     }
 
 export const getGetOnboardingUrl = () => {

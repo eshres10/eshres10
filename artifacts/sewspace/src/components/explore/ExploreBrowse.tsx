@@ -7,7 +7,8 @@ import { useLocation, useSearch } from 'wouter';
 import { ErrorState } from '@/components/common';
 import { GuestBanner } from '@/pages/explore';
 import { useChrome } from '@/components/shell/useHideOnScroll';
-import { cardHeight, ExploreCardView } from './cards';
+import { ExploreActionCard, ExploreActionsProvider } from './actions';
+import { cardHeight } from './cards';
 
 // Explore (owner: one page, named Explore): makes, fabric, pattern pages,
 // challenges and forum threads in one masonry grid. Tab and filter live in the
@@ -136,63 +137,65 @@ export function ExploreBrowsePage() {
 
   const countText = total === undefined ? '' : `${total.toLocaleString()} ${total === 1 ? tab.noun[0] : tab.noun[1]}`;
   return (
-    <div className="mx-auto w-full max-w-[1400px]">
-      {isLoaded && !isSignedIn && <GuestBanner />}
-      <div className="md:rounded-[30px] md:bg-white md:p-5">
-        <div ref={marker} aria-hidden="true" className="h-px" />
-        <div className={`explore-sticky sticky z-30 -mx-4 bg-canvas px-4 pb-3 transition-transform duration-[280ms] ease-out motion-reduce:transition-none md:-mx-5 md:-mt-5 md:bg-white md:px-5 md:pt-5 ${pinned ? '' : 'md:rounded-t-[30px]'} ${STICKY[chrome.shell].base} ${chrome.hidden ? `${STICKY[chrome.shell].hidden} shadow-[0_8px_18px_-10px_rgb(0_0_0/0.18)]` : 'translate-y-0'}`}>
-        <div role="group" aria-label="Show" className="-mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 md:mx-0 md:gap-1.5 md:border-0 md:px-0">
-          {TABS.map(t => {
-            const on = t.id === tab.id;
-            return (
-              <button key={t.id} type="button" aria-pressed={on} onClick={() => pickTab(t.id)}
-                className={`min-h-[44px] shrink-0 px-3 text-[15px] md:rounded-full md:px-4 ${on ? 'font-bold shadow-[inset_0_-3px_0_var(--color-ink)] md:bg-ink md:text-white md:shadow-none' : 'font-semibold text-subtle md:text-ink md:hover:bg-canvas'}`}>
-                {t.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="mt-3 flex items-center gap-3">
-          <div role="group" aria-label={`Filter ${tab.label}`} className="-mx-4 flex min-w-0 flex-1 gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
-            {tab.subs.map(s => {
-              const on = s.id === sub.id;
+    <ExploreActionsProvider>
+      <div className="mx-auto w-full max-w-[1400px]">
+        {isLoaded && !isSignedIn && <GuestBanner />}
+        <div className="md:rounded-[30px] md:bg-white md:p-5">
+          <div ref={marker} aria-hidden="true" className="h-px" />
+          <div className={`explore-sticky sticky z-30 -mx-4 bg-canvas px-4 pb-3 transition-transform duration-[280ms] ease-out motion-reduce:transition-none md:-mx-5 md:-mt-5 md:bg-white md:px-5 md:pt-5 ${pinned ? '' : 'md:rounded-t-[30px]'} ${STICKY[chrome.shell].base} ${chrome.hidden ? `${STICKY[chrome.shell].hidden} shadow-[0_8px_18px_-10px_rgb(0_0_0/0.18)]` : 'translate-y-0'}`}>
+          <div role="group" aria-label="Show" className="-mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 md:mx-0 md:gap-1.5 md:border-0 md:px-0">
+            {TABS.map(t => {
+              const on = t.id === tab.id;
               return (
-                <button key={s.id} type="button" aria-pressed={on} onClick={() => go(tab.id, s.id)}
-                  className={`min-h-[44px] shrink-0 rounded-full border px-4 text-[14px] font-semibold ${on ? 'border-ink bg-ink text-white' : 'border-line bg-white text-ink hover:border-ink'}`}>
-                  {s.label}
+                <button key={t.id} type="button" aria-pressed={on} onClick={() => pickTab(t.id)}
+                  className={`min-h-[44px] shrink-0 px-3 text-[15px] md:rounded-full md:px-4 ${on ? 'font-bold shadow-[inset_0_-3px_0_var(--color-ink)] md:bg-ink md:text-white md:shadow-none' : 'font-semibold text-subtle md:text-ink md:hover:bg-canvas'}`}>
+                  {t.label}
                 </button>
               );
             })}
           </div>
-          <p role="status" className="hidden shrink-0 text-sm font-semibold text-subtle md:block">{countText}</p>
-        </div>
-        <p role="status" className="sr-only md:hidden">{countText}</p>
-        </div>
+          <div className="mt-3 flex items-center gap-3">
+            <div role="group" aria-label={`Filter ${tab.label}`} className="-mx-4 flex min-w-0 flex-1 gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
+              {tab.subs.map(s => {
+                const on = s.id === sub.id;
+                return (
+                  <button key={s.id} type="button" aria-pressed={on} onClick={() => go(tab.id, s.id)}
+                    className={`min-h-[44px] shrink-0 rounded-full border px-4 text-[14px] font-semibold ${on ? 'border-ink bg-ink text-white' : 'border-line bg-white text-ink hover:border-ink'}`}>
+                    {s.label}
+                  </button>
+                );
+              })}
+            </div>
+            <p role="status" className="hidden shrink-0 text-sm font-semibold text-subtle md:block">{countText}</p>
+          </div>
+          <p role="status" className="sr-only md:hidden">{countText}</p>
+          </div>
 
-        <div ref={grid} className="mt-1">
-          {feed.isLoading || !isLoaded ? (
-            <div className="grid place-items-center py-16" role="status" aria-label="Loading"><Loader2 className="animate-spin" aria-hidden="true" /></div>
-          ) : feed.isError ? (
-            <ErrorState retry={() => feed.refetch()} />
-          ) : !cards.length ? (
-            <div className="rounded-[24px] bg-white px-6 py-14 text-center text-sm text-subtle md:bg-canvas">
-              {tab.id === 'explore' && sub.id === 'upcycle' ? 'Nothing yet. Tag a post #upcycle, #refashion or #thrifted and it shows here.'
-                : tab.id === 'patterns' && sub.id === 'upcycle' ? 'Patterns aren’t sorted for upcycling yet. Try another filter.'
-                : 'Nothing here yet.'}
-            </div>
-          ) : (
-            <div className="flex items-start gap-2.5 md:gap-3.5" aria-label={`${tab.label}: ${sub.label}`} role="region">
-              {placed.map((column, c) => (
-                <div key={c} className="flex min-w-0 flex-1 flex-col gap-3.5 md:gap-4">
-                  {column.map(card => <ExploreCardView key={card.key} card={card} index={cards.indexOf(card)} />)}
-                </div>
-              ))}
-            </div>
-          )}
-          <div ref={sentinel} aria-hidden="true" />
-          {feed.isFetchingNextPage && <div className="grid place-items-center py-6" role="status" aria-label="Loading more"><Loader2 className="animate-spin" aria-hidden="true" /></div>}
+          <div ref={grid} className="mt-1">
+            {feed.isLoading || !isLoaded ? (
+              <div className="grid place-items-center py-16" role="status" aria-label="Loading"><Loader2 className="animate-spin" aria-hidden="true" /></div>
+            ) : feed.isError ? (
+              <ErrorState retry={() => feed.refetch()} />
+            ) : !cards.length ? (
+              <div className="rounded-[24px] bg-white px-6 py-14 text-center text-sm text-subtle md:bg-canvas">
+                {tab.id === 'explore' && sub.id === 'upcycle' ? 'Nothing yet. Tag a post #upcycle, #refashion or #thrifted and it shows here.'
+                  : tab.id === 'patterns' && sub.id === 'upcycle' ? 'Patterns aren’t sorted for upcycling yet. Try another filter.'
+                  : 'Nothing here yet.'}
+              </div>
+            ) : (
+              <div className="flex items-start gap-2.5 md:gap-3.5" aria-label={`${tab.label}: ${sub.label}`} role="region">
+                {placed.map((column, c) => (
+                  <div key={c} className="flex min-w-0 flex-1 flex-col gap-3.5 md:gap-4">
+                    {column.map(card => <ExploreActionCard key={card.key} card={card} index={cards.indexOf(card)} />)}
+                  </div>
+                ))}
+              </div>
+            )}
+            <div ref={sentinel} aria-hidden="true" />
+            {feed.isFetchingNextPage && <div className="grid place-items-center py-6" role="status" aria-label="Loading more"><Loader2 className="animate-spin" aria-hidden="true" /></div>}
+          </div>
         </div>
       </div>
-    </div>
+    </ExploreActionsProvider>
   );
 }

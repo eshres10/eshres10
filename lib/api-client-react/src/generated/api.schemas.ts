@@ -425,6 +425,53 @@ export interface TagPage {
   nextCursor: string | null;
 }
 
+export type ExploreItemType = typeof ExploreItemType[keyof typeof ExploreItemType];
+
+
+export const ExploreItemType = {
+  post: 'post',
+  pattern: 'pattern',
+  challenge: 'challenge',
+  thread: 'thread',
+} as const;
+
+export interface ExploreItemRef {
+  type: ExploreItemType;
+  /** Post id, pattern page id, challenge id or forum topic id */
+  id: number;
+}
+
+export type ExploreFeedbackKind = typeof ExploreFeedbackKind[keyof typeof ExploreFeedbackKind];
+
+
+export const ExploreFeedbackKind = {
+  see_less: 'see_less',
+  more_like: 'more_like',
+} as const;
+
+export interface ExploreFeedback {
+  type: ExploreItemType;
+  id: number;
+  kind: ExploreFeedbackKind;
+}
+
+export interface Collection {
+  id: number;
+  name: string;
+  /** Saved things in it you can still see */
+  count: number;
+  /** @nullable */
+  coverUrl: string | null;
+}
+
+export interface CollectionInput {
+  /**
+     * @minLength 1
+     * @maxLength 40
+     */
+  name: string;
+}
+
 export type ExploreCardType = typeof ExploreCardType[keyof typeof ExploreCardType];
 
 
@@ -518,6 +565,10 @@ export interface ExploreCard {
   type: ExploreCardType;
   /** Unique in the list, e.g. post-12 */
   key: string;
+  /** The id to save or hide it by (with type) */
+  itemId: number;
+  /** In one of your collections (or a post you saved) */
+  saved: boolean;
   /** @nullable */
   post: ExploreCardPost;
   /** @nullable */
@@ -3000,6 +3051,25 @@ search?: SearchParameter;
 export type ListNotificationsParams = {
 cursor?: string;
 };
+
+export type RemoveCollectionItemParams = {
+type: ExploreItemType;
+itemId: number;
+};
+
+export type UndoExploreFeedbackParams = {
+type: ExploreItemType;
+itemId: number;
+kind: UndoExploreFeedbackKind;
+};
+
+export type UndoExploreFeedbackKind = typeof UndoExploreFeedbackKind[keyof typeof UndoExploreFeedbackKind];
+
+
+export const UndoExploreFeedbackKind = {
+  see_less: 'see_less',
+  more_like: 'more_like',
+} as const;
 
 export type ListThreadsParams = {
 search?: SearchParameter;

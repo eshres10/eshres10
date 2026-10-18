@@ -24,3 +24,4 @@ export * from "./menu";
 export * from "./pattern-me";
 export * from "./notifications";
 export * from "./explore";
+export * from "./collections";
