@@ -644,7 +644,7 @@ export const getExploreCardsQueryTabDefault = `explore`;
 
 export const GetExploreCardsQueryParams = zod.object({
   "tab": zod.enum(['explore', 'forum', 'challenges', 'patterns', 'fabric']).default(getExploreCardsQueryTabDefault),
-  "sub": zod.coerce.string().optional().describe('explore: for-you, dresses, tops, bottoms, outerwear, bags, upcycle, words (status posts only). patterns: the same without words. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one.'),
+  "sub": zod.coerce.string().optional().describe('explore: for-you, photos (photo posts only), dresses, tops, bottoms, outerwear, bags, upcycle, words (status posts only). patterns: the same without photos and words. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one.'),
   "cursor": zod.coerce.string().optional()
 })
 

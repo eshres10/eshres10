@@ -36,8 +36,8 @@ export const EXPLORE_TABS = ["explore", "forum", "challenges", "patterns", "fabr
 export type ExploreTab = (typeof EXPLORE_TABS)[number];
 const GARMENT_SUBS = ["for-you", "dresses", "tops", "bottoms", "outerwear", "bags", "upcycle"] as const;
 export const EXPLORE_SUBS: Record<ExploreTab, readonly string[]> = {
-  // Words = status posts only (owner); every other post filter shows both kinds.
-  explore: [...GARMENT_SUBS, "words"],
+  // Photos = photo posts only, Words = status posts only (owner); every other post filter shows both kinds.
+  explore: ["for-you", "photos", ...GARMENT_SUBS.slice(1), "words"],
   patterns: GARMENT_SUBS,
   forum: ["all", "fitting", "pattern-help", "fabric", "machines", "show-tell"],
   challenges: ["all", "running", "soon", "finished"],
@@ -133,6 +133,8 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
     // Photo posts with a photo, and words posts with something to read.
     sub === "words"
       ? and(eq(postsTable.kind, "status"), sql`btrim(${postsTable.caption}) <> ''`)
+      : sub === "photos"
+      ? sql`(${postsTable.kind} = 'photo' AND EXISTS (SELECT 1 FROM ${postMediaTable} WHERE ${postMediaTable.postId} = ${postsTable.id}))`
       : sql`((${postsTable.kind} = 'photo' AND EXISTS (SELECT 1 FROM ${postMediaTable} WHERE ${postMediaTable.postId} = ${postsTable.id}))
         OR (${postsTable.kind} = 'status' AND btrim(${postsTable.caption}) <> ''))`,
     sql`EXISTS (SELECT 1 FROM ${publicProfilesView} WHERE ${publicProfilesView.userId} = ${postsTable.userId})`,
@@ -148,7 +150,7 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
   } else if (sub === "bottoms") {
     // Bottoms covers the older "bottoms" label and the newer trousers / skirts (migration 0025).
     filters.push(inArray(postsTable.garment, ["bottoms", "trousers", "skirts"]));
-  } else if (sub !== "for-you" && sub !== "words") {
+  } else if (sub !== "for-you" && sub !== "words" && sub !== "photos") {
     filters.push(eq(postsTable.garment, sub as PostGarment));
   }
   const where = and(...filters);

@@ -64,6 +64,14 @@ test("followers-only reaches followers; private never; blocks hide both ways", a
   assert.equal(r.headers.get("cache-control"), "private, no-store", "signed in: never cached");
 });
 
+test("Photos: photo posts only, never words posts", async () => {
+  assert.deepEqual(postIds(await cards(anon, "?sub=photos")).sort(), [dress.id, linen.id, top.id].sort(), "signed out: public photo posts");
+  const fens = postIds(await cards(fen, "?sub=photos"));
+  assert.ok(!fens.includes(words.id) && !fens.includes(quietWords.id), "no words posts");
+  assert.deepEqual(postIds(await cards(bo, "?sub=photos")).filter((id) => id === dress.id), [], "nothing across a block");
+  assert.deepEqual(postIds(await cards(anon, "?tab=patterns&sub=photos")), [], "Patterns has no Photos filter");
+});
+
 test("Words: status posts only, by the same visibility rules", async () => {
   assert.deepEqual(postIds(await cards(anon, "?sub=words")), [words.id], "signed out: public words posts");
   assert.deepEqual(postIds(await cards(fen, "?sub=words")).sort(), [words.id, quietWords.id].sort(), "a follower also gets followers-only words");

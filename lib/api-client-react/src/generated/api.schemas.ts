@@ -3000,7 +3000,7 @@ export const GetExploreFeedSort = {
 export type GetExploreCardsParams = {
 tab?: GetExploreCardsTab;
 /**
- * explore: for-you, dresses, tops, bottoms, outerwear, bags, upcycle, words (status posts only). patterns: the same without words. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one.
+ * explore: for-you, photos (photo posts only), dresses, tops, bottoms, outerwear, bags, upcycle, words (status posts only). patterns: the same without photos and words. forum: all, fitting, pattern-help, fabric, machines, show-tell. challenges: all, running, soon, finished. fabric: all, linen, cotton, satin, viscose, crepe, hauls. Anything else means the first one.
  */
 sub?: string;
 cursor?: string;

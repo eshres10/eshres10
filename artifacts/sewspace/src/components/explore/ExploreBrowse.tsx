@@ -22,7 +22,7 @@ const GARMENTS = [
   { id: 'outerwear', label: 'Outerwear' }, { id: 'bags', label: 'Bags' }, { id: 'upcycle', label: 'Upcycle' },
 ];
 const TABS: Array<{ id: Tab; label: string; subs: Array<{ id: string; label: string }>; noun: [string, string] }> = [
-  { id: 'explore', label: 'Explore', subs: [...GARMENTS, { id: 'words', label: 'Words' }], noun: ['idea', 'ideas'] },
+  { id: 'explore', label: 'Explore', subs: [GARMENTS[0], { id: 'photos', label: 'Photos' }, ...GARMENTS.slice(1), { id: 'words', label: 'Words' }], noun: ['idea', 'ideas'] },
   { id: 'forum', label: 'Forum', noun: ['thread', 'threads'], subs: [
     { id: 'all', label: 'All' }, { id: 'fitting', label: 'Fitting' }, { id: 'pattern-help', label: 'Pattern help' },
     { id: 'fabric', label: 'Fabric' }, { id: 'machines', label: 'Machines' }, { id: 'show-tell', label: 'Show & tell' },
@@ -200,6 +200,7 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
               <div className="rounded-[24px] bg-white px-6 py-14 text-center text-sm text-subtle md:bg-canvas">
                 {tab.id === 'explore' && sub.id === 'upcycle' ? 'Nothing yet. Tag a post #upcycle, #refashion or #thrifted and it shows here.'
                   : tab.id === 'explore' && sub.id === 'words' ? 'No words posts yet. Write a status and it shows here.'
+                  : tab.id === 'explore' && sub.id === 'photos' ? 'No photo posts yet. Share a make and it shows here.'
                 : tab.id === 'patterns' && sub.id === 'upcycle' ? 'Patterns aren’t sorted for upcycling yet. Try another filter.'
                   : 'Nothing here yet.'}
               </div>
