@@ -29,6 +29,7 @@ import type {
   AssistantInput,
   AssistantResponse,
   BlockedPerson,
+  BrowsePage,
   CatalogEntry,
   CatalogInput,
   CatalogLinkInput,
@@ -1559,6 +1560,107 @@ export function useGetExploreFeed<TData = Awaited<ReturnType<typeof getExploreFe
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getGetExploreFeedQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getGetExploreBrowseUrl = () => {
+
+
+
+
+  return `/api/public/explore/browse`
+}
+
+/**
+ * @summary Everything Explore's Browse by modal shows: category and fabric tiles (cover = the public photo post saved most this week), trending hashtags (public posts, last 7 days), sewists to follow, and Picked for you (signed in only, never cached). Public content only; blocks apply.
+ */
+export const getExploreBrowse = async ( options?: Parameters<typeof customFetch>[1]): Promise<BrowsePage> => {
+
+  return customFetch<BrowsePage>(getGetExploreBrowseUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetExploreBrowseQueryKey = () => {
+    return [
+    `/api/public/explore/browse`
+    ] as const;
+    }
+
+
+export const getGetExploreBrowseQueryOptions = <TData = Awaited<ReturnType<typeof getExploreBrowse>>, TError = ErrorType<unknown>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreBrowse>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetExploreBrowseQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getExploreBrowse>>> = ({ signal }) => getExploreBrowse({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getExploreBrowse>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetExploreBrowseQueryResult = NonNullable<Awaited<ReturnType<typeof getExploreBrowse>>>
+export type GetExploreBrowseQueryError = ErrorType<unknown>
+
+
+export function useGetExploreBrowse<TData = Awaited<ReturnType<typeof getExploreBrowse>>, TError = ErrorType<unknown>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreBrowse>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExploreBrowse>>,
+          TError,
+          Awaited<ReturnType<typeof getExploreBrowse>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExploreBrowse<TData = Awaited<ReturnType<typeof getExploreBrowse>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreBrowse>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getExploreBrowse>>,
+          TError,
+          Awaited<ReturnType<typeof getExploreBrowse>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetExploreBrowse<TData = Awaited<ReturnType<typeof getExploreBrowse>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreBrowse>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Everything Explore's Browse by modal shows: category and fabric tiles (cover = the public photo post saved most this week), trending hashtags (public posts, last 7 days), sewists to follow, and Picked for you (signed in only, never cached). Public content only; blocks apply.
+ */
+
+export function useGetExploreBrowse<TData = Awaited<ReturnType<typeof getExploreBrowse>>, TError = ErrorType<unknown>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getExploreBrowse>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetExploreBrowseQueryOptions(options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

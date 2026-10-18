@@ -59,7 +59,7 @@ export async function searchPeople(db: Tx, raw: string) {
  * items never show up in the numbers.
  */
 export async function suggestedPeople(db: Tx, viewer: Viewer, limit = 3) {
-  if (!viewer.userId) return [];
+  const me = viewer.userId;
   // Written out with the table names: inside a subquery Drizzle leaves the view's column unqualified.
   const makes = sql<number>`(SELECT count(*)::int FROM sewspace_projects pr WHERE pr.user_id = sewspace_public_profiles.user_id AND pr.visibility = 'public')`;
   const posts = sql<number>`(SELECT count(*)::int FROM sewspace_posts po WHERE po.user_id = sewspace_public_profiles.user_id AND po.visibility = 'public')`;
@@ -67,8 +67,9 @@ export async function suggestedPeople(db: Tx, viewer: Viewer, limit = 3) {
     .select({ handle: publicProfilesView.handle, name: publicProfilesView.name, avatarUrl: publicProfilesView.avatarUrl, makes })
     .from(publicProfilesView)
     .where(and(
-      ne(publicProfilesView.userId, viewer.userId),
-      sql`NOT EXISTS (SELECT 1 FROM ${followsTable} WHERE ${followsTable.followerId} = ${viewer.userId} AND ${followsTable.followeeId} = ${publicProfilesView.userId})`,
+      // Signed out (Explore's Browse): everyone with public work.
+      me ? ne(publicProfilesView.userId, me) : undefined,
+      me ? sql`NOT EXISTS (SELECT 1 FROM ${followsTable} WHERE ${followsTable.followerId} = ${me} AND ${followsTable.followeeId} = ${publicProfilesView.userId})` : undefined,
       sql`${makes} + ${posts} > 0`,
     ))
     .orderBy(desc(makes), desc(posts), desc(publicProfilesView.createdAt))

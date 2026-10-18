@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Seams Club — Discover (desktop) — browse by</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Poppins:wght@500;600;700&amp;display=swap">
+<style>
+body{margin:0}
+*{box-sizing:border-box}
+a{color:#000}a:hover{color:#2f55d4}
+button{cursor:pointer}
+button:disabled{cursor:not-allowed}
+input:focus{outline:3px solid #466cf3;outline-offset:2px}
+@keyframes pipbob{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.pip-bob{animation:pipbob 2.4s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){.pip-bob{animation:none}}
+.pin{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+.pinw .ov,.pinw .ovb{opacity:0;transition:opacity .15s}
+.pinw .ovb{visibility:hidden}
+.pinw:hover .ov,.pinw:focus-within .ov,.pinw:hover .ovb,.pinw:focus-within .ovb{opacity:1;visibility:visible}
+.pinw:hover .tag,.pinw:hover .savedb{opacity:0}
+nav::-webkit-scrollbar,div::-webkit-scrollbar{display:none}
+</style>
+</helmet>
+<div ref="{{rootRef}}" style="position: relative; height: 100vh; min-height: 640px; overflow: hidden; background-color: #f2f2f2; background-image: radial-gradient(#d4d4d4 1px, transparent 1px); background-size: 20px 20px; font-family: 'Inter', system-ui, sans-serif; color: #000; padding: 18px; display: flex; gap: 18px">
+  <aside aria-label="Sidebar" style="width: 264px; flex-shrink: 0; align-self: stretch; background: #e6e51e; border-radius: 30px; padding: 16px 14px; display: flex; flex-direction: column; gap: 14px"><a href="AppFeed.dc.html" aria-label="Seams Club home" style="display: flex; align-items: center; gap: 10px; padding: 0 4px; text-decoration: none; color: #000"><svg viewBox="0 0 100 100" width="40" height="40" aria-hidden="true"><circle cx="50" cy="50" r="50" fill="#000000"/><g transform="translate(50 50) scale(0.92) translate(-49 -50)"><path d="M66.89 23.06 L66.65 22.58 L66.39 22.08 L66.12 21.59 L65.86 21.10 L65.59 20.62 L65.31 20.15 L65.03 19.67 L64.75 19.21 L64.47 18.75 L64.18 18.29 L63.89 17.84 L63.59 17.40 L63.30 16.96 L63.00 16.53 L62.70 16.11 L62.40 15.70 L62.10 15.29 L61.79 14.89 L61.48 14.50 L61.09 14.01 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.27 9.43 L53.54 8.64 L51.74 7.99 L49.89 7.49 L47.99 7.14 L46.07 6.93 L44.14 6.87 L42.20 6.96 L40.27 7.20 L38.37 7.60 L36.50 8.17 L34.70 8.91 L32.96 9.82 L31.32 10.92 L29.79 12.20 L28.41 13.68 L27.19 15.35 L26.16 17.19 L25.34 19.21 L24.76 21.39 L24.41 23.72 L24.37 25.69 L24.53 27.56 L24.90 29.35 L25.46 31.06 L26.18 32.68 L27.06 34.20 L28.06 35.62 L29.18 36.96 L30.39 38.22 L31.68 39.39 L33.05 40.50 L34.47 41.54 L35.95 42.53 L37.47 43.46 L39.01 44.35 L40.58 45.19 L42.16 46.00 L43.74 46.77 L45.32 47.50 L46.87 48.21 L48.40 48.90 L49.89 49.56 L51.33 50.20 L52.70 50.81 L54.12 51.48 L55.47 52.17 L56.77 52.87 L58.00 53.58 L59.18 54.32 L60.29 55.07 L61.34 55.84 L62.32 56.63 L63.23 57.43 L64.07 58.26 L64.84 59.10 L65.54 59.95 L66.17 60.83 L66.73 61.72 L67.22 62.64 L67.65 63.58 L68.00 64.54 L68.29 65.54 L68.50 66.58 L68.65 67.66 L68.72 68.79 L68.71 69.97 L68.62 71.20 L68.45 72.45 L68.17 73.70 L67.76 74.80 L67.20 75.86 L66.50 76.86 L65.64 77.83 L64.65 78.75 L63.51 79.61 L62.24 80.41 L60.86 81.14 L59.37 81.80 L57.79 82.38 L56.13 82.88 L54.42 83.29 L52.65 83.61 L50.86 83.84 L49.05 83.98 L47.24 84.02 L45.45 83.97 L43.68 83.82 L41.96 83.58 L40.31 83.24 L38.72 82.82 L37.23 82.30 L35.77 81.67 L35.08 81.34 L34.39 80.98 L33.72 80.61 L33.08 80.21 L32.46 79.81 L31.86 79.39 L31.30 78.96 L30.75 78.51 L30.24 78.06 L29.76 77.59 L29.30 77.11 L28.87 76.63 L28.47 76.13 L28.11 75.63 L27.77 75.12 L27.46 74.61 L27.18 74.09 L26.93 73.56 L26.72 73.02 L26.53 72.48 L26.37 71.93 L26.25 71.38 L26.15 70.81 L26.08 70.16 L19.92 70.84 L20.01 71.67 L20.17 72.58 L20.37 73.47 L20.62 74.34 L20.91 75.20 L21.25 76.04 L21.64 76.85 L22.06 77.65 L22.52 78.43 L23.02 79.18 L23.56 79.91 L24.13 80.62 L24.73 81.31 L25.37 81.97 L26.03 82.61 L26.73 83.23 L27.45 83.82 L28.20 84.39 L28.97 84.94 L29.77 85.46 L30.60 85.96 L31.44 86.44 L32.31 86.89 L33.23 87.33 L34.99 88.09 L36.91 88.75 L38.89 89.28 L40.92 89.69 L42.99 89.98 L45.10 90.16 L47.22 90.22 L49.36 90.17 L51.49 90.01 L53.60 89.74 L55.69 89.36 L57.74 88.87 L59.75 88.27 L61.69 87.55 L63.56 86.72 L65.35 85.77 L67.04 84.70 L68.62 83.50 L70.07 82.17 L71.37 80.70 L72.49 79.09 L73.42 77.34 L74.12 75.46 L74.55 73.55 L74.78 71.85 L74.90 70.22 L74.91 68.62 L74.82 67.06 L74.61 65.54 L74.31 64.06 L73.90 62.63 L73.39 61.24 L72.79 59.90 L72.09 58.61 L71.32 57.36 L70.46 56.17 L69.52 55.03 L68.52 53.94 L67.45 52.89 L66.31 51.89 L65.12 50.93 L63.87 50.01 L62.56 49.12 L61.20 48.27 L59.79 47.46 L58.34 46.67 L56.84 45.91 L55.30 45.19 L53.86 44.54 L52.41 43.89 L50.92 43.23 L49.42 42.56 L47.92 41.88 L46.41 41.17 L44.92 40.45 L43.46 39.70 L42.02 38.93 L40.63 38.13 L39.30 37.31 L38.03 36.46 L36.83 35.58 L35.72 34.68 L34.70 33.76 L33.79 32.82 L32.98 31.85 L32.29 30.86 L31.71 29.86 L31.24 28.83 L30.90 27.77 L30.67 26.66 L30.56 25.49 L30.59 24.28 L30.83 22.64 L31.22 21.18 L31.75 19.86 L32.41 18.69 L33.18 17.64 L34.06 16.70 L35.05 15.87 L36.13 15.15 L37.31 14.53 L38.58 14.01 L39.91 13.61 L41.30 13.32 L42.73 13.14 L44.18 13.07 L45.64 13.11 L47.09 13.27 L48.51 13.54 L49.89 13.91 L51.21 14.38 L52.45 14.95 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.45 18.13 L56.62 18.35 L56.88 18.68 L57.14 19.02 L57.40 19.37 L57.67 19.73 L57.93 20.10 L58.19 20.47 L58.44 20.85 L58.70 21.24 L58.96 21.63 L59.21 22.03 L59.46 22.44 L59.71 22.85 L59.95 23.27 L60.20 23.69 L60.44 24.12 L60.67 24.55 L60.91 24.98 L61.13 25.42 L61.36 25.87 Z" fill="#f34646"/><circle cx="64.13" cy="24.47" r="3.10" fill="#f34646"/><circle cx="23.00" cy="70.50" r="3.10" fill="#f34646"/><path d="M37.50 93.00 L47.65 65.61 L62.88 11.32 Q63.71 8.33 61.11 7.61 Q58.51 6.89 57.68 9.88 L42.86 64.29 Z M58.41 21.29 L61.15 11.40 A1.05 1.05 0 0 0 59.12 10.84 L56.39 20.73 A1.05 1.05 0 0 0 58.41 21.29 Z" fill="#ffffff" fill-rule="evenodd" stroke="#000000" stroke-width="2" paint-order="stroke"/><path d="M61.06 13.98 L59.89 12.71 L58.47 11.46 L56.92 10.37 L55.40 9.49 L52.32 14.88 L53.59 15.60 L54.63 16.34 L55.56 17.14 L56.48 18.16 Z" fill="#f34646"/></g></svg><span style="font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 21px; letter-spacing: -0.04em">seams club</span></a><a href="FlowPostDesk.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 46px; padding: 0 14px; border-radius: 16px; background: #000; color: #fff; text-decoration: none; font-size: 14px; font-weight: 700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="{{i.plus}}"></path></svg>New post</a><nav aria-label="Community"><div style="padding: 0 12px 4px; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">Community</div><a href="AppFeed.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.home}}"></path></svg>Home</a><a href="DiscoverDesk.dc.html" aria-current="page" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; background: #000; color: #fff"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.grid}}"></path></svg>Discover</a><a href="Explore.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.compass}}"></path></svg>Explore</a><a href="Forum.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.vote}}"></path></svg>Forum</a><a href="Shop.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.store}}"></path></svg>Shop</a><a href="PatternBuyDesk.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.pdf}}"></path></svg>Indie patterns</a></nav><nav aria-label="My studio"><div style="padding: 0 12px 4px; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">My studio</div><a href="Studio.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.kanban}}"></path></svg>Overview</a><a href="Patterns.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.pdf}}"></path></svg>Pattern library</a></nav><nav aria-label="Selling"><div style="padding: 0 12px 4px; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">Selling</div><a href="SellerDashboard.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.store}}"></path></svg>Seller dashboard</a><a href="MDesignerSales.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.trend}}"></path></svg>Pattern sales</a></nav><nav aria-label="Membership"><div style="padding: 0 12px 4px; font-size: 11px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase">Membership</div><a href="SupportDesk.dc.html" style="display: flex; align-items: center; gap: 12px; min-height: 42px; padding: 0 12px; border-radius: 14px; text-decoration: none; font-size: 14px; font-weight: 600; color: #000"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.heart}}"></path></svg>Support Seams Club</a></nav><div style="margin-top: auto; height: 1px; background: #000"></div><a href="Settings.dc.html" style="display: flex; align-items: center; gap: 10px; min-height: 52px; padding: 0 8px; border-radius: 16px; text-decoration: none"><span style="width: 36px; height: 36px; border-radius: 50%; background: #000; color: #e6e51e; display: grid; place-items: center; font-weight: 700">E</span><span><span style="display: block; font-size: 14px; font-weight: 700">Ena</span><span style="display: block; font-size: 12px">@ena.sews · Profile &amp; settings</span></span></a></aside>
+  <main style="position: relative; flex: 1; min-width: 0; background: #fff; border-radius: 30px; overflow: hidden">
+  <div ref="{{scRef}}" onScroll="{{onScroll}}" style="position: absolute; inset: 0; overflow-y: auto; padding: 186px 0 60px">
+    <div style="padding: 0 20px; display: flex; gap: 16px; align-items: flex-start">
+      <sc-for list="{{cols}}" as="col" hint-placeholder-count="6">
+        <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 22px">
+          <sc-for list="{{col.items}}" as="p" hint-placeholder-count="4">
+            <div class="pinw" style="position: relative">
+              <sc-if value="{{p.notHidden}}" hint-placeholder-val="{{true}}">
+                <sc-if value="{{p.isCard}}" hint-placeholder-val="{{true}}">
+                <div style="position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: {{p.ratio}}; background: #eee; transition: transform .15s; {{p.pressStyle}}">
+                  <a href="{{p.href}}" class="pin" ref="{{p.ref}}" onClick="{{p.click}}" onPointerDown="{{p.down}}" onPointerUp="{{up}}" onPointerLeave="{{up}}" onPointerMove="{{move}}" onContextMenu="{{noCtx}}" aria-label="{{p.title}}" style="position: absolute; inset: 0; display: block"><img src="{{p.img}}" alt="" draggable="false" style="display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none"></a>
+                  <span class="ov" aria-hidden="true" style="position: absolute; inset: 0; background: rgba(0,0,0,.38); pointer-events: none"></span>
+                  <sc-if value="{{p.hasTag}}" hint-placeholder-val="{{false}}"><span class="tag" style="position: absolute; left: 10px; bottom: 10px; max-width: calc(100% - 20px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 4px 10px; border-radius: 3000px; background: rgba(255,255,255,.92); font-size: 12px; font-weight: 700; pointer-events: none; {{p.tagStyle}}">{{p.tag}}</span></sc-if>
+                  <sc-if value="{{p.isSaved}}" hint-placeholder-val="{{false}}"><span class="savedb" style="position: absolute; right: 10px; top: 10px; display: inline-flex; align-items: center; gap: 4px; padding: 0 14px; min-height: 40px; border-radius: 3000px; background: #000; color: #fff; font-size: 13px; font-weight: 700; pointer-events: none">Saved</span></sc-if>
+                  <div class="ovb">
+                    <button onClick="{{p.pickBoard}}" style="position: absolute; left: 10px; top: 10px; display: inline-flex; align-items: center; gap: 4px; min-height: 40px; max-width: calc(100% - 100px); padding: 0 10px 0 12px; border: 0; border-radius: 3000px; background: rgba(255,255,255,.95); font: inherit; font-size: 13px; font-weight: 700"><span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{boardName}}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.down}}"></path></svg></button>
+                    <sc-if value="{{p.notSaved}}" hint-placeholder-val="{{true}}"><button onClick="{{p.quickSave}}" style="position: absolute; right: 10px; top: 10px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 3000px; background: #f34646; color: #fff; font: inherit; font-size: 14px; font-weight: 700">Save</button></sc-if>
+                    <button onClick="{{p.more}}" aria-label="More options for {{p.title}}" style="position: absolute; right: 10px; bottom: 10px; width: 36px; height: 36px; border: 0; border-radius: 50%; background: rgba(255,255,255,.95); display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="{{i.more}}"></path></svg></button>
+                  </div>
+                </div>
+                <div style="padding: 8px 4px 0"><span style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 14px; font-weight: 500; line-height: 1.35">{{p.title}}</span><sc-if value="{{p.hasWho}}" hint-placeholder-val="{{true}}"><span style="margin-top: 5px; display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600"><span aria-hidden="true" style="width: 22px; height: 22px; border-radius: 50%; background: {{p.avBg}}; display: grid; place-items: center; font-size: 10px; font-weight: 700; flex-shrink: 0">{{p.init}}</span>{{p.who}}</span></sc-if><sc-if value="{{p.hasSub}}" hint-placeholder-val="{{false}}"><span style="display: block; margin-top: 3px; font-size: 12px; color: #555">{{p.sub}}</span></sc-if></div>
+                </sc-if>
+                <sc-if value="{{p.isThread}}" hint-placeholder-val="{{false}}">
+                  <a href="ForumThread.dc.html" class="pin" ref="{{p.ref}}" onClick="{{p.click}}" onPointerDown="{{p.down}}" onPointerUp="{{up}}" onPointerLeave="{{up}}" onPointerMove="{{move}}" onContextMenu="{{noCtx}}" style="display: block; border-radius: 18px; padding: 16px 16px 14px; background: {{p.bg}}; color: #000; text-decoration: none; transition: transform .15s; {{p.pressStyle}}">
+                    <span style="display: flex; align-items: center; justify-content: space-between; gap: 6px"><span style="padding: 3px 9px; border-radius: 3000px; background: rgba(255,255,255,.75); font-size: 11px; font-weight: 700">{{p.tag}}</span><sc-if value="{{p.isSaved}}" hint-placeholder-val="{{false}}"><span style="padding: 3px 9px; border-radius: 3000px; background: #000; color: #fff; font-size: 11px; font-weight: 700">Saved</span></sc-if></span>
+                    <span style="display: block; margin-top: 10px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 18px; line-height: 1.2; letter-spacing: -0.03em">{{p.title}}</span>
+                    <span style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; margin-top: 6px; font-size: 14px; line-height: 1.4">{{p.excerpt}}</span>
+                    <span style="margin-top: 12px; display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600"><span aria-hidden="true" style="width: 20px; height: 20px; border-radius: 50%; background: #fff; display: grid; place-items: center; font-size: 10px; font-weight: 700">{{p.init}}</span><span style="flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap">{{p.who}}</span><span style="display: inline-flex; align-items: center; gap: 3px"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.forum}}"></path></svg>{{p.replies}}</span></span>
+                  </a>
+                  <div style="display: flex; justify-content: flex-end"><button onClick="{{p.more}}" aria-label="More options for {{p.title}}" style="width: 32px; height: 32px; border: 0; background: transparent; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" aria-hidden="true"><path d="{{i.more}}"></path></svg></button></div>
+                </sc-if>
+              </sc-if>
+              <sc-if value="{{p.isHidden}}" hint-placeholder-val="{{false}}">
+                <div style="border-radius: 18px; background: #f2f2f2; padding: 22px 16px; text-align: center">
+                  <b style="display: block; font-size: 14px">Got it. You'll see fewer ideas like this.</b>
+                  <button onClick="{{p.undoHide}}" style="margin-top: 10px; min-height: 40px; padding: 0 16px; border: 0; border-radius: 3000px; background: #fff; font: inherit; font-size: 13px; font-weight: 700">Undo</button>
+                </div>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+    <sc-if value="{{empty}}" hint-placeholder-val="{{false}}"><p style="margin: 60px 20px; text-align: center; color: #555; font-size: 15px">No ideas here yet. Be the first to post one.</p></sc-if>
+  </div>
+
+  <header style="position: absolute; left: 0; right: 0; top: 0; z-index: 10; background: #fff; border-radius: 30px 30px 0 0; transition: transform .28s ease, box-shadow .28s; {{headStyle}}">
+    <div style="height: 76px; display: flex; align-items: center; gap: 12px; padding: 0 16px 0 24px; transition: opacity .2s; {{navStyle}}">
+      <label style="flex: 1; display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 18px; border-radius: 3000px; background: #f2f2f2"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="{{i.search}}"></path></svg><input type="text" placeholder="Search makes, patterns, fabric and sewists" aria-label="Search Discover" style="flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 15px"></label>
+      <a href="FlowPostDesk.dc.html" style="display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 3000px; background: #e6e51e; text-decoration: none; font-size: 14px; font-weight: 700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="{{i.plus}}"></path></svg>New post</a>
+      <a href="AppFeed.dc.html" aria-label="Notifications" style="width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.bell}}"></path></svg></a>
+      <a href="AccountMenuDesk.dc.html" aria-label="Account menu" style="width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center"><span style="width: 36px; height: 36px; border-radius: 50%; background: #000; color: #e6e51e; display: grid; place-items: center; font-weight: 700">E</span></a>
+    </div>
+    <div style="padding: 4px 20px 14px">
+      <nav aria-label="Categories" style="display: flex; justify-content: center; gap: 6px; flex-wrap: wrap">
+        <sc-for list="{{cats}}" as="c" hint-placeholder-count="7"><button aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="min-height: 44px; padding: 0 18px; border: 0; border-radius: 3000px; font: inherit; font-size: 15px; font-weight: 700; {{c.style}}">{{c.label}}</button></sc-for>
+      </nav>
+      <div role="group" aria-label="Narrow it down" style="position: relative; margin-top: 10px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap">
+        <sc-for list="{{subs}}" as="c" hint-placeholder-count="6"><button aria-pressed="{{c.on}}" onClick="{{c.pick}}" style="min-height: 38px; padding: 0 16px; border: 1px solid; border-radius: 3000px; font: inherit; font-size: 14px; font-weight: 600; {{c.style}}">{{c.label}}</button></sc-for>
+        <sc-if value="{{hasBsel}}" hint-placeholder-val="{{false}}"><button onClick="{{clearBsel}}" aria-label="Remove filter {{bselLabel}}" style="flex-shrink: 0; display: inline-flex; align-items: center; gap: 6px; min-height: 38px; padding: 0 10px 0 14px; border: 0; border-radius: 3000px; background: #466cf3; color: #fff; font: inherit; font-size: 14px; font-weight: 700; white-space: nowrap">{{bselLabel}}<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button></sc-if>
+        <span style="flex: 1"></span>
+        <span role="status" style="position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0)">{{count}}</span>
+        <button onClick="{{openBrowse}}" aria-haspopup="dialog" style="display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 16px; border: 2px solid #000; border-radius: 3000px; background: #fff; font: inherit; font-size: 14px; font-weight: 700"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z"></path></svg>Browse by</button>
+      </div>
+    </div>
+  </header>
+
+  </main>
+
+    <sc-if value="{{lpOpen}}" hint-placeholder-val="{{false}}">
+    <div onPointerMove="{{lpMove}}" onPointerUp="{{up}}" style="position: absolute; inset: 0; z-index: 30; user-select: none">
+      <button onClick="{{lpClose}}" aria-label="Close options" style="position: absolute; inset: 0; border: 0; background: rgba(0,0,0,.62)"></button>
+      <div aria-hidden="true" style="position: absolute; border-radius: 18px; overflow: hidden; transform: scale(1.04); box-shadow: rgba(0,0,0,.45) 0 24px 50px -12px; pointer-events: none; {{lpCard}}"><sc-if value="{{lpHasImg}}" hint-placeholder-val="{{true}}"><img src="{{lpImg}}" alt="" style="display: block; width: 100%; height: 100%; object-fit: cover"></sc-if><sc-if value="{{lpNoImg}}" hint-placeholder-val="{{false}}"><div style="width: 100%; height: 100%; padding: 16px; background: {{lpBg}}; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 16px; line-height: 1.2">{{lpTitle}}</div></sc-if></div>
+      <span aria-hidden="true" style="position: absolute; width: 44px; height: 44px; border-radius: 50%; border: 3px solid rgba(255,255,255,.9); background: rgba(255,255,255,.18); pointer-events: none; {{lpDot}}"></span>
+      <div role="menu" aria-label="Options for {{lpTitle}}">
+        <sc-for list="{{acts}}" as="a" hint-placeholder-count="4">
+          <div style="position: absolute; width: 56px; display: flex; flex-direction: column; align-items: center; gap: 4px; {{a.style}}">
+            <button role="menuitem" onClick="{{a.go}}" onFocus="{{a.enter}}" aria-label="{{a.label}}" style="width: 56px; height: 56px; border: 0; border-radius: 50%; display: grid; place-items: center; box-shadow: rgba(0,0,0,.3) 0 8px 18px -6px; transition: transform .12s, background .12s; {{a.btn}}"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="{{a.stroke}}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{a.icon}}"></path><path d="{{a.head}}" fill="{{a.stroke}}"></path></svg></button>
+            <span aria-hidden="true" style="white-space: nowrap; padding: 2px 8px; border-radius: 3000px; font-size: 11px; font-weight: 700; transition: opacity .12s; {{a.pill}}">{{a.label}}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+
+  <sc-if value="{{postOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 35; background: rgba(0,0,0,.72)">
+      <button onClick="{{postClose}}" aria-label="Close post" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default"></button>
+      <button onClick="{{postClose}}" aria-label="Close" style="position: absolute; right: 18px; top: 18px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: transparent; display: grid; place-items: center"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button>
+      <sc-if value="{{pHasPrev}}" hint-placeholder-val="{{true}}"><button onClick="{{pPrev}}" aria-label="Previous post" style="position: absolute; left: 22px; top: 50%; margin-top: -22px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: rgba(0,0,0,.3) 0 6px 14px -4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></button></sc-if>
+      <sc-if value="{{pHasNext}}" hint-placeholder-val="{{true}}"><button onClick="{{pNext}}" aria-label="Next post" style="position: absolute; right: 22px; top: 50%; margin-top: -22px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: rgba(0,0,0,.3) 0 6px 14px -4px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"></path></svg></button></sc-if>
+      <div role="dialog" aria-modal="true" aria-label="Post by {{pWho}}" style="position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(1140px, calc(100% - 160px)); height: min(780px, calc(100% - 80px)); display: grid; grid-template-columns: minmax(0, 1fr) 420px; background: #fff; border-radius: 6px; overflow: hidden">
+        <div style="background: #000; display: grid; place-items: center; min-height: 0"><img src="{{pImg}}" alt="{{pCaption}}" style="max-width: 100%; max-height: 100%; width: 100%; height: 100%; object-fit: contain"></div>
+        <div style="display: flex; flex-direction: column; min-height: 0">
+          <div style="display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid #eee">
+            <span aria-hidden="true" style="width: 34px; height: 34px; border-radius: 50%; background: {{pBg}}; display: grid; place-items: center; font-size: 13px; font-weight: 700">{{pInit}}</span>
+            <a href="Profile.dc.html" style="font-size: 14px; font-weight: 700; text-decoration: none">{{pWho}}</a>
+            <sc-if value="{{pNotMine}}" hint-placeholder-val="{{true}}"><span aria-hidden="true" style="color: #999">·</span>
+            <button onClick="{{pFollow}}" style="border: 0; background: transparent; padding: 0; min-height: 36px; font: inherit; font-size: 14px; font-weight: 700; {{pFollowStyle}}">{{pFollowLabel}}</button></sc-if>
+            <span style="flex: 1"></span>
+            <button aria-label="More options" style="width: 36px; height: 36px; border: 0; background: transparent; display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h.01 M12 12h.01 M19 12h.01"></path></svg></button>
+          </div>
+          <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; gap: 10px">
+              <span aria-hidden="true" style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: {{pBg}}; display: grid; place-items: center; font-size: 12px; font-weight: 700">{{pInit}}</span>
+              <div style="min-width: 0; font-size: 14px; line-height: 1.45"><b style="margin-right: 5px">{{pWho}}</b>{{pCaption}}
+                <div style="margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px">
+                  <sc-if value="{{pHasPat}}" hint-placeholder-val="{{true}}"><a href="PatternDetail.dc.html" style="display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 3000px; background: #e6e51e; font-size: 12px; font-weight: 700; text-decoration: none">Pattern: {{pPat}}</a></sc-if>
+                  <sc-if value="{{pIsFabric}}" hint-placeholder-val="{{false}}"><span style="padding: 5px 11px; border-radius: 3000px; background: #d6defd; font-size: 12px; font-weight: 700">Fabric: {{pFabric}}</span></sc-if>
+                </div>
+                <div style="margin-top: 6px; font-size: 12px; color: #777">{{pTime}}</div>
+              </div>
+            </div>
+            <sc-for list="{{pComments}}" as="c" hint-placeholder-count="4">
+              <div style="display: flex; gap: 10px; align-items: flex-start; {{c.pad}}">
+                <span aria-hidden="true" style="width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; background: {{c.bg}}; color: {{c.initColor}}; display: grid; place-items: center; font-size: 12px; font-weight: 700">{{c.init}}</span>
+                <div style="flex: 1; min-width: 0; font-size: 14px; line-height: 1.45"><b style="margin-right: 5px">{{c.who}}</b>{{c.text}}
+                  <div style="margin-top: 3px; display: flex; gap: 12px; font-size: 12px; color: #777; font-weight: 600"><span>{{c.time}}</span><span>{{c.likeLabel}}</span><button style="border: 0; background: transparent; padding: 0; font: inherit; color: #777">Reply</button></div>
+                </div>
+                <button onClick="{{c.toggle}}" aria-label="Like comment" style="width: 32px; height: 32px; border: 0; background: transparent; display: grid; place-items: center; flex-shrink: 0"><svg width="14" height="14" viewBox="0 0 24 24" fill="{{c.heart}}" stroke="{{c.heartStroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="padding: 6px 14px 10px; border-top: 1px solid #eee">
+            <div style="display: flex; align-items: center; gap: 4px">
+              <button onClick="{{pLike}}" aria-label="Like" style="width: 44px; height: 44px; border: 0; background: transparent; display: grid; place-items: center; margin-left: -10px"><svg width="26" height="26" viewBox="0 0 24 24" fill="{{pHeart}}" stroke="{{pHeartStroke}}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z"></path></svg></button>
+              <button onClick="{{pFocus}}" aria-label="Comment" style="width: 44px; height: 44px; border: 0; background: transparent; display: grid; place-items: center"><svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-12.4 7.4L3 21l2.1-5.6A8.4 8.4 0 1 1 21 11.5z"></path></svg></button>
+              <button onClick="{{pShare}}" aria-label="Share" style="width: 44px; height: 44px; border: 0; background: transparent; display: grid; place-items: center"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13 M22 2l-7 20-4-9-9-4z"></path></svg></button>
+              <span style="flex: 1"></span>
+              <button onClick="{{pSave}}" aria-label="{{pSaveLabel}}" style="display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px 0 10px; border: 0; border-radius: 3000px; background: #f34646; color: #fff; font: inherit; font-size: 13px; font-weight: 700"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.pin}}"></path><path d="{{i.pinHead}}" fill="#fff"></path></svg>{{pSaveShort}}</button>
+            </div>
+            <div style="font-size: 14px; font-weight: 700">{{pLikes}}</div>
+            <div style="margin-top: 2px; font-size: 12px; color: #777">Liked by <b style="color: #000">{{pLiker}}</b> and others</div>
+            <div style="margin-top: 2px; font-size: 11px; color: #777; text-transform: uppercase; letter-spacing: .04em">{{pTime}}</div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; padding: 8px 10px 8px 14px; border-top: 1px solid #eee">
+            <span aria-hidden="true" style="width: 30px; height: 30px; flex-shrink: 0; border-radius: 50%; background: #000; color: #e6e51e; display: grid; place-items: center; font-size: 12px; font-weight: 700">E</span>
+            <input id="post-cmt" type="text" value="{{pCmt}}" onChange="{{pOnCmt}}" onKeyDown="{{pKey}}" aria-label="Add a comment" placeholder="Add a comment…" style="flex: 1; min-width: 0; min-height: 44px; border: 0; background: transparent; font: inherit; font-size: 14px">
+            <button onClick="{{pPost}}" disabled="{{pCantPost}}" style="min-height: 44px; padding: 0 8px; border: 0; background: transparent; font: inherit; font-size: 14px; font-weight: 700; {{pPostStyle}}">Post</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+  <sc-if value="{{browseOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 36; background: rgba(0,0,0,.55); display: grid; place-items: center">
+      <button onClick="{{closeBrowse}}" aria-label="Close browse" style="position: absolute; inset: 0; border: 0; background: transparent; cursor: default"></button>
+      <div role="dialog" aria-modal="true" aria-labelledby="b-title" style="position: relative; width: min(1080px, calc(100% - 80px)); height: min(800px, calc(100% - 60px)); background: #fff; border-radius: 30px; display: flex; flex-direction: column; overflow: hidden">
+        <div style="display: flex; align-items: center; gap: 16px; padding: 20px 22px 14px">
+          <h2 id="b-title" style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 28px; letter-spacing: -0.05em">Browse by</h2>
+          <label style="flex: 1; display: flex; align-items: center; gap: 8px; min-height: 46px; padding: 0 16px; border-radius: 3000px; background: #f2f2f2"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z m10 18-4.3-4.3"></path></svg><input type="text" value="{{bq}}" onChange="{{onBq}}" aria-label="Search categories, hashtags and sewists" placeholder="Search categories, hashtags, sewists" style="flex: 1; min-width: 0; border: 0; background: transparent; font: inherit; font-size: 15px"></label>
+          <button onClick="{{closeBrowse}}" aria-label="Close" style="width: 46px; height: 46px; flex-shrink: 0; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18 M6 6l12 12"></path></svg></button>
+        </div>
+        <div style="flex: 1; min-height: 0; overflow-y: auto; padding: 6px 22px 28px; display: flex; flex-direction: column; gap: 28px">
+          <sc-if value="{{bShowGarments}}" hint-placeholder-val="{{true}}"><section aria-labelledby="b-g">
+            <h3 id="b-g" style="margin: 0 0 12px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Clothing &amp; makes</h3>
+            <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px">
+              <sc-for list="{{bGarments}}" as="g" hint-placeholder-count="12"><button onClick="{{g.go}}" style="position: relative; padding: 0; border: 0; border-radius: 18px; overflow: hidden; aspect-ratio: 4/5; background: #eee"><img src="{{g.img}}" alt="" style="position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover"><span style="position: absolute; left: 8px; right: 8px; bottom: 8px; padding: 6px 8px; border-radius: 12px; background: rgba(255,255,255,.94); font: inherit; font-size: 14px; font-weight: 700; text-align: left; line-height: 1.2">{{g.label}}</span></button></sc-for>
+            </div>
+          </section></sc-if>
+          <sc-if value="{{bShowTrending}}" hint-placeholder-val="{{true}}"><div style="display: grid; grid-template-columns: 1.4fr 1fr; gap: 28px">
+            <section aria-labelledby="b-t">
+              <h3 id="b-t" style="margin: 0 0 12px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Trending hashtags</h3>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                <sc-for list="{{bTrending}}" as="t" hint-placeholder-count="8"><button onClick="{{t.go}}" style="display: inline-flex; align-items: center; gap: 8px; min-height: 42px; padding: 0 14px; border: 1px solid #d4d4d4; border-radius: 3000px; background: #fff; font: inherit; font-size: 14px; font-weight: 700">{{t.label}}<span style="font-size: 12px; font-weight: 600; color: #555">{{t.n}}</span></button></sc-for>
+              </div>
+            </section>
+            <section aria-labelledby="b-f">
+              <h3 id="b-f" style="margin: 0 0 12px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Picked for you</h3>
+              <p style="margin: -6px 0 10px; font-size: 13px; color: #555">Because you save dresses and tops</p>
+              <div style="display: flex; flex-wrap: wrap; gap: 8px">
+                <sc-for list="{{bForYou}}" as="t" hint-placeholder-count="4"><button onClick="{{t.go}}" style="min-height: 42px; padding: 0 14px; border: 0; border-radius: 3000px; background: #fff3a8; font: inherit; font-size: 14px; font-weight: 700">{{t.label}}</button></sc-for>
+              </div>
+            </section>
+          </div></sc-if>
+          <sc-if value="{{bShowWays}}" hint-placeholder-val="{{true}}"><section aria-labelledby="b-w">
+            <h3 id="b-w" style="margin: 0 0 12px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Ways to browse</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+              <sc-for list="{{bWays}}" as="w" hint-placeholder-count="6"><button onClick="{{w.go}}" style="min-height: 86px; padding: 14px 16px; border: 0; border-radius: 20px; font: inherit; text-align: left; {{w.style}}"><b style="display: block; font-family: 'Poppins', sans-serif; font-size: 17px; letter-spacing: -0.03em">{{w.label}}</b><span style="display: block; margin-top: 2px; font-size: 13px; opacity: .85">{{w.sub}}</span></button></sc-for>
+            </div>
+          </section></sc-if>
+          <sc-if value="{{bShowFabric}}" hint-placeholder-val="{{true}}"><section aria-labelledby="b-fa">
+            <h3 id="b-fa" style="margin: 0 0 12px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">By fabric</h3>
+            <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px">
+              <sc-for list="{{bFabric}}" as="f" hint-placeholder-count="6"><button onClick="{{f.go}}" style="display: flex; align-items: center; gap: 10px; padding: 6px; border: 1px solid #e6e6e6; border-radius: 16px; background: #fff; font: inherit; font-size: 14px; font-weight: 700"><img src="{{f.img}}" alt="" style="width: 40px; height: 40px; border-radius: 11px; object-fit: cover">{{f.label}}</button></sc-for>
+            </div>
+          </section></sc-if>
+          <sc-if value="{{bShowSewists}}" hint-placeholder-val="{{true}}"><section aria-labelledby="b-s">
+            <h3 id="b-s" style="margin: 0 0 12px; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 20px; letter-spacing: -0.04em">Popular sewists to follow</h3>
+            <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px">
+              <sc-for list="{{bSewists}}" as="p" hint-placeholder-count="6"><div style="display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 18px; background: #f7f7f7">
+                <span aria-hidden="true" style="width: 44px; height: 44px; border-radius: 50%; background: {{p.bg}}; display: grid; place-items: center; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 17px">{{p.init}}</span>
+                <a href="Profile.dc.html" style="flex: 1; min-width: 0; text-decoration: none"><b style="display: block; font-size: 14px">{{p.name}}</b><span style="display: block; font-size: 12px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{p.handle}} · {{p.meta}}</span></a>
+                <button onClick="{{p.go}}" style="min-height: 38px; padding: 0 14px; border: 0; border-radius: 3000px; font: inherit; font-size: 13px; font-weight: 700; {{p.style}}">{{p.label}}</button>
+              </div></sc-for>
+            </div>
+          </section></sc-if>
+          <sc-if value="{{bNoResults}}" hint-placeholder-val="{{false}}"><p style="margin: 30px 0; text-align: center; font-size: 15px; color: #555">Nothing matches "{{bq}}". Try a garment, fabric or hashtag.</p></sc-if>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{sheetOpen}}" hint-placeholder-val="{{false}}">
+    <div style="position: absolute; inset: 0; z-index: 40; background: rgba(0,0,0,.5); display: grid; place-items: center">
+      <button onClick="{{sheetClose}}" aria-label="Close" style="position: absolute; inset: 0; border: 0; background: transparent"></button>
+      <div role="dialog" aria-modal="true" aria-labelledby="sv-title" style="position: relative; width: 460px; max-height: 720px; overflow-y: auto; background: #fff; border-radius: 30px; padding: 22px 20px 22px">
+                <div style="display: flex; align-items: center; gap: 12px">
+          <sc-if value="{{sheetHasImg}}" hint-placeholder-val="{{true}}"><img src="{{sheetImg}}" alt="" style="width: 52px; height: 64px; border-radius: 12px; object-fit: cover"></sc-if><sc-if value="{{sheetNoImg}}" hint-placeholder-val="{{false}}"><span aria-hidden="true" style="width: 52px; height: 64px; border-radius: 12px; background: {{sheetBg}}; display: grid; place-items: center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="{{i.forum}}"></path></svg></span></sc-if>
+          <div style="flex: 1; min-width: 0"><h2 id="sv-title" style="margin: 0; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 22px; letter-spacing: -0.05em">Save to collection</h2><span style="display: block; font-size: 13px; color: #555; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{sheetTitle}}</span></div>
+          <button onClick="{{sheetClose}}" aria-label="Close" style="width: 44px; height: 44px; border: 0; border-radius: 50%; background: #f2f2f2; display: grid; place-items: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="{{i.close}}"></path></svg></button>
+        </div>
+        <p style="margin: 12px 0 6px; display: flex; align-items: center; gap: 6px; font-size: 12px; color: #555"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="{{i.lock}}"></path></svg>Collections are private. Only you see what you save.</p>
+        <div style="display: flex; flex-direction: column">
+          <sc-for list="{{boards}}" as="b" hint-placeholder-count="4">
+            <button onClick="{{b.pick}}" style="display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 6px 8px; border: 0; border-radius: 16px; background: transparent; font: inherit; text-align: left"><img src="{{b.img}}" alt="" style="width: 52px; height: 52px; border-radius: 12px; object-fit: cover"><span style="flex: 1"><b style="display: block; font-size: 15px">{{b.name}}</b><span style="font-size: 12px; color: #555">{{b.n}}</span></span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#777" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-label="Private" role="img"><path d="{{i.lock}}"></path></svg></button>
+          </sc-for>
+        </div>
+        <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center; padding-top: 12px; border-top: 1px solid #eee">
+          <input type="text" value="{{newBoard}}" onChange="{{onNewBoard}}" aria-label="New collection name" placeholder="New collection, e.g. Winter coats" style="flex: 1; min-width: 0; min-height: 46px; border: 1px solid #000; border-radius: 14px; padding: 0 12px; font: inherit; font-size: 15px">
+          <button onClick="{{createBoard}}" disabled="{{cantCreate}}" style="min-height: 46px; padding: 0 16px; border: 0; border-radius: 3000px; background: #000; color: #fff; font: inherit; font-size: 14px; font-weight: 700; {{createStyle}}">Create</button>
+        </div>
+
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{hasToast}}" hint-placeholder-val="{{false}}">
+    <div role="status" style="position: absolute; left: 50%; bottom: 28px; transform: translateX(-50%); z-index: 50; display: flex; align-items: center; gap: 10px; background: #000; color: #fff; border-radius: 3000px; padding: 14px 22px; font-size: 14px; font-weight: 600">{{toast}}</div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1440,"height":900}}'>
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    var START = {"browse": true};
+    this.START = START;
+    this.state = { browse: !!START.browse, bsel: null, bq: '', bfollow: {}, post: START.post || null, liked: {}, follow: {}, added: {}, cmt: '', cliked: {}, cat: 'Explore', sub: 0, navHidden: !!START.scrolled, lp: null, sheet: null, saved: {}, hiddenPins: {}, toast: '', pressed: null, lpSel: START.lpSel == null ? null : START.lpSel, boards: null, newBoard: '' };
+    this.lastY = 0; this.timer = null; this.fired = false; this.els = {}; this.root = null; this.sc = null;
+  }
+  componentDidMount() {
+    var self = this, S = this.START;
+    if (S.scrolled && this.sc) { this.sc.scrollTop = S.scrolled; this.lastY = S.scrolled; }
+    if (S.lp) setTimeout(function () { self.openLp(S.lp, null); }, 60);
+    if (S.sheet) setTimeout(function () { self.setState({ sheet: S.sheet }); }, 60);
+  }
+  openLp(id, pt) {
+    var el = this.els[id], root = this.root;
+    if (!el || !root) return;
+    var r = el.getBoundingClientRect(), R = root.getBoundingClientRect();
+    var x = pt ? pt.x - R.left : r.left - R.left + r.width / 2, y = pt ? pt.y - R.top : r.top - R.top + r.height * 0.55;
+    this.setState({ lp: { id: id, x: x, y: y, card: { l: r.left - R.left, t: r.top - R.top, w: r.width, h: r.height } }, pressed: null });
+  }
+  renderVals() {
+    var self = this, s = this.state;
+    var DESK = true;
+    var B = function (id) { return '/_blob/' + id; };
+    var ICON = {
+      search: 'M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z m10 18-4.3-4.3',
+      bell: 'M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9 M13.7 21a2 2 0 0 1-3.4 0',
+      more: 'M5 12h.01 M12 12h.01 M19 12h.01',
+      pin: 'M13.4 10.6 3.5 20.5', pinHead: 'M16 3a4 4 0 1 0 0 8 4 4 0 1 0 0-8z',
+      share: 'M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7 M16 6l-4-4-4 4 M12 2v13',
+      sparkle: 'M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z',
+      eyeoff: 'M3 3l18 18 M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-3.2 4.1 M6.6 6.6C3.9 8.3 2 12 2 12s3.5 7 10 7a9.6 9.6 0 0 0 5.4-1.6 M9.9 9.9a3 3 0 0 0 4.2 4.2',
+      lock: 'M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4',
+      plus: 'M12 5v14 M5 12h14', check: 'M20 6 9 17l-5-5', close: 'M18 6 6 18 M6 6l12 12', down: 'm6 9 6 6 6-6',
+      sliders: 'M4 21v-7 M4 10V3 M12 21v-9 M12 8V3 M20 21v-5 M20 12V3 M1 14h6 M9 8h6 M17 16h6',
+      home: 'm3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10',
+      compass: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z m4.24 5.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z',
+      kanban: 'M3 3h18v18H3z M8 7v7 M12 7v4 M16 7v9'
+    };
+    // kind: make | fabric ; pat = pattern used ; hack = upcycle/hack ; f = from someone you follow
+    var PINS = [
+      ['2', '0a8ae6a44e186ecaeb7322a09be76d15', 'Red linen sundress', '@maya.makes', 'Dresses', 'Midi', 'make', '2/3', 'Wren Wrap Skirt', 0, 1],
+      ['15', '623f53848a0fba7bb103667b6cd6d996', 'Vintage print cotton stack', '@thriftandthread', 'Fabric', 'Cotton', 'fabric', '3/4', '', 0, 0],
+      ['21', 'a93207f7db6c002a302477269ae8ce59', 'Denim wrap vest with ties', '@ena.sews', 'Tops', 'Wrap', 'make', '4/5', 'Wren Wrap Top', 0, 1],
+      ['9', '378fd5c76ce2f87bc1b06cdd5a4ae20f', 'Pussy-bow stripe shirt', '@helen.stitches', 'Tops', 'Blouses', 'make', '3/4', 'Bowie Blouse', 0, 0],
+      ['11', '544eca3d47a401399c1e405afd3fada4', 'Painted stripe linen', '@fabricfinds', 'Fabric', 'Linen', 'fabric', '1/1', '', 0, 0],
+      ['6', '188ffd136f4c0ada8a70caa52d09ec3b', 'Floral gathered midi', '@june.okafor', 'Dresses', 'Midi', 'make', '9/16', 'Pinafore No. 2', 0, 1],
+      ['22', 'b15aceab26480c18148934a44710873a', 'Colour-block shirt from two thrifted ones', '@sew.over.it.sam', 'Tops', 'Upcycle', 'make', '3/4', '', 1, 0],
+      ['3', '0b6b01103b47174ea4ec4c0f6db6b9f7', 'Cobalt satin + leopard lining', '@ena.sews', 'Fabric', 'Satin', 'fabric', '4/5', '', 0, 1],
+      ['10', '3fb41ae12053aadbcaf96b90bd6f28ea', 'Gingham maxi skirt', '@lou.makes', 'Bottoms', 'Skirts', 'make', '2/3', 'Tiered Skirt', 0, 0],
+      ['13', '5bf905114ac1edcca363e2d2dc675860', 'Knot bag in brown linen', '@hey.june', 'Bags', 'Knot bags', 'make', '3/4', 'Everyday Tote', 0, 0],
+      ['4', '119246c3d8b8d9d8d1a9a6e7f8c1b2a3', 'Denim pinafore over a ruffle blouse', '@mina.sews', 'Dresses', 'Pinafore', 'make', '3/4', 'Pinafore No. 2', 0, 1],
+      ['19', '973249613519f24b590d1a29562f5378', 'Autumn linen palette', '@fabricfinds', 'Fabric', 'Linen', 'fabric', '4/5', '', 0, 0],
+      ['23', 'b24763864c8c89e98667824487e6a6eb', 'Leaf print halter maxi', '@ama.makes', 'Dresses', 'Slip', 'make', '9/16', '', 0, 0],
+      ['26', 'cedd8232af110501083827e498f729f6', 'Two-tone knit jumper', '@mina.sews', 'Tops', 'Knits', 'make', '3/4', '', 0, 1],
+      ['1', '070d0dbfa6770629d474769422fdcce8', 'Dark floral viscose', '@thriftandthread', 'Fabric', 'Florals', 'fabric', '1/1', '', 0, 0],
+      ['14', '5fb545dfebc25a3ab288dabc4d4f34cc', 'Chambray apron dress', '@ena.sews', 'Dresses', 'Pinafore', 'make', '2/3', 'Pinafore No. 2', 0, 1],
+      ['28', 'e9b9124af50eb749d99a9f4a4477d928', 'Sailor collar top + skirt', '@june.okafor', 'Tops', 'Blouses', 'make', '3/4', 'Sailor Top', 0, 1],
+      ['30', 'f91b3526340d65ba4402e367501c7827', 'Rainbow butterfly cape from scraps', '@scrapqueen', 'Upcycle', 'Scraps', 'make', '4/5', '', 1, 0],
+      ['5', '156a03273ae96fc256def755c3066a37', 'Black satin slip dress', '@ama.makes', 'Dresses', 'Slip', 'make', '2/3', 'Slip No. 1', 0, 0],
+      ['17', '769e9f00331c5518d858d9a671756c46', 'Painted floral satin', '@fabricfinds', 'Fabric', 'Satin', 'fabric', '3/4', '', 0, 0],
+      ['24', 'c14805936ea42c8a216102adbfceffbc', 'Boxy linen tee + border print skirt', '@lou.makes', 'Tops', 'Boxy', 'make', '3/4', 'Box Tee', 0, 0],
+      ['12', '55887fc2105646d7b1f47c4296ac5891', 'Pleated skirt for fabric shopping day', '@helen.stitches', 'Bottoms', 'Skirts', 'make', '4/5', '', 0, 0],
+      ['18', '913753b8f8f4a3e1f6d9c2b7a5e4d3c2', 'This week’s fabric haul', '@thriftandthread', 'Fabric', 'Hauls', 'fabric', '3/4', '', 0, 0],
+      ['27', 'e551a4b8280f8ecc8ee3ab17952c2bf', 'Green print tie dress', '@sew.over.it.sam', 'Dresses', 'Midi', 'make', '2/3', '', 0, 0],
+      ['16', '701b827f636929720e8290d66c043951', 'Ruffle-sleeve top + flares', '@clare.creates', 'Tops', 'Blouses', 'make', '9/16', '', 0, 0],
+      ['25', 'c974cd96842b2dd8418f09777861290e', 'Sage blouse for everyday', '@hey.june', 'Tops', 'Blouses', 'make', '3/4', 'Bowie Blouse', 0, 0],
+      ['29', 'f60786ed2d9a8d01a3b3d6f6f0b2c9e1', 'Polka dot crepe', '@fabricfinds', 'Fabric', 'Florals', 'fabric', '1/1', '', 0, 0],
+      ['8', '31f9090e0f46023c17a2689be64e6db3', 'Rose print kimono dress', '@clare.creates', 'Dresses', 'Formal', 'make', '4/5', '', 0, 0],
+      ['0', '057c4fedc8c7a51b83d0aa3f797c4b48', 'Floral satin waiting for a pattern', '@ena.sews', 'Fabric', 'Satin', 'fabric', '3/4', '', 0, 1],
+      ['20', 'a61bdc356ada728b0e1c50c4248e64b1', 'Handmade dirndl, first try', '@lena.naht', 'Dresses', 'Costume', 'make', '2/3', '', 0, 0],
+      ['7', '1f26346581fa5b1d2b3ba2642b997bb1', 'Gold taffeta ball gown', '@scrapqueen', 'Dresses', 'Formal', 'make', '3/4', '', 0, 0]
+    ];
+    var REAL = {"0": "057c4fedc8c7a51b83d0aa3f797c4b48", "1": "070d0dbfa6770629d474769422fdcce8", "2": "0a8ae6a44e186ecaeb7322a09be76d15", "3": "0b6b01103b47174ea4ec4c0f6db6b9f7", "4": "1192463bd0067b49a26194ff1b40ec1c", "5": "156a03273ae96fc256def755c3066a37", "6": "188ffd136f4c0ada8a70caa52d09ec3b", "7": "1f26346581fa5b1d2b3ba2642b997bb1", "8": "31f9090e0f46023c17a2689be64e6db3", "9": "378fd54e9a610caf64290fbec065ccf9", "10": "3fb41ae12053aadbcaf96b90bd6f28ea", "11": "544eca3d47a401399c1e405afd3fada4", "12": "55887fc2105646d7b1f47c4296ac5891", "13": "5bf905114ac1edcca363e2d2dc675860", "14": "5fb545dfebc25a3ab288dabc4d4f34cc", "15": "623f53848a0fba7bb103667b6cd6d996", "16": "701b827f636929720e8290d66c043951", "17": "769e9f00331c5518d858d9a671756c46", "18": "91375372928539e1e7afc9e791509906", "19": "973249613519f24b590d1a29562f5378", "20": "a61bdc356ada728b0e1c50c4248e64b1", "21": "a93207f7db6c002a302477269ae8ce59", "22": "b15aceab26480c18148934a44710873a", "23": "b24763864c8c89e98667824487e6a6eb", "24": "c14805936ea42c8a216102adbfceffbc", "25": "c974cd96842b2dd8418f09777861290e", "26": "cedd8232af110501083827e498f729f6", "27": "e551a46b8280f8ecc8ee3ab17952c2bf", "28": "e9b9124af50eb749d99a9f4a4477d928", "29": "f6078638415aa9a1943ae3aab1bedae6", "30": "f91b3526340d65ba4402e367501c7827"};
+    var CAP = {"2": "Wore my new linen sundress to brunch and got three compliments!", "15": "Op-shop haul: 6 m of vintage cotton for $12", "21": "Hacked the Wren Wrap into a vest and I'm obsessed", "9": "Stripes + a giant bow = my new work uniform", "11": "Hand-painted this linen myself. Now what do I make?", "6": "First dress with a lining. Took a month but so worth it", "22": "Two thrifted shirts became one. Zero waste!", "3": "Leopard lining is the secret to a happy coat", "10": "Tiered skirt, four hours start to finish", "13": "Leftover linen turned knot bag. 30-minute project", "4": "Pinafore season is back", "19": "My autumn palette, all from the stash", "23": "Made this for a wedding in Bali", "26": "Two-tone jumper knitted from yarn ends", "1": "Can't stop touching this viscose", "14": "Chambray apron dress, sewn in a weekend", "28": "The sailor collar was fiddly but I did it!", "30": "Every scrap from last year went into this cape", "5": "Bias-cut slip dress. The bias nearly won", "17": "Saving this satin for something special", "24": "Box tee + border print skirt, my summer combo", "12": "Wearing my latest make to go fabric shopping, obviously", "18": "This week's haul. Don't tell my partner", "27": "Tie dress with pockets. Always pockets", "16": "Ruffle sleeves and flares, full 70s mood", "25": "My most-worn blouse, on version three now", "29": "Polka dot crepe for a dress? Ideas welcome", "8": "Kimono dress for the races", "0": "Pattern and fabric matched. Cutting tonight", "20": "My first dirndl, just in time for Oktoberfest", "7": "Graduation gown: 9 m of taffeta"};
+    var pins = PINS.map(function (p) { return { id: p[0], img: B(REAL[p[0]]), title: CAP[p[0]] || p[2], who: p[3], cat: p[4], sub: p[5], kind: p[6], ratio: p[7], pat: p[8], hack: !!p[9], f: !!p[10] }; });
+    pins.forEach(function (p) { p.kind2 = 'pin'; p.href = 'MakeDetail.dc.html'; p.hasWho = true; });
+    var PATS = [
+      ['2', 'Wren Wrap Skirt', 'Fern & Field', 4.7, 1204, 'Free', 'Bottoms'],
+      ['21', 'Wren Wrap Top', 'Fern & Field', 4.6, 642, 'Free', 'Tops'],
+      ['9', 'Bowie Blouse', 'Northside Studio', 4.5, 388, '$16', 'Tops'],
+      ['6', 'Pinafore No. 2', 'Studio Marlo', 4.8, 812, '$14', 'Dresses'],
+      ['10', 'Tiered Skirt', 'Linden & Co', 4.4, 503, '$12', 'Bottoms'],
+      ['13', 'Everyday Tote', 'Hey June', 4.9, 2390, 'Free', 'Bags'],
+      ['28', 'Sailor Top', 'Studio Marlo', 4.3, 211, '$15', 'Tops'],
+      ['5', 'Slip No. 1', 'Oakwork Patterns', 4.2, 377, '$18', 'Dresses'],
+      ['24', 'Box Tee', 'Northside Studio', 4.8, 1402, 'Free', 'Tops'],
+      ['27', 'Willa Dress', 'Fernhill Patterns', 4.6, 214, '$17', 'Dresses']
+    ].map(function (a) {
+      var free = a[5] === 'Free';
+      return { id: 'p' + a[0], img: B(REAL[a[0]]), title: a[1], who: '', ratio: pins.filter(function (x) { return x.id === a[0]; })[0].ratio, kind2: 'pat', href: 'PatternDetail.dc.html',
+        sub: a[2] + ' · ★ ' + a[3] + ' · ' + a[4].toLocaleString('en-AU') + ' makes', tag: a[5], tagStyle: free ? 'background: #466cf3; color: #fff' : 'background: #e6e51e',
+        free: free, pcat: a[6] };
+    });
+    var CHALS = [
+      ['4', '#OctoberDenimChallenge', '12 days left · 486 joined', 'Running now', 0],
+      ['15', 'Sew From Your Stash', 'Starts in 9 days · 132 interested', 'Starting soon', 1],
+      ['21', 'Make It Mend', '3 days left · 211 joined', 'Running now', 0],
+      ['5', '#SlipDressSummer', 'Starts 1 December', 'Starting soon', 1],
+      ['30', 'Scrap Busting September', 'Ended · 1,204 makes', 'Finished', 2],
+      ['6', '#MeMadeMay', 'Ended · 3,410 makes', 'Finished', 2]
+    ].map(function (a) {
+      var st = a[3];
+      return { id: 'c' + a[0], img: B(REAL[a[0]]), title: a[1], who: '', ratio: '4/5', kind2: 'chal', href: 'Challenge.dc.html', sub: a[2], tag: st, cstate: a[4],
+        tagStyle: a[4] === 0 ? 'background: #e6e51e' : a[4] === 1 ? 'background: #fff; color: #2f55d4; box-shadow: inset 0 0 0 2px #2f55d4' : 'background: #000; color: #fff' };
+    });
+    var TH = [
+      ['Fitting', 'How do I fix gaping at the back neckline?', 'Every top I make stands away at the back of the neck. Is this a forward head adjustment or a sway back thing?', '@lou.makes', 34],
+      ['Pattern help', 'Wren Wrap: which way does the tie go through?', 'Step 9 has me confused. Does the tie pass through the side seam gap or around the back?', '@mina.sews', 12],
+      ['Fabric', 'Is viscose crepe OK for a first dress?', 'Found a gorgeous print but everyone says viscose is slippery. Tips welcome!', '@clare.creates', 27],
+      ['Machines', 'Janome vs Brother for a first machine under $400', 'Mostly dresses and the odd pair of jeans. Which one would you get?', '@ama.makes', 58],
+      ['Show & tell', 'My first fitted bodice, be kind!', 'Six toiles later and it finally fits. Photos in the thread.', '@helen.stitches', 41],
+      ['Fitting', 'Full bust adjustment on a princess seam?', 'All the tutorials use darts. How do I do an FBA on princess seams?', '@june.okafor', 19],
+      ['Pattern help', 'Pinafore No. 2 runs big. Size down?', 'I made my usual 12 and it is roomy everywhere. Did you size down?', '@sew.over.it.sam', 22],
+      ['Fabric', 'Pre-wash linen or not?', 'I keep hearing both. Does it shrink enough to matter?', '@fabricfinds', 63],
+      ['Machines', 'Overlocker threading tips that saved me', 'Colour-coded my thread guides and it changed my life. Sharing my method.', '@scrapqueen', 15],
+      ['Show & tell', 'Finished the dirndl just in time!', 'Three weekends, one very patient partner and a lot of trim.', '@lena.naht', 30]
+    ];
+    var TBG = { 'Fitting': '#fff3a8', 'Pattern help': '#ffd5c8', 'Fabric': '#d6defd', 'Machines': '#f2f2f2', 'Show & tell': '#ffe0d6' };
+    var THREADS = TH.map(function (a, n) { return { id: 't' + n, img: '', title: a[1], excerpt: a[2], who: a[3], replies: a[4], tag: a[0], bg: TBG[a[0]], kind2: 'thread', ratio: '1/' + (0.9 + (a[2].length > 80 ? 0.15 : 0)) }; });
+    var FABG = { '15': 'Dresses', '11': 'Tops', '3': 'Outerwear', '19': 'Bottoms', '1': 'Dresses', '17': 'Dresses', '18': 'Bags', '29': 'Dresses', '0': 'Tops' };
+    pins.forEach(function (p) { p.g = p.kind === 'fabric' ? FABG[p.id] : (p.id === '8' ? 'Outerwear' : p.cat); });
+    PATS.forEach(function (p) { p.g = p.pcat; });
+    var CHG = ['Dresses', 'Upcycle', 'Upcycle', 'Dresses', 'Upcycle', 'Dresses'];
+    CHALS.forEach(function (c, n) { c.g = CHG[n]; });
+    var THG = ['Tops', 'Bottoms', 'Dresses', '', 'Dresses', 'Tops', 'Dresses', '', '', 'Dresses'];
+    THREADS.forEach(function (t, n) { t.g = THG[n]; });
+    var FTYPE = { '15': 'Cotton', '11': 'Linen', '19': 'Linen', '3': 'Satin', '17': 'Satin', '0': 'Satin', '1': 'Viscose', '29': 'Crepe', '18': 'Hauls' };
+    var GARMENTS = ['For you', 'Dresses', 'Tops', 'Bottoms', 'Outerwear', 'Bags', 'Upcycle'];
+    var CATS = {
+      'Explore': GARMENTS,
+      'Forum': ['All', 'Fitting', 'Pattern help', 'Fabric', 'Machines', 'Show & tell'],
+      'Challenges': ['All', 'Running now', 'Starting soon', 'Finished'],
+      'Patterns': GARMENTS,
+      'Fabric': ['All fabric', 'Linen', 'Cotton', 'Satin', 'Viscose', 'Crepe', 'Hauls']
+    };
+    var subs = CATS[s.cat], subName = subs[s.sub] || subs[0];
+    var notGone = function (p) { return s.hiddenPins[p.id] !== 'gone'; };
+    var list;
+    if (s.cat === 'Forum') list = THREADS.filter(function (t) { return s.sub === 0 || t.tag === subName; });
+    else if (s.cat === 'Challenges') list = CHALS.filter(function (c) { return s.sub === 0 || c.cstate === s.sub - 1; });
+    else if (s.cat === 'Fabric') list = pins.filter(function (p) { return p.kind === 'fabric' && (s.sub === 0 || FTYPE[p.id] === subName); });
+    else list = (s.cat === 'Patterns' ? PATS : pins).filter(function (p) { return s.sub === 0 || p.g === subName; });
+    var BMAP = {
+      'Pants & trousers': ['10', '12', '24', '16'], 'Skirts': ['10', '12', '24'], 'Knitwear': ['26'], 'Quilts & home': ['15', '18', '30'], 'Kids': ['4', '14'], 'Costume': ['20', '8', '7'], 'Formal': ['7', '8', '23'], 'Shirts & blouses': ['9', '25', '28', '16', '22'],
+      '#memade': null, '#stashbusting': ['15', '18', '19', '0', '30'], '#wrapdress': ['21', '2', '27'], '#pyjamaset': ['10', '12'], '#visiblemending': ['22', '30'], '#firstmake': ['20', '28', '6'], '#linenseason': ['11', '19', '2', '13'], '#OctoberDenimChallenge': ['4', '14', '21', '3'],
+      '#slipdress': ['5', '23'], '#puffsleeves': ['6', '25', '16'], '#shirtdress': ['14', '27', '4'], '#fullbustadjustment': ['6', '9', '25'],
+      'Popular this week': ['2', '6', '23', '21', '9', '14', '27', '5', '30', '22'], 'Beginner-friendly': ['13', '24', '10', '2', '14'], 'Quick makes': ['13', '24', '10', '28'], 'Zero waste': ['22', '30', '15', '18'], 'Pattern hacks': ['21', '22', '30', '2'], 'Free patterns': ['2', '21', '13', '24'],
+      'Linen': ['11', '19', '2', '13', '24'], 'Denim': ['4', '14', '21'], 'Cotton': ['15', '6', '27'], 'Knit': ['26'], 'Satin': ['3', '17', '0', '5'], 'Wool': ['8', '26']
+    };
+    if (s.bsel && BMAP[s.bsel]) { var keep = BMAP[s.bsel]; list = list.filter(function (x) { return x.kind2 !== 'pin' || keep.indexOf(x.id) >= 0; }); }
+    list = list.filter(notGone);
+    var ALL = pins.concat(PATS, CHALS, THREADS);
+    var NC = DESK ? 5 : 2, cols = [], hts = [];
+    for (var c = 0; c < NC; c++) { cols.push({ items: [] }); hts.push(0); }
+    var savedN = 0;
+    list.forEach(function (p) {
+      var rr = p.ratio.split('/'), h = Number(rr[1]) / Number(rr[0]) + (p.kind2 === 'thread' ? 0.2 : 0.3);
+      var k = hts.indexOf(Math.min.apply(null, hts)); hts[k] += h;
+      var sv = s.saved[p.id], hid = s.hiddenPins[p.id] === 'hid';
+      if (sv) savedN++;
+      cols[k].items.push({
+        init: (p.who || '@?').charAt(1).toUpperCase(), avBg: ['#e6e51e', '#ffd5c8', '#d6defd', '#f2f2f2'][p.who.length % 4],
+        id: p.id, img: p.img, title: p.title, who: p.who, ratio: p.ratio, alt: p.title, href: p.href || 'MakeDetail.dc.html',
+        isCard: p.kind2 !== 'thread', isThread: p.kind2 === 'thread', hasWho: p.kind2 === 'pin', hasSub: !!(p.kind2 === 'pat' || p.kind2 === 'chal'), sub: p.kind2 === 'pin' ? '' : (p.sub || ''),
+        excerpt: p.excerpt || '', replies: p.replies || 0, bg: p.bg || '#f2f2f2',
+        tag: p.kind2 === 'pin' ? (p.pat ? 'Pattern: ' + p.pat : (p.kind === 'fabric' ? (FTYPE[p.id] || 'Fabric') : '')) : p.tag, tagStyle: p.tagStyle || '',
+        hasTag: p.kind2 === 'pin' ? !!(p.pat || p.kind === 'fabric') : true,
+        isSaved: !!sv, notSaved: !sv, savedTo: sv || '', notHidden: !hid, isHidden: hid,
+        pressStyle: s.pressed === p.id ? 'transform: scale(.96)' : '',
+        ref: function (el) { if (el) self.els[p.id] = el; },
+        down: function (e) {
+          if (e.button && e.button !== 0) return;
+          var pt = { x: e.clientX, y: e.clientY }; self.fired = false; self.start = pt;
+          clearTimeout(self.timer);
+          self.setState({ pressed: p.id });
+          self.timer = setTimeout(function () { self.fired = true; self.openLp(p.id, pt); }, 450);
+        },
+        click: function (e) {
+          if (self.fired) { e.preventDefault(); self.fired = false; return; }
+          if (p.kind2 === 'pin') { e.preventDefault(); self.setState({ post: p.id, cmt: '' }); }
+        },
+        more: function () { self.openLp(p.id, null); },
+        quickSave: function () { save(p.id, s.lastBoard || 'Quick saves'); },
+        pickBoard: function () { self.setState({ sheet: { id: p.id } }); },
+        undoHide: function () { var h = Object.assign({}, s.hiddenPins); delete h[p.id]; self.setState({ hiddenPins: h }); }
+      });
+    });
+    function up() {
+      clearTimeout(self.timer);
+      var st = self.state;
+      if (st.lp && st.lpSel != null && self.actGo && self.actGo[st.lpSel]) { var g = self.actGo[st.lpSel]; self.setState({ lpSel: null }); g(); return; }
+      if (st.pressed) self.setState({ pressed: null });
+    }
+    function lpMove(e) {
+      if (!self.state.lp || !self.actPos || !self.root) return;
+      var R = self.root.getBoundingClientRect(), px = e.clientX - R.left, py = e.clientY - R.top, hit = null;
+      self.actPos.forEach(function (c, n) { if (Math.hypot(px - c.x, py - c.y) < 38) hit = n; });
+      if (hit !== self.state.lpSel) self.setState({ lpSel: hit });
+    }
+    function move(e) {
+      if (self.state.lp) { lpMove(e); return; }
+      if (self.start && Math.abs(e.clientY - self.start.y) + Math.abs(e.clientX - self.start.x) > 10) up();
+    }
+    function toast(t) { self.setState({ toast: t }); clearTimeout(self.tt); self.tt = setTimeout(function () { self.setState({ toast: '' }); }, 2600); }
+    function save(id, board) { var sv = Object.assign({}, self.state.saved); sv[id] = board; self.setState({ saved: sv, lp: null, lpSel: null, sheet: null, lastBoard: board }); toast('Saved to ' + board); }
+    var BOARDS = (s.boards || [
+      { name: 'Quick saves', n: 12, img: B(REAL['6']) },
+      { name: 'Summer makes', n: 34, img: B(REAL['2']) },
+      { name: 'Wrap tops to try', n: 9, img: B(REAL['21']) },
+      { name: 'Fabric wishlist', n: 21, img: B(REAL['11']) }
+    ]);
+    var lp = s.lp, lpPin = lp ? ALL.filter(function (p) { return p.id === lp.id; })[0] : null;
+    var W = DESK ? 1440 : 390, H = DESK ? 900 : 844;
+    var acts = [];
+    if (lp) {
+      var cx = W / 2, cy = H * 0.45, base = Math.atan2(cy - lp.y, cx - lp.x);
+      if (!DESK) base = lp.x < W / 2 ? -Math.PI / 4 : -3 * Math.PI / 4;
+      if (!DESK && lp.y < 260) base = lp.x < W / 2 ? Math.PI / 5 : Math.PI - Math.PI / 5;
+      var A = [
+        { k: 'save', label: 'Save', icon: ICON.pin, head: ICON.pinHead, bg: '#f34646', fg: '#fff', go: function () { self.setState({ sheet: { id: lp.id }, lp: null }); } },
+        { k: 'share', label: 'Share', icon: ICON.share, bg: '#466cf3', fg: '#fff', go: function () { self.setState({ lp: null }); toast('Link copied'); } },
+        { k: 'more', label: 'More', icon: ICON.sparkle, bg: '#e6e51e', fg: '#000', go: function () { self.setState({ lp: null }); toast('We’ll show you more like this'); } },
+        { k: 'hide', label: 'Hide', icon: ICON.eyeoff, bg: '#ff8562', fg: '#000', go: function () { var h = Object.assign({}, s.hiddenPins); h[lp.id] = 'hid'; self.setState({ lp: null, hiddenPins: h }); } }
+      ];
+      var R = DESK ? 104 : 100, spread = 0.74;
+      acts = A.map(function (a, n) {
+        var ang = base + (n - 1.5) * spread;
+        var x = lp.x + Math.cos(ang) * R - 28, y = lp.y + Math.sin(ang) * R - 28;
+        x = Math.max(8, Math.min(W - 64, x)); y = Math.max(8, Math.min(H - 90, y));
+        var on = s.lpSel === n;
+        return { label: a.label, icon: a.icon, head: a.head || '', go: a.go, cx: x + 28, cy: y + 28, on: on, style: 'left: ' + x + 'px; top: ' + y + 'px',
+          btn: on ? 'background: ' + a.bg + '; color: ' + a.fg + '; transform: scale(1.14)' : 'background: #fff; color: #000',
+          pill: on ? 'background: ' + a.bg + '; color: ' + a.fg : 'opacity: 0', stroke: on ? a.fg : '#000',
+          enter: function () { if (self.state.lpSel !== n) self.setState({ lpSel: n }); } };
+      });
+    }
+    self.actPos = acts.map(function (a) { return { x: a.cx, y: a.cy }; }); self.actGo = acts.map(function (a) { return a.go; });
+    var sheetPin = s.sheet ? ALL.filter(function (p) { return p.id === s.sheet.id; })[0] : null;
+    // ---- post modal (Instagram explore style)
+    var POOL = [['@june.okafor', 'The colour on you is perfect!'], ['@mina.sews', 'Did you size up or down for this one?'], ['@lou.makes', 'Saving this for summer, thank you!'], ['@helen.stitches', 'That topstitching is so neat.'], ['@hey.june', 'Which fabric is this? It drapes beautifully.'], ['@ama.makes', 'Adding this to my list right now.'], ['@clare.creates', 'How long did it take you?'], ['@scrapqueen', 'Pattern twins! Mine is still at the cutting stage.']];
+    var REPLY = ['Thank you! I sized down one.', 'Washed linen from my stash.', 'About two weekends, with breaks.', 'Thank you so much!'];
+    var av = function (h) { return { init: h.charAt(1).toUpperCase(), bg: ['#e6e51e', '#ffd5c8', '#d6defd', '#f2f2f2'][h.length % 4] }; };
+    var feedPins = list.filter(function (x) { return x.kind2 === 'pin'; });
+    var post = s.post ? pins.filter(function (x) { return x.id === s.post; })[0] : null;
+    var pv = {};
+    if (post) {
+      var n = Number(post.id), sv2 = s.saved[post.id];
+      var cm = [0, 1, 2].map(function (k) { return POOL[(n * 3 + k * 5) % POOL.length]; });
+      var comments = cm.map(function (c, k) { var a = av(c[0]); return { who: c[0], text: c[1], init: a.init, bg: a.bg, time: ['2h', '5h', '1d'][k], likes: ((n + k * 7) % 9) + (k === 0 ? 4 : 0), reply: false }; });
+      comments.splice(1, 0, (function () { var a = av(post.who); return { who: post.who, text: '@' + cm[0][0].slice(1) + ' ' + REPLY[n % REPLY.length], init: a.init, bg: a.bg, time: '1h', likes: 2, reply: true }; })());
+      (s.added[post.id] || []).forEach(function (t) { comments.push({ who: '@ena.sews', text: t, init: 'E', bg: '#000', time: 'now', likes: 0, reply: false, mine: true }); });
+      comments = comments.map(function (c, k) { var key = post.id + ':' + k, on = !!s.cliked[key]; return Object.assign(c, { pad: c.reply ? 'padding-left: 40px' : '', initColor: c.mine ? '#e6e51e' : '#000', likeLabel: (c.likes + (on ? 1 : 0)) ? (c.likes + (on ? 1 : 0)) + (c.likes + (on ? 1 : 0) === 1 ? ' like' : ' likes') : '', heart: on ? '#f34646' : 'none', heartStroke: on ? '#f34646' : '#777', toggle: function () { var cl = Object.assign({}, s.cliked); cl[key] = !on; self.setState({ cliked: cl }); } }); });
+      var liked = !!s.liked[post.id], likes = 40 + (n * 37) % 400 + (liked ? 1 : 0);
+      var pa = av(post.who), idx = feedPins.map(function (x) { return x.id; }).indexOf(post.id), fol = !!s.follow[post.who];
+      var go = function (d) { var j = idx + d; if (j >= 0 && j < feedPins.length) self.setState({ post: feedPins[j].id, cmt: '' }); };
+      pv = {
+        pImg: post.img, pWho: post.who, pInit: pa.init, pBg: pa.bg, pCaption: post.title, pTime: ['2 hours ago', '5 hours ago', '1 day ago', '3 days ago', '1 week ago'][n % 5],
+        pHasPat: !!post.pat, pPat: post.pat || '', pIsFabric: post.kind === 'fabric', pFabric: FTYPE[post.id] || '',
+        pComments: comments, pCount: comments.length + 9 + (n % 12),
+        pLikes: likes.toLocaleString('en-AU') + ' likes', pLiker: POOL[(n + 2) % POOL.length][0],
+        pHeart: liked ? '#f34646' : 'none', pHeartStroke: liked ? '#f34646' : '#000', pLike: function () { var l = Object.assign({}, s.liked); l[post.id] = !liked; self.setState({ liked: l }); },
+        pSaved: !!sv2, pSaveShort: sv2 ? 'Saved' : 'Save', pSaveFill: sv2 ? '#000' : 'none', pSaveLabel: sv2 ? 'Saved to ' + sv2 : 'Save to collection',
+        pSave: function () { self.setState({ sheet: { id: post.id } }); },
+        pShare: function () { toast('Link copied'); },
+        pNotMine: post.who !== '@ena.sews', pFollowLabel: fol ? 'Following' : 'Follow', pFollowStyle: fol ? 'color: #555' : 'color: #2f55d4', pFollow: function () { var f = Object.assign({}, s.follow); f[post.who] = !fol; self.setState({ follow: f }); },
+        pCmt: s.cmt, pOnCmt: function (e) { self.setState({ cmt: e.target.value.slice(0, 300) }); },
+        pPost: function () { var t = (self.state.cmt || '').trim(); if (!t) return; var a = Object.assign({}, s.added); a[post.id] = (a[post.id] || []).concat([t]); self.setState({ added: a, cmt: '' }); },
+        pCantPost: !(s.cmt || '').trim(), pPostStyle: (s.cmt || '').trim() ? 'color: #2f55d4' : 'color: #2f55d4; opacity: .4',
+        pHasPrev: idx > 0, pHasNext: idx >= 0 && idx < feedPins.length - 1, pPrev: function () { go(-1); }, pNext: function () { go(1); },
+        pKey: function (e) { if (e.key === 'Enter') { var t = (self.state.cmt || '').trim(); if (t) { var a = Object.assign({}, self.state.added); a[post.id] = (a[post.id] || []).concat([t]); self.setState({ added: a, cmt: '' }); } } },
+        pFocus: function (e) { var el = self.root && self.root.querySelector('#post-cmt'); if (el) el.focus(); }
+      };
+    }
+    // ---- Browse by
+    var bq = (s.bq || '').toLowerCase();
+    var match = function (t) { return !bq || t.toLowerCase().indexOf(bq) >= 0; };
+    function applyB(label, garment) {
+      if (garment) self.setState({ browse: false, bsel: null, cat: 'Explore', sub: GARMENTS.indexOf(garment), bq: '' });
+      else self.setState({ browse: false, bsel: label, cat: 'Explore', sub: 0, bq: '' });
+      if (self.sc) self.sc.scrollTop = 0;
+    }
+    var BG = [['Dresses', '6', 'Dresses'], ['Shirts & blouses', '9', ''], ['Tops', '21', 'Tops'], ['Pants & trousers', '12', ''], ['Skirts', '10', ''], ['Outerwear', '8', 'Outerwear'], ['Knitwear', '26', ''], ['Bags', '13', 'Bags'], ['Quilts & home', '15', ''], ['Kids', '4', ''], ['Upcycled', '22', 'Upcycle'], ['Formal', '7', '']];
+    var TR = [['#OctoberDenimChallenge', '486 posts'], ['#memade', '12.4k'], ['#stashbusting', '3.1k'], ['#wrapdress', '2.2k'], ['#linenseason', '1.1k'], ['#visiblemending', '1.4k'], ['#pyjamaset', '980'], ['#firstmake', '860']];
+    var FY = ['#slipdress', '#puffsleeves', '#shirtdress', '#fullbustadjustment'];
+    var WAYS = [['Popular this week', 'What everyone is saving', '#e6e51e', '#000'], ['Beginner-friendly', 'Simple shapes, clear steps', '#466cf3', '#fff'], ['Quick makes', 'Under 3 hours', '#ff8562', '#000'], ['Zero waste', 'Scraps, offcuts, thrift flips', '#000', '#fff'], ['Pattern hacks', 'One pattern, new look', '#f34646', '#fff'], ['Free patterns', 'No cost to start', '#d6defd', '#000']];
+    var FAB = [['Linen', '11'], ['Denim', '3'], ['Cotton', '15'], ['Knit', '26'], ['Satin', '17'], ['Wool', '1']];
+    var SEW = [['June Okafor', '@junesews', '128 makes', '#e6e51e'], ['Kofi Mensah', '@kofi_tailors', 'tailoring', '#466cf3'], ['Ada Lindqvist', '@ada_alters', 'mending', '#ff8562'], ['Mina Park', '@mina.sews', 'pinafores', '#d6defd'], ['Lou Martin', '@lou.makes', 'skirts', '#ffd5c8'], ['Sam Reid', '@sew.over.it.sam', 'upcycling', '#f2f2f2']];
+    var bv = {
+      browseOpen: s.browse, openBrowse: function () { self.setState({ browse: true, lp: null }); }, closeBrowse: function () { self.setState({ browse: false, bq: '' }); },
+      bq: s.bq, onBq: function (e) { self.setState({ bq: e.target.value.slice(0, 40) }); },
+      bGarments: BG.filter(function (g) { return match(g[0]); }).map(function (g) { return { label: g[0], img: B(REAL[g[1]]), go: function () { applyB(g[0], g[2]); } }; }),
+      bTrending: TR.filter(function (t) { return match(t[0]); }).map(function (t) { return { label: t[0], n: t[1], go: function () { applyB(t[0]); } }; }),
+      bForYou: FY.filter(match).map(function (t) { return { label: t, go: function () { applyB(t); } }; }),
+      bWays: WAYS.filter(function (w) { return match(w[0]); }).map(function (w) { return { label: w[0], sub: w[1], style: 'background: ' + w[2] + '; color: ' + w[3], go: function () { applyB(w[0]); } }; }),
+      bFabric: FAB.filter(function (f) { return match(f[0]); }).map(function (f) { return { label: f[0], img: B(REAL[f[1]]), go: function () { applyB(f[0]); } }; }),
+      bSewists: SEW.filter(function (w) { return match(w[0]) || match(w[1]); }).map(function (w) { var on = !!s.bfollow[w[1]]; return { name: w[0], handle: w[1], meta: w[2], init: w[0].charAt(0), bg: w[3], label: on ? 'Following' : 'Follow', style: on ? 'background: #fff; color: #000; box-shadow: inset 0 0 0 2px #000' : 'background: #000; color: #fff', go: function () { var f = Object.assign({}, s.bfollow); f[w[1]] = !on; self.setState({ bfollow: f }); } }; }),
+      hasBsel: !!s.bsel, bselLabel: s.bsel || '', clearBsel: function () { self.setState({ bsel: null }); }
+    };
+    bv.bNoResults = !bv.bGarments.length && !bv.bTrending.length && !bv.bForYou.length && !bv.bWays.length && !bv.bFabric.length && !bv.bSewists.length;
+    bv.bShowGarments = bv.bGarments.length > 0; bv.bShowTrending = bv.bTrending.length > 0 || bv.bForYou.length > 0; bv.bShowWays = bv.bWays.length > 0; bv.bShowFabric = bv.bFabric.length > 0; bv.bShowSewists = bv.bSewists.length > 0;
+    Object.assign(pv, bv);
+    pv.postOpen = !!post; pv.postClose = function () { self.setState({ post: null }); };
+    return Object.assign(pv, {
+      i: Object.assign({}, {"search": "M11 3a8 8 0 1 0 0 16 8 8 0 0 0 0-16z m10 18-4.3-4.3", "home": "m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10", "compass": "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z m4.24 5.76-2.12 6.36-6.36 2.12 2.12-6.36 6.36-2.12z", "plus": "M12 5v14 M5 12h14", "kanban": "M3 3h18v18H3z M8 7v7 M12 7v4 M16 7v9", "lock": "M5 11h14v10H5z M7 11V7a5 5 0 0 1 10 0v4", "pdf": "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z M14 2v6h6", "back": "M15 18l-6-6 6-6", "close": "M18 6 6 18 M6 6l12 12", "check": "M20 6 9 17l-5-5", "heart": "M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1.1a5.5 5.5 0 0 0-7.8 7.8l1 1.1L12 21l7.8-7.5 1-1.1a5.5 5.5 0 0 0 0-7.8z", "download": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3", "upload": "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M17 8l-5-5-5 5 M12 3v12", "share": "M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8 M16 6l-4-4-4 4 M12 2v13", "image": "M3 3h18v18H3z M8.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z M21 15l-5-5L5 21", "star": "M12 2l3.1 6.3 6.9 1-5 4.9 1.2 6.8L12 17.8 5.8 21l1.2-6.8-5-4.9 6.9-1z", "sparkle": "M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z", "vote": "M9 11l3 3L22 4 M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11", "palette": "M12 2a10 10 0 1 0 0 20c1.1 0 2-.9 2-2 0-.5-.2-1-.5-1.3-.3-.4-.5-.8-.5-1.3 0-1.1.9-2 2-2h2.4A5.6 5.6 0 0 0 22 9.8C22 5.5 17.5 2 12 2z M6.5 11.5h.01 M9.5 7.5h.01 M14.5 7.5h.01 M17.5 11.5h.01", "card": "M2 5h20v14H2z M2 10h20", "receipt": "M4 2v20l3-2 3 2 3-2 3 2 3-2 3 2V2l-3 2-3-2-3 2-3-2-3 2z M8 8h8 M8 12h8 M8 16h5", "store": "M3 9l1.5-5h15L21 9 M3 9v11h18V9 M3 9h18 M9 20v-6h6v6", "trend": "M3 17l6-6 4 4 8-8 M15 7h6v6", "pen": "M12 20h9 M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z", "info": "M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20z M12 16v-4 M12 8h.01", "grid": "M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z"}, ICON),
+      rootRef: function (el) { if (el) self.root = el; },
+      scRef: function (el) { if (el) self.sc = el; },
+      onScroll: function (e) {
+        var y = e.target.scrollTop, d = y - self.lastY;
+        if (Math.abs(d) < 6) return;
+        self.lastY = y;
+        if (d > 0 && y > 80 && !self.state.navHidden) self.setState({ navHidden: true, lp: null });
+        else if (d < 0 && self.state.navHidden) self.setState({ navHidden: false });
+      },
+      headStyle: s.navHidden ? 'transform: translateY(-' + (DESK ? 76 : 62) + 'px); box-shadow: rgba(0,0,0,.10) 0 8px 18px -10px' : 'transform: translateY(0)',
+      navStyle: s.navHidden ? 'opacity: 0' : 'opacity: 1',
+      bottomStyle: s.navHidden ? 'transform: translateY(100%)' : 'transform: translateY(0)',
+      cats: Object.keys(CATS).map(function (k) { var on = s.cat === k; return { label: k, on: on, style: on ? (DESK ? 'background: #000; color: #fff' : 'box-shadow: inset 0 -3px 0 #000; font-weight: 700') : (DESK ? 'background: transparent' : 'color: #555'), pick: function () { var garm = function (c) { return c === 'Explore' || c === 'Patterns'; }; self.setState({ cat: k, sub: garm(k) && garm(s.cat) ? s.sub : 0 }); if (self.sc) self.sc.scrollTop = 0; } }; }),
+      subs: subs.map(function (n, k) { var on = s.sub === k; return { label: n, on: on, style: on ? 'background: #000; color: #fff; border-color: #000' : 'background: #fff; color: #000; border-color: #d4d4d4', pick: function () { self.setState({ sub: k }); if (self.sc) self.sc.scrollTop = 0; } }; }),
+      cols: cols, count: list.length + ' ' + ({ Forum: 'threads', Challenges: 'challenges', Patterns: 'patterns' }[s.cat] || 'ideas'), empty: list.length === 0,
+      up: up, move: move, noCtx: function (e) { e.preventDefault(); },
+      lpOpen: !!lp, lpClose: function () { self.setState({ lp: null, lpSel: null }); }, lpMove: lpMove, lpLeave: function () { if (self.state.lpSel != null) self.setState({ lpSel: null }); },
+      lpImg: lpPin ? lpPin.img : '', lpHasImg: !!(lpPin && lpPin.img), lpNoImg: !!(lpPin && !lpPin.img), lpBg: lpPin && lpPin.bg ? lpPin.bg : '#f2f2f2', lpTitle: lpPin ? lpPin.title : '',
+      lpCard: lp ? 'left: ' + lp.card.l + 'px; top: ' + lp.card.t + 'px; width: ' + lp.card.w + 'px; height: ' + lp.card.h + 'px' : '',
+      lpDot: lp ? 'left: ' + (lp.x - 22) + 'px; top: ' + (lp.y - 22) + 'px' : '',
+      acts: acts,
+      sheetOpen: !!s.sheet, sheetClose: function () { self.setState({ sheet: null }); },
+      sheetImg: sheetPin ? sheetPin.img : '', sheetHasImg: !!(sheetPin && sheetPin.img), sheetNoImg: !!(sheetPin && !sheetPin.img), sheetBg: sheetPin && sheetPin.bg ? sheetPin.bg : '#f2f2f2', sheetTitle: sheetPin ? sheetPin.title : '',
+      boards: BOARDS.map(function (b) { return { name: b.name, n: b.n + ' saves', img: b.img, pick: function () { save(s.sheet.id, b.name); } }; }),
+      newBoard: s.newBoard, onNewBoard: function (e) { self.setState({ newBoard: e.target.value.slice(0, 40) }); },
+      createBoard: function () {
+        var n = (self.state.newBoard || '').trim(); if (!n) return;
+        var it = ALL.filter(function (x) { return x.id === s.sheet.id; })[0]; var bs = [{ name: n, n: 0, img: (it && it.img) || B(REAL['11']) }].concat(BOARDS);
+        self.setState({ boards: bs, newBoard: '' }); save(s.sheet.id, n);
+      },
+      cantCreate: !(s.newBoard || '').trim(), createStyle: (s.newBoard || '').trim() ? '' : 'opacity: .35',
+      toast: s.toast, hasToast: !!s.toast,
+      savedCount: savedN, boardName: s.lastBoard || 'Quick saves'
+    });
+  }
+}
+</script>
+</body>
+</html>

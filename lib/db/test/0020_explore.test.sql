@@ -8,7 +8,7 @@ INSERT INTO sewspace_posts (id, user_id, kind, caption, visibility) VALUES (2200
 SELECT t.act_as('ex_a');
 INSERT INTO sewspace_posts (id, user_id, kind, caption, visibility, garment, fabric) VALUES (22002, 'ex_a', 'status', 'Mine', 'public', 'tops', 'linen');
 SELECT t.rejects($$UPDATE sewspace_posts SET garment = 'hats' WHERE id = 22002$$, 'garment is one of the fixed values');
-SELECT t.rejects($$UPDATE sewspace_posts SET fabric = 'denim' WHERE id = 22002$$, 'fabric is one of the fixed values');
+SELECT t.rejects($$UPDATE sewspace_posts SET fabric = 'silk' WHERE id = 22002$$, 'fabric is one of the fixed values');
 SELECT t.eq(t.affected($$UPDATE sewspace_posts SET garment = 'dresses' WHERE id = 22001$$), 0, 'only the author labels a post');
 
 INSERT INTO sewspace_collections (id, user_id, name) VALUES (22001, 'ex_a', 'Quick saves');

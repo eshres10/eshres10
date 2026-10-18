@@ -86,8 +86,8 @@ export const GetProfilePostsResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -312,8 +312,8 @@ export const GetPublicPostResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -380,8 +380,8 @@ export const GetTagPostsResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -449,8 +449,8 @@ export const SearchPostsResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -573,8 +573,8 @@ export const GetExploreFeedResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -589,6 +589,51 @@ export const GetExploreFeedResponse = zod.object({
 }),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
+})
+
+
+/**
+ * @summary Everything Explore's Browse by modal shows: category and fabric tiles (cover = the public photo post saved most this week), trending hashtags (public posts, last 7 days), sewists to follow, and Picked for you (signed in only, never cached). Public content only; blocks apply.
+ */
+export const GetExploreBrowseResponse = zod.object({
+  "categories": zod.array(zod.object({
+  "id": zod.string(),
+  "label": zod.string(),
+  "sub": zod.string().nullable().describe('The Explore sub-filter this selects; null means a category filter'),
+  "cover": zod.union([zod.object({
+  "thumbUrl": zod.string(),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable()
+}),zod.null()])
+})),
+  "trending": zod.array(zod.object({
+  "tag": zod.string(),
+  "posts": zod.number().int()
+})),
+  "fabrics": zod.array(zod.object({
+  "id": zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),
+  "label": zod.string(),
+  "cover": zod.union([zod.object({
+  "thumbUrl": zod.string(),
+  "width": zod.number().int(),
+  "height": zod.number().int(),
+  "color": zod.string().nullable()
+}),zod.null()])
+})),
+  "picked": zod.object({
+  "because": zod.array(zod.string()).describe('The garments you save most'),
+  "tags": zod.array(zod.string())
+}).nullable().describe('Signed in only'),
+  "sewists": zod.array(zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}).and(zod.object({
+  "makes": zod.number().int().describe('Their public makes')
+})).and(zod.object({
+  "specialty": zod.string().nullable()
+})))
 })
 
 
@@ -932,8 +977,8 @@ export const GetSavedPostsResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -1908,8 +1953,8 @@ export const GetChallengeEntriesResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -2113,8 +2158,8 @@ export const EnterChallengeResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -2496,8 +2541,8 @@ export const GetForumTopicResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -2701,8 +2746,8 @@ export const CreateForumTopicResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -2845,8 +2890,8 @@ export const UpdateForumTopicResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -2986,8 +3031,8 @@ export const SetAcceptedAnswerResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -3121,8 +3166,8 @@ export const ModerateForumTopicResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -3295,8 +3340,8 @@ export const GetHomeFeedResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -3355,8 +3400,8 @@ export const CreatePostBody = zod.object({
   "projectId": zod.number().int().nullish(),
   "patternId": zod.number().int().nullish(),
   "fabricId": zod.number().int().nullish(),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]).optional(),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]).optional(),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]).optional(),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]).optional(),
   "linkUrl": zod.string().max(createPostBodyLinkUrlMax).nullish().describe('An http(s) link (https:// is added when left out). Empty or null removes it.'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).optional().describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
@@ -3403,8 +3448,8 @@ export const CreatePostResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
@@ -3446,8 +3491,8 @@ export const UpdatePostBody = zod.object({
   "patternId": zod.number().int().nullish(),
   "fabricId": zod.number().int().nullish(),
   "mediaIds": zod.array(zod.number().int()).max(updatePostBodyMediaIdsMax).optional().describe('Photo posts: the photos in order (1 to 10). Leave out to keep them as they are.'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]).optional(),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]).optional(),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]).optional(),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]).optional(),
   "linkUrl": zod.string().max(updatePostBodyLinkUrlMax).nullish().describe('An http(s) link (https:// is added when left out). Empty or null removes it.'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).optional().describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
@@ -3494,8 +3539,8 @@ export const UpdatePostResponse = zod.object({
   "entryId": zod.number().int().optional().describe('On posts: the entry, so its author can withdraw it')
 })).describe('Challenges this post is a (not removed) entry in'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
-  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
-  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags', 'shirts', 'trousers', 'skirts', 'knitwear', 'home', 'kids', 'formal']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
+  "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul', 'denim', 'knit', 'wool']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({

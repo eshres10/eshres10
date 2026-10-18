@@ -64,3 +64,6 @@ docs/design/account-menu/screens/img/
 # Pattern directory mockups: screenshots and screen snapshots contain mockup photos (keep locally).
 docs/design/patterns/images/
 docs/design/patterns/screens/img/
+# Browse design screenshots contain mockup photos: keep them local.
+docs/design/browse/images/
+docs/design/browse/interactive/img/

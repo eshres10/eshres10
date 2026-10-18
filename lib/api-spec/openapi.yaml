@@ -244,6 +244,17 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/FeedPage" }
+  /public/explore/browse:
+    get:
+      operationId: getExploreBrowse
+      tags: [public]
+      summary: "Everything Explore's Browse by modal shows: category and fabric tiles (cover = the public photo post saved most this week), trending hashtags (public posts, last 7 days), sewists to follow, and Picked for you (signed in only, never cached). Public content only; blocks apply."
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/BrowsePage" }
   /public/explore/cards:
     get:
       operationId: getExploreCards
@@ -2640,11 +2651,11 @@ components:
     PostGarment:
       type: string
       description: What the post shows was made (Explore filters). Optional; the author picks it.
-      enum: [dresses, tops, bottoms, outerwear, bags]
+      enum: [dresses, tops, bottoms, outerwear, bags, shirts, trousers, skirts, knitwear, home, kids, formal]
     PostFabric:
       type: string
       description: Set when the post is about fabric (Explore's Fabric tab). Optional; the author picks it.
-      enum: [linen, cotton, satin, viscose, crepe, haul]
+      enum: [linen, cotton, satin, viscose, crepe, haul, denim, knit, wool]
     PostCardColor:
       type: string
       description: The card colour of a status (words) post. Yellow unless the author picks another.
@@ -2699,6 +2710,66 @@ components:
         count: { type: integer, description: Saved things in it you can still see }
         coverUrl: { type: string, nullable: true }
       required: [id, name, count, coverUrl]
+    BrowseCover:
+      type: object
+      properties:
+        thumbUrl: { type: string }
+        width: { type: integer }
+        height: { type: integer }
+        color: { type: string, nullable: true }
+      required: [thumbUrl, width, height, color]
+    BrowsePage:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              label: { type: string }
+              sub: { type: string, nullable: true, description: The Explore sub-filter this selects; null means a category filter }
+              cover:
+                allOf: [{ $ref: "#/components/schemas/BrowseCover" }]
+                nullable: true
+            required: [id, label, sub, cover]
+        trending:
+          type: array
+          items:
+            type: object
+            properties:
+              tag: { type: string }
+              posts: { type: integer }
+            required: [tag, posts]
+        fabrics:
+          type: array
+          items:
+            type: object
+            properties:
+              id: { $ref: "#/components/schemas/PostFabric" }
+              label: { type: string }
+              cover:
+                allOf: [{ $ref: "#/components/schemas/BrowseCover" }]
+                nullable: true
+            required: [id, label, cover]
+        picked:
+          type: object
+          nullable: true
+          description: Signed in only
+          properties:
+            because: { type: array, items: { type: string }, description: The garments you save most }
+            tags: { type: array, items: { type: string } }
+          required: [because, tags]
+        sewists:
+          type: array
+          items:
+            allOf:
+              - { $ref: "#/components/schemas/SuggestedPerson" }
+              - type: object
+                properties:
+                  specialty: { type: string, nullable: true }
+                required: [specialty]
+      required: [categories, trending, fabrics, picked, sewists]
     SavedItem:
       type: object
       description: Something you saved, as a tile or cover.

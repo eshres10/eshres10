@@ -2,6 +2,7 @@ import { Router, type IRouter } from "express";
 import {
   GetExploreFeedQueryParams,
   GetExploreCardsQueryParams,
+  GetExploreBrowseResponse,
   GetExploreCardsResponse,
   GetExploreFeedResponse,
   GetPublicMakeParams,
@@ -28,7 +29,7 @@ import {
   SearchTagsQueryParams,
   SearchTagsResponse,
 } from "@workspace/api-zod";
-import { exploreCards, exploreFeed, likedByFollowee, listComments, listCommentsPage, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, searchPeople, searchPosts, searchTags, tagPage } from "../access";
+import { browsePage, exploreCards, exploreFeed, likedByFollowee, listComments, listCommentsPage, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, searchPeople, searchPosts, searchTags, tagPage } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { scoped } from "../lib/scoped";
 
@@ -118,6 +119,15 @@ router.get("/public/posts/:id/comments/page", (req, res, next) => {
 
 // Explore: the mixed browse page (posts, fabric, pattern pages, challenges, threads).
 // Signed in, the page holds followers-only posts and your own saves: never cache it.
+// Browse by: public parts are the same for everyone signed out (cached 5 minutes); signed in it
+// carries Picked for you and your own follow / block state, so it's never cached.
+router.get("/public/explore/browse", (req, res, next) => {
+  res.set("Cache-Control", viewerOf(req).userId ? "private, no-store" : "public, max-age=300");
+  next();
+}, scoped(async (req, res, db): Promise<void> => {
+  res.json(GetExploreBrowseResponse.parse(await browsePage(db, viewerOf(req))));
+}));
+
 router.get("/public/explore/cards", (req, res, next) => {
   if (viewerOf(req).userId) res.set("Cache-Control", "private, no-store");
   next();

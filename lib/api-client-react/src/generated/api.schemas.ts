@@ -363,6 +363,13 @@ export const PostGarment = {
   bottoms: 'bottoms',
   outerwear: 'outerwear',
   bags: 'bags',
+  shirts: 'shirts',
+  trousers: 'trousers',
+  skirts: 'skirts',
+  knitwear: 'knitwear',
+  home: 'home',
+  kids: 'kids',
+  formal: 'formal',
 } as const;
 
 /**
@@ -378,6 +385,9 @@ export const PostFabric = {
   viscose: 'viscose',
   crepe: 'crepe',
   haul: 'haul',
+  denim: 'denim',
+  knit: 'knit',
+  wool: 'wool',
 } as const;
 
 /**
@@ -489,6 +499,63 @@ export interface Collection {
   count: number;
   /** @nullable */
   coverUrl: string | null;
+}
+
+export interface BrowseCover {
+  thumbUrl: string;
+  width: number;
+  height: number;
+  /** @nullable */
+  color: string | null;
+}
+
+export type BrowsePageCategoriesItem = {
+  id: string;
+  label: string;
+  /**
+     * The Explore sub-filter this selects; null means a category filter
+     * @nullable
+     */
+  sub: string | null;
+  cover: BrowseCover | null;
+};
+
+export type BrowsePageTrendingItem = {
+  tag: string;
+  posts: number;
+};
+
+export type BrowsePageFabricsItem = {
+  id: PostFabric;
+  label: string;
+  cover: BrowseCover | null;
+};
+
+/**
+ * Signed in only
+ * @nullable
+ */
+export type BrowsePagePicked = {
+  /** The garments you save most */
+  because: string[];
+  tags: string[];
+} | null;
+
+export type BrowsePageSewistsItem = SuggestedPerson & ({
+  /** @nullable */
+  specialty: string | null;
+});
+
+export interface BrowsePage {
+  categories: BrowsePageCategoriesItem[];
+  trending: BrowsePageTrendingItem[];
+  fabrics: BrowsePageFabricsItem[];
+  /**
+     * Signed in only
+     * @nullable
+     */
+  picked: BrowsePagePicked;
+  sewists: BrowsePageSewistsItem[];
 }
 
 /**

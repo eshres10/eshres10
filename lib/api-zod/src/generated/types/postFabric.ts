@@ -19,4 +19,7 @@ export const PostFabric = {
   viscose: 'viscose',
   crepe: 'crepe',
   haul: 'haul',
+  denim: 'denim',
+  knit: 'knit',
+  wool: 'wool',
 } as const;

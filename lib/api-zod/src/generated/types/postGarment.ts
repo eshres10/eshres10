@@ -18,4 +18,11 @@ export const PostGarment = {
   bottoms: 'bottoms',
   outerwear: 'outerwear',
   bags: 'bags',
+  shirts: 'shirts',
+  trousers: 'trousers',
+  skirts: 'skirts',
+  knitwear: 'knitwear',
+  home: 'home',
+  kids: 'kids',
+  formal: 'formal',
 } as const;

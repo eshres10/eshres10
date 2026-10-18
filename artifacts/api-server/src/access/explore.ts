@@ -145,6 +145,9 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
   } else if (sub === "upcycle") {
     filters.push(sql`EXISTS (SELECT 1 FROM sewspace_post_hashtags ph JOIN sewspace_hashtags h ON h.id = ph.hashtag_id
       WHERE ph.post_id = ${postsTable.id} AND h.tag IN (${sql.join(UPCYCLE_TAGS.map((t) => sql`${t}`), sql`, `)}))`);
+  } else if (sub === "bottoms") {
+    // Bottoms covers the older "bottoms" label and the newer trousers / skirts (migration 0025).
+    filters.push(inArray(postsTable.garment, ["bottoms", "trousers", "skirts"]));
   } else if (sub !== "for-you" && sub !== "words") {
     filters.push(eq(postsTable.garment, sub as PostGarment));
   }

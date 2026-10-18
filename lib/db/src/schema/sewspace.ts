@@ -245,9 +245,10 @@ export const POST_KINDS = ["status", "photo"] as const;
 export type PostKind = (typeof POST_KINDS)[number];
 export const POST_ASPECTS = ["4:5", "1:1", "original"] as const;
 export type PostAspect = (typeof POST_ASPECTS)[number];
-export const POST_GARMENTS = ["dresses", "tops", "bottoms", "outerwear", "bags"] as const;
+// Migration 0025 (Browse by) added shirts … formal; "bottoms" stays for older posts.
+export const POST_GARMENTS = ["dresses", "tops", "bottoms", "outerwear", "bags", "shirts", "trousers", "skirts", "knitwear", "home", "kids", "formal"] as const;
 export type PostGarment = (typeof POST_GARMENTS)[number];
-export const POST_FABRICS = ["linen", "cotton", "satin", "viscose", "crepe", "haul"] as const;
+export const POST_FABRICS = ["linen", "cotton", "satin", "viscose", "crepe", "haul", "denim", "knit", "wool"] as const;
 export type PostFabric = (typeof POST_FABRICS)[number];
 export const POST_CARD_COLORS = ["yellow", "red", "blue", "peach", "black"] as const;
 export type PostCardColor = (typeof POST_CARD_COLORS)[number];

@@ -82,12 +82,16 @@ function errorText(error: unknown, fallback: string): string {
 }
 
 // Explore labels (optional): what was made, and whether the post is about fabric.
+// Migration 0025 (Browse by) split "Trousers or skirt" and added more; older posts keep "bottoms" untouched.
 const GARMENT_CHOICES: Array<{ value: PostGarment; label: string }> = [
-  { value: 'dresses', label: 'Dress' }, { value: 'tops', label: 'Top' }, { value: 'bottoms', label: 'Trousers or skirt' },
-  { value: 'outerwear', label: 'Outerwear' }, { value: 'bags', label: 'Bag' },
+  { value: 'dresses', label: 'Dress' }, { value: 'tops', label: 'Top' }, { value: 'shirts', label: 'Shirt or blouse' },
+  { value: 'trousers', label: 'Trousers' }, { value: 'skirts', label: 'Skirt' }, { value: 'outerwear', label: 'Outerwear' },
+  { value: 'knitwear', label: 'Knitwear' }, { value: 'bags', label: 'Bag' }, { value: 'home', label: 'Quilt or home' },
+  { value: 'kids', label: 'Kids' }, { value: 'formal', label: 'Formal' },
 ];
 const FABRIC_CHOICES: Array<{ value: PostFabric; label: string }> = [
-  { value: 'linen', label: 'Linen' }, { value: 'cotton', label: 'Cotton' }, { value: 'satin', label: 'Satin' },
+  { value: 'linen', label: 'Linen' }, { value: 'cotton', label: 'Cotton' }, { value: 'denim', label: 'Denim' },
+  { value: 'knit', label: 'Knit' }, { value: 'satin', label: 'Satin' }, { value: 'wool', label: 'Wool' },
   { value: 'viscose', label: 'Viscose' }, { value: 'crepe', label: 'Crepe' }, { value: 'haul', label: 'Fabric haul' },
 ];
 /** A make's garment (Quick start choices) as an Explore garment. */
@@ -95,7 +99,9 @@ function garmentOf(name: string | null | undefined): PostGarment | null {
   const g = (name ?? '').toLowerCase();
   if (g.startsWith('dress')) return 'dresses';
   if (g.startsWith('top')) return 'tops';
-  if (g.startsWith('trouser') || g.startsWith('skirt')) return 'bottoms';
+  if (g.startsWith('trouser')) return 'trousers';
+  if (g.startsWith('skirt')) return 'skirts';
+  if (g.startsWith('shirt')) return 'shirts';
   if (g.startsWith('outerwear')) return 'outerwear';
   if (g.startsWith('bag')) return 'bags';
   return null;

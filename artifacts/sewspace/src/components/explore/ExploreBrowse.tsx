@@ -2,11 +2,12 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import { useAuth } from '@clerk/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getExploreCards, type ExploreCard, type GetExploreCardsTab } from '@workspace/api-client-react';
-import { Loader2 } from 'lucide-react';
+import { LayoutGrid, Loader2 } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import { ErrorState } from '@/components/common';
 import { GuestBanner } from '@/pages/explore';
 import { STICKY, useChrome } from '@/components/shell/useHideOnScroll';
+import { BrowseModal, type BrowsePick } from './BrowseModal';
 import { ExploreActionCard, ExploreActionsProvider, ExplorePostOverlay } from './actions';
 import { overlaySearch } from './overlay';
 import { cardHeight } from './cards';
@@ -93,6 +94,19 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
   // Explore and Patterns share the garment filters: switching between them keeps the one chosen.
   const pickTab = (next: Tab) => go(next, SHARES_GARMENTS.has(next) && SHARES_GARMENTS.has(tab.id) ? sub.id : undefined);
 
+  // Browse by (owner's Browse brief): a tile that matches a sub-filter selects it; the rest
+  // become a filter in the address (?category= / ?tag= / ?fabric= / ?way=) on the Explore tab.
+  const [browsing, setBrowsing] = useState(false);
+  const pick = (choice: BrowsePick) => {
+    setBrowsing(false);
+    if (choice.kind === 'sub') return go('explore', choice.sub);
+    const q = new URLSearchParams();
+    if (choice.kind === 'way' && choice.id === 'free') q.set('tab', 'patterns');
+    q.set(choice.kind === 'tag' ? 'tag' : choice.kind, choice.kind === 'tag' ? choice.tag : choice.id);
+    setLocation(`/explore?${q}`, { replace: true });
+    window.scrollTo({ top: 0 });
+  };
+
   const feed = useInfiniteQuery({
     queryKey: ['explore-cards', tab.id, sub.id, Boolean(isSignedIn)],
     queryFn: ({ pageParam }) => getExploreCards({ tab: tab.id, sub: sub.id, ...(pageParam ? { cursor: pageParam } : {}) }),
@@ -135,6 +149,7 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
   const countText = total === undefined ? '' : `${total.toLocaleString()} ${total === 1 ? tab.noun[0] : tab.noun[1]}`;
   return (
     <ExploreActionsProvider>
+      {browsing && <BrowseModal onClose={() => setBrowsing(false)} onPick={pick} />}
       <div className="mx-auto w-full max-w-[1400px]">
         {isLoaded && !isSignedIn && <GuestBanner />}
         <div className="md:rounded-[30px] md:bg-white md:p-5">
@@ -153,6 +168,10 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
           </div>
           <div className="mt-3 flex items-center gap-3 md:mt-0">
             <div role="group" aria-label={`Filter ${tab.label}`} className="-mx-4 flex min-w-0 flex-1 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 md:mx-0 md:flex-wrap md:px-0">
+              <button type="button" onClick={() => setBrowsing(true)} aria-haspopup="dialog"
+                className="inline-flex min-h-[44px] shrink-0 items-center gap-2 rounded-full border-2 border-ink bg-white px-4 text-[14px] font-bold text-ink md:hidden">
+                <LayoutGrid size={16} aria-hidden="true" />Browse
+              </button>
               {tab.subs.map(s => {
                 const on = s.id === sub.id;
                 return (
@@ -163,9 +182,13 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
                 );
               })}
             </div>
-            <p role="status" className="hidden shrink-0 text-sm font-semibold text-subtle md:block">{countText}</p>
+            <button type="button" onClick={() => setBrowsing(true)} aria-haspopup="dialog"
+              className="hidden min-h-[44px] shrink-0 items-center gap-2 rounded-full border-2 border-ink bg-white px-4 text-[15px] font-bold text-ink hover:bg-canvas md:inline-flex">
+              <LayoutGrid size={17} aria-hidden="true" />Browse by
+            </button>
           </div>
-          <p role="status" className="sr-only md:hidden">{countText}</p>
+          {/* The count moved off screen when Browse by took its place; screen readers still hear it. */}
+          <p role="status" className="sr-only">{countText}</p>
           </div>
 
           <div ref={grid} className="mt-1">
