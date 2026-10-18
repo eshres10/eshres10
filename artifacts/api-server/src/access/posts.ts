@@ -55,6 +55,7 @@ export interface FeedPostView {
   aspect: Post["aspect"];
   garment: Post["garment"];
   fabric: Post["fabric"];
+  linkUrl: string | null;
   forumTopic: { id: number; title: string; replies: number } | null;
 }
 
@@ -162,6 +163,7 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
       aspect: post.aspect,
       garment: post.garment ?? null,
       fabric: post.fabric ?? null,
+      linkUrl: post.linkUrl ?? null,
       forumTopic: ((t) => (t ? { id: t.id, title: t.title, replies: t.replies } : null))(topics.find((t) => t.postId === post.id && t.userId === post.userId)),
     }];
   });
@@ -235,4 +237,23 @@ export async function listPublicPosts(db: Tx, limit = 50000) {
     .where(eq(postsTable.visibility, "public"))
     .orderBy(desc(postsTable.id))
     .limit(limit);
+}
+
+/**
+ * A post's link as typed: trimmed, https:// added when no scheme is given.
+ * null = no link (empty); false = not a link we accept (only http and https,
+ * a real host name, no user/password, no spaces, at most 500 characters).
+ */
+export function normaliseLink(raw: string | null | undefined): string | null | false {
+  const text = (raw ?? "").trim();
+  if (!text) return null;
+  const withScheme = /^[a-z][a-z0-9+.-]*:/i.test(text) ? text : `https://${text}`;
+  if (withScheme.length > 500 || /\s/.test(withScheme)) return false;
+  try {
+    const url = new URL(withScheme);
+    if ((url.protocol !== "https:" && url.protocol !== "http:") || url.username || url.password || !url.hostname.includes(".")) return false;
+    return withScheme;
+  } catch {
+    return false;
+  }
 }

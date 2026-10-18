@@ -17,7 +17,7 @@ import {
   type PostFabric,
   type PostGarment,
 } from '@workspace/api-client-react';
-import { BookOpen, Camera, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Hash, ImagePlus, Info, Layers, Scissors, Search, Trophy, X } from 'lucide-react';
+import { BookOpen, Camera, Check, ChevronDown, ChevronLeft, ChevronRight, ChevronUp, Hash, ImagePlus, Info, Layers, Link2, Scissors, Search, Trophy, X } from 'lucide-react';
 import { useLocation, useSearch } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { CaptionText } from '@/components/feed/CaptionText';
@@ -34,12 +34,14 @@ import {
   useValidation,
 } from '@/components/flow';
 import { appendHashtag, aspectRatio, MAX_HASHTAGS, normaliseHashtag, parseHashtags, removeHashtag } from '@/lib/hashtags';
+import { linkLabel } from '@/lib/links';
 import { processPhoto } from '@/lib/photos';
 import {
   AudienceCards,
   insertHashtag,
   PhotoCarousel,
   photoSrc,
+  LinkSheet,
   PickerSheet,
   ChallengeSheet,
   Switch,
@@ -66,6 +68,7 @@ interface PostDraft extends Record<string, unknown> {
   fabricId: number | null;
   garment?: PostGarment | null;
   fabric?: PostFabric | null;
+  linkUrl?: string | null;
   visibility: Audience;
   challenges: string[];
   reached: number;
@@ -130,6 +133,8 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
   const [fabricId, setFabricId] = useState<number | null>(editing ? tagged('fabric') : null);
   const [garment, setGarment] = useState<PostGarment | null>(editing?.garment ?? null);
   const [fabric, setFabric] = useState<PostFabric | null>(editing?.fabric ?? null);
+  const [linkUrl, setLinkUrl] = useState<string | null>(editing?.linkUrl ?? null);
+  const [editingLink, setEditingLink] = useState(false);
   const [visibility, setVisibility] = useState<Audience>((editing?.visibility as Audience | undefined) ?? 'public');
   const [challenges, setChallenges] = useState<string[]>(editing ? editing.challenges.map(c => c.slug) : paramChallenge ? [paramChallenge] : []);
   const [reached, setReached] = useState(isEdit ? ALL_STEPS.length - 1 : 0);
@@ -145,14 +150,14 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
 
   // Draft: new posts only. Applied once, before autosave starts.
   const payload: PostDraft = {
-    kind, caption, aspect, projectId, patternId, fabricId, garment, fabric, visibility, challenges, reached,
+    kind, caption, aspect, projectId, patternId, fabricId, garment, fabric, linkUrl, visibility, challenges, reached,
     photos: uploads.items.filter(i => i.status === 'done' && i.result).map(i => ({ media: i.result!, alt: alts[i.key] ?? '' })),
   };
   const dirty = isEdit
     ? caption !== editing!.caption || aspect !== editing!.aspect || visibility !== editing!.visibility || uploads.items.length !== editing!.media.length
       || projectId !== tagged('make') || challenges.join() !== editing!.challenges.map(c => c.slug).join()
-      || garment !== (editing!.garment ?? null) || fabric !== (editing!.fabric ?? null)
-    : Boolean(caption.trim() || uploads.items.length || projectId || patternId || fabricId);
+      || garment !== (editing!.garment ?? null) || fabric !== (editing!.fabric ?? null) || linkUrl !== (editing!.linkUrl ?? null)
+    : Boolean(caption.trim() || uploads.items.length || projectId || patternId || fabricId || linkUrl);
   const [hydrated, setHydrated] = useState(isEdit);
   const draft = useDraft('post', payload, { enabled: !isEdit, active: hydrated && dirty });
   if (!hydrated && draft.loaded !== undefined) {
@@ -166,6 +171,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       setFabricId(d.fabricId ?? null);
       setGarment(d.garment ?? null);
       setFabric(d.fabric ?? null);
+      setLinkUrl(d.linkUrl ?? null);
       setVisibility(d.visibility ?? 'public');
       setChallenges([...new Set([...(d.challenges ?? []), ...(paramChallenge ? [paramChallenge] : [])])]);
       setReached(Math.min(d.reached ?? 0, ALL_STEPS.length - 1));
@@ -265,7 +271,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       if (isEdit) {
         const post = editing!;
         await updatePost(post.id, {
-          caption: caption.trim(), visibility, projectId, patternId, fabricId, garment, fabric, aspect, altTexts,
+          caption: caption.trim(), visibility, projectId, patternId, fabricId, garment, fabric, linkUrl: linkUrl ?? '', aspect, altTexts,
           ...(post.kind === 'photo' ? { mediaIds: media.map(m => m.id) } : {}),
         });
         for (const c of post.challenges.filter(c => !challenges.includes(c.slug))) if (c.entryId) await deleteChallengeEntry(c.entryId).catch(() => undefined);
@@ -278,7 +284,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       }
       const post = await createPost({
         kind, caption: caption.trim(), visibility, mediaIds: kind === 'photo' ? media.map(m => m.id) : [],
-        projectId, patternId, fabricId, garment, fabric, aspect, altTexts: kind === 'photo' ? altTexts : [],
+        projectId, patternId, fabricId, garment, fabric, linkUrl, aspect, altTexts: kind === 'photo' ? altTexts : [],
       });
       const entered: string[] = [], notEntered: string[] = [];
       if (visibility === 'public') {
@@ -323,6 +329,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
   const [option, setOption] = useState(0);
   const captionRef = useRef<HTMLTextAreaElement>(null);
   const listboxId = useId();
+  const [ownTag, setOwnTag] = useState(''); // "Add your own" hashtag field (before the Done screen's early return: hooks must always run)
   const audienceTitle = useId();
 
   // ---- Done --------------------------------------------------------------
@@ -515,7 +522,6 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
     setOption(0);
     requestAnimationFrame(() => { captionRef.current?.focus(); captionRef.current?.setSelectionRange(next.caret, next.caret); });
   };
-  const [ownTag, setOwnTag] = useState('');
   const atLimit = hashtags.length >= MAX_HASHTAGS;
   const addOwnTag = () => {
     const tag = normaliseHashtag(ownTag);
@@ -646,6 +652,16 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
         {tagRow('Make', Scissors, 'make', nameOf(projects.data, projectId), false)}
         {tagRow('Pattern', BookOpen, 'pattern', nameOf(patterns.data, patternId), Boolean(make && make.patternId === patternId))}
         {tagRow('Fabric', Layers, 'fabric', nameOf(fabrics.data, fabricId), Boolean(make && make.fabricId === fabricId))}
+        <div className="flex min-h-[64px] items-center gap-3 py-2">
+          <Link2 size={22} aria-hidden="true" />
+          <span className="flex-1 text-[17px] font-semibold lg:text-[15px]">Link</span>
+          {linkUrl
+            ? <span className="inline-flex min-h-[44px] min-w-0 items-center gap-2 rounded-full bg-yellow pl-4 pr-1 font-bold">
+                <button type="button" onClick={() => setEditingLink(true)} aria-label={`Edit link: ${linkUrl}`} className="max-w-[160px] truncate">{linkLabel(linkUrl, 28)}</button>
+                <button type="button" onClick={() => setLinkUrl(null)} aria-label="Remove link" className="grid h-9 w-9 place-items-center rounded-full bg-ink text-white"><X size={15} /></button>
+              </span>
+            : <button type="button" onClick={() => setEditingLink(true)} className="btn btn-line min-h-[48px] text-base">Add a link</button>}
+        </div>
       </div>
       {(projectId || patternId || fabricId) && <p className="px-2 text-sm text-subtle">Tagged items show on the post only for people who can already see them.</p>}
 
@@ -678,6 +694,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
           onClose={() => setChoosingChallenge(false)} />
       )}
 
+      {editingLink && <LinkSheet value={linkUrl} onSave={setLinkUrl} onClose={() => setEditingLink(false)} />}
       {picker === 'make' && <PickerSheet title="Tag a make" help="We'll fill in the pattern and fabric from it." items={projects.data} value={projectId}
         image={p => p.coverImageUrl} describe={p => [nameOf(patterns.data, p.patternId ?? null), nameOf(fabrics.data, p.fabricId ?? null)].filter(Boolean).join(' · ') || p.status}
         onPick={p => pickMake(p?.id ?? null)} onClose={() => setPicker(null)} empty="No makes yet. Start one from Projects." />}

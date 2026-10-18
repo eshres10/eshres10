@@ -14,6 +14,7 @@ import { UserAvatar } from '@/components/avatar';
 import { PinIcon } from '@/components/explore/actions';
 import { CaptionText } from '@/components/feed/CaptionText';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
+import { PostLink } from '@/components/feed/PostLink';
 import { postUrl, shareLink } from '@/components/feed/PostActions';
 import { useModal } from '@/components/flow/modal';
 import { SafetyMenu } from '@/components/social/SafetyMenu';
@@ -266,6 +267,7 @@ function Discussion({ post, wide, saved, onSave, top }: { post: FeedPost; wide: 
       {wide && <UserAvatar name={post.author.name} avatarUrl={post.author.avatarUrl} size={32} />}
       <div className="min-w-0 text-[14px] leading-[1.45]">
         {(wide || post.media.length > 0) && post.caption && <p className="whitespace-pre-line break-words"><b className="mr-1.5">{post.author.handle}</b><CaptionText text={post.caption} /></p>}
+        {post.linkUrl && <div className="mt-2"><PostLink url={post.linkUrl} /></div>}
         {(pattern || post.fabric) && (
           <div className="mt-2 flex flex-wrap gap-1.5">
             {pattern && <Link href={`/search?tab=patterns&q=${encodeURIComponent(pattern.name)}`} className="inline-flex min-h-8 items-center rounded-full bg-yellow px-3 text-[12px] font-bold text-ink no-underline">Pattern: {pattern.name}</Link>}

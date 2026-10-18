@@ -4,6 +4,7 @@ import { Check, ChevronLeft, ChevronRight, Globe, Lock, Search, Users } from 'lu
 import type { UploadItem } from '@/components/flow';
 import { Sheet, useSheetDirty } from '@/components/social/Sheet';
 import { aspectRatio, hashtagAtCaret, parseHashtags, shortCount } from '@/lib/hashtags';
+import { normaliseLink } from '@/lib/links';
 
 export type Aspect = '4:5' | '1:1' | 'original';
 export type Audience = 'public' | 'followers' | 'private';
@@ -121,6 +122,37 @@ export function PickerSheet<T extends { id: number; name: string }>({ title, hel
         {value !== null && <button type="button" onClick={() => { onPick(null); onClose(); }} className="btn btn-line min-h-[52px] flex-1 text-base">Remove tag</button>}
         <button type="button" onClick={onClose} className="btn min-h-[52px] flex-1 bg-ink text-base text-white">Done</button>
       </div>
+    </Sheet>
+  );
+}
+
+/** "Add a link": a pattern shop, blog post or tutorial. Checked like the API does; https:// is added when left out. */
+export function LinkSheet({ value, onSave, onClose }: { value: string | null; onSave: (url: string | null) => void; onClose: () => void }) {
+  const [text, setText] = useState(value ?? '');
+  const [error, setError] = useState('');
+  useSheetDirty(text.trim() !== (value ?? ''));
+  const save = (e: React.FormEvent) => {
+    e.preventDefault();
+    const url = normaliseLink(text);
+    if (url === false) return setError('Enter a web address, like example.com/pattern.');
+    onSave(url);
+    onClose();
+  };
+  return (
+    <Sheet label="Add a link" onClose={onClose}>
+      <form onSubmit={save} noValidate>
+        <h2 className="font-display text-[26px] leading-tight tracking-[-.05em]">{value ? 'Edit link' : 'Add a link'}</h2>
+        <p className="mt-1 text-[15px] text-subtle">Your pattern shop, a blog post or a tutorial. It opens in a new tab.</p>
+        <label htmlFor="post-link" className="mt-4 block text-sm font-bold">Web address</label>
+        <input id="post-link" data-autofocus type="url" inputMode="url" autoComplete="url" autoCapitalize="off" spellCheck={false}
+          value={text} onChange={e => { setText(e.target.value.slice(0, 500)); setError(''); }} placeholder="https://"
+          aria-invalid={error ? true : undefined} aria-describedby={error ? 'post-link-error' : undefined} className="field mt-1.5" />
+        {error && <p id="post-link-error" className="mt-1.5 text-sm font-semibold text-red-ink">{error}</p>}
+        <div className="mt-4 flex gap-2">
+          {value && <button type="button" onClick={() => { onSave(null); onClose(); }} className="btn btn-line min-h-[52px] flex-1 text-base">Remove link</button>}
+          <button type="submit" className="btn min-h-[52px] flex-1 bg-ink text-base text-white">{value ? 'Save' : 'Add link'}</button>
+        </div>
+      </form>
     </Sheet>
   );
 }

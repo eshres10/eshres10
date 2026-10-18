@@ -6,6 +6,7 @@ import { Link, useLocation } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { VisibilityBadge } from '@/components/visibility';
 import { CaptionText } from '@/components/feed/CaptionText';
+import { PostLink } from '@/components/feed/PostLink';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { PostActions } from '@/components/feed/PostActions';
 import { SafetyMenu } from '@/components/social/SafetyMenu';
@@ -128,6 +129,7 @@ export function PostCard({ post, full = false, mobileCompact = false, onDeleted,
               {post.kind === 'status'
                 ? <p className="whitespace-pre-line break-words text-[13px] leading-[1.4]">{post.caption}</p>
                 : <Caption post={post} full />}
+              {post.linkUrl && <div className="mt-1.5"><PostLink url={post.linkUrl} /></div>}
               <p className="mt-1 text-[11px] text-subtle">{post.likeCount} {post.likeCount === 1 ? 'like' : 'likes'}</p>
             </div>
           </div>
@@ -159,6 +161,7 @@ export function PostCard({ post, full = false, mobileCompact = false, onDeleted,
         {post.kind === 'status'
           ? <p className={`whitespace-pre-line break-words ${post.caption.length < 140 ? 'font-display text-[22px] leading-snug tracking-[-.03em]' : 'text-[15px] leading-relaxed'}`}><CaptionText text={post.caption} /></p>
           : <Caption post={post} full={full} />}
+        {post.linkUrl && <div className="mt-2.5"><PostLink url={post.linkUrl} /></div>}
         {post.forumTopic && (
           <Link href={`/forum/topics/${post.forumTopic.id}`} className="mt-3 flex min-h-[44px] items-center gap-2 rounded-[18px] bg-canvas px-3 py-2 text-sm text-ink no-underline hover:bg-line">
             <MessagesSquare size={16} aria-hidden="true" className="shrink-0" />

@@ -264,6 +264,8 @@ export const postsTable = pgTable("sewspace_posts", {
   // Explore (migration 0020): optional labels the author picks; null on older posts.
   garment: text("garment").$type<PostGarment>(),
   fabric: text("fabric").$type<PostFabric>(),
+  /** Migration 0022: an optional http(s) link the author adds (pattern shop, blog post, tutorial). */
+  linkUrl: text("link_url"),
   ...timestamps,
 });
 

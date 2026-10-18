@@ -28,6 +28,12 @@ export interface PostUpdate {
   mediaIds?: number[];
   garment?: PostGarment | null;
   fabric?: PostFabric | null;
+  /**
+     * An http(s) link (https:// is added when left out). Empty or null removes it.
+     * @maxLength 500
+     * @nullable
+     */
+  linkUrl?: string | null;
   aspect?: PostAspect;
   /** @maxItems 10 */
   altTexts?: AltTextInput[];

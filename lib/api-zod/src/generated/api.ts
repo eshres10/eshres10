@@ -88,6 +88,7 @@ export const GetProfilePostsResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -312,6 +313,7 @@ export const GetPublicPostResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -378,6 +380,7 @@ export const GetTagPostsResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -445,6 +448,7 @@ export const SearchPostsResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -567,6 +571,7 @@ export const GetExploreFeedResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -923,6 +928,7 @@ export const GetSavedPostsResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -1897,6 +1903,7 @@ export const GetChallengeEntriesResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2100,6 +2107,7 @@ export const EnterChallengeResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2481,6 +2489,7 @@ export const GetForumTopicResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2684,6 +2693,7 @@ export const CreateForumTopicResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2826,6 +2836,7 @@ export const UpdateForumTopicResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2965,6 +2976,7 @@ export const SetAcceptedAnswerResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -3098,6 +3110,7 @@ export const ModerateForumTopicResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -3270,6 +3283,7 @@ export const GetHomeFeedResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -3310,6 +3324,8 @@ export const createPostBodyCaptionMax = 2200;
 
 export const createPostBodyMediaIdsMax = 10;
 
+export const createPostBodyLinkUrlMax = 500;
+
 export const createPostBodyAltTextsItemTextMax = 500;
 
 export const createPostBodyAltTextsMax = 10;
@@ -3326,6 +3342,7 @@ export const CreatePostBody = zod.object({
   "fabricId": zod.number().int().nullish(),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]).optional(),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]).optional(),
+  "linkUrl": zod.string().max(createPostBodyLinkUrlMax).nullish().describe('An http(s) link (https:// is added when left out). Empty or null removes it.'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "altTexts": zod.array(zod.object({
   "mediaId": zod.number().int(),
@@ -3372,6 +3389,7 @@ export const CreatePostResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -3396,6 +3414,8 @@ export const updatePostBodyCaptionMax = 2200;
 
 export const updatePostBodyMediaIdsMax = 10;
 
+export const updatePostBodyLinkUrlMax = 500;
+
 export const updatePostBodyAltTextsItemTextMax = 500;
 
 export const updatePostBodyAltTextsMax = 10;
@@ -3411,6 +3431,7 @@ export const UpdatePostBody = zod.object({
   "mediaIds": zod.array(zod.number().int()).max(updatePostBodyMediaIdsMax).optional().describe('Photo posts: the photos in order (1 to 10). Leave out to keep them as they are.'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]).optional(),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]).optional(),
+  "linkUrl": zod.string().max(updatePostBodyLinkUrlMax).nullish().describe('An http(s) link (https:// is added when left out). Empty or null removes it.'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "altTexts": zod.array(zod.object({
   "mediaId": zod.number().int(),
@@ -3457,6 +3478,7 @@ export const UpdatePostResponse = zod.object({
   "aspect": zod.enum(['4:5', '1:1', 'original']).describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
+  "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),

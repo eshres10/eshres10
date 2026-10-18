@@ -2588,6 +2588,7 @@ components:
         fabric:
           allOf: [{ $ref: "#/components/schemas/PostFabric" }]
           nullable: true
+        linkUrl: { type: string, nullable: true, description: "The author's link, if any (http or https)" }
         forumTopic:
           type: object
           nullable: true
@@ -2601,7 +2602,7 @@ components:
           allOf: [{ $ref: "#/components/schemas/PublicPerson" }]
           nullable: true
           description: "Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for 'Liked by … and others'"
-      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect, garment, fabric, forumTopic]
+      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect, garment, fabric, forumTopic, linkUrl]
     PostGarment:
       type: string
       description: What the post shows was made (Explore filters). Optional; the author picks it.
@@ -2769,6 +2770,7 @@ components:
         fabric:
           allOf: [{ $ref: "#/components/schemas/PostFabric" }]
           nullable: true
+        linkUrl: { type: string, nullable: true, maxLength: 500, description: "An http(s) link (https:// is added when left out). Empty or null removes it." }
         aspect: { $ref: "#/components/schemas/PostAspect" }
         altTexts:
           type: array
@@ -2794,6 +2796,7 @@ components:
         fabric:
           allOf: [{ $ref: "#/components/schemas/PostFabric" }]
           nullable: true
+        linkUrl: { type: string, nullable: true, maxLength: 500, description: "An http(s) link (https:// is added when left out). Empty or null removes it." }
         aspect: { $ref: "#/components/schemas/PostAspect" }
         altTexts:
           type: array

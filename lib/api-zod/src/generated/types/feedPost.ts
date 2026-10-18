@@ -38,6 +38,11 @@ export interface FeedPost {
   garment: PostGarment | null;
   fabric: PostFabric | null;
   /**
+     * The author's link, if any (http or https)
+     * @nullable
+     */
+  linkUrl: string | null;
+  /**
      * The forum thread this post was shared from (Show & tell)
      * @nullable
      */

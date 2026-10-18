@@ -26,7 +26,7 @@ import {
   UpdatePostParams,
   UpdatePostResponse,
 } from "@workspace/api-zod";
-import { getPostForViewer, homeFeed, MAX_HASHTAGS, mediaView, own, parseHashtags, suggestHashtags, syncPostHashtags, type Viewer } from "../access";
+import { getPostForViewer, homeFeed, MAX_HASHTAGS, mediaView, normaliseLink, own, parseHashtags, suggestHashtags, syncPostHashtags, type Viewer } from "../access";
 import { processImage, UnreadableImageError } from "../lib/images";
 import { ObjectNotFoundError } from "../lib/objectStorage";
 import { scoped, type Reply } from "../lib/scoped";
@@ -36,6 +36,7 @@ import { storageFor } from "./storage";
 const router: IRouter = Router();
 
 export const MAX_PHOTOS = 10;
+const BAD_LINK = "Links start with https:// (or http://) and point at a website.";
 export const POSTS_PER_HOUR = 30;
 const MAX_SOURCE_BYTES = 15 * 1024 * 1024;
 
@@ -190,6 +191,8 @@ router.post("/posts", scoped(async (req, res, db): Promise<void> => {
   }
   if (await rejectsForeignMedia(db, viewer, mediaIds, res)) return;
   if (await rejectsForeignTags(db, viewer, body, res)) return;
+  const linkUrl = normaliseLink(body.linkUrl);
+  if (linkUrl === false) return void res.status(400).json({ error: BAD_LINK });
 
   const [post] = await db
     .insert(postsTable)
@@ -203,6 +206,7 @@ router.post("/posts", scoped(async (req, res, db): Promise<void> => {
       fabricId: body.fabricId ?? null,
       garment: body.garment ?? null,
       fabric: body.fabric ?? null,
+      linkUrl,
       ...(body.aspect ? { aspect: body.aspect } : {}),
     })
     .returning();
@@ -249,6 +253,8 @@ router.patch("/posts/:id", scoped(async (req, res, db): Promise<void> => {
   if (rejectsStrayAltText(body.altTexts, finalMedia, res)) return;
   if (mediaIds && await rejectsForeignMedia(db, viewer, mediaIds, res)) return;
   if (await rejectsForeignTags(db, viewer, body, res)) return;
+  const linkUrl = body.linkUrl === undefined ? undefined : normaliseLink(body.linkUrl);
+  if (linkUrl === false) return void res.status(400).json({ error: BAD_LINK });
   await db
     .update(postsTable)
     .set({
@@ -259,6 +265,7 @@ router.patch("/posts/:id", scoped(async (req, res, db): Promise<void> => {
       fabricId: body.fabricId,
       garment: body.garment,
       fabric: body.fabric,
+      linkUrl,
       aspect: body.aspect,
       updatedAt: new Date(),
     })
