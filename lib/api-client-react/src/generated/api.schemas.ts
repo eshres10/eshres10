@@ -1719,6 +1719,102 @@ export interface ErrorResponse {
   error: string;
 }
 
+export type NotificationKind = typeof NotificationKind[keyof typeof NotificationKind];
+
+
+export const NotificationKind = {
+  like: 'like',
+  comment: 'comment',
+  comment_reply: 'comment_reply',
+  follow: 'follow',
+  forum_reply: 'forum_reply',
+  answer_accepted: 'answer_accepted',
+  challenge_entry: 'challenge_entry',
+} as const;
+
+/**
+ * @nullable
+ */
+export type NotificationPost = {
+  id: number;
+  caption: string;
+  /** @nullable */
+  thumbUrl: string | null;
+} | null;
+
+/**
+ * @nullable
+ */
+export type NotificationComment = {
+  id: number;
+  body: string;
+} | null;
+
+/**
+ * @nullable
+ */
+export type NotificationTopic = {
+  id: number;
+  title: string;
+} | null;
+
+/**
+ * @nullable
+ */
+export type NotificationReply = {
+  id: number;
+  body: string;
+} | null;
+
+/**
+ * @nullable
+ */
+export type NotificationChallenge = {
+  slug: string;
+  title: string;
+} | null;
+
+export interface Notification {
+  id: number;
+  kind: NotificationKind;
+  createdAt: string;
+  read: boolean;
+  /** Who did it. Null when they have no handle yet (show "Someone") */
+  actor: PublicPerson | null;
+  /** @nullable */
+  post: NotificationPost;
+  /** @nullable */
+  comment: NotificationComment;
+  /** @nullable */
+  topic: NotificationTopic;
+  /** @nullable */
+  reply: NotificationReply;
+  /** @nullable */
+  challenge: NotificationChallenge;
+  /** Where tapping it goes */
+  href: string;
+}
+
+export interface NotificationPage {
+  items: Notification[];
+  /** @nullable */
+  nextCursor: string | null;
+  unreadCount: number;
+}
+
+export interface UnreadNotificationCount {
+  unreadCount: number;
+}
+
+export interface MarkNotificationsRead {
+  /**
+     * Leave out to mark everything read
+     * @maxItems 100
+     * @items.minimum 1
+     */
+  ids?: number[];
+}
+
 export interface MenuSummary {
   /** Saved posts you may still see */
   savedCount: number;
@@ -2723,6 +2819,10 @@ export type CheckHandleAvailability200 = {
 
 export type ListFabricsParams = {
 search?: SearchParameter;
+};
+
+export type ListNotificationsParams = {
+cursor?: string;
 };
 
 export type ListThreadsParams = {

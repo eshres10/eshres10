@@ -3520,6 +3520,77 @@ export const GetMenuSummaryResponse = zod.object({
 
 
 /**
+ * @summary Your notifications, newest first, 20 a page, with the unread count. Only your own; nothing from across a block or about things you can no longer see.
+ */
+export const ListNotificationsQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional()
+})
+
+export const ListNotificationsResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "kind": zod.enum(['like', 'comment', 'comment_reply', 'follow', 'forum_reply', 'answer_accepted', 'challenge_entry']),
+  "createdAt": zod.coerce.date(),
+  "read": zod.boolean(),
+  "actor": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).describe('Who did it. Null when they have no handle yet (show "Someone")'),
+  "post": zod.object({
+  "id": zod.number().int(),
+  "caption": zod.string(),
+  "thumbUrl": zod.string().nullable()
+}).nullable(),
+  "comment": zod.object({
+  "id": zod.number().int(),
+  "body": zod.string()
+}).nullable(),
+  "topic": zod.object({
+  "id": zod.number().int(),
+  "title": zod.string()
+}).nullable(),
+  "reply": zod.object({
+  "id": zod.number().int(),
+  "body": zod.string()
+}).nullable(),
+  "challenge": zod.object({
+  "slug": zod.string(),
+  "title": zod.string()
+}).nullable(),
+  "href": zod.string().describe('Where tapping it goes')
+})),
+  "nextCursor": zod.string().nullable(),
+  "unreadCount": zod.number().int()
+})
+
+
+/**
+ * @summary The number on the bell.
+ */
+export const GetUnreadNotificationCountResponse = zod.object({
+  "unreadCount": zod.number().int()
+})
+
+
+/**
+ * @summary Mark some of your notifications read (ids, at most 100), or all of them (no ids). Returns what's still unread.
+ */
+
+export const markNotificationsReadBodyIdsMax = 100;
+
+
+
+export const MarkNotificationsReadBody = zod.object({
+  "ids": zod.array(zod.number().int().min(1)).max(markNotificationsReadBodyIdsMax).optional().describe('Leave out to mark everything read')
+})
+
+export const MarkNotificationsReadResponse = zod.object({
+  "unreadCount": zod.number().int()
+})
+
+
+/**
  * @summary Your answers to Pip's questions and the step you got to. Private to you; defaults before you start.
  */
 export const getOnboardingResponseCurrentStepMin = 0;

@@ -1453,6 +1453,50 @@ paths:
               schema: { $ref: "#/components/schemas/MenuSummary" }
         "401": { description: Sign in first }
         "429": { description: Asked too often this hour }
+  /notifications:
+    get:
+      operationId: listNotifications
+      tags: [social]
+      summary: "Your notifications, newest first, 20 a page, with the unread count. Only your own; nothing from across a block or about things you can no longer see."
+      parameters:
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: A page of notifications
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/NotificationPage" }
+        "401": { description: Sign in first }
+  /notifications/unread-count:
+    get:
+      operationId: getUnreadNotificationCount
+      tags: [social]
+      summary: The number on the bell.
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UnreadNotificationCount" }
+        "401": { description: Sign in first }
+  /notifications/read:
+    post:
+      operationId: markNotificationsRead
+      tags: [social]
+      summary: "Mark some of your notifications read (ids, at most 100), or all of them (no ids). Returns what's still unread."
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MarkNotificationsRead" }
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/UnreadNotificationCount" }
+        "400": { description: Not a list of ids }
+        "401": { description: Sign in first }
   /onboarding:
     get:
       operationId: getOnboarding
@@ -3298,6 +3342,77 @@ components:
       properties:
         error: { type: string }
       required: [error]
+    Notification:
+      type: object
+      properties:
+        id: { type: integer }
+        kind: { type: string, enum: [like, comment, comment_reply, follow, forum_reply, answer_accepted, challenge_entry] }
+        createdAt: { type: string, format: date-time }
+        read: { type: boolean }
+        actor:
+          allOf: [{ $ref: "#/components/schemas/PublicPerson" }]
+          nullable: true
+          description: "Who did it. Null when they have no handle yet (show \"Someone\")"
+        post:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            caption: { type: string }
+            thumbUrl: { type: string, nullable: true }
+          required: [id, caption, thumbUrl]
+        comment:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            body: { type: string }
+          required: [id, body]
+        topic:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            title: { type: string }
+          required: [id, title]
+        reply:
+          type: object
+          nullable: true
+          properties:
+            id: { type: integer }
+            body: { type: string }
+          required: [id, body]
+        challenge:
+          type: object
+          nullable: true
+          properties:
+            slug: { type: string }
+            title: { type: string }
+          required: [slug, title]
+        href: { type: string, description: Where tapping it goes }
+      required: [id, kind, createdAt, read, actor, post, comment, topic, reply, challenge, href]
+    NotificationPage:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: "#/components/schemas/Notification" }
+        nextCursor: { type: string, nullable: true }
+        unreadCount: { type: integer }
+      required: [items, nextCursor, unreadCount]
+    UnreadNotificationCount:
+      type: object
+      properties:
+        unreadCount: { type: integer }
+      required: [unreadCount]
+    MarkNotificationsRead:
+      type: object
+      properties:
+        ids:
+          type: array
+          maxItems: 100
+          items: { type: integer, minimum: 1 }
+          description: Leave out to mark everything read
     MenuSummary:
       type: object
       properties:

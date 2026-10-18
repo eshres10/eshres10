@@ -22,3 +22,4 @@ export * from "./search";
 export * from "./onboarding";
 export * from "./menu";
 export * from "./pattern-me";
+export * from "./notifications";
