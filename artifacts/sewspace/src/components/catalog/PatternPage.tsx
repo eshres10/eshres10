@@ -23,7 +23,7 @@ import { formatPrice } from '@/lib/currency';
 // The pattern page's public sections (docs/design/patterns d4–d5, m3–m6).
 // Every number here comes from public data (the API decides).
 
-const ART: Record<string, string> = { dresses: 'Dresses', tops: 'Tops', skirts: 'Skirts', trousers: 'Trousers', outerwear: 'Outerwear', knitwear: 'Knits', bags: 'Bags', jumpsuits: 'Dresses' };
+const ART: Record<string, string> = { dresses: 'Dresses', tops: 'Tops', skirts: 'Skirts', trousers: 'Trousers', outerwear: 'Outerwear', knitwear: 'Knits', bags: 'Bags', jumpsuits: 'Dresses', home: 'Home', other: 'Other' };
 
 /** Photos from public makes: thumbnails beside the main photo from 768 px, swipe with dots below. */
 export function Gallery({ page }: { page: CatalogPage }) {

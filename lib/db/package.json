@@ -11,7 +11,8 @@
   "scripts": {
     "migrate": "tsx ./src/migrate-cli.ts",
     "push": "echo 'drizzle-kit push is disabled: add a SQL file to lib/db/migrations and run pnpm --filter @workspace/db run migrate' && exit 1",
-    "test": "bash ./test/run.sh"
+    "test": "bash ./test/run.sh",
+    "import-catalog": "tsx ./src/import-catalog.ts"
   },
   "dependencies": {
     "drizzle-orm": "catalog:",

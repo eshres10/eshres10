@@ -18,7 +18,7 @@ import { formatPrice } from '@/lib/currency';
 const MAIN_CATEGORIES = ['dresses', 'tops', 'skirts', 'trousers', 'outerwear', 'knitwear', 'bags'] as const;
 const CATEGORY_LABEL: Record<string, string> = { knitwear: 'Knits' };
 const categoryLabel = (c: string) => CATEGORY_LABEL[c] ?? capitalise(c);
-const ART: Record<string, string> = { dresses: 'Dresses', tops: 'Tops', skirts: 'Skirts', trousers: 'Trousers', outerwear: 'Outerwear', knitwear: 'Knits', bags: 'Bags', jumpsuits: 'Dresses' };
+const ART: Record<string, string> = { dresses: 'Dresses', tops: 'Tops', skirts: 'Skirts', trousers: 'Trousers', outerwear: 'Outerwear', knitwear: 'Knits', bags: 'Bags', jumpsuits: 'Dresses', home: 'Home', other: 'Other' };
 const TONES = ['bg-blue-soft', 'bg-peach-soft', 'bg-mist'];
 
 const DIFFICULTIES = [['beginner', 'Beginner'], ['intermediate', 'Intermediate'], ['advanced', 'Advanced']] as const;

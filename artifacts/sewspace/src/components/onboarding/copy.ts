@@ -68,6 +68,9 @@ export const MAKE_ART: Record<string, string> = {
   Knits: 'M18 8 9 12 6 34h6l2-12v20h20V22l2 12h6l-3-22-9-4c-2 4-10 4-12 0z M14 36h20 M18 36v6 M24 36v6 M30 36v6',
   Bags: 'M10 18h28l-3 24H13z M18 18v-4a6 6 0 0 1 12 0v4 M17 26h14',
   Costume: 'M8 36 10 14l8 9 6-13 6 13 8-9 2 22z M8 41h32 M24 26v.5',
+  // Not Q4 options: covers for directory pages in Home (quilts, cushions, aprons) and Other (toys, pets…).
+  Home: 'M9 9h30v30H9z M9 24h30 M24 9v30 M9 9l15 15 M24 24l15 15 M39 9 24 24',
+  Other: 'M12 8h24v5H12z M12 35h24v5H12z M16 13v22 M32 13v22 M16 19h16 M16 24h16 M16 29h16',
   Mending: 'M8 14h22v22H8z M12 18h2 M18 18h2 M24 18h2 M12 32h2 M18 32h2 M24 32h2 M34 34 44 8 M41.5 11.5a2 2 0 1 1 2.5-3',
 };
 
