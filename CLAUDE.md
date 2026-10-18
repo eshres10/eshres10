@@ -169,6 +169,7 @@ Replit routes by path prefix. The web artifact serves `/` statically; the API ar
 - Modals: use `useModal` (or `Sheet`/`FlowShell`, which do). It keeps a stack so only the top dialog answers Escape and traps Tab; a hand-rolled `keydown` listener on `window` would also close the dialog underneath.
 - Drafts: never autosave until the loaded draft has been applied (`useDraft(..., { active })`), or an empty form overwrites it. Drafts are kept for new items only; edit mode passes `enabled: false`.
 - Body parser refusals keep their status (413 too large, 400 bad JSON) instead of becoming 500s (`app.ts` error handler).
+- Rows of chips or tabs that scroll sideways hide the scrollbar with `[scrollbar-width:none] [&::-webkit-scrollbar]:hidden` (desktop browsers and narrow windows otherwise draw a grey bar under them); tables and code blocks keep theirs.
 - `.field` is unlayered CSS and beats Tailwind padding utilities; inputs with a leading icon use `pl-9`, which has its own `.field.pl-9` rule in `index.css`.
 - The SEO router caches `index.html` in production; restart the API after a new web build (Replit deploys do this).
 - YAML flow mappings in `openapi.yaml`: quote any description containing a comma or a `#` (a `#` starts a comment), or Orval fails and deletes the generated Zod files.

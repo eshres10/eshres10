@@ -111,7 +111,7 @@ export function StudioMobileHeader({ section }: { section: StudioSection }) {
         )}
         {searching && section.href === '/studio' && <OverviewResults q={q} />}
       </header>
-      <nav aria-label="Studio sections" className="flex gap-2 md:hidden overflow-x-auto px-3 pb-1 pt-3">
+      <nav aria-label="Studio sections" className="flex gap-2 md:hidden overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-3 pb-1 pt-3">
         {STUDIO_SECTIONS.map(s => {
           const current = s.href === section.href;
           return (

@@ -147,7 +147,7 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
         <div className="md:rounded-[30px] md:bg-white md:p-5">
           <div ref={marker} aria-hidden="true" className="h-px" />
           <div className={`explore-sticky sticky z-30 -mx-4 bg-canvas px-4 pb-3 transition-transform duration-[280ms] ease-out motion-reduce:transition-none md:-mx-5 md:-mt-5 md:bg-white md:px-5 md:pt-5 ${pinned ? '' : 'md:rounded-t-[30px]'} ${STICKY[chrome.shell].base} ${chrome.hidden ? `${STICKY[chrome.shell].hidden} shadow-[0_8px_18px_-10px_rgb(0_0_0/0.18)]` : 'translate-y-0'}`}>
-          <div role="group" aria-label="Show" className="-mx-4 flex gap-1 overflow-x-auto border-b border-line px-4 md:hidden">
+          <div role="group" aria-label="Show" className="-mx-4 flex gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden border-b border-line px-4 md:hidden">
             {TABS.map(t => {
               const on = t.id === tab.id;
               return (
@@ -159,7 +159,7 @@ export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
             })}
           </div>
           <div className="mt-3 flex items-center gap-3 md:mt-0">
-            <div role="group" aria-label={`Filter ${tab.label}`} className="-mx-4 flex min-w-0 flex-1 gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
+            <div role="group" aria-label={`Filter ${tab.label}`} className="-mx-4 flex min-w-0 flex-1 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 md:mx-0 md:flex-wrap md:px-0">
               {tab.subs.map(s => {
                 const on = s.id === sub.id;
                 return (

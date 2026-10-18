@@ -44,7 +44,7 @@ export function MobileMeasurements({ sets, storedUnit, onNew, onEdit, onDelete }
       <p className="flex items-center gap-3 rounded-[22px] bg-ink px-4 py-3 text-[15px] font-bold text-white">
         <Lock size={18} className="shrink-0" aria-hidden="true" />Only you can see these. They never appear on shared makes.
       </p>
-      <div role="radiogroup" aria-label="Measurement sets" className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+      <div role="radiogroup" aria-label="Measurement sets" className="-mx-4 flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 pb-1">
         {ordered.map(s => (
           <button key={s.id} type="button" role="radio" aria-checked={s.id === selectedId} onClick={() => setSelectedId(s.id)}
             className={`min-h-[56px] shrink-0 rounded-[18px] border-2 px-4 py-1.5 text-left ${s.id === selectedId ? 'border-ink bg-yellow' : 'border-transparent bg-white'}`}>

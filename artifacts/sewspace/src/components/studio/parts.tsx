@@ -66,7 +66,7 @@ export function FilterChips<T extends string>({ label, options, value, onChange 
   label: string; options: Array<{ value: NoInfer<T>; label: string }>; value: T; onChange: (v: NoInfer<T>) => void;
 }) {
   return (
-    <div role="group" aria-label={label} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
+    <div role="group" aria-label={label} className="-mx-4 flex gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 pb-1">
       {options.map(o => (
         <button key={o.value} type="button" aria-pressed={value === o.value} onClick={() => onChange(o.value)}
           className={`min-h-[44px] shrink-0 rounded-full px-4 text-[15px] font-bold ${value === o.value ? 'bg-ink text-white' : 'bg-white text-ink'}`}>

@@ -76,7 +76,7 @@ export function TagPage({ tag }: { tag: string }) {
       </header>
 
       {others.length > 0 && (
-        <nav aria-label="Related hashtags" className="-mx-3 mt-6 flex items-center gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
+        <nav aria-label="Related hashtags" className="-mx-3 mt-6 flex items-center gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-3 pb-1 sm:mx-0 sm:flex-wrap sm:px-0">
           <span className="shrink-0 text-sm font-semibold text-subtle">Related</span>
           {others.map(t => <Link key={t.tag} href={`/tags/${t.tag}`} className="inline-flex min-h-[40px] shrink-0 items-center rounded-full bg-white px-4 text-sm font-bold text-ink no-underline hover:bg-yellow">#{t.tag}</Link>)}
         </nav>

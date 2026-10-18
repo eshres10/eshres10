@@ -175,7 +175,7 @@ export function ExplorePage() {
       {/* Signed in, the top bar already names the page: one toolbar row, no big heading (owner). */}
       {!isSignedIn && <div><p className="eyebrow eyebrow-red">Discover</p><h1 className="font-display text-[44px] leading-none tracking-[-.06em] sm:text-[56px]">Explore</h1></div>}
       <div className={`flex flex-wrap items-center gap-2 ${isSignedIn ? '' : 'mt-3'}`}>
-        <div role="group" aria-label="Show" className="-mx-4 flex w-[calc(100%+2rem)] min-w-0 gap-2 overflow-x-auto px-4 sm:mx-0 sm:w-auto sm:flex-1 sm:px-0">
+        <div role="group" aria-label="Show" className="-mx-4 flex w-[calc(100%+2rem)] min-w-0 gap-2 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden px-4 sm:mx-0 sm:w-auto sm:flex-1 sm:px-0">
           {KINDS.map(k => (
             <button key={k.id} type="button" aria-pressed={kind === k.id} onClick={() => setKind(k.id)}
               className={`min-h-[44px] shrink-0 rounded-full px-4 text-[15px] font-semibold ${kind === k.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>{k.label}</button>

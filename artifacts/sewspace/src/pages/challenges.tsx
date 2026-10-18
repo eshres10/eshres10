@@ -28,7 +28,7 @@ export function ChallengesPage() {
     <div className="mx-auto max-w-[1232px]">
       <CommunityTabs />
       <div className="flex flex-wrap items-center gap-3">
-        <div role="tablist" aria-label="Challenges" className="flex w-fit max-w-full gap-1 overflow-x-auto rounded-full bg-white p-1">
+        <div role="tablist" aria-label="Challenges" className="flex w-fit max-w-full gap-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden rounded-full bg-white p-1">
           {TABS.map(t => (
             <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setLocation(t.id === 'active' ? '/challenges' : `/challenges?status=${t.id}`, { replace: true })}
               className={`min-h-[44px] shrink-0 rounded-full px-4 text-sm font-bold ${tab === t.id ? 'bg-ink text-white' : 'text-ink'}`}>{t.label}</button>
