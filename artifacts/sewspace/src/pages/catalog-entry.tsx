@@ -20,6 +20,7 @@ import { Link, useLocation } from 'wouter';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
 import { capitalise, DeletePage, EditEntryForm, ReviewForm, Stars } from '@/components/catalog/parts';
+import { SaveHeart } from '@/components/catalog/Directory';
 import { Alterations, DesignerRow, FabricsUsed, Gallery, GetIt, SizeChart, StarSummary, StatTiles } from '@/components/catalog/PatternPage';
 import { Loading } from '@/components/common';
 import { Discussions } from '@/components/forum/Discussions';
@@ -144,7 +145,8 @@ function WriteReview({ page, label, className }: { page: CatalogPage; label: str
   );
 }
 
-const BIG = 'inline-flex min-h-[44px] items-center gap-2 rounded-full px-5 text-[15px] font-bold no-underline disabled:opacity-60';
+// One row on the pattern page (owner): Edit page · I've made this · Add to my library, so they stay compact.
+const BIG = 'inline-flex min-h-[44px] items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 text-[14px] font-bold no-underline disabled:opacity-60';
 
 /**
  * "I've made this": starts a new make with this pattern from your library
@@ -187,7 +189,8 @@ function Actions({ page, me }: { page: CatalogPage; me: CatalogMe | undefined })
   const [editing, setEditing] = useState(false);
   const inLibrary = Boolean(me?.libraryPatternId) || page.inMyLibrary || save.isSuccess;
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex flex-wrap items-center gap-1.5">
+      {e.canEdit && <button type="button" onClick={() => setEditing(true)} className={`${BIG.replace('px-3.5', 'px-1')} text-ink underline underline-offset-4`}><Pencil size={15} aria-hidden="true" />Edit page</button>}
       {e.kind === 'pattern'
         ? <MadeIt entry={e} me={me} />
         : <WriteReview page={page} className={`${BIG} border-2 border-ink bg-white text-ink`} label={page.myReview ? 'Edit your review' : 'Write a review'} />}
@@ -196,10 +199,9 @@ function Actions({ page, me }: { page: CatalogPage; me: CatalogMe | undefined })
           ? <Link href="/patterns" className={`${BIG} border border-ink bg-white text-ink`}><Check size={16} aria-hidden="true" />In your library</Link>
           : <button type="button" disabled={save.isPending} className={`${BIG} bg-canvas text-ink`}
               onClick={() => { if (ask({ title: 'Sign in to save patterns', body: 'Saved patterns go in your private pattern library.' })) save.mutate({ id: e.id }, { onSuccess: () => client.invalidateQueries() }); }}>
-              {save.isPending ? <Loader2 size={16} className="animate-spin" /> : <Bookmark size={16} aria-hidden="true" />}Add to my library
+              {save.isPending ? <Loader2 size={16} className="animate-spin" /> : <Bookmark size={16} aria-hidden="true" />}Add to library
             </button>
       )}
-      {e.canEdit && <button type="button" onClick={() => setEditing(true)} className={`${BIG} text-ink underline underline-offset-4`}><Pencil size={15} aria-hidden="true" />Edit page</button>}
       {editing && (
         <Sheet label={`Edit ${e.name}`} onClose={() => setEditing(false)}>
           <EditEntryForm entry={e} sizes={page.sizes} onDone={() => setEditing(false)} />
@@ -304,11 +306,14 @@ export function CatalogEntryPage({ kind, slug }: { kind: string; slug: string })
         <span aria-hidden="true" className="text-subtle"> / </span><span className="font-semibold">{e.name}</span>
       </nav>
 
-      <section className="grid grid-cols-1 gap-4 md:grid-cols-[minmax(0,7fr)_minmax(0,6fr)] md:items-start">
+      <section className="grid grid-cols-1 gap-4 md:grid-cols-2 md:items-start min-[1440px]:grid-cols-[minmax(0,7fr)_minmax(0,6fr)]">
         <Gallery page={page.data} />
-        <div className="min-w-0 rounded-[30px] bg-white p-6 sm:p-8 md:rounded-[40px] md:p-10">
+        <div className="min-w-0 rounded-[30px] bg-white p-6 sm:p-8 md:rounded-[40px] min-[1440px]:p-10">
           <p className="eyebrow eyebrow-red">{pattern ? SOURCE_EYEBROW[e.source] : capitalise(e.category)}</p>
-          <h1 className="mt-2 font-display text-[clamp(34px,4.2vw,56px)] leading-[1.02] tracking-[-.05em]">{e.name}</h1>
+          <div className="mt-2 flex items-start gap-3">
+            <h1 className="min-w-0 flex-1 font-display text-[clamp(34px,4.2vw,56px)] leading-[1.02] tracking-[-.05em]">{e.name}</h1>
+            {pattern && <SaveHeart entry={e} className="mt-1 h-12 w-12 shrink-0 border border-ink" />}
+          </div>
           <DesignerRow page={page.data} />
           {e.description && <p className="mt-4 whitespace-pre-line text-[15px] leading-relaxed">{e.description}</p>}
           <ul className="mt-4 flex flex-wrap gap-1.5">{facts.map(f => <li key={f} className="rounded-full bg-canvas px-3 py-1.5 text-[13px] font-semibold">{f}</li>)}</ul>

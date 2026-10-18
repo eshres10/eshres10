@@ -160,12 +160,14 @@ export function GetIt({ entry: e, compact = false }: { entry: CatalogEntry; comp
   }
   return (
     <div className="mt-5 border-t border-line pt-5">
+      {/* The heart sits beside the name (catalog-entry.tsx); this row is the price and the way to get it. */}
       <div className="flex flex-wrap items-center gap-3">
         <span className="min-w-0 flex-1">
-          <b className="block font-display text-[32px] leading-none">{free ? 'Free' : price ?? 'Designer\'s site'}</b>
+          {free || price
+            ? <b className="block font-display text-[28px] leading-none">{free ? 'Free' : price}</b>
+            : <b className="block whitespace-nowrap text-[17px] font-bold leading-tight">Designer's site</b>}
           {price && <span className="mt-1 block text-[13px] text-subtle">{e.currency} · on the designer's site</span>}
         </span>
-        <SaveHeart entry={e} className="h-12 w-12 border border-ink" />
         {button}
       </div>
     </div>
