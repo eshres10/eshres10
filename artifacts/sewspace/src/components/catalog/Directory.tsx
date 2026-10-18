@@ -1,4 +1,5 @@
 import { useEffect, useId, useState } from 'react';
+import { useAuth } from '@clerk/react';
 import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
 import { listCatalog, saveCatalogEntry, unsaveCatalogEntry, type CatalogEntry, type CatalogList, type ListCatalogParams, type ListCatalogSort } from '@workspace/api-client-react';
 import { Heart, Loader2, Plus, Search, SlidersHorizontal, Star, X } from 'lucide-react';
@@ -180,6 +181,7 @@ function SortControl({ f, set, wide = false }: { f: Filters; set: (next: Partial
 
 /** The pattern directory: search, category pills, filters (panel on desktop, sheet on phones), sort, 24 at a time. */
 export function PatternDirectory({ onAdd }: { onAdd: () => void }) {
+  const { isSignedIn } = useAuth();
   const [f, set] = useFilters();
   const [q, setQ] = useState(f.q);
   const [sheet, setSheet] = useState(false);
@@ -208,6 +210,24 @@ export function PatternDirectory({ onAdd }: { onAdd: () => void }) {
 
   return (
     <div>
+      {/* Signed in, the top bar already names the page: categories and search in one row, no big heading (owner). */}
+      {isSignedIn ? (
+        <div className="flex flex-col-reverse gap-3 lg:flex-row lg:items-center">
+        <nav aria-label="Categories" className="-mx-4 flex min-w-0 flex-1 gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+          {[['', 'All'] as const, ...MAIN_CATEGORIES.map(c => [c, categoryLabel(c)] as const), ...PATTERN_CATEGORIES.filter(c => !(MAIN_CATEGORIES as readonly string[]).includes(c)).map(c => [c, categoryLabel(c)] as const)].map(([id, label]) => (
+            <button key={id || 'all'} type="button" aria-pressed={f.category === id} onClick={() => set({ category: id })}
+              className={`min-h-[44px] shrink-0 rounded-full px-5 text-[15px] font-bold ${f.category === id ? 'bg-ink text-white' : 'bg-white text-ink'}`}>{label}</button>
+          ))}
+        </nav>
+          <label className="relative block lg:w-[360px] lg:shrink-0">
+            <span className="sr-only">Search patterns</span>
+            <Search size={19} aria-hidden="true" className="absolute left-5 top-1/2 -translate-y-1/2" />
+            <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder="Search name, designer or garment"
+              className="min-h-[52px] w-full rounded-full border-2 border-ink bg-white pl-12 pr-5 text-[16px] outline-none focus:ring-4 focus:ring-yellow" />
+          </label>
+        </div>
+      ) : (
+        <>
       <header className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,560px)] lg:items-end">
         <div>
           <p className="eyebrow eyebrow-red">Pattern directory</p>
@@ -228,6 +248,8 @@ export function PatternDirectory({ onAdd }: { onAdd: () => void }) {
             className={`min-h-[44px] shrink-0 rounded-full px-5 text-[15px] font-bold ${f.category === id ? 'bg-ink text-white' : 'bg-white text-ink'}`}>{label}</button>
         ))}
       </nav>
+        </>
+      )}
 
       <div className="mt-5 grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)] lg:items-start">
         <aside aria-label="Filters" className="hidden rounded-[28px] bg-white p-6 lg:block">

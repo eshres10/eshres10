@@ -172,13 +172,18 @@ export function ExplorePage() {
     <div className="mx-auto max-w-[1232px]">
       <CommunityTabs />
       {isLoaded && !isSignedIn && <GuestBanner />}
-      <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-3">
-        <div>
-          <p className="eyebrow eyebrow-red">Discover</p>
-          <h1 className="font-display text-[44px] leading-none tracking-[-.06em] sm:text-[56px]">Explore</h1>
+      {/* Signed in, the top bar already names the page: one toolbar row, no big heading (owner). */}
+      {!isSignedIn && <div><p className="eyebrow eyebrow-red">Discover</p><h1 className="font-display text-[44px] leading-none tracking-[-.06em] sm:text-[56px]">Explore</h1></div>}
+      <div className={`flex flex-wrap items-center gap-2 ${isSignedIn ? '' : 'mt-3'}`}>
+        <div role="group" aria-label="Show" className="-mx-4 flex w-[calc(100%+2rem)] min-w-0 gap-2 overflow-x-auto px-4 sm:mx-0 sm:w-auto sm:flex-1 sm:px-0">
+          {KINDS.map(k => (
+            <button key={k.id} type="button" aria-pressed={kind === k.id} onClick={() => setKind(k.id)}
+              className={`min-h-[44px] shrink-0 rounded-full px-4 text-[15px] font-semibold ${kind === k.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>{k.label}</button>
+          ))}
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <Link href="/search" className="inline-flex min-h-[48px] items-center gap-2 rounded-full bg-yellow px-5 text-[15px] font-bold text-ink no-underline"><Search size={18} aria-hidden="true" />Search Explore</Link>
+          {/* Phones have the search icon in the header. */}
+          <Link href="/search" className="hidden min-h-[48px] items-center gap-2 rounded-full bg-yellow px-5 text-[15px] font-bold text-ink no-underline sm:inline-flex"><Search size={18} aria-hidden="true" />Search Explore</Link>
           <div role="group" aria-label="Order" className="flex rounded-full bg-white p-1">
             {SORTS.map(o => (
               <button key={o.id} type="button" aria-pressed={sort === o.id} onClick={() => setSort(o.id)}
@@ -186,12 +191,6 @@ export function ExplorePage() {
             ))}
           </div>
         </div>
-      </div>
-      <div role="group" aria-label="Show" className="-mx-3 mt-4 flex gap-2 overflow-x-auto px-3 pb-1 sm:mx-0 sm:px-0">
-        {KINDS.map(k => (
-          <button key={k.id} type="button" aria-pressed={kind === k.id} onClick={() => setKind(k.id)}
-            className={`min-h-[44px] shrink-0 rounded-full px-4 text-[15px] font-semibold ${kind === k.id ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>{k.label}</button>
-        ))}
       </div>
       {sort === 'popular' && <p className="mt-3 text-sm text-subtle">Most liked in the last two weeks.</p>}
       <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_350px] lg:items-start">

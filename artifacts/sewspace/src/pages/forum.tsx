@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useAuth } from '@clerk/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { listForumTopics, useGetForumOverview, type ForumBoard, type ForumTopicSummary, type ListForumTopicsFilter, type ListForumTopicsSort } from '@workspace/api-client-react';
 import { Loader2, MessagesSquare, Plus, Search, X } from 'lucide-react';
@@ -53,6 +54,7 @@ function TopicRow({ topic: t }: { topic: ForumTopicSummary }) {
 /** The forum: boards, filters with counts, Hot/New/Unanswered, search. Works signed out. */
 export function ForumPage() {
   const [, setLocation] = useLocation();
+  const { isSignedIn } = useAuth();
   const params = new URLSearchParams(useSearch());
   const filter = (params.get('filter') ?? 'all') as ListForumTopicsFilter;
   const board = (params.get('board') || undefined) as ForumBoard | undefined;
@@ -97,7 +99,23 @@ export function ForumPage() {
   return (
     <div className="mx-auto max-w-[1232px]">
       <CommunityTabs />
-      <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,570px)] lg:items-end">
+      {/* Signed in, the top bar already names the page: search and Start a discussion in one row (owner). */}
+      {isSignedIn ? (
+        <section aria-label="Search the forum" className="flex flex-wrap items-center gap-3">
+          <div className="min-w-[240px] flex-1">
+            <label className="relative block">
+              <span className="sr-only">Search the forum</span>
+              <Search size={18} className="absolute left-5 top-1/2 -translate-y-1/2 text-ink" aria-hidden="true" />
+              <input type="search" value={q} onChange={e => { setQ(e.target.value); go({ q: e.target.value || undefined }); }}
+                className="min-h-[54px] w-full rounded-full border-2 border-ink bg-white pl-12 pr-5 text-[16px] outline-none focus:ring-4 focus:ring-yellow" placeholder={'Search before you ask: “gaping neckline”'} />
+            </label>
+          </div>
+          <button type="button" onClick={start} className="inline-flex min-h-[50px] items-center gap-2 rounded-full bg-yellow px-6 text-[16px] font-bold text-ink">
+            <Plus size={17} aria-hidden="true" />Start a discussion
+          </button>
+        </section>
+      ) : (
+        <section className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_minmax(0,570px)] lg:items-end">
         <div>
           <p className="eyebrow eyebrow-red">The forum</p>
           <h1 className="mt-2 font-display text-[clamp(40px,5.4vw,68px)] leading-[.95] tracking-[-.06em]">Ask anything.<br />Someone's sewn it.</h1>
@@ -115,6 +133,7 @@ export function ForumPage() {
           </button>
         </div>
       </section>
+      )}
 
       <section aria-label="Boards" className="-mx-3 mt-6 flex snap-x gap-3 overflow-x-auto px-3 pb-1 sm:mx-0 sm:grid sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
         {(Object.keys(BOARDS) as ForumBoard[]).map(b => {
