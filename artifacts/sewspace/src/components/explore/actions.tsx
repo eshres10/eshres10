@@ -14,6 +14,8 @@ import { useModal } from '@/components/flow/modal';
 import { Sheet } from '@/components/social/Sheet';
 import { toast } from '@/hooks/use-toast';
 import { cardArea, cardHref, cardTitle, CardMedia, ExploreCardView } from './cards';
+import { closePostOverlay, openPostOverlay, swapPostOverlay } from './overlay';
+import { PostView } from '@/components/post-view/PostView';
 
 // Explore step 4: Save (to a private collection), Share, More like this and
 // Hide on every card. Three ways in: a long press (the arc of round buttons),
@@ -34,7 +36,7 @@ const SLOP_PX = 10;
 const MENU_WIDTH = 232;
 
 /** The sewing pin from the design (Save). */
-function PinIcon({ size = 22 }: { size?: number }) {
+export function PinIcon({ size = 22 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M13.4 10.6 3.5 20.5" /><path d="M16 3a4 4 0 1 0 0 8 4 4 0 1 0 0-8z" fill="currentColor" />
@@ -168,7 +170,7 @@ export function ExploreActionsProvider({ children }: { children: ReactNode }) {
  * Hold for 450 ms to open the arc menu; moving more than 10 px first cancels
  * (so scrolling never opens it). A hold that opened the menu never opens the card.
  */
-function useLongPress(open: (point: { x: number; y: number }) => void) {
+function useLongPress(open: (point: { x: number; y: number }) => void, onTap?: (e: React.MouseEvent) => void) {
   const timer = useRef(0);
   const start = useRef<{ x: number; y: number } | null>(null);
   const fired = useRef(false);
@@ -204,7 +206,7 @@ function useLongPress(open: (point: { x: number; y: number }) => void) {
       onPointerCancel: cancel,
       onPointerLeave: cancel,
       onClickCapture: (e: React.MouseEvent) => {
-        if (!fired.current) return;
+        if (!fired.current) return onTap?.(e);
         fired.current = false;
         e.preventDefault();
         e.stopPropagation();
@@ -224,6 +226,11 @@ export function ExploreActionCard({ card, index }: { card: ExploreCard; index: n
   const press = useLongPress(point => {
     const box = (areaRef.current ?? wrapRef.current)!.getBoundingClientRect();
     actions.openMenu({ card, index, rect: box, point });
+  }, e => {
+    // A plain click on a post opens the post view over Explore (Ctrl/⌘/Shift-click keep opening the page).
+    if (!card.post || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || !(e.target as Element).closest('a')) return;
+    e.preventDefault();
+    openPostOverlay(card.post.id);
   });
   if (actions.isHidden(card)) return <HiddenNotice card={card} />;
   const saved = actions.isSaved(card);
@@ -261,6 +268,29 @@ export function ExploreActionCard({ card, index }: { card: ExploreCard; index: n
         </>
       )}
     </div>
+  );
+}
+
+/**
+ * The post view over Explore (/posts/:id). Previous / next step through the
+ * posts in the feed's current order (loading more near the end); Save opens
+ * Explore's collection picker. Closing goes Back.
+ */
+export function ExplorePostOverlay({ postId, cards, hasMore, loadMore }: { postId: number; cards: ExploreCard[]; hasMore: boolean; loadMore: () => void }) {
+  const actions = useActions();
+  const posts = cards.filter(c => c.post);
+  const at = posts.findIndex(c => c.post!.id === postId);
+  const card = at >= 0 ? posts[at] : null;
+  useEffect(() => {
+    if (at >= 0 && at >= posts.length - 3 && hasMore) loadMore();
+  }, [at, posts.length, hasMore, loadMore]);
+  return (
+    <PostView postId={postId} onClose={closePostOverlay}
+      prevId={at > 0 ? posts[at - 1].post!.id : null}
+      nextId={at >= 0 && at < posts.length - 1 ? posts[at + 1].post!.id : null}
+      onStep={swapPostOverlay}
+      saved={card ? actions.isSaved(card) : undefined}
+      onSave={card ? () => actions.run('save', card, cards.indexOf(card)) : undefined} />
   );
 }
 

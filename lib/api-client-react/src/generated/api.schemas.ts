@@ -401,6 +401,8 @@ export interface FeedPost {
      * @nullable
      */
   forumTopic: FeedPostForumTopic;
+  /** Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for 'Liked by … and others' */
+  likedBy?: PublicPerson | null;
 }
 
 export interface AltTextInput {
@@ -680,6 +682,8 @@ export interface CommentReply {
   createdAt: string;
   author: PublicPerson;
   canDelete: boolean;
+  likeCount: number;
+  likedByMe: boolean;
 }
 
 export interface Comment {
@@ -692,7 +696,18 @@ export interface Comment {
   author: PublicPerson;
   /** Your comment */
   canDelete: boolean;
+  likeCount: number;
+  likedByMe: boolean;
   replies: CommentReply[];
+}
+
+export interface CommentsPage {
+  /** Top-level comments, oldest first, each with all its replies */
+  items: Comment[];
+  /** @nullable */
+  nextCursor: string | null;
+  /** Comments and replies the viewer may see */
+  total: number;
 }
 
 export interface BlockedPerson {
@@ -2852,6 +2867,10 @@ export const GetExploreCardsTab = {
   patterns: 'patterns',
   fabric: 'fabric',
 } as const;
+
+export type GetPostCommentsPageParams = {
+cursor?: string;
+};
 
 export type GetSavedPostsParams = {
 cursor?: string;

@@ -8,6 +8,9 @@ import {
   GetPublicMakeResponse,
   GetPublicPostParams,
   GetPublicPostResponse,
+  GetPostCommentsPageParams,
+  GetPostCommentsPageQueryParams,
+  GetPostCommentsPageResponse,
   GetPostCommentsParams,
   GetPostCommentsResponse,
   GetPublicProfileResponse,
@@ -25,7 +28,7 @@ import {
   SearchTagsQueryParams,
   SearchTagsResponse,
 } from "@workspace/api-zod";
-import { exploreCards, exploreFeed, listComments, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, searchPeople, searchPosts, searchTags, tagPage } from "../access";
+import { exploreCards, exploreFeed, likedByFollowee, listComments, listCommentsPage, getMakeForViewer, getPostForViewer, getProfileMakes, getProfilePage, getProfilePosts, getProfileUsed, searchPeople, searchPosts, searchTags, tagPage } from "../access";
 import { viewerOf } from "../middlewares/auth";
 import { scoped } from "../lib/scoped";
 
@@ -88,7 +91,7 @@ router.get("/public/posts/:id", scoped(async (req, res, db): Promise<void> => {
     res.status(404).json({ error: "Post not found" });
     return;
   }
-  res.json(GetPublicPostResponse.parse(post));
+  res.json(GetPublicPostResponse.parse({ ...post, likedBy: await likedByFollowee(db, viewerOf(req), post.id) }));
 }));
 
 router.get("/public/posts/:id/comments", scoped(async (req, res, db): Promise<void> => {
@@ -99,6 +102,18 @@ router.get("/public/posts/:id/comments", scoped(async (req, res, db): Promise<vo
     return;
   }
   res.json(GetPostCommentsResponse.parse(comments));
+}));
+
+// Signed in, the page carries your own comment likes: never cache it.
+router.get("/public/posts/:id/comments/page", (req, res, next) => {
+  if (viewerOf(req).userId) res.set("Cache-Control", "private, no-store");
+  next();
+}, scoped(async (req, res, db): Promise<void> => {
+  const params = GetPostCommentsPageParams.safeParse(req.params);
+  const query = GetPostCommentsPageQueryParams.safeParse(req.query);
+  const page = params.success ? await listCommentsPage(db, viewerOf(req), params.data.id, query.success ? query.data.cursor : undefined) : null;
+  if (!page) return void res.status(404).json({ error: "Post not found" });
+  res.json(GetPostCommentsPageResponse.parse(page));
 }));
 
 // Explore: the mixed browse page (posts, fabric, pattern pages, challenges, threads).

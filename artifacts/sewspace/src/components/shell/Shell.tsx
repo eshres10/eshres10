@@ -9,6 +9,7 @@ import { UserAvatar } from '@/components/avatar';
 import { Logo } from '@/components/brand/Logo';
 import { currentAppPath } from '@/lib/navigation';
 import { ChromeContext, EXPLORE_SCROLL, useHideOnScroll } from '@/components/shell/useHideOnScroll';
+import { isExploreOverlay } from '@/components/explore/overlay';
 import { inCommunity } from '@/components/shell/CommunityTabs';
 import { inStudio, StudioMobileHeader, studioSection } from '@/components/shell/StudioMobile';
 import { AccountMenuDesktop, AccountMenuMobile, LogOut } from '@/components/shell/AccountMenu';
@@ -192,9 +193,15 @@ function MobileTabBar({ location, full = false, hidden = false }: { location: st
   );
 }
 
+/** The address the shell lays out for: a post open over Explore keeps Explore's layout underneath. */
+function useShellLocation(): string {
+  const [location] = useLocation();
+  return isExploreOverlay() ? '/explore' : location;
+}
+
 export function ShellFrame({ children }: { children: ReactNode }) {
   const [collapsed, setCollapsed] = useSidebarCollapsed();
-  const [location] = useLocation();
+  const location = useShellLocation();
   const profile = useGetProfile();
   const mobileFocus = location === '/new' || location.startsWith('/posts/');
   // Explore (owner's brief): the bars slide away on the way down and the filters stay pinned.
@@ -251,7 +258,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
  */
 export function AdaptiveLayout({ children }: { children: ReactNode }) {
   const { isLoaded, isSignedIn } = useAuth();
-  const [location] = useLocation();
+  const location = useShellLocation();
   const postDetail = location.startsWith('/posts/');
   const compactToolbarPage = compactToolbarPages.has(location);
   const publicHidden = useHideOnScroll(!(isLoaded && isSignedIn), location, location === '/explore' ? EXPLORE_SCROLL : undefined);

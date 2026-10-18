@@ -282,6 +282,21 @@ paths:
                 type: array
                 items: { $ref: "#/components/schemas/Comment" }
         "404": { description: Post not found or not visible }
+  /public/posts/{id}/comments/page:
+    get:
+      operationId: getPostCommentsPage
+      tags: [public]
+      summary: "The post view's comments: 20 top-level comments at a time, oldest first, each with its replies. Same rules as getPostComments."
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+        - { name: cursor, in: query, required: false, schema: { type: string } }
+      responses:
+        "200":
+          description: A page of comments
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/CommentsPage" }
+        "404": { description: Post not found or not visible }
   /posts/{id}/comments:
     post:
       operationId: createComment
@@ -313,6 +328,34 @@ paths:
       responses:
         "204": { description: Deleted }
         "404": { description: Not found or not yours to delete }
+  /comments/{id}/like:
+    put:
+      operationId: likeComment
+      tags: [social]
+      summary: Like a comment you can see (120 an hour).
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Liked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LikeState" }
+        "404": { description: Comment not found or not visible }
+        "429": { description: Too many in an hour }
+    delete:
+      operationId: unlikeComment
+      tags: [social]
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: integer } }
+      responses:
+        "200":
+          description: Not liked
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/LikeState" }
+        "404": { description: Comment not found or not visible }
+        "429": { description: Too many in an hour }
   /posts/{id}/like:
     put:
       operationId: likePost
@@ -2554,6 +2597,10 @@ components:
             title: { type: string }
             replies: { type: integer }
           required: [id, title, replies]
+        likedBy:
+          allOf: [{ $ref: "#/components/schemas/PublicPerson" }]
+          nullable: true
+          description: "Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for 'Liked by … and others'"
       required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect, garment, fabric, forumTopic]
     PostGarment:
       type: string
@@ -2785,10 +2832,12 @@ components:
         createdAt: { type: string, format: date-time }
         author: { $ref: "#/components/schemas/PublicPerson" }
         canDelete: { type: boolean, description: Your comment, or a comment on your post }
+        likeCount: { type: integer }
+        likedByMe: { type: boolean }
         replies:
           type: array
           items: { $ref: "#/components/schemas/CommentReply" }
-      required: [id, postId, parentId, body, createdAt, author, canDelete, replies]
+      required: [id, postId, parentId, body, createdAt, author, canDelete, likeCount, likedByMe, replies]
     CommentReply:
       type: object
       properties:
@@ -2799,7 +2848,19 @@ components:
         createdAt: { type: string, format: date-time }
         author: { $ref: "#/components/schemas/PublicPerson" }
         canDelete: { type: boolean }
-      required: [id, postId, parentId, body, createdAt, author, canDelete]
+        likeCount: { type: integer }
+        likedByMe: { type: boolean }
+      required: [id, postId, parentId, body, createdAt, author, canDelete, likeCount, likedByMe]
+    CommentsPage:
+      type: object
+      properties:
+        items:
+          type: array
+          description: Top-level comments, oldest first, each with all its replies
+          items: { $ref: "#/components/schemas/Comment" }
+        nextCursor: { type: string, nullable: true }
+        total: { type: integer, description: Comments and replies the viewer may see }
+      required: [items, nextCursor, total]
     BlockedPerson:
       type: object
       properties:

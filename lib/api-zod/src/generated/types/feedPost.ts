@@ -42,4 +42,6 @@ export interface FeedPost {
      * @nullable
      */
   forumTopic: FeedPostForumTopic;
+  /** Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for 'Liked by … and others' */
+  likedBy?: PublicPerson | null;
 }

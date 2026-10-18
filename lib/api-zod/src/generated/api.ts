@@ -92,7 +92,12 @@ export const GetProfilePostsResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -311,7 +316,12 @@ export const GetPublicPostResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })
 
 
@@ -372,7 +382,12 @@ export const GetTagPostsResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })),
   "nextCursor": zod.string().nullable()
 })
@@ -434,7 +449,12 @@ export const SearchPostsResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -551,7 +571,12 @@ export const GetExploreFeedResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -664,6 +689,8 @@ export const GetPostCommentsResponseItem = zod.object({
   "avatarUrl": zod.string().nullable()
 }),
   "canDelete": zod.boolean().describe('Your comment'),
+  "likeCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
   "replies": zod.array(zod.object({
   "id": zod.number().int(),
   "postId": zod.number().int(),
@@ -675,10 +702,59 @@ export const GetPostCommentsResponseItem = zod.object({
   "name": zod.string(),
   "avatarUrl": zod.string().nullable()
 }),
-  "canDelete": zod.boolean()
+  "canDelete": zod.boolean(),
+  "likeCount": zod.number().int(),
+  "likedByMe": zod.boolean()
 }))
 })
 export const GetPostCommentsResponse = zod.array(GetPostCommentsResponseItem)
+
+
+/**
+ * @summary The post view's comments: 20 top-level comments at a time, oldest first, each with its replies. Same rules as getPostComments.
+ */
+export const GetPostCommentsPageParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const GetPostCommentsPageQueryParams = zod.object({
+  "cursor": zod.coerce.string().optional()
+})
+
+export const GetPostCommentsPageResponse = zod.object({
+  "items": zod.array(zod.object({
+  "id": zod.number().int(),
+  "postId": zod.number().int(),
+  "parentId": zod.number().int().nullable(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "canDelete": zod.boolean().describe('Your comment'),
+  "likeCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
+  "replies": zod.array(zod.object({
+  "id": zod.number().int(),
+  "postId": zod.number().int(),
+  "parentId": zod.number().int().nullable(),
+  "body": zod.string(),
+  "createdAt": zod.coerce.date(),
+  "author": zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),
+  "canDelete": zod.boolean(),
+  "likeCount": zod.number().int(),
+  "likedByMe": zod.boolean()
+}))
+})).describe('Top-level comments, oldest first, each with all its replies'),
+  "nextCursor": zod.string().nullable(),
+  "total": zod.number().int().describe('Comments and replies the viewer may see')
+})
 
 
 /**
@@ -709,6 +785,8 @@ export const CreateCommentResponse = zod.object({
   "avatarUrl": zod.string().nullable()
 }),
   "canDelete": zod.boolean().describe('Your comment'),
+  "likeCount": zod.number().int(),
+  "likedByMe": zod.boolean(),
   "replies": zod.array(zod.object({
   "id": zod.number().int(),
   "postId": zod.number().int(),
@@ -720,7 +798,9 @@ export const CreateCommentResponse = zod.object({
   "name": zod.string(),
   "avatarUrl": zod.string().nullable()
 }),
-  "canDelete": zod.boolean()
+  "canDelete": zod.boolean(),
+  "likeCount": zod.number().int(),
+  "likedByMe": zod.boolean()
 }))
 })
 
@@ -733,6 +813,29 @@ export const DeleteCommentParams = zod.object({
 })
 
 export const DeleteCommentResponse = zod.void()
+
+
+/**
+ * @summary Like a comment you can see (120 an hour).
+ */
+export const LikeCommentParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const LikeCommentResponse = zod.object({
+  "liked": zod.boolean(),
+  "likeCount": zod.number().int()
+})
+
+
+export const UnlikeCommentParams = zod.object({
+  "id": zod.coerce.number().int()
+})
+
+export const UnlikeCommentResponse = zod.object({
+  "liked": zod.boolean(),
+  "likeCount": zod.number().int()
+})
 
 
 export const LikePostParams = zod.object({
@@ -824,7 +927,12 @@ export const GetSavedPostsResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -1793,7 +1901,12 @@ export const GetChallengeEntriesResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 }),
   "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
   "isMine": zod.boolean()
@@ -1991,7 +2104,12 @@ export const EnterChallengeResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 }),
   "canRemove": zod.boolean().describe('You host the challenge (and it isn\'t your entry)'),
   "isMine": zod.boolean()
@@ -2367,7 +2485,12 @@ export const GetForumTopicResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2565,7 +2688,12 @@ export const CreateForumTopicResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2702,7 +2830,12 @@ export const UpdateForumTopicResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2836,7 +2969,12 @@ export const SetAcceptedAnswerResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -2964,7 +3102,12 @@ export const ModerateForumTopicResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 }),zod.null()]).describe('The feed post this was shared as (show & tell), when visible'),
   "acceptedReplyId": zod.number().int().nullable(),
   "isMine": zod.boolean(),
@@ -3131,7 +3274,12 @@ export const GetHomeFeedResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })),
   "nextCursor": zod.string().nullable().describe('Pass back as ?cursor= for the next page; null at the end')
 })
@@ -3228,7 +3376,12 @@ export const CreatePostResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })
 
 
@@ -3308,7 +3461,12 @@ export const UpdatePostResponse = zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
   "replies": zod.number().int()
-}).nullable().describe('The forum thread this post was shared from (Show & tell)')
+}).nullable().describe('The forum thread this post was shared from (Show & tell)'),
+  "likedBy": zod.union([zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}),zod.null()]).optional().describe('Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for \'Liked by … and others\'')
 })
 
 

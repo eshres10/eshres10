@@ -33,6 +33,7 @@ import { ChallengePage } from '@/pages/challenge';
 import { CatalogEntryPage } from '@/pages/catalog-entry';
 import { AdminReportsPage } from '@/pages/admin-reports';
 import { ExploreBrowsePage } from '@/components/explore/ExploreBrowse';
+import { isExploreOverlay } from '@/components/explore/overlay';
 import { SearchPage } from '@/pages/search';
 import { FeedPage } from '@/pages/feed';
 import { PostPage } from '@/pages/post';
@@ -106,7 +107,10 @@ function Router() {
     <Route path="/search">{() => <AdaptiveLayout><SearchPage /></AdaptiveLayout>}</Route>
     <Route path="/posts/:id/edit">{(params: { id: string }) => <Shell><EditPostPage id={Number(params.id)} /></Shell>}</Route>
     <Route path="/tags/:tag">{(params: { tag: string }) => <AdaptiveLayout><TagPage tag={decodeURIComponent(params.tag)} /></AdaptiveLayout>}</Route>
-    <Route path="/posts/:id">{(params: { id: string }) => <AdaptiveLayout><PostPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
+    {/* Opened from Explore, the post shows over Explore (same element type as /explore, so Explore stays mounted); otherwise the full page. */}
+    <Route path="/posts/:id">{(params: { id: string }) => isExploreOverlay()
+      ? <AdaptiveLayout><ExploreBrowsePage postId={Number(params.id)} /></AdaptiveLayout>
+      : <AdaptiveLayout><PostPage id={Number(params.id)} /></AdaptiveLayout>}</Route>
     <Route path="/welcome" component={WelcomeRoute} />
     <Route path="/welcome/setup" component={SettingUpRoute} />
     <Route path="/welcome/ready" component={ReadyRoute} />

@@ -1,4 +1,4 @@
-import { Router, type IRouter } from "express";
+import { Router, type IRouter, type RequestHandler } from "express";
 import {
   BlockProfileParams,
   CreateCommentBody,
@@ -16,8 +16,11 @@ import {
   ListBlocksResponse,
   SavePostParams,
   SavePostResponse,
+  LikeCommentParams,
+  LikeCommentResponse,
 } from "@workspace/api-zod";
-import { addComment, block, createReport, listBlocks, removeComment, savedFeed, setFollow, setLike, setSave, unblock } from "../access";
+import { addComment, block, createReport, listBlocks, removeComment, savedFeed, setCommentLike, setFollow, setLike, setSave, unblock } from "../access";
+import { hourlyLimit } from "../lib/hourly";
 import { scoped } from "../lib/scoped";
 import { viewerOf } from "../middlewares/auth";
 
@@ -61,6 +64,22 @@ router.delete("/comments/:id", scoped(async (req, res, db): Promise<void> => {
   }
   res.sendStatus(204);
 }));
+
+// Comment likes (post view): 120 an hour per person, kept in memory.
+export const COMMENT_LIKES_PER_HOUR = 120;
+const commentLikeAllowed = hourlyLimit(COMMENT_LIKES_PER_HOUR);
+const commentLikeLimited: RequestHandler = (req, res, next) => {
+  if (!commentLikeAllowed(viewerOf(req).userId!)) return void res.status(429).json({ error: "That's a lot of likes for one hour. Try again later." });
+  next();
+};
+for (const on of [true, false]) {
+  router[on ? "put" : "delete"]("/comments/:id/like", commentLikeLimited, scoped(async (req, res, db): Promise<void> => {
+    const params = LikeCommentParams.safeParse(req.params);
+    const state = params.success ? await setCommentLike(db, viewerOf(req), params.data.id, on) : null;
+    if (!state) return void res.status(404).json({ error: "Comment not found" });
+    res.json(LikeCommentResponse.parse(state));
+  }));
+}
 
 for (const on of [true, false]) {
   const method = on ? "put" : "delete";

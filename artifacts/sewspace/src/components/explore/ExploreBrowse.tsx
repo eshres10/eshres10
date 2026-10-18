@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useAuth } from '@clerk/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
 import { getExploreCards, type ExploreCard, type GetExploreCardsTab } from '@workspace/api-client-react';
@@ -7,7 +7,8 @@ import { useLocation, useSearch } from 'wouter';
 import { ErrorState } from '@/components/common';
 import { GuestBanner } from '@/pages/explore';
 import { useChrome } from '@/components/shell/useHideOnScroll';
-import { ExploreActionCard, ExploreActionsProvider } from './actions';
+import { ExploreActionCard, ExploreActionsProvider, ExplorePostOverlay } from './actions';
+import { overlaySearch } from './overlay';
 import { cardHeight } from './cards';
 
 // Explore (owner: one page, named Explore): makes, fabric, pattern pages,
@@ -78,15 +79,16 @@ export function placeInColumns(cards: ExploreCard[], columns: number): ExploreCa
   return out;
 }
 
-export function ExploreBrowsePage() {
+/** `postId`: a post is open over the page (/posts/:id, see overlay.ts); the filters come from the history entry. */
+export function ExploreBrowsePage({ postId }: { postId?: number } = {}) {
   const { isLoaded, isSignedIn } = useAuth();
   const chrome = useChrome();
   const search = useSearch();
   const [, setLocation] = useLocation();
-  const params = new URLSearchParams(search);
+  const params = new URLSearchParams(postId ? overlaySearch() : search);
   const tab = TABS.find(t => t.id === params.get('tab')) ?? TABS[0];
   const sub = tab.subs.find(s => s.id === params.get('sub')) ?? tab.subs[0];
-  useEffect(() => { document.title = 'Explore · Seams Club'; }, []);
+  useEffect(() => { if (!postId) document.title = 'Explore · Seams Club'; }, [postId]);
 
   const go = (nextTab: Tab, nextSub?: string) => {
     const q = new URLSearchParams();
@@ -106,6 +108,8 @@ export function ExploreBrowsePage() {
     enabled: isLoaded,
   });
   const cards = useMemo(() => feed.data?.pages.flatMap(p => p.items) ?? [], [feed.data]);
+  const { hasNextPage, isFetchingNextPage, fetchNextPage } = feed;
+  const loadMore = useCallback(() => { if (hasNextPage && !isFetchingNextPage) void fetchNextPage(); }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
   const total = feed.data?.pages[0]?.total;
 
   const grid = useRef<HTMLDivElement>(null);
@@ -197,6 +201,7 @@ export function ExploreBrowsePage() {
           </div>
         </div>
       </div>
+      {postId !== undefined && <ExplorePostOverlay postId={postId} cards={cards} hasMore={Boolean(feed.hasNextPage)} loadMore={loadMore} />}
     </ExploreActionsProvider>
   );
 }

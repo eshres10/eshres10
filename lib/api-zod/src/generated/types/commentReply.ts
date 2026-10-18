@@ -16,4 +16,6 @@ export interface CommentReply {
   createdAt: Date;
   author: PublicPerson;
   canDelete: boolean;
+  likeCount: number;
+  likedByMe: boolean;
 }

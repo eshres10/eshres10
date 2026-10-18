@@ -307,6 +307,13 @@ export const commentsTable = pgTable("sewspace_comments", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
+/** Comment likes (migration 0021): private to the liker; counts come from sewspace_comment_like_counts(). */
+export const commentLikesTable = pgTable("sewspace_comment_likes", {
+  userId: varchar("user_id", { length: 255 }).notNull(),
+  commentId: integer("comment_id").notNull().references(() => commentsTable.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (t) => [primaryKey({ columns: [t.userId, t.commentId] })]);
+
 export const savesTable = pgTable("sewspace_saves", {
   userId: varchar("user_id", { length: 255 }).notNull(),
   postId: integer("post_id").notNull().references(() => postsTable.id, { onDelete: "cascade" }),

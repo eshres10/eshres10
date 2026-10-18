@@ -18,5 +18,7 @@ export interface Comment {
   author: PublicPerson;
   /** Your comment */
   canDelete: boolean;
+  likeCount: number;
+  likedByMe: boolean;
   replies: CommentReply[];
 }

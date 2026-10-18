@@ -1,5 +1,6 @@
 import { and, asc, count, desc, eq, gt, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
 import {
+  commentLikesTable,
   commentsTable,
   followsTable,
   likesTable,
@@ -32,6 +33,7 @@ import { visibleForumItem } from "./forum";
 // block are never shown or counted.
 
 export const COMMENTS_PER_HOUR = 60;
+export const COMMENTS_PAGE = 20;
 export const REPORTS_PER_DAY = 20;
 const MAX_COMMENTS = 1000;
 
@@ -63,13 +65,28 @@ export interface CommentReplyView {
   createdAt: Date;
   author: { handle: string; name: string; avatarUrl: string | null };
   canDelete: boolean;
+  likeCount: number;
+  likedByMe: boolean;
 }
 export type CommentView = CommentReplyView & { replies: CommentReplyView[] };
+
+/** Like numbers for comments the viewer may see (SECURITY DEFINER, numbers only), and which of them the viewer liked. */
+async function commentLikes(db: Tx, viewer: Viewer, ids: number[]): Promise<{ counts: Map<number, number>; mine: Set<number> }> {
+  if (!ids.length) return { counts: new Map(), mine: new Set() };
+  const list = sql`ARRAY[${sql.join(ids.map((id) => sql`${id}`), sql`, `)}]::integer[]`;
+  const rows = await db.execute<{ comment_id: number; likes: string }>(sql`SELECT comment_id, likes FROM sewspace_comment_like_counts(${list})`);
+  const mine = viewer.userId
+    ? await db.select({ id: commentLikesTable.commentId }).from(commentLikesTable)
+      .where(and(eq(commentLikesTable.userId, viewer.userId), inArray(commentLikesTable.commentId, ids)))
+    : [];
+  return { counts: new Map(rows.rows.map((r) => [Number(r.comment_id), Number(r.likes)])), mine: new Set(mine.map((m) => m.id)) };
+}
 
 async function commentViews(db: Tx, viewer: Viewer, post: Post, rows: Comment[]): Promise<CommentView[]> {
   const ids = [...new Set(rows.map((c) => c.userId))];
   const authors = ids.length ? await db.select().from(publicProfilesView).where(inArray(publicProfilesView.userId, ids)) : [];
   const byUser = new Map(authors.map((a) => [a.userId, a]));
+  const likes = await commentLikes(db, viewer, rows.map((r) => r.id));
   const view = (c: Comment): CommentReplyView | null => {
     const a = byUser.get(c.userId);
     if (!a) return null;
@@ -81,6 +98,8 @@ async function commentViews(db: Tx, viewer: Viewer, post: Post, rows: Comment[])
       createdAt: c.createdAt,
       author: { handle: a.handle, name: a.name, avatarUrl: a.avatarUrl },
       canDelete: Boolean(viewer.userId) && (c.userId === viewer.userId || post.userId === viewer.userId),
+      likeCount: likes.counts.get(c.id) ?? 0,
+      likedByMe: likes.mine.has(c.id),
     };
   };
   const top: CommentView[] = [];
@@ -110,6 +129,61 @@ export async function listComments(db: Tx, viewer: Viewer, postId: number): Prom
     .orderBy(asc(commentsTable.createdAt), asc(commentsTable.id))
     .limit(MAX_COMMENTS);
   return commentViews(db, viewer, post, rows);
+}
+
+/**
+ * The post view's comments: 20 top-level comments at a time (oldest first,
+ * offset cursor "o:<n>"), each with all its replies. Same rules as
+ * listComments; null if the post isn't visible. `total` counts the comments
+ * and replies the viewer would see.
+ */
+export async function listCommentsPage(db: Tx, viewer: Viewer, postId: number, cursor?: string) {
+  const post = await visiblePost(db, viewer, postId);
+  if (!post) return null;
+  const offset = Math.min(Number(/^o:(\d+)$/.exec(Buffer.from(cursor ?? "", "base64url").toString("utf8"))?.[1] ?? 0), 10_000);
+  const shown = and(
+    eq(commentsTable.postId, postId),
+    notBlockedComment(viewer),
+    sql`EXISTS (SELECT 1 FROM ${publicProfilesView} WHERE ${publicProfilesView.userId} = ${commentsTable.userId})`,
+  );
+  const [{ total }] = await db.select({ total: count() }).from(commentsTable).where(shown);
+  const top = await db.select().from(commentsTable).where(and(shown, isNull(commentsTable.parentId)))
+    .orderBy(asc(commentsTable.createdAt), asc(commentsTable.id)).limit(COMMENTS_PAGE + 1).offset(offset);
+  const page = top.slice(0, COMMENTS_PAGE);
+  const replies = page.length
+    ? await db.select().from(commentsTable)
+      .where(and(shown, inArray(commentsTable.parentId, page.map((c) => c.id))))
+      .orderBy(asc(commentsTable.createdAt), asc(commentsTable.id))
+    : [];
+  const items = await commentViews(db, viewer, post, [...page, ...replies]);
+  const nextCursor = top.length > COMMENTS_PAGE ? Buffer.from(`o:${offset + COMMENTS_PAGE}`).toString("base64url") : null;
+  return { items, nextCursor, total };
+}
+
+/** Like or unlike a comment the viewer may see (its post visible, no block either way). Null if it isn't. */
+export async function setCommentLike(db: Tx, viewer: Viewer, commentId: number, on: boolean) {
+  const me = viewer.userId;
+  if (!me) return null;
+  const [comment] = await db.select().from(commentsTable).where(and(eq(commentsTable.id, commentId), notBlockedComment(viewer))).limit(1);
+  if (!comment || !(await visiblePost(db, viewer, comment.postId))) return null;
+  if (on) await db.insert(commentLikesTable).values({ userId: me, commentId }).onConflictDoNothing();
+  else await db.delete(commentLikesTable).where(and(eq(commentLikesTable.userId, me), eq(commentLikesTable.commentId, commentId)));
+  const { counts } = await commentLikes(db, viewer, [commentId]);
+  return { liked: on, likeCount: counts.get(commentId) ?? 0 };
+}
+
+/** "Liked by {someone you follow} and others": the latest liker the viewer follows (people with a handle, not blocked). */
+export async function likedByFollowee(db: Tx, viewer: Viewer, postId: number) {
+  const me = viewer.userId;
+  if (!me) return null;
+  const [row] = await db.select({ handle: publicProfilesView.handle, name: publicProfilesView.name, avatarUrl: publicProfilesView.avatarUrl })
+    .from(likesTable)
+    .innerJoin(followsTable, and(eq(followsTable.followeeId, likesTable.userId), eq(followsTable.followerId, me)))
+    .innerJoin(publicProfilesView, eq(publicProfilesView.userId, likesTable.userId))
+    .where(eq(likesTable.postId, postId))
+    .orderBy(desc(likesTable.createdAt))
+    .limit(1);
+  return row ? { handle: row.handle, name: row.name, avatarUrl: row.avatarUrl } : null;
 }
 
 export type CommentError = "not_found" | "bad_parent" | "no_handle" | "rate_limited" | "empty";

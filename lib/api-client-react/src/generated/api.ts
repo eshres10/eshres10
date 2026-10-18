@@ -52,6 +52,7 @@ import type {
   CollectionInput,
   Comment,
   CommentInput,
+  CommentsPage,
   Dashboard,
   Draft,
   DraftEnvelope,
@@ -84,6 +85,7 @@ import type {
   GetExploreFeedParams,
   GetForumDiscussionsParams,
   GetHomeFeedParams,
+  GetPostCommentsPageParams,
   GetProfilePostsParams,
   GetSavedPostsParams,
   GetTagPostsParams,
@@ -1776,6 +1778,122 @@ export function useGetPostComments<TData = Awaited<ReturnType<typeof getPostComm
 
 
 
+export const getGetPostCommentsPageUrl = (id: number,
+    params?: GetPostCommentsPageParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/public/posts/${id}/comments/page?${stringifiedParams}` : `/api/public/posts/${id}/comments/page`
+}
+
+/**
+ * @summary The post view's comments: 20 top-level comments at a time, oldest first, each with its replies. Same rules as getPostComments.
+ */
+export const getPostCommentsPage = async (id: number,
+    params?: GetPostCommentsPageParams, options?: Parameters<typeof customFetch>[1]): Promise<CommentsPage> => {
+
+  return customFetch<CommentsPage>(getGetPostCommentsPageUrl(id,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetPostCommentsPageQueryKey = (id: number,
+    params?: GetPostCommentsPageParams,) => {
+    return [
+    `/api/public/posts/${id}/comments/page`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getGetPostCommentsPageQueryOptions = <TData = Awaited<ReturnType<typeof getPostCommentsPage>>, TError = ErrorType<void>>(id: number,
+    params?: GetPostCommentsPageParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentsPage>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetPostCommentsPageQueryKey(id,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getPostCommentsPage>>> = ({ signal }) => getPostCommentsPage(id,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: id !== null && id !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getPostCommentsPage>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetPostCommentsPageQueryResult = NonNullable<Awaited<ReturnType<typeof getPostCommentsPage>>>
+export type GetPostCommentsPageQueryError = ErrorType<void>
+
+
+export function useGetPostCommentsPage<TData = Awaited<ReturnType<typeof getPostCommentsPage>>, TError = ErrorType<void>>(
+ id: number,
+    params: undefined |  GetPostCommentsPageParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentsPage>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPostCommentsPage>>,
+          TError,
+          Awaited<ReturnType<typeof getPostCommentsPage>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPostCommentsPage<TData = Awaited<ReturnType<typeof getPostCommentsPage>>, TError = ErrorType<void>>(
+ id: number,
+    params?: GetPostCommentsPageParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentsPage>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getPostCommentsPage>>,
+          TError,
+          Awaited<ReturnType<typeof getPostCommentsPage>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetPostCommentsPage<TData = Awaited<ReturnType<typeof getPostCommentsPage>>, TError = ErrorType<void>>(
+ id: number,
+    params?: GetPostCommentsPageParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentsPage>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary The post view's comments: 20 top-level comments at a time, oldest first, each with its replies. Same rules as getPostComments.
+ */
+
+export function useGetPostCommentsPage<TData = Awaited<ReturnType<typeof getPostCommentsPage>>, TError = ErrorType<void>>(
+ id: number,
+    params?: GetPostCommentsPageParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getPostCommentsPage>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetPostCommentsPageQueryOptions(id,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getCreateCommentUrl = (id: number,) => {
 
 
@@ -1937,6 +2055,148 @@ export const useDeleteComment = <TError = ErrorType<void>,
         TContext
       > => {
       return useMutation(getDeleteCommentMutationOptions(options), queryClient);
+    }
+
+export const getLikeCommentUrl = (id: number,) => {
+
+
+
+
+  return `/api/comments/${id}/like`
+}
+
+/**
+ * @summary Like a comment you can see (120 an hour).
+ */
+export const likeComment = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LikeState> => {
+
+  return customFetch<LikeState>(getLikeCommentUrl(id),
+  {
+    ...options,
+    method: 'PUT'
+
+
+  }
+);}
+
+
+
+
+
+export const getLikeCommentMutationKey = () => ['likeComment'] as const;
+
+export const getLikeCommentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof likeComment>>, TError,LikeCommentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof likeComment>>, TError,LikeCommentMutationVariables, TContext> => {
+
+const mutationKey = getLikeCommentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof likeComment>>, LikeCommentMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  likeComment(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LikeCommentMutationResult = NonNullable<Awaited<ReturnType<typeof likeComment>>>
+
+    export type LikeCommentMutationError = ErrorType<void>
+    export type LikeCommentMutationVariables = {id: number}
+
+    /**
+ * @summary Like a comment you can see (120 an hour).
+ */
+export const useLikeComment = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof likeComment>>, TError,LikeCommentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof likeComment>>,
+        TError,
+        LikeCommentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getLikeCommentMutationOptions(options), queryClient);
+    }
+
+export const getUnlikeCommentUrl = (id: number,) => {
+
+
+
+
+  return `/api/comments/${id}/like`
+}
+
+export const unlikeComment = async (id: number, options?: Parameters<typeof customFetch>[1]): Promise<LikeState> => {
+
+  return customFetch<LikeState>(getUnlikeCommentUrl(id),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getUnlikeCommentMutationKey = () => ['unlikeComment'] as const;
+
+export const getUnlikeCommentMutationOptions = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlikeComment>>, TError,UnlikeCommentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof unlikeComment>>, TError,UnlikeCommentMutationVariables, TContext> => {
+
+const mutationKey = getUnlikeCommentMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unlikeComment>>, UnlikeCommentMutationVariables> = (props) => {
+          const {id} = props ?? {};
+
+          return  unlikeComment(id,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnlikeCommentMutationResult = NonNullable<Awaited<ReturnType<typeof unlikeComment>>>
+
+    export type UnlikeCommentMutationError = ErrorType<void>
+    export type UnlikeCommentMutationVariables = {id: number}
+
+    export const useUnlikeComment = <TError = ErrorType<void>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlikeComment>>, TError,UnlikeCommentMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unlikeComment>>,
+        TError,
+        UnlikeCommentMutationVariables,
+        TContext
+      > => {
+      return useMutation(getUnlikeCommentMutationOptions(options), queryClient);
     }
 
 export const getLikePostUrl = (id: number,) => {
