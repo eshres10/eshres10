@@ -2,7 +2,7 @@ import { AccountMenuMobile } from '@/components/shell/AccountMenu';
 import { NotificationBellMobile } from '@/components/notifications/Notifications';
 import { useEffect, useRef, useState } from 'react';
 import { useListFabrics, useListPatterns, useListProjects, useListThreads } from '@workspace/api-client-react';
-import { Menu, Plus, Search, X } from 'lucide-react';
+import { Plus, Search, X } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
 import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
 
@@ -72,7 +72,7 @@ function OverviewResults({ q }: { q: string }) {
 }
 
 /** Phones only: the studio's top bar, search field and section pills. */
-export function StudioMobileHeader({ section, onMenuOpen }: { section: StudioSection; onMenuOpen: () => void }) {
+export function StudioMobileHeader({ section }: { section: StudioSection }) {
   const [q, setQ] = useStudioQuery();
   const [searching, setSearching] = useState(Boolean(q));
   const input = useRef<HTMLInputElement>(null);
@@ -97,9 +97,6 @@ export function StudioMobileHeader({ section, onMenuOpen }: { section: StudioSec
             </Link>
           )}
           <NotificationBellMobile />
-          <button type="button" onClick={onMenuOpen} aria-label="Open menu" className="grid h-11 w-11 shrink-0 place-items-center text-ink">
-            <Menu size={20} aria-hidden="true" />
-          </button>
           <AccountMenuMobile />
         </div>
         {searching && (

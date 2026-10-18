@@ -1,6 +1,6 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useGetProfile, useListProjects } from '@workspace/api-client-react';
-import { BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, Menu, MessageCircle, MessagesSquare, PanelLeftClose, PanelLeftOpen, Plus, Ruler, Scissors, Search, ShoppingBag, Sparkles, Spool, Store, Trophy, X } from 'lucide-react';
+import { BookOpen, Compass, Flag, FolderKanban, LayoutGrid, Home, House, Layers, MessageCircle, MessagesSquare, PanelLeftClose, PanelLeftOpen, Plus, Ruler, Scissors, Search, ShoppingBag, Sparkles, Spool, Store, Trophy } from 'lucide-react';
 import { Link, Redirect, useLocation } from 'wouter';
 import { useAuth } from '@clerk/react';
 import { RequireSignIn } from '@/components/auth/RequireSignIn';
@@ -193,13 +193,11 @@ function MobileTabBar({ location, full = false }: { location: string; full?: boo
 }
 
 export function ShellFrame({ children }: { children: ReactNode }) {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [collapsed, setCollapsed] = useSidebarCollapsed();
   const [location] = useLocation();
   const profile = useGetProfile();
   const mobileFocus = location === '/new' || location.startsWith('/posts/');
   const profileHeaderHidden = useHideOnScroll(!mobileFocus, location);
-  useEffect(() => { setMenuOpen(false); }, [location]);
 
   // First visit: choose a handle before using the app, then come back here.
   if (profile.data?.needsHandle && location !== '/welcome') {
@@ -215,16 +213,8 @@ export function ShellFrame({ children }: { children: ReactNode }) {
       <aside aria-label="Main menu" className={`sticky top-[18px] hidden h-[calc(100dvh-36px)] shrink-0 overflow-y-auto rounded-[30px] bg-yellow py-5 md:block ${collapsed ? 'w-[84px] px-3' : 'w-[260px] px-4'}`}>
         <SidebarNav location={location} collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
       </aside>
-      {menuOpen && (
-         <div className="fixed inset-0 z-50 flex justify-end bg-ink/40 md:hidden" onClick={e => { if (e.target === e.currentTarget) setMenuOpen(false); }}>
-           <aside className="h-full w-[300px] max-w-[85vw] overflow-y-auto rounded-l-[30px] bg-yellow px-4 pb-[calc(1.4rem+env(safe-area-inset-bottom))] pt-[calc(1.4rem+env(safe-area-inset-top))]">
-            <button type="button" onClick={() => setMenuOpen(false)} aria-label="Close menu" className="float-right grid h-11 w-11 place-items-center rounded-full bg-white"><X size={20} /></button>
-            <SidebarNav location={location} onNavigate={() => setMenuOpen(false)} />
-          </aside>
-        </div>
-      )}
       <div className="min-w-0 flex-1">
-        {studio && <StudioMobileHeader key={studio.href} section={studio} onMenuOpen={() => setMenuOpen(true)} />}
+        {studio && <StudioMobileHeader key={studio.href} section={studio} />}
         {!mobileFocus && !studio && <div aria-hidden="true" className="h-[calc(4rem+env(safe-area-inset-top))] md:hidden" />}
         <header className={mobileFocus
           ? 'relative z-30 hidden items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:flex md:relative md:z-40 md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3'
@@ -237,10 +227,9 @@ export function ShellFrame({ children }: { children: ReactNode }) {
           <h1 className={location === '/feed' ? `sr-only md:not-sr-only md:min-w-0 md:flex-1 md:truncate md:font-display md:text-[22px] md:tracking-[-.04em] ${title === 'Home' ? 'md:font-bold' : ''}` : 'hidden'}>{title}</h1>
           {inCommunity(location) && <Link href="/search" aria-label="Search" className="grid h-10 w-10 shrink-0 place-items-center rounded-full md:hidden"><Search size={19} aria-hidden="true" /></Link>}
           <NotificationBellMobile className="-mx-0.5" />
-          <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="grid h-10 w-10 shrink-0 place-items-center rounded-full md:hidden"><Menu size={19} /></button>
+          <AccountMenuMobile />
           {location !== '/new' && <Link href="/new" className="hidden min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white no-underline md:inline-flex"><Plus size={16} aria-hidden="true" />New post</Link>}
           <NotificationBellDesktop />
-          <AccountMenuMobile />
           <AccountMenuDesktop />
         </header>
         <main className={`${location === '/new' ? 'mx-auto w-full max-w-7xl px-0 py-0 md:px-2 md:py-8' : location.startsWith('/posts/') ? 'mx-auto flex h-[100dvh] min-h-0 w-full max-w-7xl flex-col overflow-hidden px-3 py-0 md:block md:h-auto md:overflow-visible md:px-2 md:py-8' : compactToolbarPages.has(location) ? 'mx-auto w-full max-w-7xl px-4 pb-6 pt-4 md:px-2 md:pb-8 md:pt-6' : 'mx-auto w-full max-w-7xl px-4 py-6 md:px-2 md:py-8'}`}>{children}</main>

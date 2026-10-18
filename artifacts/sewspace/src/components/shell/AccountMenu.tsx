@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useClerk } from '@clerk/react';
 import { useQueryClient } from '@tanstack/react-query';
 import { getGetProfileQueryKey, useGetMenuSummary, useGetProfile, useUpdateProfile, type Profile } from '@workspace/api-client-react';
-import { Bookmark, ChevronDown, ChevronRight, Heart, Loader2, LogOut as LogOutIcon, Ruler, Settings, SquareKanban, TrendingUp, Trophy, Users, X, type LucideIcon } from 'lucide-react';
+import { Bookmark, ChevronDown, ChevronRight, Flag, FolderKanban, Heart, Loader2, LogOut as LogOutIcon, Menu, MessageCircle, Ruler, Settings, Sparkles, SquareKanban, TrendingUp, Trophy, Users, X, type LucideIcon } from 'lucide-react';
 import { Link } from 'wouter';
 import { UserAvatar } from '@/components/avatar';
 import { useModal } from '@/components/flow/modal';
@@ -98,7 +98,7 @@ export function LogOut({ close, rowClass = ROW, panelClass = 'bg-canvas', cancel
 }
 
 /** What's inside the menu, the same on both sizes. `close` runs when a link is chosen. */
-function MenuBody({ me, close, closeButton }: { me: Profile | undefined; close: () => void; closeButton?: ReactNode }) {
+function MenuBody({ me, close, closeButton, phone = false }: { me: Profile | undefined; close: () => void; closeButton?: ReactNode; phone?: boolean }) {
   const profileHref = me?.handle ? `/@${me.handle}` : '/settings';
   const audience = VISIBILITY_OPTIONS.find(o => o.value === me?.defaultPostVisibility)?.label;
   // Fresh numbers each time the menu opens (this body mounts on open).
@@ -136,6 +136,15 @@ function MenuBody({ me, close, closeButton }: { me: Profile | undefined; close: 
           {audience && <span className="text-[13px] text-subtle">{audience}</span>}<ChevronRight size={16} aria-hidden="true" className="text-subtle" />
         </Row>
       </div>
+      {/* Phones have no sidebar: the pages the tab bar, studio pills and community tabs don't reach. */}
+      {phone && (
+        <nav aria-label="Also on Seams Club" className="border-b border-line py-1.5">
+          <Row href="/projects" icon={FolderKanban} label="Projects & makes" onClick={close} />
+          <Row href="/ai-studio" icon={Sparkles} label="AI studio" onClick={close} />
+          <Row href="/assistant" icon={MessageCircle} label="Sewing assistant" onClick={close} />
+          {me?.isAdmin && <Row href="/admin/reports" icon={Flag} label="Admin: reports" onClick={close} />}
+        </nav>
+      )}
       <nav aria-label="More" className="border-b border-line py-1.5">
         {/* Once membership exists. */}
         {summary?.membershipAvailable && (
@@ -195,8 +204,8 @@ function DesktopPanel({ id, me, close }: { id: string; me: Profile | undefined; 
 }
 
 /**
- * Phones: the avatar at the right of the top bar opens a 328 px drawer from the
- * right over a 45% backdrop. A modal dialog: focus stays inside, the page
+ * Phones: the ☰ button at the right of the top bar (owner: one menu, no avatar
+ * in the bar) opens a 328 px drawer from the right over a 45% backdrop. A modal dialog: focus stays inside, the page
  * doesn't scroll, ✕, a backdrop tap or Escape closes it.
  */
 export function AccountMenuMobile() {
@@ -207,9 +216,9 @@ export function AccountMenuMobile() {
   const close = () => { setOpen(false); trigger.current?.focus({ preventScroll: true }); };
   return (
     <>
-      <button ref={trigger} type="button" aria-label="Account menu" aria-expanded={open} aria-controls={id} onClick={() => setOpen(true)}
-        className="grid h-11 w-11 shrink-0 place-items-center rounded-full md:hidden">
-        <UserAvatar name={me?.name} avatarUrl={me?.avatarUrl} size={34} />
+      <button ref={trigger} type="button" aria-label="Menu" aria-expanded={open} aria-controls={id} onClick={() => setOpen(true)}
+        className="grid h-11 w-11 shrink-0 place-items-center rounded-full text-ink md:hidden">
+        <Menu size={20} aria-hidden="true" />
       </button>
       {/* Portal: the top bars use transforms, which would trap a fixed drawer inside them. */}
       {open && createPortal(<MobileDrawer id={id} me={me} close={close} />, document.body)}
@@ -222,10 +231,10 @@ function MobileDrawer({ id, me, close }: { id: string; me: Profile | undefined; 
   useModal(panel, close);
   return (
     <div className="account-fade fixed inset-0 z-[60] bg-ink/45 md:hidden" onClick={e => { if (e.target === e.currentTarget) close(); }}>
-      <div ref={panel} id={id} role="dialog" aria-modal="true" aria-label="Account menu"
+      <div ref={panel} id={id} role="dialog" aria-modal="true" aria-label="Menu"
         className="account-drawer absolute inset-y-0 right-0 flex w-[328px] max-w-[92vw] flex-col overflow-y-auto rounded-l-[28px] bg-white px-3 pb-[calc(.75rem+env(safe-area-inset-bottom))] pt-[calc(1.25rem+env(safe-area-inset-top))] text-ink">
-        <MenuBody me={me} close={close} closeButton={
-          <button type="button" onClick={close} aria-label="Close account menu" className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-canvas"><X size={20} aria-hidden="true" /></button>
+        <MenuBody me={me} close={close} phone closeButton={
+          <button type="button" onClick={close} aria-label="Close menu" className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-canvas"><X size={20} aria-hidden="true" /></button>
         } />
       </div>
     </div>
