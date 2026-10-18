@@ -5,6 +5,7 @@
  * Sewspace digital sewing studio API
  * OpenAPI spec version: 0.1.0
  */
+import type { ChallengeReminder } from './challengeReminder';
 import type { Notification } from './notification';
 
 export interface NotificationPage {
@@ -12,4 +13,6 @@ export interface NotificationPage {
   /** @nullable */
   nextCursor: string | null;
   unreadCount: number;
+  /** First page only: running challenges you joined that end within 24 hours. Worked out when asked and not counted in unreadCount */
+  reminders: ChallengeReminder[];
 }

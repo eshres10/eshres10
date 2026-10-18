@@ -3561,7 +3561,13 @@ export const ListNotificationsResponse = zod.object({
   "href": zod.string().describe('Where tapping it goes')
 })),
   "nextCursor": zod.string().nullable(),
-  "unreadCount": zod.number().int()
+  "unreadCount": zod.number().int(),
+  "reminders": zod.array(zod.object({
+  "slug": zod.string(),
+  "title": zod.string(),
+  "endsAt": zod.coerce.date(),
+  "entered": zod.boolean().describe('Whether you have a live entry in it')
+})).describe('First page only: running challenges you joined that end within 24 hours. Worked out when asked and not counted in unreadCount')
 })
 
 

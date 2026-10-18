@@ -5,7 +5,7 @@ import { as, ownerSql, startApp, withoutRls } from "./harness";
 // Notifications (the bell): written by database triggers, read only by the
 // recipient, never across a block or about something they can no longer see.
 const origin = await startApp();
-const { listNotifications, unreadNotificationCount, viewerFor } = await import("../src/access");
+const { endingSoon, listNotifications, unreadNotificationCount, viewerFor } = await import("../src/access");
 const ann = as(origin, "nf_ann"); // posts, asks, hosts
 const ben = as(origin, "nf_ben"); // likes, comments, follows, answers, enters
 const cal = as(origin, "nf_cal"); // replies to Ben's comment; later blocked by Ann
@@ -140,4 +140,34 @@ test("20 a page with a cursor", async () => {
   assert.equal(second.items.length, 2);
   assert.equal(second.nextCursor, null);
   assert.equal(new Set([...first.items, ...second.items].map((i: { id: number }) => i.id)).size, 22, "no repeats");
+});
+
+test("ends tomorrow: running challenges you joined that end within 24 hours, first page only, not counted", async () => {
+  const dee = as(origin, "nf_dee"); // hosts
+  const eve = as(origin, "nf_eve"); // joins
+  const fay = as(origin, "nf_fay"); // never joins
+  for (const [user, handle] of [[dee, "dee"], [eve, "eve"], [fay, "fay"]] as const) await user("PATCH", "/api/profile", { handle: `${handle}.nf`, name: handle });
+  const now = Date.now(), hour = 3_600_000;
+  const start = async (tag: string, endsIn: number) => ok(await dee("POST", "/api/challenges", { tag, title: tag, description: "", rules: "", startsAt: new Date(now - hour).toISOString(), endsAt: new Date(now + endsIn).toISOString() }));
+  await start("NfSoon", 10 * hour);
+  await start("NfLater", 72 * hour);
+  for (const slug of ["nfsoon", "nflater"]) ok(await eve("PUT", `/api/challenges/${slug}/membership`));
+
+  const first = await list(eve);
+  assert.deepEqual(first.reminders.map((r: { slug: string; entered: boolean }) => [r.slug, r.entered]), [["nfsoon", false]], "only the one ending within a day");
+  assert.equal(first.unreadCount, await unread(eve), "reminders aren't in the bell number");
+  assert.deepEqual((await list(dee)).reminders.map((r: { slug: string }) => r.slug), ["nfsoon"], "the host is a member too");
+  assert.deepEqual((await list(fay)).reminders, [], "not for people who didn't join");
+
+  const p = ok(await eve("POST", "/api/posts", { kind: "status", caption: "Made it in time", visibility: "public" }));
+  ok(await eve("POST", "/api/challenges/nfsoon/entries", { postId: p.id }));
+  assert.equal((await list(eve)).reminders[0].entered, true, "entered now");
+
+  await ownerSql("INSERT INTO sewspace_blocks VALUES ('nf_eve', 'nf_dee')");
+  assert.deepEqual((await list(eve)).reminders, [], "nothing across a block with the host");
+  assert.deepEqual(await withoutRls("nf_eve", (tx) => endingSoon(tx, viewerFor("nf_eve"))), [], "the module alone agrees");
+  await ownerSql("DELETE FROM sewspace_blocks WHERE blocker_id = 'nf_eve' AND blocked_id = 'nf_dee'");
+  assert.deepEqual((await withoutRls("nf_fay", (tx) => endingSoon(tx, viewerFor("nf_fay")))), [], "module: only your own memberships");
+  const page1 = await list(cal);
+  if (page1.nextCursor) assert.deepEqual((await list(cal, page1.nextCursor)).reminders, [], "later pages carry none");
 });

@@ -1,5 +1,7 @@
-import { and, asc, count, desc, eq, inArray, isNull, lt, or, sql, type SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, inArray, isNull, lt, lte, or, sql, type SQL } from "drizzle-orm";
 import {
+  challengeEntriesTable,
+  challengeMembersTable,
   challengesTable,
   commentsTable,
   forumRepliesTable,
@@ -12,6 +14,7 @@ import {
   type NotificationKind,
   type Tx,
 } from "@workspace/db";
+import { notBlockedHost } from "./challenges";
 import { urlForObjectPath } from "./objects";
 import { decodeCursor, encodeCursor } from "./posts";
 import type { Viewer } from "./viewer";
@@ -89,7 +92,33 @@ function hrefFor(row: typeof n.$inferSelect, actor: Person | null, challenge: { 
   }
 }
 
-/** Newest first, 20 a page, with an opaque cursor and the unread count. */
+export const REMINDER_HOURS = 24;
+export interface ChallengeReminder { slug: string; title: string; endsAt: Date; entered: boolean }
+
+/**
+ * "Ends tomorrow" reminders, worked out when asked (nothing is stored or
+ * scheduled): running challenges you're a member of (hosts are members) that
+ * end within the next 24 hours, not across a block with the host, soonest
+ * first, with whether you have a live entry yet.
+ */
+export async function endingSoon(db: Tx, viewer: Viewer, now = new Date()): Promise<ChallengeReminder[]> {
+  const me = viewer.userId;
+  if (!me) throw new Error("endingSoon needs a signed-in viewer");
+  const soon = new Date(now.getTime() + REMINDER_HOURS * 3_600_000);
+  const rows = await db.select({ id: challengesTable.id, slug: challengesTable.slug, title: challengesTable.title, endsAt: challengesTable.endsAt })
+    .from(challengeMembersTable)
+    .innerJoin(challengesTable, eq(challengesTable.id, challengeMembersTable.challengeId))
+    .where(and(eq(challengeMembersTable.userId, me), lte(challengesTable.startsAt, now), gt(challengesTable.endsAt, now), lte(challengesTable.endsAt, soon), notBlockedHost(viewer)))
+    .orderBy(asc(challengesTable.endsAt));
+  const entered = rows.length
+    ? await db.select({ challengeId: challengeEntriesTable.challengeId }).from(challengeEntriesTable)
+        .where(and(eq(challengeEntriesTable.userId, me), inArray(challengeEntriesTable.challengeId, rows.map((r) => r.id)), isNull(challengeEntriesTable.removedAt)))
+    : [];
+  const done = new Set(entered.map((e) => e.challengeId));
+  return rows.map((r) => ({ slug: r.slug, title: r.title, endsAt: r.endsAt, entered: done.has(r.id) }));
+}
+
+/** Newest first, 20 a page, with an opaque cursor and the unread count; the first page also carries the reminders. */
 export async function listNotifications(db: Tx, viewer: Viewer, cursor?: string) {
   if (!viewer.userId) throw new Error("listNotifications needs a signed-in viewer");
   const after = decodeCursor(cursor);
@@ -140,6 +169,7 @@ export async function listNotifications(db: Tx, viewer: Viewer, cursor?: string)
         .where(and(inArray(challengesTable.id, challengeIds), sql`NOT ${blocked(sql`${challengesTable.createdBy}`)}`))
     : [];
   const unreadCount = await unreadNotificationCount(db, viewer);
+  const reminders = after ? [] : await endingSoon(db, viewer);
 
   const actorBy = new Map(actors.map((a) => [a.userId, { handle: a.handle, name: a.name, avatarUrl: a.avatarUrl }]));
   const postBy = new Map(posts.map((p) => [p.id, p]));
@@ -176,7 +206,7 @@ export async function listNotifications(db: Tx, viewer: Viewer, cursor?: string)
     });
   }
   const last = page[page.length - 1];
-  return { items, nextCursor: rows.length > NOTIFICATIONS_PAGE_SIZE && last ? encodeCursor(last) : null, unreadCount };
+  return { items, nextCursor: rows.length > NOTIFICATIONS_PAGE_SIZE && last ? encodeCursor(last) : null, unreadCount, reminders };
 }
 
 /** Marks the given notifications (or all of them) read. Only your own; returns what's left unread. */

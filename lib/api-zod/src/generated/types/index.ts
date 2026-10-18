@@ -54,6 +54,7 @@ export * from './challengeEntryPage';
 export * from './challengeInput';
 export * from './challengePage';
 export * from './challengeRef';
+export * from './challengeReminder';
 export * from './challengeSummary';
 export * from './challengeSummaryStatus';
 export * from './challengeUpdate';

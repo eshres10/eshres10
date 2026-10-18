@@ -3399,7 +3399,19 @@ components:
           items: { $ref: "#/components/schemas/Notification" }
         nextCursor: { type: string, nullable: true }
         unreadCount: { type: integer }
-      required: [items, nextCursor, unreadCount]
+        reminders:
+          type: array
+          description: "First page only: running challenges you joined that end within 24 hours. Worked out when asked and not counted in unreadCount"
+          items: { $ref: "#/components/schemas/ChallengeReminder" }
+      required: [items, nextCursor, unreadCount, reminders]
+    ChallengeReminder:
+      type: object
+      properties:
+        slug: { type: string }
+        title: { type: string }
+        endsAt: { type: string, format: date-time }
+        entered: { type: boolean, description: Whether you have a live entry in it }
+      required: [slug, title, endsAt, entered]
     UnreadNotificationCount:
       type: object
       properties:

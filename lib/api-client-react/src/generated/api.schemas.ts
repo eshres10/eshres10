@@ -1795,11 +1795,21 @@ export interface Notification {
   href: string;
 }
 
+export interface ChallengeReminder {
+  slug: string;
+  title: string;
+  endsAt: string;
+  /** Whether you have a live entry in it */
+  entered: boolean;
+}
+
 export interface NotificationPage {
   items: Notification[];
   /** @nullable */
   nextCursor: string | null;
   unreadCount: number;
+  /** First page only: running challenges you joined that end within 24 hours. Worked out when asked and not counted in unreadCount */
+  reminders: ChallengeReminder[];
 }
 
 export interface UnreadNotificationCount {
