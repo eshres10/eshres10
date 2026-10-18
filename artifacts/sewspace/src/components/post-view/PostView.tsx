@@ -9,6 +9,7 @@ import {
 } from '@workspace/api-client-react';
 import { ArrowLeft, ChevronLeft, ChevronRight, Heart, Loader2, MessageCircle, Pencil, Send, X } from 'lucide-react';
 import { Link } from 'wouter';
+import { cardColorClass } from '@/lib/card-colors';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { UserAvatar } from '@/components/avatar';
 import { PinIcon } from '@/components/explore/actions';
@@ -133,7 +134,7 @@ function Media({ post, wide }: { post: FeedPost; wide: boolean }) {
   const media = post.media;
   if (!media.length) {
     return (
-      <div className={`flex items-center justify-center bg-yellow p-8 ${wide ? 'min-h-0' : 'aspect-[4/5]'}`}>
+      <div className={`flex items-center justify-center p-8 ${cardColorClass(post.cardColor)} ${wide ? 'min-h-0' : 'aspect-[4/5]'}`}>
         <p className={`whitespace-pre-line font-display leading-tight tracking-[-.03em] ${wide ? 'max-w-[520px] text-[34px]' : 'text-[26px]'}`}><CaptionText text={post.caption} linked={false} /></p>
       </div>
     );

@@ -249,6 +249,8 @@ export const POST_GARMENTS = ["dresses", "tops", "bottoms", "outerwear", "bags"]
 export type PostGarment = (typeof POST_GARMENTS)[number];
 export const POST_FABRICS = ["linen", "cotton", "satin", "viscose", "crepe", "haul"] as const;
 export type PostFabric = (typeof POST_FABRICS)[number];
+export const POST_CARD_COLORS = ["yellow", "red", "blue", "peach", "black"] as const;
+export type PostCardColor = (typeof POST_CARD_COLORS)[number];
 
 export const postsTable = pgTable("sewspace_posts", {
   id: serial("id").primaryKey(),
@@ -266,6 +268,8 @@ export const postsTable = pgTable("sewspace_posts", {
   fabric: text("fabric").$type<PostFabric>(),
   /** Migration 0022: an optional http(s) link the author adds (pattern shop, blog post, tutorial). */
   linkUrl: text("link_url"),
+  /** Migration 0023: the card colour of a status post (one of five brand colours). */
+  cardColor: text("card_color").$type<PostCardColor>().notNull().default("yellow"),
   ...timestamps,
 });
 

@@ -10,6 +10,7 @@ import {
   postsTable,
   publicProfilesView,
   type ExploreItemType,
+  type PostCardColor,
   type PostFabric,
   type PostGarment,
   type Tx,
@@ -59,7 +60,7 @@ export interface ExploreCardView {
   itemId: number;
   saved: boolean;
   /** `photo` is null for a words (status) post. */
-  post: { id: number; caption: string; photo: MediaView | null; author: Person; chip: string | null; savedByMe: boolean } | null;
+  post: { id: number; caption: string; photo: MediaView | null; author: Person; chip: string | null; savedByMe: boolean; cardColor: PostCardColor } | null;
   pattern: {
     id: number; slug: string; name: string; designer: string; category: string; rating: number | null; makes: number;
     free: boolean; priceCents: number | null; currency: string | null; coverImageUrl: string | null;
@@ -168,7 +169,7 @@ async function postCards(db: Tx, viewer: Viewer, tab: "explore" | "fabric", sub:
     const pattern = p.tags.find((t) => t.kind === "pattern");
     // Owner: only the pattern is shown on a post, never the fabric label.
     const chip = pattern ? `Pattern: ${pattern.name}` : null;
-    return [{ ...empty, type: "post", key: `post-${p.id}`, itemId: p.id, saved: p.savedByMe, post: { id: p.id, caption: p.caption, photo, author: p.author, chip, savedByMe: p.savedByMe } }];
+    return [{ ...empty, type: "post", key: `post-${p.id}`, itemId: p.id, saved: p.savedByMe, post: { id: p.id, caption: p.caption, photo, author: p.author, chip, savedByMe: p.savedByMe, cardColor: p.cardColor } }];
   });
   return { items, nextCursor: nextCursor(offset, rows.length), total: n };
 }

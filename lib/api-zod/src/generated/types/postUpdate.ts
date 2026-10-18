@@ -7,6 +7,7 @@
  */
 import type { AltTextInput } from './altTextInput';
 import type { PostAspect } from './postAspect';
+import type { PostCardColor } from './postCardColor';
 import type { PostFabric } from './postFabric';
 import type { PostGarment } from './postGarment';
 import type { Visibility } from './visibility';
@@ -34,6 +35,7 @@ export interface PostUpdate {
      * @nullable
      */
   linkUrl?: string | null;
+  cardColor?: PostCardColor;
   aspect?: PostAspect;
   /** @maxItems 10 */
   altTexts?: AltTextInput[];

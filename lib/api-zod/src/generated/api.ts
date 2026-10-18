@@ -89,6 +89,7 @@ export const GetProfilePostsResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -314,6 +315,7 @@ export const GetPublicPostResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -381,6 +383,7 @@ export const GetTagPostsResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -449,6 +452,7 @@ export const SearchPostsResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -572,6 +576,7 @@ export const GetExploreFeedResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -621,8 +626,9 @@ export const GetExploreCardsResponse = zod.object({
   "name": zod.string(),
   "avatarUrl": zod.string().nullable()
 }),
-  "chip": zod.string().nullable().describe('Pattern: {name} when the tagged pattern is visible to you, or the fabric type'),
-  "savedByMe": zod.boolean()
+  "chip": zod.string().nullable().describe('Pattern: {name} when the tagged pattern is visible to you'),
+  "savedByMe": zod.boolean(),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.')
 }).nullable(),
   "pattern": zod.object({
   "id": zod.number().int(),
@@ -929,6 +935,7 @@ export const GetSavedPostsResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -1904,6 +1911,7 @@ export const GetChallengeEntriesResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2108,6 +2116,7 @@ export const EnterChallengeResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2490,6 +2499,7 @@ export const GetForumTopicResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2694,6 +2704,7 @@ export const CreateForumTopicResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2837,6 +2848,7 @@ export const UpdateForumTopicResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -2977,6 +2989,7 @@ export const SetAcceptedAnswerResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -3111,6 +3124,7 @@ export const ModerateForumTopicResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -3284,6 +3298,7 @@ export const GetHomeFeedResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -3343,6 +3358,7 @@ export const CreatePostBody = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]).optional(),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]).optional(),
   "linkUrl": zod.string().max(createPostBodyLinkUrlMax).nullish().describe('An http(s) link (https:// is added when left out). Empty or null removes it.'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).optional().describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "altTexts": zod.array(zod.object({
   "mediaId": zod.number().int(),
@@ -3390,6 +3406,7 @@ export const CreatePostResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),
@@ -3432,6 +3449,7 @@ export const UpdatePostBody = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]).optional(),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]).optional(),
   "linkUrl": zod.string().max(updatePostBodyLinkUrlMax).nullish().describe('An http(s) link (https:// is added when left out). Empty or null removes it.'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).optional().describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "aspect": zod.enum(['4:5', '1:1', 'original']).optional().describe('How photos are cropped for display: 4:5, 1:1 or the first photo\'s own shape'),
   "altTexts": zod.array(zod.object({
   "mediaId": zod.number().int(),
@@ -3479,6 +3497,7 @@ export const UpdatePostResponse = zod.object({
   "garment": zod.union([zod.enum(['dresses', 'tops', 'bottoms', 'outerwear', 'bags']).describe('What the post shows was made (Explore filters). Optional; the author picks it.'),zod.null()]),
   "fabric": zod.union([zod.enum(['linen', 'cotton', 'satin', 'viscose', 'crepe', 'haul']).describe('Set when the post is about fabric (Explore\'s Fabric tab). Optional; the author picks it.'),zod.null()]),
   "linkUrl": zod.string().nullable().describe('The author\'s link, if any (http or https)'),
+  "cardColor": zod.enum(['yellow', 'red', 'blue', 'peach', 'black']).describe('The card colour of a status (words) post. Yellow unless the author picks another.'),
   "forumTopic": zod.object({
   "id": zod.number().int(),
   "title": zod.string(),

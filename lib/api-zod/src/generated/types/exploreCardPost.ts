@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.1.0
  */
 import type { Media } from './media';
+import type { PostCardColor } from './postCardColor';
 import type { PublicPerson } from './publicPerson';
 
 /**
@@ -18,9 +19,10 @@ export type ExploreCardPost = {
   photo: Media | null;
   author: PublicPerson;
   /**
-     * Pattern: {name} when the tagged pattern is visible to you, or the fabric type
+     * Pattern: {name} when the tagged pattern is visible to you
      * @nullable
      */
   chip: string | null;
   savedByMe: boolean;
+  cardColor: PostCardColor;
 } | null;

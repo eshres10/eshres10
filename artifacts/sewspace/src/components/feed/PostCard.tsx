@@ -3,6 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { getGetPublicPostQueryKey, useDeletePost, type FeedPost } from '@workspace/api-client-react';
 import { BookOpen, ChevronLeft, ChevronRight, Loader2, MessagesSquare, MoreHorizontal, Pencil, Scissors, Trash2, Trophy, X } from 'lucide-react';
 import { Link, useLocation } from 'wouter';
+import { cardColorClass } from '@/lib/card-colors';
 import { UserAvatar } from '@/components/avatar';
 import { VisibilityBadge } from '@/components/visibility';
 import { CaptionText } from '@/components/feed/CaptionText';
@@ -165,7 +166,7 @@ export function PostCard({ post, full = false, mobileCompact = false, onDeleted,
       {post.kind === 'photo' && post.media.length > 0 && <><Photos post={post} /><PostActions post={post} onComment={onComment} /></>}
       <div className={post.kind === 'status' ? 'px-3.5 pb-2 md:px-[18px]' : 'px-3.5 pb-4 pt-1 md:px-[18px] md:pb-[18px]'}>
         {post.kind === 'status'
-          ? <p className={`whitespace-pre-line break-words ${post.caption.length < 140 ? 'font-display text-[22px] leading-snug tracking-[-.03em]' : 'text-[15px] leading-relaxed'}`}><CaptionText text={post.caption} /></p>
+          ? <p className={`whitespace-pre-line break-words rounded-[22px] p-5 ${cardColorClass(post.cardColor)} ${post.caption.length < 140 ? 'font-display text-[22px] leading-snug tracking-[-.03em]' : 'text-[15px] leading-relaxed'}`}><CaptionText text={post.caption} /></p>
           : <Caption post={post} full={full} />}
         {post.linkUrl && <div className="mt-2.5"><PostLink url={post.linkUrl} /></div>}
         {post.forumTopic && (

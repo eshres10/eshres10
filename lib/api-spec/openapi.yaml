@@ -2589,6 +2589,7 @@ components:
           allOf: [{ $ref: "#/components/schemas/PostFabric" }]
           nullable: true
         linkUrl: { type: string, nullable: true, description: "The author's link, if any (http or https)" }
+        cardColor: { $ref: "#/components/schemas/PostCardColor" }
         forumTopic:
           type: object
           nullable: true
@@ -2602,7 +2603,7 @@ components:
           allOf: [{ $ref: "#/components/schemas/PublicPerson" }]
           nullable: true
           description: "Single post only (GET /public/posts/{id}): the latest liker the viewer follows, for 'Liked by … and others'"
-      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect, garment, fabric, forumTopic, linkUrl]
+      required: [id, kind, caption, visibility, createdAt, updatedAt, author, isOwner, media, tags, likeCount, commentCount, likedByMe, savedByMe, challenges, aspect, garment, fabric, forumTopic, linkUrl, cardColor]
     PostGarment:
       type: string
       description: What the post shows was made (Explore filters). Optional; the author picks it.
@@ -2611,6 +2612,10 @@ components:
       type: string
       description: Set when the post is about fabric (Explore's Fabric tab). Optional; the author picks it.
       enum: [linen, cotton, satin, viscose, crepe, haul]
+    PostCardColor:
+      type: string
+      description: The card colour of a status (words) post. Yellow unless the author picks another.
+      enum: [yellow, red, blue, peach, black]
     PostAspect:
       type: string
       description: "How photos are cropped for display: 4:5, 1:1 or the first photo's own shape"
@@ -2694,9 +2699,10 @@ components:
               nullable: true
               description: Null for a words (status) post
             author: { $ref: "#/components/schemas/PublicPerson" }
-            chip: { type: string, nullable: true, description: "Pattern: {name} when the tagged pattern is visible to you, or the fabric type" }
+            chip: { type: string, nullable: true, description: "Pattern: {name} when the tagged pattern is visible to you" }
             savedByMe: { type: boolean }
-          required: [id, caption, photo, author, chip, savedByMe]
+            cardColor: { $ref: "#/components/schemas/PostCardColor" }
+          required: [id, caption, photo, author, chip, savedByMe, cardColor]
         pattern:
           type: object
           nullable: true
@@ -2771,6 +2777,7 @@ components:
           allOf: [{ $ref: "#/components/schemas/PostFabric" }]
           nullable: true
         linkUrl: { type: string, nullable: true, maxLength: 500, description: "An http(s) link (https:// is added when left out). Empty or null removes it." }
+        cardColor: { $ref: "#/components/schemas/PostCardColor" }
         aspect: { $ref: "#/components/schemas/PostAspect" }
         altTexts:
           type: array
@@ -2797,6 +2804,7 @@ components:
           allOf: [{ $ref: "#/components/schemas/PostFabric" }]
           nullable: true
         linkUrl: { type: string, nullable: true, maxLength: 500, description: "An http(s) link (https:// is added when left out). Empty or null removes it." }
+        cardColor: { $ref: "#/components/schemas/PostCardColor" }
         aspect: { $ref: "#/components/schemas/PostAspect" }
         altTexts:
           type: array

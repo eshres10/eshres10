@@ -375,6 +375,20 @@ export const PostFabric = {
   haul: 'haul',
 } as const;
 
+/**
+ * The card colour of a status (words) post. Yellow unless the author picks another.
+ */
+export type PostCardColor = typeof PostCardColor[keyof typeof PostCardColor];
+
+
+export const PostCardColor = {
+  yellow: 'yellow',
+  red: 'red',
+  blue: 'blue',
+  peach: 'peach',
+  black: 'black',
+} as const;
+
 export interface FeedPost {
   id: number;
   kind: FeedPostKind;
@@ -401,6 +415,7 @@ export interface FeedPost {
      * @nullable
      */
   linkUrl: string | null;
+  cardColor: PostCardColor;
   /**
      * The forum thread this post was shared from (Show & tell)
      * @nullable
@@ -508,11 +523,12 @@ export type ExploreCardPost = {
   photo: Media | null;
   author: PublicPerson;
   /**
-     * Pattern: {name} when the tagged pattern is visible to you, or the fabric type
+     * Pattern: {name} when the tagged pattern is visible to you
      * @nullable
      */
   chip: string | null;
   savedByMe: boolean;
+  cardColor: PostCardColor;
 } | null;
 
 /**
@@ -633,6 +649,7 @@ export interface PostInput {
      * @nullable
      */
   linkUrl?: string | null;
+  cardColor?: PostCardColor;
   aspect?: PostAspect;
   /** @maxItems 10 */
   altTexts?: AltTextInput[];
@@ -661,6 +678,7 @@ export interface PostUpdate {
      * @nullable
      */
   linkUrl?: string | null;
+  cardColor?: PostCardColor;
   aspect?: PostAspect;
   /** @maxItems 10 */
   altTexts?: AltTextInput[];

@@ -196,6 +196,7 @@ export * from './patternStatus';
 export * from './patternUpdate';
 export * from './pollVoteInput';
 export * from './postAspect';
+export * from './postCardColor';
 export * from './postFabric';
 export * from './postGarment';
 export * from './postInput';

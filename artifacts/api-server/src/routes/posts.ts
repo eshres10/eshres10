@@ -207,6 +207,7 @@ router.post("/posts", scoped(async (req, res, db): Promise<void> => {
       garment: body.garment ?? null,
       fabric: body.fabric ?? null,
       linkUrl,
+      ...(body.cardColor ? { cardColor: body.cardColor } : {}),
       ...(body.aspect ? { aspect: body.aspect } : {}),
     })
     .returning();
@@ -266,6 +267,7 @@ router.patch("/posts/:id", scoped(async (req, res, db): Promise<void> => {
       garment: body.garment,
       fabric: body.fabric,
       linkUrl,
+      cardColor: body.cardColor,
       aspect: body.aspect,
       updatedAt: new Date(),
     })

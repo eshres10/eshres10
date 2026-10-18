@@ -4,6 +4,7 @@ import { useInfiniteQuery } from '@tanstack/react-query';
 import { getExploreFeed, useListCatalog, useListChallenges, type FeedPost } from '@workspace/api-client-react';
 import { Heart, Images, Loader2, Search, Star, Trophy } from 'lucide-react';
 import { Link } from 'wouter';
+import { cardColorClass } from '@/lib/card-colors';
 import { UserAvatar } from '@/components/avatar';
 import { challengeMeta } from '@/components/challenges/parts';
 import { authHref } from '@/lib/navigation';
@@ -30,7 +31,7 @@ export function PostTile({ post }: { post: FeedPost }) {
   const cover = post.media[0];
   if (!cover) {
     return (
-      <Link href={`/posts/${post.id}`} className="mb-2.5 block break-inside-avoid rounded-[22px] bg-white p-5 text-ink no-underline hover:bg-yellow">
+      <Link href={`/posts/${post.id}`} className={`mb-2.5 block break-inside-avoid rounded-[22px] p-5 no-underline ${cardColorClass(post.cardColor)}`}>
         <p className="line-clamp-6 font-display text-lg leading-snug tracking-[-.03em]"><CaptionText text={post.caption} linked={false} /></p>
         <p className="mt-3 text-xs font-semibold text-subtle">@{post.author.handle}</p>
       </Link>

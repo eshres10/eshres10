@@ -10,6 +10,7 @@ import type { FeedPostForumTopic } from './feedPostForumTopic';
 import type { FeedPostKind } from './feedPostKind';
 import type { Media } from './media';
 import type { PostAspect } from './postAspect';
+import type { PostCardColor } from './postCardColor';
 import type { PostFabric } from './postFabric';
 import type { PostGarment } from './postGarment';
 import type { PostTag } from './postTag';
@@ -42,6 +43,7 @@ export interface FeedPost {
      * @nullable
      */
   linkUrl: string | null;
+  cardColor: PostCardColor;
   /**
      * The forum thread this post was shared from (Show & tell)
      * @nullable

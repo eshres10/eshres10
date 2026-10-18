@@ -56,6 +56,7 @@ export interface FeedPostView {
   garment: Post["garment"];
   fabric: Post["fabric"];
   linkUrl: string | null;
+  cardColor: Post["cardColor"];
   forumTopic: { id: number; title: string; replies: number } | null;
 }
 
@@ -164,6 +165,7 @@ export async function hydratePosts(db: Tx, viewer: Viewer, posts: Post[]): Promi
       garment: post.garment ?? null,
       fabric: post.fabric ?? null,
       linkUrl: post.linkUrl ?? null,
+      cardColor: post.cardColor ?? "yellow",
       forumTopic: ((t) => (t ? { id: t.id, title: t.title, replies: t.replies } : null))(topics.find((t) => t.postId === post.id && t.userId === post.userId)),
     }];
   });

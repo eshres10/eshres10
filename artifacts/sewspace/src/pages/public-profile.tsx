@@ -18,6 +18,7 @@ import {
 } from '@workspace/api-client-react';
 import { BookOpen, Bookmark, Check, Grid3x3, Layers, Loader2, Lock, Pencil, Plus, Scissors, Send, Share2, ShoppingBag, Spool, Store, Trophy, UserCheck, UserPlus, AtSign } from 'lucide-react';
 import { Link, useLocation, useSearch } from 'wouter';
+import { cardColorClass } from '@/lib/card-colors';
 import { useRequireSignIn } from '@/components/auth/SignInPrompt';
 import { ErrorState, Loading } from '@/components/common';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
@@ -181,7 +182,7 @@ function PostTile({ post, showVisibility }: { post: FeedPost; showVisibility: bo
       style={cover?.color ? { backgroundColor: cover.color } : undefined}>
       {cover
         ? <img src={cover.thumbUrl} alt="" loading="lazy" className="absolute inset-0 h-full w-full object-cover" />
-        : <span className="absolute inset-0 flex items-center bg-white p-[clamp(12px,3vw,22px)] font-display text-[clamp(14px,2.4vw,19px)] font-semibold leading-[1.3] tracking-[-.03em]">
+        : <span className={`absolute inset-0 flex items-center p-[clamp(12px,3vw,22px)] ${cardColorClass(post.cardColor)} font-display text-[clamp(14px,2.4vw,19px)] font-semibold leading-[1.3] tracking-[-.03em]`}>
             <span className="line-clamp-5"><CaptionText text={post.caption} linked={false} /></span>
           </span>}
       {post.media.length > 1 && <span className="absolute right-2.5 top-2.5 rounded-full bg-ink/75 px-2 py-0.5 text-[11px] font-semibold text-white">1/{post.media.length}</span>}

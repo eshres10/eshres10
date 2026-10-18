@@ -1,6 +1,7 @@
 import type { ExploreCard } from '@workspace/api-client-react';
 import { MessageCircle, Quote, Trophy } from 'lucide-react';
 import { Link } from 'wouter';
+import { cardColorClass } from '@/lib/card-colors';
 import { UserAvatar } from '@/components/avatar';
 import { CaptionText } from '@/components/feed/CaptionText';
 import { Garment } from '@/components/brand/Garment';
@@ -107,7 +108,7 @@ function PostCard({ post, saved }: { post: NonNullable<ExploreCard['post']>; sav
 /** A words (status) post: the caption on yellow, like the composer's status card. */
 function WordsCard({ post, saved }: { post: NonNullable<ExploreCard['post']>; saved: boolean }) {
   return (
-    <Link href={`/posts/${post.id}`} className={`${CARD_LINK} bg-yellow p-4`} draggable={false}>
+    <Link href={`/posts/${post.id}`} className={`${CARD_LINK} p-4 ${cardColorClass(post.cardColor)}`} draggable={false}>
       {/* At most 8 lines. The float leaves room on the first line for "…" and the Saved pin (actions.tsx). */}
       <span className="block max-h-[10em] overflow-hidden whitespace-pre-line font-display text-[17px] leading-tight tracking-[-.03em]">
         <span aria-hidden="true" className={`float-right h-7 ${saved ? 'w-[4.25rem]' : 'w-8'}`} />

@@ -1,6 +1,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import {
+  type PostCardColor,
   createPost,
   deleteChallengeEntry,
   enterChallenge,
@@ -35,6 +36,7 @@ import {
 } from '@/components/flow';
 import { appendHashtag, aspectRatio, MAX_HASHTAGS, normaliseHashtag, parseHashtags, removeHashtag } from '@/lib/hashtags';
 import { linkLabel } from '@/lib/links';
+import { CARD_COLORS, cardColorClass } from '@/lib/card-colors';
 import { processPhoto } from '@/lib/photos';
 import {
   AudienceCards,
@@ -69,6 +71,7 @@ interface PostDraft extends Record<string, unknown> {
   garment?: PostGarment | null;
   fabric?: PostFabric | null;
   linkUrl?: string | null;
+  cardColor?: PostCardColor;
   visibility: Audience;
   challenges: string[];
   reached: number;
@@ -135,6 +138,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
   const [fabric, setFabric] = useState<PostFabric | null>(editing?.fabric ?? null);
   const [linkUrl, setLinkUrl] = useState<string | null>(editing?.linkUrl ?? null);
   const [editingLink, setEditingLink] = useState(false);
+  const [cardColor, setCardColor] = useState<PostCardColor>(editing?.cardColor ?? 'yellow');
   const [visibility, setVisibility] = useState<Audience>((editing?.visibility as Audience | undefined) ?? 'public');
   const [challenges, setChallenges] = useState<string[]>(editing ? editing.challenges.map(c => c.slug) : paramChallenge ? [paramChallenge] : []);
   const [reached, setReached] = useState(isEdit ? ALL_STEPS.length - 1 : 0);
@@ -150,13 +154,13 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
 
   // Draft: new posts only. Applied once, before autosave starts.
   const payload: PostDraft = {
-    kind, caption, aspect, projectId, patternId, fabricId, garment, fabric, linkUrl, visibility, challenges, reached,
+    kind, caption, aspect, projectId, patternId, fabricId, garment, fabric, linkUrl, cardColor, visibility, challenges, reached,
     photos: uploads.items.filter(i => i.status === 'done' && i.result).map(i => ({ media: i.result!, alt: alts[i.key] ?? '' })),
   };
   const dirty = isEdit
     ? caption !== editing!.caption || aspect !== editing!.aspect || visibility !== editing!.visibility || uploads.items.length !== editing!.media.length
       || projectId !== tagged('make') || challenges.join() !== editing!.challenges.map(c => c.slug).join()
-      || garment !== (editing!.garment ?? null) || fabric !== (editing!.fabric ?? null) || linkUrl !== (editing!.linkUrl ?? null)
+      || garment !== (editing!.garment ?? null) || fabric !== (editing!.fabric ?? null) || linkUrl !== (editing!.linkUrl ?? null) || cardColor !== (editing!.cardColor ?? 'yellow')
     : Boolean(caption.trim() || uploads.items.length || projectId || patternId || fabricId || linkUrl);
   const [hydrated, setHydrated] = useState(isEdit);
   const draft = useDraft('post', payload, { enabled: !isEdit, active: hydrated && dirty });
@@ -172,6 +176,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       setGarment(d.garment ?? null);
       setFabric(d.fabric ?? null);
       setLinkUrl(d.linkUrl ?? null);
+      setCardColor(d.cardColor ?? 'yellow');
       setVisibility(d.visibility ?? 'public');
       setChallenges([...new Set([...(d.challenges ?? []), ...(paramChallenge ? [paramChallenge] : [])])]);
       setReached(Math.min(d.reached ?? 0, ALL_STEPS.length - 1));
@@ -272,6 +277,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
         const post = editing!;
         await updatePost(post.id, {
           caption: caption.trim(), visibility, projectId, patternId, fabricId, garment, fabric, linkUrl: linkUrl ?? '', aspect, altTexts,
+          ...(post.kind === 'status' ? { cardColor } : {}),
           ...(post.kind === 'photo' ? { mediaIds: media.map(m => m.id) } : {}),
         });
         for (const c of post.challenges.filter(c => !challenges.includes(c.slug))) if (c.entryId) await deleteChallengeEntry(c.entryId).catch(() => undefined);
@@ -285,6 +291,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
       const post = await createPost({
         kind, caption: caption.trim(), visibility, mediaIds: kind === 'photo' ? media.map(m => m.id) : [],
         projectId, patternId, fabricId, garment, fabric, linkUrl, aspect, altTexts: kind === 'photo' ? altTexts : [],
+        ...(kind === 'status' ? { cardColor } : {}),
       });
       const entered: string[] = [], notEntered: string[] = [];
       if (visibility === 'public') {
@@ -361,20 +368,23 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
   const pick = (id: string) => document.getElementById(id)?.click();
 
   const statusCard = (
-    <div data-field="caption" className={`rounded-[34px] bg-yellow p-5 ${v.error('caption') ? 'outline outline-2 -outline-offset-2 outline-red-ink' : ''}`}>
+    <div data-field="caption">
+    <div className={`rounded-[34px] p-5 ${cardColorClass(cardColor)} ${v.error('caption') ? 'outline outline-2 outline-offset-2 outline-red-ink' : ''}`}>
       <label htmlFor="f-caption" className="text-sm font-bold">What's on your table?</label>
       <textarea id="f-caption" value={caption} onChange={e => { setCaption(e.target.value.slice(0, MAX_CAPTION)); setCaret(e.target.selectionStart); }}
         aria-invalid={v.error('caption') ? true : undefined} aria-describedby={v.error('caption') ? 'f-caption-error' : undefined}
         rows={6} placeholder="A question, a win, a work in progress…"
-        className="mt-2 w-full resize-none bg-transparent font-display text-[26px] leading-tight tracking-[-.03em] text-ink outline-none placeholder:text-ink/40" />
+        className="mt-2 w-full resize-none bg-transparent font-display text-[26px] leading-tight tracking-[-.03em] text-current outline-none placeholder:text-current placeholder:opacity-50" />
       <p className="text-right text-sm font-semibold">{caption.length} / {MAX_CAPTION.toLocaleString()}</p>
-      {v.error('caption') && <p id="f-caption-error" className="mt-1 text-sm font-semibold text-red-ink">{v.error('caption')}</p>}
+    </div>
+    {v.error('caption') && <p id="f-caption-error" className="mt-2 px-2 text-sm font-semibold text-red-ink">{v.error('caption')}</p>}
+    <CardColorPicker value={cardColor} onChange={setCardColor} />
     </div>
   );
 
   const darkPane = kind === 'photo' && items.length > 0
     ? <div className="flex h-full items-center px-4"><PhotoCarousel items={items} aspect={aspect} alts={alts} index={active} onIndex={setActive} className="max-w-[480px]" /></div>
-    : <div className="flex h-full items-center justify-center p-6"><div className="w-full max-w-[420px] rounded-[30px] bg-yellow p-6 font-display text-[24px] leading-tight tracking-[-.03em] text-ink"><CaptionText text={caption || 'Your status shows here.'} linked={false} /></div></div>;
+    : <div className="flex h-full items-center justify-center p-6"><div className={`w-full max-w-[420px] rounded-[30px] p-6 font-display text-[24px] leading-tight tracking-[-.03em] ${cardColorClass(cardColor)}`}><CaptionText text={caption || 'Your status shows here.'} linked={false} /></div></div>;
 
   // ---- Photos ------------------------------------------------------------
   const photosStep = kind === 'status' ? (
@@ -723,7 +733,7 @@ export function PostFlow({ editing, onRestart }: { editing?: FeedPost; onRestart
         <p className="text-sm font-semibold text-subtle">Preview</p>
         <div className="mt-3 flex items-center gap-2.5"><UserAvatar name={me.data?.name} avatarUrl={me.data?.avatarUrl} size={40} /><span className="font-bold">{handle}</span><span className="text-sm text-subtle">· now</span></div>
         {kind === 'photo' && cover && <img src={photoSrc(cover)} alt={alts[cover.key] ?? ''} className="mt-3 w-full rounded-[22px] object-cover" style={{ aspectRatio: String(aspectRatio(aspect, cover.result)) }} />}
-        {caption && <p className={`mt-3 whitespace-pre-line break-words ${kind === 'status' ? 'font-display text-[22px] leading-snug tracking-[-.03em]' : 'text-[16px] leading-relaxed'}`}><CaptionText text={caption} linked={false} /></p>}
+        {caption && <p className={`mt-3 whitespace-pre-line break-words ${kind === 'status' ? `rounded-[22px] p-5 font-display text-[22px] leading-snug tracking-[-.03em] ${cardColorClass(cardColor)}` : 'text-[16px] leading-relaxed'}`}><CaptionText text={caption} linked={false} /></p>}
       </div>
       <div className="hidden rounded-[20px] border border-line p-3.5 lg:block">
         <p className="text-xs font-bold text-subtle">Caption</p>
@@ -794,6 +804,34 @@ function LabelChips({ label, options, value, onChange }: {
           <button key={o.value} type="button" aria-pressed={value === o.value} onClick={() => onChange((value === o.value ? null : o.value) as never)}
             className={`min-h-[44px] rounded-full px-4 text-[15px] font-semibold ${value === o.value ? 'bg-ink text-white' : 'border border-line bg-white text-ink'}`}>
             {o.label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** Card colour for a status: five brand-colour swatches in a radio group (arrow keys move and pick). */
+function CardColorPicker({ value, onChange }: { value: PostCardColor; onChange: (c: PostCardColor) => void }) {
+  const refs = useRef<Array<HTMLButtonElement | null>>([]);
+  const at = CARD_COLORS.findIndex(c => c.id === value);
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    const step = e.key === 'ArrowRight' || e.key === 'ArrowDown' ? 1 : e.key === 'ArrowLeft' || e.key === 'ArrowUp' ? -1 : 0;
+    if (!step) return;
+    e.preventDefault();
+    const next = (at + step + CARD_COLORS.length) % CARD_COLORS.length;
+    onChange(CARD_COLORS[next].id);
+    refs.current[next]?.focus();
+  };
+  return (
+    <div className="mt-3 flex items-center gap-3 px-2">
+      <span id="card-colour-label" className="text-sm font-bold">Card colour</span>
+      <div role="radiogroup" aria-labelledby="card-colour-label" onKeyDown={onKeyDown} className="flex gap-1">
+        {CARD_COLORS.map((c, i) => (
+          <button key={c.id} ref={el => { refs.current[i] = el; }} type="button" role="radio" aria-checked={c.id === value} aria-label={c.label}
+            tabIndex={c.id === value ? 0 : -1} onClick={() => onChange(c.id)}
+            className="grid h-11 w-11 place-items-center rounded-full">
+            <span className={`h-8 w-8 rounded-full border border-line ${cardColorClass(c.id)} ${c.id === value ? 'ring-2 ring-ink ring-offset-2' : ''}`} />
           </button>
         ))}
       </div>
