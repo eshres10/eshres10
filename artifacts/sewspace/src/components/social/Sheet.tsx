@@ -1,3 +1,4 @@
+import { createPortal } from 'react-dom';
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { useLeaveGuard } from '@/components/flow/LeaveDialog';
 import { useModal } from '@/components/flow/modal';
@@ -23,15 +24,17 @@ export function Sheet({ label, onClose, children }: { label: string; onClose: ()
   const [dirty, setDirty] = useState(false);
   const guard = useLeaveGuard({ dirty, onLeave: onClose });
   useModal(panel, guard.request);
-  return (
-    <div className="fixed inset-0 z-[60] flex items-end justify-center bg-ink/45 p-2 sm:items-center" onMouseDown={e => { if (e.target === e.currentTarget) guard.request(); }}>
+  // On document.body above everything (z 90): sheets also open from the post view and the comments sheet (z 80).
+  return createPortal(
+    <div className="fixed inset-0 z-[90] flex items-end justify-center bg-ink/45 p-2 sm:items-center" onMouseDown={e => { if (e.target === e.currentTarget) guard.request(); }}>
       <div ref={panel} role="dialog" aria-modal="true" aria-label={label}
         className="max-h-[90dvh] w-full max-w-[440px] overflow-y-auto rounded-[32px] bg-white p-5 pb-[calc(1.25rem+env(safe-area-inset-bottom))]">
         <span className="mx-auto mb-3 block h-[5px] w-11 rounded-full bg-line sm:hidden" aria-hidden="true" />
         <SheetDirty.Provider value={setDirty}>{children}</SheetDirty.Provider>
       </div>
       {guard.dialog}
-    </div>
+    </div>,
+    document.body,
   );
 }
 
