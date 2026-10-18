@@ -3831,6 +3831,19 @@ export const DeleteFabricResponse = zod.void()
 
 
 /**
+ * @summary Up to 3 people to follow (Home's sidebar): handle set, not you, not already followed, not blocked either way, with public posts or makes. Numbers count public work only.
+ */
+export const GetSuggestedPeopleResponseItem = zod.object({
+  "handle": zod.string(),
+  "name": zod.string(),
+  "avatarUrl": zod.string().nullable()
+}).and(zod.object({
+  "makes": zod.number().int().describe('Their public makes')
+}))
+export const GetSuggestedPeopleResponse = zod.array(GetSuggestedPeopleResponseItem)
+
+
+/**
  * @summary The account menu's numbers: your saves, running challenges you joined, pattern sales and membership. Only ever the caller's own.
  */
 export const GetMenuSummaryResponse = zod.object({

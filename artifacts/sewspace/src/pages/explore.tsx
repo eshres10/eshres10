@@ -1,17 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@clerk/react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { getExploreFeed, useListCatalog, useListChallenges, type FeedPost } from '@workspace/api-client-react';
-import { Heart, Images, Loader2, Search, Star, Trophy } from 'lucide-react';
+import { getExploreFeed, type FeedPost } from '@workspace/api-client-react';
+import { Heart, Images, Loader2, Search } from 'lucide-react';
 import { Link } from 'wouter';
 import { cardColorClass } from '@/lib/card-colors';
 import { UserAvatar } from '@/components/avatar';
-import { challengeMeta } from '@/components/challenges/parts';
 import { authHref } from '@/lib/navigation';
 import { ErrorState } from '@/components/common';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { CaptionText } from '@/components/feed/CaptionText';
 import { CommunityTabs } from '@/components/shell/CommunityTabs';
+import { PopularPatterns, TrendingChallenges } from '@/components/feed/SideCards';
 
 const KINDS = [
   { id: 'all', label: 'All' },
@@ -88,71 +88,6 @@ export function GuestBanner() {
       <p className="flex-1 text-[15px] font-medium leading-snug">You're browsing as a guest. Sign in to like, comment, follow sewists and join challenges. We'll bring you right back here.</p>
       <Link href={authHref('sign-in', '/explore')} className="inline-flex min-h-[44px] shrink-0 items-center self-start rounded-full bg-ink px-5 text-[15px] font-semibold text-white no-underline sm:self-auto">Sign in or join</Link>
     </div>
-  );
-}
-
-function SideCard({ title, more, children, dark = false }: { title: string; more?: { href: string; label: string }; children: React.ReactNode; dark?: boolean }) {
-  return (
-    <section className={`rounded-[30px] p-5 ${dark ? 'bg-ink text-white' : 'bg-white'}`}>
-      <div className="flex items-baseline justify-between gap-3">
-        <h2 className="font-display text-[20px] tracking-[-.04em]">{title}</h2>
-        {more && <Link href={more.href} className="text-sm font-semibold text-ink underline underline-offset-4">{more.label}</Link>}
-      </div>
-      {children}
-    </section>
-  );
-}
-
-/** Running challenges with the most people, then upcoming ones. */
-function TrendingChallenges() {
-  const active = useListChallenges({ status: 'active' });
-  const upcoming = useListChallenges({ status: 'upcoming' });
-  const list = [...[...(active.data ?? [])].sort((a, b) => b.members - a.members), ...(upcoming.data ?? [])].slice(0, 3);
-  if (list.length === 0) return null;
-  return (
-    <SideCard title="Trending challenges" more={{ href: '/challenges', label: 'All' }}>
-      <ul className="mt-3">
-        {list.map(c => {
-          const [when, count] = challengeMeta(c);
-          return (
-            <li key={c.slug}>
-              <Link href={`/challenges/${c.slug}`} className="flex items-center gap-3 rounded-[16px] py-2 text-ink no-underline hover:bg-canvas">
-                <span aria-hidden="true" className="grid h-12 w-12 shrink-0 place-items-center rounded-[14px] bg-yellow"><Trophy size={20} /></span>
-                <span className="min-w-0 flex-1">
-                  <b className="block truncate text-[14px]">#{c.tag}</b>
-                  <span className="block truncate text-xs text-subtle">{c.status === 'upcoming' ? when : `${when} · ${count}`}</span>
-                </span>
-                <span className={`shrink-0 rounded-full px-2 py-0.5 text-[11px] font-bold ${c.status === 'active' ? 'bg-yellow' : 'border-2 border-blue text-blue-ink'}`}>{c.status === 'active' ? 'Active' : 'Soon'}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </SideCard>
-  );
-}
-
-/** Shared pattern pages with the most reviews. */
-function PopularPatterns() {
-  const list = useListCatalog({ kind: 'pattern' });
-  const items = (list.data?.items ?? []).slice(0, 4);
-  if (items.length === 0) return null;
-  return (
-    <SideCard title="Popular patterns" more={{ href: '/catalog', label: 'All' }}>
-      <ul className="mt-2 divide-y divide-line">
-        {items.map(p => (
-          <li key={p.id}>
-            <Link href={`/catalog/pattern/${p.slug}`} className="flex items-center gap-3 py-3 text-ink no-underline hover:underline">
-              <span className="min-w-0 flex-1">
-                <b className="block truncate text-[14px]">{p.name}</b>
-                <span className="block truncate text-xs text-subtle">{[p.maker, `${p.stats.makes} ${p.stats.makes === 1 ? 'make' : 'makes'}`].filter(Boolean).join(' · ')}</span>
-              </span>
-              {p.stats.rating != null && <span className="inline-flex shrink-0 items-center gap-1 text-sm font-bold"><Star size={14} aria-hidden="true" className="fill-ink" />{p.stats.rating.toFixed(1)}<span className="sr-only"> out of 5</span></span>}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </SideCard>
   );
 }
 

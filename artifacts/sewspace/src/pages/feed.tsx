@@ -1,27 +1,11 @@
-import { getHomeFeed, useGetDashboard } from '@workspace/api-client-react';
+import { getHomeFeed } from '@workspace/api-client-react';
 import { Compass } from 'lucide-react';
 import { Link } from 'wouter';
 import { FEED_KEYS } from '@/components/feed/feed-keys';
 import { FeedList } from '@/components/feed/FeedList';
+import { PopularPatterns, SewistsToFollow, TrendingChallenges } from '@/components/feed/SideCards';
 import { usePipGate } from '@/components/onboarding/gate';
 import { FinishSetupCard } from '@/pages/onboarding-finish';
-
-function CurrentProject() {
-  const dashboard = useGetDashboard();
-  const project = dashboard.data?.activeProject;
-  if (!project) return null;
-  return (
-    <section className="rounded-[30px] bg-white p-5" aria-labelledby="current-project">
-      <h2 id="current-project" className="eyebrow">On your table</h2>
-      <p className="mt-2 font-display text-xl leading-tight">{project.name}</p>
-      <div className="mt-3 h-2 overflow-hidden rounded-full bg-canvas"><div className="h-full rounded-full bg-yellow" style={{ width: `${Math.min(100, project.progress)}%` }} /></div>
-      <div className="mt-4 flex flex-wrap gap-2">
-        <Link href={`/projects/${project.id}`} className="btn btn-line no-underline">Open make log</Link>
-        <Link href={`/new?make=${project.id}`} className="btn btn-primary no-underline">Post progress</Link>
-      </div>
-    </section>
-  );
-}
 
 /** Home: posts from people you follow, and your own. Browsing everyone is Explore (no Discover tab: owner's call). */
 export function FeedPage() {
@@ -38,7 +22,8 @@ export function FeedPage() {
             <Link href="/explore" className="btn btn-primary mt-5">Go to Explore</Link>
           </div>} />
       </div>
-      <aside className="hidden flex-col gap-4 lg:flex" aria-label="Your studio"><CurrentProject /></aside>
+      {/* Owner, October 2026: challenges, patterns and people to follow instead of "On your table". */}
+      <aside className="sticky top-[110px] hidden flex-col gap-4 self-start lg:flex" aria-label="From the community"><TrendingChallenges /><PopularPatterns /><SewistsToFollow /></aside>
     </div>
   );
 }

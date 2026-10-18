@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
-import { GetMenuSummaryResponse } from "@workspace/api-zod";
-import { menuSummary } from "../access";
+import { GetMenuSummaryResponse, GetSuggestedPeopleResponse } from "@workspace/api-zod";
+import { menuSummary, suggestedPeople } from "../access";
 import { scoped } from "../lib/scoped";
 import { viewerOf } from "../middlewares/auth";
 
@@ -27,6 +27,14 @@ router.get("/me/menu-summary", (req, res, next) => {
   next();
 }, scoped(async (req, res, db): Promise<void> => {
   res.json(GetMenuSummaryResponse.parse(await menuSummary(db, viewerOf(req))));
+}));
+
+// Home's "Sewists to follow". Your own view of others (who you follow), so never cached.
+router.get("/me/suggested-people", (_req, res, next) => {
+  res.set("Cache-Control", "private, no-store");
+  next();
+}, scoped(async (req, res, db): Promise<void> => {
+  res.json(GetSuggestedPeopleResponse.parse(await suggestedPeople(db, viewerOf(req))));
 }));
 
 export default router;

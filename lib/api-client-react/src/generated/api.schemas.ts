@@ -230,6 +230,11 @@ export interface PublicPerson {
   avatarUrl: string | null;
 }
 
+export type SuggestedPerson = PublicPerson & {
+  /** Their public makes */
+  makes: number;
+};
+
 export type PublicMakeStepsItem = {
   title: string;
   completed: boolean;

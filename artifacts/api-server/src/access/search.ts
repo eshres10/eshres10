@@ -1,5 +1,5 @@
-import { and, eq, ilike, or, sql, type SQL } from "drizzle-orm";
-import { postsTable, publicProfilesView, type Tx } from "@workspace/db";
+import { and, desc, eq, ilike, ne, or, sql, type SQL } from "drizzle-orm";
+import { followsTable, postsTable, publicProfilesView, type Tx } from "@workspace/db";
 import { normaliseTag } from "./hashtags";
 import { pagePosts } from "./posts";
 import type { Viewer } from "./viewer";
@@ -50,6 +50,29 @@ export async function searchPeople(db: Tx, raw: string) {
     )
     .limit(PEOPLE_LIMIT);
   return rows;
+}
+
+/**
+ * Sewists to follow (Home's sidebar): people with a handle (the view also drops
+ * anyone blocked either way), not you, not already followed, who have public
+ * posts or makes. Only public work is counted, so followers-only and private
+ * items never show up in the numbers.
+ */
+export async function suggestedPeople(db: Tx, viewer: Viewer, limit = 3) {
+  if (!viewer.userId) return [];
+  // Written out with the table names: inside a subquery Drizzle leaves the view's column unqualified.
+  const makes = sql<number>`(SELECT count(*)::int FROM sewspace_projects pr WHERE pr.user_id = sewspace_public_profiles.user_id AND pr.visibility = 'public')`;
+  const posts = sql<number>`(SELECT count(*)::int FROM sewspace_posts po WHERE po.user_id = sewspace_public_profiles.user_id AND po.visibility = 'public')`;
+  return db
+    .select({ handle: publicProfilesView.handle, name: publicProfilesView.name, avatarUrl: publicProfilesView.avatarUrl, makes })
+    .from(publicProfilesView)
+    .where(and(
+      ne(publicProfilesView.userId, viewer.userId),
+      sql`NOT EXISTS (SELECT 1 FROM ${followsTable} WHERE ${followsTable.followerId} = ${viewer.userId} AND ${followsTable.followeeId} = ${publicProfilesView.userId})`,
+      sql`${makes} + ${posts} > 0`,
+    ))
+    .orderBy(desc(makes), desc(posts), desc(publicProfilesView.createdAt))
+    .limit(limit);
 }
 
 /** Hashtags starting with the text ("#lin", "lin", "linen dress" -> "linendress"). */

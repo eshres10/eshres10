@@ -1505,6 +1505,20 @@ paths:
       responses:
         "204":
           description: Deleted
+  /me/suggested-people:
+    get:
+      operationId: getSuggestedPeople
+      tags: [studio]
+      summary: "Up to 3 people to follow (Home's sidebar): handle set, not you, not already followed, not blocked either way, with public posts or makes. Numbers count public work only."
+      responses:
+        "200":
+          description: Most public makes first
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/SuggestedPerson" }
+        "401": { description: Sign in first }
   /me/menu-summary:
     get:
       operationId: getMenuSummary
@@ -2476,6 +2490,13 @@ components:
         name: { type: string }
         avatarUrl: { type: string, nullable: true }
       required: [handle, name, avatarUrl]
+    SuggestedPerson:
+      allOf:
+        - { $ref: "#/components/schemas/PublicPerson" }
+        - type: object
+          properties:
+            makes: { type: integer, description: Their public makes }
+          required: [makes]
     PublicMaterial:
       type: object
       description: A pattern, fabric or thread used in a make, shown only when the viewer may see it.

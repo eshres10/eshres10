@@ -159,6 +159,7 @@ import type {
   SearchTagsParams,
   SetCatalogSizesBody,
   SuggestHashtagsParams,
+  SuggestedPerson,
   TagPage,
   Thread,
   ThreadInput,
@@ -8424,6 +8425,107 @@ export const useDeleteFabric = <TError = ErrorType<unknown>,
       > => {
       return useMutation(getDeleteFabricMutationOptions(options), queryClient);
     }
+
+export const getGetSuggestedPeopleUrl = () => {
+
+
+
+
+  return `/api/me/suggested-people`
+}
+
+/**
+ * @summary Up to 3 people to follow (Home's sidebar): handle set, not you, not already followed, not blocked either way, with public posts or makes. Numbers count public work only.
+ */
+export const getSuggestedPeople = async ( options?: Parameters<typeof customFetch>[1]): Promise<SuggestedPerson[]> => {
+
+  return customFetch<SuggestedPerson[]>(getGetSuggestedPeopleUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getGetSuggestedPeopleQueryKey = () => {
+    return [
+    `/api/me/suggested-people`
+    ] as const;
+    }
+
+
+export const getGetSuggestedPeopleQueryOptions = <TData = Awaited<ReturnType<typeof getSuggestedPeople>>, TError = ErrorType<void>>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSuggestedPeople>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSuggestedPeopleQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSuggestedPeople>>> = ({ signal }) => getSuggestedPeople({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSuggestedPeople>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSuggestedPeopleQueryResult = NonNullable<Awaited<ReturnType<typeof getSuggestedPeople>>>
+export type GetSuggestedPeopleQueryError = ErrorType<void>
+
+
+export function useGetSuggestedPeople<TData = Awaited<ReturnType<typeof getSuggestedPeople>>, TError = ErrorType<void>>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSuggestedPeople>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSuggestedPeople>>,
+          TError,
+          Awaited<ReturnType<typeof getSuggestedPeople>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSuggestedPeople<TData = Awaited<ReturnType<typeof getSuggestedPeople>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSuggestedPeople>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSuggestedPeople>>,
+          TError,
+          Awaited<ReturnType<typeof getSuggestedPeople>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSuggestedPeople<TData = Awaited<ReturnType<typeof getSuggestedPeople>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSuggestedPeople>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Up to 3 people to follow (Home's sidebar): handle set, not you, not already followed, not blocked either way, with public posts or makes. Numbers count public work only.
+ */
+
+export function useGetSuggestedPeople<TData = Awaited<ReturnType<typeof getSuggestedPeople>>, TError = ErrorType<void>>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSuggestedPeople>>, TError, TData>>, request?: SecondParameter<typeof customFetch>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSuggestedPeopleQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getGetMenuSummaryUrl = () => {
 

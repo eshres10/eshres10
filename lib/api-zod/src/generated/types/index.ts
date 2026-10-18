@@ -257,6 +257,7 @@ export * from './searchPeopleParams';
 export * from './searchPostsParams';
 export * from './searchTagsParams';
 export * from './setCatalogSizesBody';
+export * from './suggestedPerson';
 export * from './suggestHashtagsParams';
 export * from './tagPage';
 export * from './thread';
