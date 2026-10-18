@@ -23,6 +23,7 @@ import { PublicMakePage } from '@/pages/public-make';
 import { EditPostPage, NewPostPage } from '@/pages/post-flow';
 import { TagPage } from '@/pages/tag';
 import { SavedPage } from '@/pages/saved';
+import { NotificationsPage } from '@/components/notifications/Notifications';
 import { CatalogPage } from '@/pages/catalog';
 import { ChallengesPage } from '@/pages/challenges';
 import { ForumPage } from '@/pages/forum';
@@ -49,6 +50,7 @@ const InShellStudio = studio(Studio);
 const InShellFeedPage = studio(FeedPage);
 const InShellNewPostPage = studio(NewPostPage);
 const InShellSavedPage = studio(SavedPage);
+const InShellNotificationsPage = studio(NotificationsPage);
 const InShellAdminReports = studio(AdminReportsPage);
 const InShellFabricPage = studio(FabricPage);
 const InShellThreadPage = studio(ThreadPage);
@@ -91,6 +93,7 @@ function Router() {
     <Route path="/feed" component={InShellFeedPage} />
     <Route path="/new" component={InShellNewPostPage} />
     <Route path="/saved" component={InShellSavedPage} />
+    <Route path="/notifications" component={InShellNotificationsPage} />
     <Route path="/admin/reports" component={InShellAdminReports} />
     <Route path="/forum">{() => <AdaptiveLayout><ForumPage /></AdaptiveLayout>}</Route>
     <Route path="/forum/new">{() => <Shell><NewTopicPage /></Shell>}</Route>

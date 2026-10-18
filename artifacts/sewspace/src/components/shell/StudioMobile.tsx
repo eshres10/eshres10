@@ -1,4 +1,5 @@
 import { AccountMenuMobile } from '@/components/shell/AccountMenu';
+import { NotificationBellMobile } from '@/components/notifications/Notifications';
 import { useEffect, useRef, useState } from 'react';
 import { useListFabrics, useListPatterns, useListProjects, useListThreads } from '@workspace/api-client-react';
 import { Menu, Plus, Search, X } from 'lucide-react';
@@ -95,6 +96,7 @@ export function StudioMobileHeader({ section, onMenuOpen }: { section: StudioSec
               <Plus size={22} aria-hidden="true" />
             </Link>
           )}
+          <NotificationBellMobile />
           <button type="button" onClick={onMenuOpen} aria-label="Open menu" className="grid h-11 w-11 shrink-0 place-items-center text-ink">
             <Menu size={20} aria-hidden="true" />
           </button>

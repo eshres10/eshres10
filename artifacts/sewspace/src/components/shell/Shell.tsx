@@ -12,6 +12,7 @@ import { useHideOnScroll } from '@/components/shell/useHideOnScroll';
 import { inCommunity } from '@/components/shell/CommunityTabs';
 import { inStudio, StudioMobileHeader, studioSection } from '@/components/shell/StudioMobile';
 import { AccountMenuDesktop, AccountMenuMobile, LogOut } from '@/components/shell/AccountMenu';
+import { NotificationBellDesktop, NotificationBellMobile } from '@/components/notifications/Notifications';
 
 type NavItem = { href: string; label: string; icon: typeof Home };
 
@@ -207,7 +208,7 @@ export function ShellFrame({ children }: { children: ReactNode }) {
 
   const studio = studioSection(location);
   const title = allItems.find(item => isActive(location, item.href))?.label
-    ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search', '/saved': 'Saved posts' } as Record<string, string>)[location]
+    ?? ({ '/settings': 'Profile & settings', '/new': 'New post', '/search': 'Search', '/saved': 'Saved posts', '/notifications': 'Notifications' } as Record<string, string>)[location]
     ?? (location.startsWith('/posts/') ? 'Post' : location.startsWith('/@') ? 'Profile' : 'Seams Club');
   return (
     <div className={`${mobileFocus ? 'min-h-[100dvh] pb-0' : 'min-h-[100dvh] pb-[calc(6rem+env(safe-area-inset-bottom))]'} md:flex md:items-start md:gap-[18px] md:p-[18px] md:pb-[18px]`}>
@@ -226,17 +227,19 @@ export function ShellFrame({ children }: { children: ReactNode }) {
         {studio && <StudioMobileHeader key={studio.href} section={studio} onMenuOpen={() => setMenuOpen(true)} />}
         {!mobileFocus && !studio && <div aria-hidden="true" className="h-[calc(4rem+env(safe-area-inset-top))] md:hidden" />}
         <header className={mobileFocus
-          ? 'relative z-30 hidden items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:flex md:static md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3'
+          ? 'relative z-30 hidden items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:flex md:relative md:z-40 md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3'
           : studio
-            ? 'hidden items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:flex md:static md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3'
-            : `fixed inset-x-0 top-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 bg-white px-4 pb-2 pt-[env(safe-area-inset-top)] shadow-float transition-transform duration-200 ease-out ${profileHeaderHidden ? '-translate-y-full' : 'translate-y-0'} md:static md:mx-0 md:mt-0 md:h-auto md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3 md:transition-none md:translate-y-0`}>
+            ? 'hidden items-center gap-2 rounded-[24px] bg-white py-1.5 pl-3 pr-2 shadow-float md:flex md:relative md:z-40 md:mx-0 md:mt-0 md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3'
+            : `fixed inset-x-0 top-0 z-40 flex h-[calc(4rem+env(safe-area-inset-top))] items-center gap-2 bg-white px-4 pb-2 pt-[env(safe-area-inset-top)] shadow-float transition-transform duration-200 ease-out ${profileHeaderHidden ? '-translate-y-full' : 'translate-y-0'} md:relative md:z-40 md:mx-0 md:mt-0 md:h-auto md:gap-3 md:rounded-[30px] md:py-2.5 md:pl-[22px] md:pr-3 md:transition-none md:translate-y-0`}>
           {location === '/feed'
             ? <div className="min-w-0 flex-1 md:hidden"><Logo href="/feed" /></div>
             : <h1 className={`min-w-0 flex-1 truncate font-display text-[20px] tracking-[-.04em] md:text-[22px] ${title === 'Home' ? 'font-bold' : ''}`}>{title}</h1>}
           <h1 className={location === '/feed' ? `sr-only md:not-sr-only md:min-w-0 md:flex-1 md:truncate md:font-display md:text-[22px] md:tracking-[-.04em] ${title === 'Home' ? 'md:font-bold' : ''}` : 'hidden'}>{title}</h1>
           {inCommunity(location) && <Link href="/search" aria-label="Search" className="grid h-10 w-10 shrink-0 place-items-center rounded-full md:hidden"><Search size={19} aria-hidden="true" /></Link>}
+          <NotificationBellMobile className="-mx-0.5" />
           <button type="button" onClick={() => setMenuOpen(true)} aria-label="Open menu" className="grid h-10 w-10 shrink-0 place-items-center rounded-full md:hidden"><Menu size={19} /></button>
           {location !== '/new' && <Link href="/new" className="hidden min-h-[44px] items-center gap-2 rounded-full bg-ink px-5 text-sm font-bold text-white no-underline md:inline-flex"><Plus size={16} aria-hidden="true" />New post</Link>}
+          <NotificationBellDesktop />
           <AccountMenuMobile />
           <AccountMenuDesktop />
         </header>
