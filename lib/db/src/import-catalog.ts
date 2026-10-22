@@ -7,7 +7,7 @@
 //   pnpm --filter @workspace/db run import-catalog seed/free-patterns.json --apply    add the pages
 //   pnpm --filter @workspace/db run import-catalog seed/free-patterns.json --undo     remove them again
 //
-// The admin is the first id in ADMIN_USER_IDS (or --as <clerk user id>).
+// The admin is --handle <your @handle>, --as <clerk user id>, or the first id in ADMIN_USER_IDS.
 // Existing pages (same designer + name) are left alone. --undo only removes pages
 // this admin created that nobody else uses yet (the same rule as deleting by hand).
 import { readFileSync } from "node:fs";
@@ -17,13 +17,19 @@ import pg from "pg";
 interface Row { name: string; maker: string; category: string; sizes: string | null; fabricTypes: string | null; url: string; description: string; slug: string }
 
 const args = process.argv.slice(2);
-const file = args.find((a) => !a.startsWith("--") && args[args.indexOf(a) - 1] !== "--as");
+const option = (name: string) => (args.includes(name) ? args[args.indexOf(name) + 1] : undefined);
+const file = args.find((a, i) => !a.startsWith("--") && !["--as", "--handle"].includes(args[i - 1]));
 const apply = args.includes("--apply");
 const undo = args.includes("--undo");
-const asUser = args.includes("--as") ? args[args.indexOf("--as") + 1] : (process.env.ADMIN_USER_IDS ?? "").split(",")[0]?.trim();
-if (!file) throw new Error("Usage: import-catalog <file.json> [--apply | --undo] [--as <user id>]");
-if (!asUser) throw new Error("Set ADMIN_USER_IDS or pass --as <your Clerk user id>.");
-if (!process.env.DATABASE_URL) throw new Error("DATABASE_URL is not set.");
+const handle = option("--handle")?.replace(/^@/, "").toLowerCase();
+
+// Plain messages instead of a stack trace: this is run by hand in the Shell.
+function fail(message: string): never {
+  console.error(`\n${message}\n`);
+  process.exit(1);
+}
+if (!file) fail("Usage: import-catalog <file.json> [--apply | --undo] [--handle <your @handle> | --as <user id>]");
+if (!process.env.DATABASE_URL) fail("DATABASE_URL is not set: run this in the Replit Shell, where the database is connected.");
 
 const rows: Row[] = JSON.parse(readFileSync(path.resolve(process.cwd(), file), "utf8"));
 const CATEGORIES = new Set(["dresses", "tops", "trousers", "skirts", "jumpsuits", "outerwear", "knitwear", "lingerie", "activewear", "menswear", "kids", "bags", "accessories", "home", "other"]);
@@ -33,7 +39,14 @@ for (const r of rows) {
 }
 
 const client = new pg.Client({ connectionString: process.env.DATABASE_URL });
-await client.connect();
+await client.connect().catch((e) => fail(`Can't reach the database: ${e.message}`));
+let asUser = option("--as") ?? (handle ? undefined : (process.env.ADMIN_USER_IDS ?? "").split(",")[0]?.trim());
+if (handle) {
+  const found = await client.query<{ user_id: string }>("SELECT user_id FROM sewspace_profiles WHERE lower(handle) = $1", [handle]);
+  if (!found.rows[0]) { await client.end(); fail(`No profile with the handle @${handle} in this database. Sign in to this copy of the site once and pick that handle, or check the spelling.`); }
+  asUser = found.rows[0].user_id;
+}
+if (!asUser) { await client.end(); fail("Who should own the pages? Add --handle <your @handle> (for example --handle ena.shrestha)."); }
 try {
   await client.query("BEGIN");
   // The same role and user setting as every app request, so RLS applies.
@@ -63,7 +76,10 @@ try {
   if (!apply && !undo) console.log("Dry run: nothing was saved. Add --apply to save.");
 } catch (e) {
   await client.query("ROLLBACK").catch(() => {});
-  throw e;
+  const err = e as { message?: string; code?: string };
+  fail(err.code === "42704" ? "The database role sewspace_app is missing: run the app once (it runs the migrations) or `pnpm --filter @workspace/db run migrate`, then try again."
+    : err.code === "42P01" ? "The catalog table isn't there yet: run `pnpm --filter @workspace/db run migrate` first."
+    : `Import failed, nothing was saved: ${err.message}`);
 } finally {
   await client.end();
 }

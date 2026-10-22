@@ -20,7 +20,7 @@ Development happens in this repo; Replit runs and deploys it. Work is done in ph
 - `pnpm run typecheck` — everything. `pnpm run build` — typecheck + build.
 - `pnpm --filter @workspace/api-spec run codegen` — regenerate hooks and Zod after editing `openapi.yaml`.
 - `pnpm --filter @workspace/db run migrate` — apply SQL migrations to `DATABASE_URL` (also runs automatically at API startup and in `scripts/post-merge.sh`).
-- `pnpm --filter @workspace/db run import-catalog seed/free-patterns.json [--apply | --undo]` — one-off import of free pattern pages (dry run without `--apply`). Runs as the first `ADMIN_USER_IDS` id (or `--as <id>`) under RLS (role `sewspace_app`), so pages belong to that admin; existing designer + name pages are skipped; `--undo` removes only the admin's imported pages nobody else uses yet.
+- `pnpm --filter @workspace/db run import-catalog seed/free-patterns.json [--apply | --undo]` — one-off import of free pattern pages (dry run without `--apply`). Runs as `--handle <your handle>` (looked up in this database), `--as <clerk id>` or the first `ADMIN_USER_IDS` id, under RLS (role `sewspace_app`), so pages belong to that admin; existing designer + name pages are skipped; `--undo` removes only the admin's imported pages nobody else uses yet.
 - `TEST_DATABASE_URL=postgresql://user:pass@host:port/postgres pnpm --filter @workspace/db test` — RLS tests (SQL, `lib/db/test/*.test.sql`). The user must be allowed to create databases.
 - `TEST_DATABASE_URL=… pnpm --filter @workspace/api-server test` — API tests (`node:test` + `tsx`, `artifacts/api-server/test`). Uses a test-only auth stub (`x-test-user` header) and a fake object store.
 
