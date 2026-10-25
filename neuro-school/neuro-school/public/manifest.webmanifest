@@ -1,0 +1,12 @@
+{
+  "name": "Neuro School",
+  "short_name": "Neuro School",
+  "description": "Learn neuroscience in six minutes a day.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FBFAF7",
+  "theme_color": "#FBFAF7",
+  "icons": [
+    { "src": "/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

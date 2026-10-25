@@ -1,0 +1,23 @@
+{
+  "name": "neuro-school",
+  "version": "0.1.0",
+  "private": true,
+  "description": "School for adults: bite-sized daily lessons, starting with neuroscience",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "motion": "^14.6.0",
+    "next": "^16.4.3",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5"
+  }
+}
